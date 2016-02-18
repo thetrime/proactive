@@ -7,22 +7,21 @@ import javax.swing.*;
 import org.w3c.dom.*;
 import javax.xml.parsers.*;
 import java.awt.*;
+import java.awt.event.*;
 import java.lang.reflect.*;
 import java.lang.reflect.*;
 
 public class React extends JFrame
 {
    static DocumentBuilder builder;
+   static Document nextDocument = null;
    public static void main(String[] args) throws Exception
    {
       DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
       builder = factory.newDocumentBuilder();
       React r = new React();
-      System.out.println("---------------------------- Setting " + args[0]);
       r.setVirtualDOM(builder.parse(new FileInputStream(args[0])));
-      System.out.println("---------------------------- Setting " + args[1]);
-      r.setVirtualDOM(builder.parse(new FileInputStream(args[1])));
-      System.out.println("----------------------------");
+      nextDocument = builder.parse(new FileInputStream(args[1]));
    }
 
    private Document state = null;
@@ -31,10 +30,29 @@ public class React extends JFrame
    {
       super("React Test");
       state = builder.newDocument();
-      state.setUserData("dom", getContentPane(), null);
+      JPanel form = new JPanel();
+      getContentPane().setLayout(new BorderLayout());
+      getContentPane().add(form, BorderLayout.CENTER);
+      state.setUserData("dom", form, null);
       setSize(800, 600);
       setDefaultCloseOperation(EXIT_ON_CLOSE);      
       setVisible(true);
+      JButton button = new JButton("Apply a change");
+      button.addActionListener(new ActionListener()
+         {
+            public void actionPerformed(ActionEvent ae)
+            {
+               try
+               {
+                  setVirtualDOM(nextDocument);
+               }
+               catch(Exception e)
+               {
+                  e.printStackTrace();
+               }
+            }
+         });
+      getContentPane().add(button, BorderLayout.SOUTH);
    }
 
    public synchronized void setVirtualDOM(Document newState) throws Exception
