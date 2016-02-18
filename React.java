@@ -35,73 +35,84 @@ public class React extends JFrame
 
    public synchronized void setVirtualDOM(Document newState) throws Exception
    {
-      updateState(state, newState);
+      updateState(newState);
       state = newState;
    }
-   
-
-   private void updateState(Node prevState, Node currentState)
+      
+   private void updateState(Node newState)
    {
+      Node left = state.getFirstChild();
+      Node right = newState.getFirstChild();
       // Compute diffs between prevState and currentState, putting them in a queue
-      computeDiffs(prevState, currentState, getContentPane());
+      computeDiffs("", left, right, getContentPane());
       // Some other thread should flush that queue every second (or whatever seems appropriate)
       //     but for now we will request it to happen after each updateState() call
-      flushQueue();
-      /*
-      SwingUtilities.invokeLater(new Runnable()
-         {
-            public void run()
-            {
+//      SwingUtilities.invokeLater(new Runnable()
+//         {
+//            public void run()
+//            {
                flushQueue();
                validate();
-            }
-         });
-      */
+//            }
+//         });
    }
 
 
-   // Note: This is not actually implemented properly!   
-   private void computeDiffs(Node prevState, Node currentState, Container context)
+   // Note: This is not actually implemented properly! For a start we need to sort the nodes according to something so we can diff efficiently
+   // Then, as a second step, we need to check for reordering
+   private void computeDiffs(String indent, Node left, Node right, Container context)
    {
-      if (prevState == currentState)
+      while (true)
       {
-         return;
-      }
-      if (currentState == null)
-      {
-         // Delete everything present in prevState
-         System.out.println("Deleting because currentState is null but prevState has " + prevState);
-         queueDiff(new Diff(Diff.REMOVE, prevState, context));
-      }
-      else if (prevState == null)
-      {
-         System.out.println("Adding " + currentState);
-         queueDiff(new Diff(Diff.ADD, currentState, context));
-      }
-      else
-      {
-         if (prevState.getNodeName() == currentState.getNodeName())
+         System.out.println(indent + "Comparing " + left + " <-> " + right);
+         if (left == null && right == null)
+            return;
+         if (left != right)
          {
-            // diffProps here. If present, we need to add patches for them
-            // diffChildren:
-            Node leftChild = prevState.getFirstChild();
-            Node rightChild = currentState.getFirstChild();
-            Container childContext = (Container)prevState.getUserData("dom");
-            while (leftChild != null || rightChild != null)
+            if (right == null)
             {
-               computeDiffs(leftChild, rightChild, childContext);
-               if (leftChild != null)
-                  leftChild = leftChild.getNextSibling();               
-               if (rightChild != null)
-                  rightChild = rightChild.getNextSibling();            
+               // Delete everything present in left
+               System.out.println(indent + "* Deleting because right is null but left has " + left);
+               queueDiff(new Diff(Diff.REMOVE, left, context));
+               left = left.getNextSibling();
+            }
+            else if (left == null)
+            {
+               // Add the node in right
+               System.out.println(indent + "* Adding because left is null but right has " + right);
+               queueDiff(new Diff(Diff.ADD, right, context));
+               right = right.getNextSibling();
+            }
+            else
+            {
+               if (left.getNodeName() == right.getNodeName())
+               {
+                  // diffProps here. If present, we need to add patches for them
+                  // diffChildren:
+                  Node leftChild = left.getFirstChild();
+                  Node rightChild = right.getFirstChild();
+                  Container childContext = (Container)left.getUserData("dom");
+                  computeDiffs(indent + "   ", leftChild, rightChild, childContext);
+                  left = left.getNextSibling();
+                  right = right.getNextSibling();
+               }
+               else if (true)
+               {
+                  // This is the case if left > right
+                  System.out.println(indent + "* Must delete " + left + " because of mismatch");
+                  queueDiff(new Diff(Diff.REMOVE, left, context));
+                  left = left.getNextSibling();
+               }
+               else
+               {
+                  // This is the case if left < right
+                  System.out.println(indent + "* Must insert " + right + " because of mismatch");
+                  queueDiff(new Diff(Diff.ADD, right, context));
+                  right = right.getNextSibling();
+               }
             }
          }
-         else
-         {
-            queueDiff(new Diff(Diff.REMOVE, prevState, context));
-            queueDiff(new Diff(Diff.ADD, currentState, context));
-         }
-      }
+      }      
    }
 
    private void flushQueue()
@@ -145,6 +156,7 @@ public class React extends JFrame
       private Container parent;
       public Diff(int action, Node node, Container parent)
       {
+         System.out.println("Diff: " + node);
          this.parent = parent;
          this.action = action;
          this.node = node;
@@ -163,12 +175,18 @@ public class React extends JFrame
          switch(action)
          {
             case REMOVE:
+            {
+               ReactComponent c = (ReactComponent)node.getUserData("dom");
+               ((ReactComponent)parent).removeChild(c);
                break;
+            }
             case ADD:
+            {
                ReactComponent c = instantiateNode(node);
                parent.add((Component)c);
                node.setUserData("dom", c, null);
                break;
+            }
          }
       }
    }
