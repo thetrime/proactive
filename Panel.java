@@ -4,9 +4,15 @@ import java.awt.*;
 
 public class Panel extends JPanel implements ReactComponent 
 {
+   private static final int HORIZONTAL = 0;
+   private static final int VERTICAL = 1;
+   int fill = GridBagConstraints.HORIZONTAL;
+   int nextIndex = 0;
+   int orientation = VERTICAL;
    public Panel(Node n)
    {
       setBackground(Color.RED);
+      setLayout(new GridBagLayout());
       for (Node child = n.getFirstChild(); child != null; child = child.getNextSibling())
       {
          ReactComponent c = React.instantiateNode(child);
@@ -20,7 +26,7 @@ public class Panel extends JPanel implements ReactComponent
       int index = -1;
       if (sibling != null)
       {
-         // FIXME: This is probably wrong
+         // FIXME: This is definitely wrong
          for (int i = 0; i < getComponentCount(); i++)
          {
             if (getComponent(i) == sibling)
@@ -30,7 +36,25 @@ public class Panel extends JPanel implements ReactComponent
             }
          }         
       }
-      add((Component)child, index);
+      else
+      {
+         int padx = 0;
+         int pady = 0;
+         int x = 0;
+         int y = nextIndex;
+         double xweight = 1.0;
+         double yweight = 0;
+         if (orientation == HORIZONTAL)
+         {
+            x = nextIndex;
+            y = 0;
+            yweight = 1.0;
+            xweight = 0;
+         }
+         nextIndex++;
+         System.out.println("x: " + x + ", y: " + y);
+         add((Component)child, new GridBagConstraints(x, y, 1, 1, xweight, yweight, GridBagConstraints.NORTH, fill, new Insets(0,0,0,0), padx, pady));
+      }
    }
 
    public void removeChild(ReactComponent child)
