@@ -6,6 +6,8 @@ import javax.swing.*;
 import org.w3c.dom.*;
 import javax.xml.parsers.*;
 import java.awt.*;
+import java.lang.reflect.*;
+import java.lang.reflect.*;
 
 public class React extends JFrame
 {
@@ -131,16 +133,34 @@ public class React extends JFrame
       dispatchQueue.offer(diff);
    }
 
+   private static HashMap<String, Constructor<ReactComponent>> constructorHash = new HashMap<String, Constructor<ReactComponent>>();
+   static
+   {
+      try
+      {
+         constructorHash.put("Panel", (Constructor)Panel.class.getConstructor(Node.class));
+         constructorHash.put("Field", (Constructor)Field.class.getConstructor(Node.class));
+         constructorHash.put("Button", (Constructor)Button.class.getConstructor(Node.class));
+         constructorHash.put("Title", (Constructor)Title.class.getConstructor(Node.class));
+      }
+      catch(Exception e)
+      {
+         e.printStackTrace();
+      }
+   }
+
    public static ReactComponent instantiateNode(Node n)
    {
-      if (n.getNodeName().equals("Form"))
-         return new Form(n);
-      if (n.getNodeName().equals("Field"))
-         return new Field(n);
-      if (n.getNodeName().equals("Title"))
-         return new Title(n);
-      if (n.getNodeName().equals("Button"))
-         return new Button(n);
+      try
+      {
+         Constructor<ReactComponent> c = constructorHash.get(n.getNodeName());
+         if (c != null)         
+            return c.newInstance(n);
+      }
+      catch(Exception e)
+      {
+         e.printStackTrace();
+      }    
       System.out.println("Unhandled type: " + n.getNodeName());
       return null;
    }
