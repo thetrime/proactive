@@ -1,5 +1,8 @@
 //https://github.com/Matt-Esch/virtual-dom
 
+// Problem is that we know we need to create a node (and its children), then later, we know we must delete one of those children, because the state has been updated
+// to include those children. But the node has not yet been created, so its children all still have null pointers into the Swing tree.
+
 import java.io.*;
 import java.util.*;
 import javax.swing.*;
@@ -28,6 +31,7 @@ public class React extends JFrame
    private LinkedList<Diff> dispatchQueue = new LinkedList<Diff>();
    public React() throws Exception
    {
+      super("React Test");
       state = builder.newDocument();
       state.setUserData("dom", getContentPane(), null);
       setSize(800, 600);
@@ -49,14 +53,14 @@ public class React extends JFrame
       computeDiffs("", left, right, getContentPane());
       // Some other thread should flush that queue every second (or whatever seems appropriate)
       //     but for now we will request it to happen after each updateState() call
-//      SwingUtilities.invokeLater(new Runnable()
-//         {
-//            public void run()
-//            {
+      SwingUtilities.invokeLater(new Runnable()
+         {
+            public void run()
+            {
                flushQueue();
                validate();
-//            }
-//         });
+            }
+         });
    }
 
 
@@ -119,8 +123,14 @@ public class React extends JFrame
 
    private void flushQueue()
    {
+      LinkedList<Diff> queue = null;
+      synchronized(dispatchQueue)
+      {
+         queue = dispatchQueue;
+         dispatchQueue = new LinkedList<Diff>();
+      }
       Diff d;
-      while ((d = dispatchQueue.poll()) != null)
+      while ((d = queue.poll()) != null)
       {
          System.out.println(d);
          d.apply();
@@ -130,7 +140,10 @@ public class React extends JFrame
 
    private void queueDiff(Diff diff)
    {
-      dispatchQueue.offer(diff);
+      synchronized(dispatchQueue)
+      {
+         dispatchQueue.offer(diff);
+      }
    }
 
    private static HashMap<String, Constructor<ReactComponent>> constructorHash = new HashMap<String, Constructor<ReactComponent>>();
@@ -184,9 +197,9 @@ public class React extends JFrame
       public String toString()
       {
          if (this.action == REMOVE)
-            return "Delete " + node;
+            return "Delete " + node + " from " + parent;
          else if (this.action == ADD)
-            return "Add " + node;
+            return "Add " + node + " to " + parent;
          return "??";
       }
 
@@ -212,3 +225,4 @@ public class React extends JFrame
    }
    
 }
+

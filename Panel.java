@@ -11,8 +11,10 @@ public class Panel extends JPanel implements ReactComponent
    int orientation = VERTICAL;
    public Panel(Node n)
    {
-      setBackground(Color.RED);
+      setBackground(Color.GRAY);
       setLayout(new GridBagLayout());
+      if ("horizontal".equals(((Element)n).getAttribute("layout")))
+         orientation = HORIZONTAL;
       for (Node child = n.getFirstChild(); child != null; child = child.getNextSibling())
       {
          ReactComponent c = React.instantiateNode(child);
