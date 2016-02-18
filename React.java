@@ -1,7 +1,5 @@
 //https://github.com/Matt-Esch/virtual-dom
 
-// Problem is that we know we need to create a node (and its children), then later, we know we must delete one of those children, because the state has been updated
-// to include those children. But the node has not yet been created, so its children all still have null pointers into the Swing tree.
 
 import java.io.*;
 import java.util.*;
@@ -50,7 +48,7 @@ public class React extends JFrame
       Node left = state.getFirstChild();
       Node right = newState.getFirstChild();
       // Compute diffs between prevState and currentState, putting them in a queue
-      computeDiffs("", left, right, getContentPane());
+      computeDiffs("", left, right, state);
       // Some other thread should flush that queue every second (or whatever seems appropriate)
       //     but for now we will request it to happen after each updateState() call
       SwingUtilities.invokeLater(new Runnable()
@@ -66,7 +64,7 @@ public class React extends JFrame
 
    // Note: This is not actually implemented properly! For a start we need to sort the nodes according to something so we can diff efficiently
    // Then, as a second step, we need to check for reordering
-   private void computeDiffs(String indent, Node left, Node right, Container context)
+   private void computeDiffs(String indent, Node left, Node right, Node context)
    {
       while (true)
       {
@@ -97,8 +95,7 @@ public class React extends JFrame
                   // diffChildren:
                   Node leftChild = left.getFirstChild();
                   Node rightChild = right.getFirstChild();
-                  Container childContext = (Container)left.getUserData("dom");
-                  computeDiffs(indent + "   ", leftChild, rightChild, childContext);
+                  computeDiffs(indent + "   ", leftChild, rightChild, left);
                   left = left.getNextSibling();
                   right = right.getNextSibling();
                }
@@ -186,8 +183,8 @@ public class React extends JFrame
 
       private int action;
       private Node node;
-      private Container parent;
-      public Diff(int action, Node node, Container parent)
+      private Node parent;
+      public Diff(int action, Node node, Node parent)
       {
          System.out.println("Diff: " + node);
          this.parent = parent;
@@ -210,13 +207,13 @@ public class React extends JFrame
             case REMOVE:
             {
                ReactComponent c = (ReactComponent)node.getUserData("dom");
-               ((ReactComponent)parent).removeChild(c);
+               ((ReactComponent)parent.getUserData("dom")).removeChild(c);
                break;
             }
             case ADD:
             {
                ReactComponent c = instantiateNode(node);
-               parent.add((Component)c);
+               ((Container)(parent.getUserData("dom"))).add((Component)c);
                node.setUserData("dom", c, null);
                break;
             }
