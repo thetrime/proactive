@@ -6,7 +6,9 @@ import java.util.*;
 import javax.swing.*;
 import org.w3c.dom.*;
 import javax.xml.parsers.*;
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Container;
+import java.awt.Component;
 import java.awt.event.*;
 import java.lang.reflect.*;
 import java.lang.reflect.*;
@@ -19,9 +21,11 @@ public class React extends JFrame
    {
       DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
       builder = factory.newDocumentBuilder();
-      React r = new React();
-      r.setVirtualDOM(builder.parse(new FileInputStream(args[0])));
+      Document baseDocument = builder.parse(new FileInputStream(args[0]));
+//      React r = new React();
+      //r.setVirtualDOM(baseDocument);
       nextDocument = builder.parse(new FileInputStream(args[1]));
+      System.out.println(ZhangShasha.ZhangShasha(baseDocument, nextDocument));
    }
 
    private Document state = null;
@@ -78,8 +82,7 @@ public class React extends JFrame
             }
          });
    }
-
-
+   
    // Note: This is not actually implemented properly! For a start we need to sort the nodes according to something so we can diff efficiently
    // Then, as a second step, we need to check for reordering
    private void computeDiffs(String indent, Node left, Node right, Node context)
