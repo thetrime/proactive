@@ -9,18 +9,27 @@ public class Panel extends JPanel implements ReactComponent
    int fill = GridBagConstraints.HORIZONTAL;
    int nextIndex = 0;
    int orientation = VERTICAL;
+
+   public Panel()
+   {
+      setBackground(Color.RED);
+   }
+
    public Panel(Node n)
    {
+      System.out.println("Here");
       setBackground(Color.GRAY);
       setLayout(new GridBagLayout());
       if ("horizontal".equals(((Element)n).getAttribute("layout")))
          orientation = HORIZONTAL;
+      /*
       for (Node child = n.getFirstChild(); child != null; child = child.getNextSibling())
       {
          ReactComponent c = React.instantiateNode(child);
          child.setUserData("dom", c, null);
          insertChildBefore(c, null);
       }
+      */
    }
 
    public void insertChildBefore(ReactComponent child, ReactComponent sibling)
@@ -54,7 +63,6 @@ public class Panel extends JPanel implements ReactComponent
             xweight = 0;
          }
          nextIndex++;
-         System.out.println("x: " + x + ", y: " + y);
          add((Component)child, new GridBagConstraints(x, y, 1, 1, xweight, yweight, GridBagConstraints.NORTH, fill, new Insets(0,0,0,0), padx, pady));
       }
    }

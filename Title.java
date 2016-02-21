@@ -5,9 +5,12 @@ public class Title extends JLabel implements ReactComponent
 {
    public Title(Node n)
    {
-      Node child = n.getFirstChild();
-      if (child != null && child instanceof Text)
-         setText(((Text)child).getWholeText());
+      super(((Element)n).getAttribute("label"));
+      /* This is if the child is the label.
+        Node child = n.getFirstChild();
+        if (child != null && child instanceof Text)
+        setText(((Text)child).getWholeText());
+      */
    }
 
    public void insertChildBefore(ReactComponent child, ReactComponent sibling) {}

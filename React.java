@@ -25,7 +25,7 @@ public class React extends JFrame
       React r = new React();
       r.setVirtualDOM(baseDocument);
       nextDocument = builder.parse(new FileInputStream(args[1]));
-      System.out.println(ZhangShasha.ZhangShasha(baseDocument, nextDocument));
+      System.out.println(ZhangShasha.ZhangShasha(baseDocument, nextDocument)); System.exit(-1);
    }
 
    private Document state = null;
@@ -34,7 +34,7 @@ public class React extends JFrame
    {
       super("React Test");
       state = builder.newDocument();
-      JPanel form = new JPanel();
+      JPanel form = new Panel();
       getContentPane().setLayout(new BorderLayout());
       getContentPane().add(form, BorderLayout.CENTER);
       state.setUserData("dom", form, null);
@@ -105,6 +105,7 @@ public class React extends JFrame
    {
       synchronized(dispatchQueue)
       {
+         System.out.println("Received the following edit script: " + script);
          for (Iterator<Edit> i = script.iterator(); i.hasNext();)
             dispatchQueue.offer(i.next());
       }
@@ -131,8 +132,12 @@ public class React extends JFrame
       try
       {
          Constructor<ReactComponent> c = constructorHash.get(n.getNodeName());
-         if (c != null)         
-            return c.newInstance(n);
+         if (c != null)
+         {
+            ReactComponent component = c.newInstance(n);
+            n.setUserData("dom", component, null);
+            return component;
+         }
       }
       catch(Exception e)
       {

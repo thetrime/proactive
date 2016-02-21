@@ -5,8 +5,8 @@ import org.w3c.dom.*;
 //        This is actually impossible in Java. In reality, either:
 //        A) Change the attributes, if the class is the same
 //        B) Change the class completely, which means deleting the old node (preserving the children!), then replacing it with a new node
-//   2) Delete a node, *moving all the children up*
-//   3) Insert a node *somewhere* 
+//   2) Delete a node, *moving all the children up in order*
+//   3) Insert a node between an existing node and a subsequence of consecutive children of this node.
 
 public class Edit
 {
@@ -29,7 +29,7 @@ public class Edit
       switch(op)
       {
          case INSERT:
-            return "Insert " + left;
+            return "Insert " + right + " into " + left;
          case DELETE:
             return "Delete " + left;
          case TRANSFORM:
@@ -43,11 +43,24 @@ public class Edit
       switch(op)
       {
          case INSERT:
+         {
+            ReactComponent component = React.instantiateNode(right);
+            System.out.println("inserting " + right + " into " + left);
+            ((ReactComponent)left.getUserData("dom")).insertChildBefore(component, null);
             break;
+         }
          case DELETE:
+         {
+            ReactComponent component = ((ReactComponent)left.getUserData("dom"));
+            Node parent = left.getParentNode();
+            // FIXME: We must get all the children and insert them after this node, THEN delete this node
+            ((ReactComponent)parent.getUserData("dom")).removeChild(component);
             break;
+         }
          case TRANSFORM:
+         {
             break;
+         }
       }
    }
 }

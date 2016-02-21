@@ -93,33 +93,52 @@ public class ZhangShasha
       return keyroots;
    }   
 
-   public static List<Edit> editScript(String script, List<Node> left, List<Node> right)
+   public static List<Edit> editScript(String script, List<Node> l, List<Node> r)
    {
       List<Edit> list = new ArrayList<Edit>();
-      Iterator<Node> i = left.iterator();
-      Iterator<Node> j = right.iterator();
+      Iterator<Node> i = l.iterator();
+      Iterator<Node> j = r.iterator();
       int n = script.length();
-
+      //System.out.println(l);
+      System.out.println(script);
+      //System.out.println(r);
+      Node left = i.next();
+      Node right = j.next();
       for (int x = 0; x < n; x++)
-      {         
+      {
          char c = script.charAt(x);
+         //System.out.println(c + " left=" + left + " right=" + right);
          switch(c)
          {
             case 'm': // Match
-               if (!nodesAreEqual(j.next(), i.next()))
+               if (!nodesAreEqual(left, right))
                {
                   System.out.println("The edit script contains an error :(");
                   System.exit(-1);
                }
+               if (x + 1 < n)
+               {
+                  left = i.next();
+                  right = j.next();
+               }
                break;
             case 'x': // Transform
-               list.add(new Edit(Edit.TRANSFORM, i.next(), j.next()));
+               list.add(new Edit(Edit.TRANSFORM, left, right));
+               if (x + 1 < n)
+               {                  
+                  left = i.next();
+                  right = j.next();
+               }
                break;
             case 'i': // Insert
-               list.add(new Edit(Edit.INSERT, j.next(), null));
+               list.add(new Edit(Edit.INSERT, left, right));
+               if (x + 1 < n)
+                  right = j.next();
                break;
             case 'd': // Delete
-               list.add(new Edit(Edit.DELETE, i.next(), null));
+               list.add(new Edit(Edit.DELETE, left, right));
+               if (x + 1 < n)
+                  left = i.next();
                break;
          }
       }
