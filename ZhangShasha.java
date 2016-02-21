@@ -91,41 +91,7 @@ public class ZhangShasha
          }
       }
       return keyroots;
-   }
-
-   public static class Edit
-   {
-      int op;
-      public static final int INSERT = 0;
-      public static final int DELETE = 1;
-      public static final int TRANSFORM = 2;
-      Node left;
-      Node right;
-      public Edit(int op, Node left, Node right)
-      {
-         this.op = op;
-         this.left = left;
-         this.right = right;
-      }
-      public String toString()
-      {
-         if (op == INSERT)
-            return "Insert " + left;
-         else if (op == DELETE)
-            return "Delete " + left;
-         else
-            return "Transform " + left + " into " + right;
-      }
-   }
-
-   public static int min3(int a, int b, int c)
-   {
-      if (a < b && a < c)
-         return a;
-      if (b < c)
-         return b;
-      return c;
-   }
+   }   
 
    public static List<Edit> editScript(String script, List<Node> left, List<Node> right)
    {
@@ -134,7 +100,6 @@ public class ZhangShasha
       Iterator<Node> j = right.iterator();
       int n = script.length();
 
-      System.out.println(script);
       for (int x = 0; x < n; x++)
       {         
          char c = script.charAt(x);
@@ -274,4 +239,14 @@ public class ZhangShasha
       //return D[l1.size()][l2.size()];
    }
 
+   public static int min3(int a, int b, int c)
+   {
+      if (a < b && a < c)
+         return a;
+      if (b < c)
+         return b;
+      return c;
+   }
+
+   
 }
