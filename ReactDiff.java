@@ -9,11 +9,10 @@ import java.util.Map;
 
 public class ReactDiff
 {
-   public static PatchSet diff(Node a, Node b)
+   public static PatchSet diff(Document a, Document b)
    {
-      PatchSet patchSet = new PatchSet(a);
-      //HashMap<Integer, List<ReactEdit>> patchSet = new HashMap<Integer, List<ReactEdit>>();
-      walk(a, b, patchSet, 0);      
+      PatchSet patchSet = new PatchSet(a.getFirstChild());
+      walk(a.getFirstChild(), b.getFirstChild(), patchSet, 0);      
       return patchSet;
    }
 
@@ -417,7 +416,7 @@ public class ReactDiff
       DocumentBuilder builder = factory.newDocumentBuilder();
       Document baseDocument = builder.parse(new FileInputStream(args[0]));
       Document nextDocument = builder.parse(new FileInputStream(args[1]));
-      System.out.println(diff(baseDocument.getFirstChild(), nextDocument.getFirstChild()));
+      System.out.println(diff(baseDocument, nextDocument));
       System.exit(-1);
    }
 }

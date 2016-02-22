@@ -22,14 +22,11 @@ public class Panel extends JPanel implements ReactComponent
       setLayout(new GridBagLayout());
       if ("horizontal".equals(((Element)n).getAttribute("layout")))
          orientation = HORIZONTAL;
-      /*
       for (Node child = n.getFirstChild(); child != null; child = child.getNextSibling())
       {
-         ReactComponent c = React.instantiateNode(child);
-         child.setUserData("dom", c, null);
-         insertChildBefore(c, null);
+         React.instantiateNode(child);
+         insertChildBefore((ReactComponent)child.getUserData("dom"), null);
       }
-      */
    }
 
    public void insertChildBefore(ReactComponent child, ReactComponent sibling)

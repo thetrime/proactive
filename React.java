@@ -16,7 +16,7 @@ import java.lang.reflect.*;
 public class React extends JFrame
 {
    static DocumentBuilder builder;
-   static Document nextDocument = null;
+   static Document nextDocument = null;   
    public static void main(String[] args) throws Exception
    {
       DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -25,11 +25,12 @@ public class React extends JFrame
       React r = new React();
       r.setVirtualDOM(baseDocument);
       nextDocument = builder.parse(new FileInputStream(args[1]));
-      System.out.println(ZhangShasha.ZhangShasha(baseDocument, nextDocument)); System.exit(-1);
+      //System.out.println(ZhangShasha.ZhangShasha(baseDocument, nextDocument)); System.exit(-1);
    }
 
-   private Document state = null;
-   private LinkedList<Edit> dispatchQueue = new LinkedList<Edit>();
+   private Node state = null;
+   private Node vState = null;
+   private LinkedList<PatchSet> dispatchQueue = new LinkedList<PatchSet>();
    public React() throws Exception
    {
       super("React Test");
@@ -38,6 +39,7 @@ public class React extends JFrame
       getContentPane().setLayout(new BorderLayout());
       getContentPane().add(form, BorderLayout.CENTER);
       state.setUserData("dom", form, null);
+      vState = state;
       setSize(800, 600);
       setDefaultCloseOperation(EXIT_ON_CLOSE);      
       setVisible(true);
@@ -62,13 +64,13 @@ public class React extends JFrame
    public synchronized void setVirtualDOM(Document newState) throws Exception
    {
       updateState(newState);
-      state = newState;
+      vState = newState;
    }
       
-   private void updateState(Node newState)
+   private void updateState(Document newState)
    {
       // Compute diffs between prevState and currentState, putting them in a queue
-      List<Edit> editScript = ZhangShasha.ZhangShasha(state, newState);
+      PatchSet editScript = ReactDiff.diff((Document)vState, newState);
       queueDiffs(editScript);
       // Some other thread should flush that queue every second (or whatever seems appropriate)
       //     but for now we will request it to happen after each updateState() call
@@ -86,28 +88,26 @@ public class React extends JFrame
 
    private void flushQueue()
    {
-      LinkedList<Edit> queue = null;
+      LinkedList<PatchSet> queue = null;
       synchronized(dispatchQueue)
       {
          queue = dispatchQueue;
-         dispatchQueue = new LinkedList<Edit>();
+         dispatchQueue = new LinkedList<PatchSet>();
       }
-      Edit e;
-      while ((e = queue.poll()) != null)
+      PatchSet p;
+      while ((p = queue.poll()) != null)
       {
-         System.out.println(e);
-         e.apply();
+         state = p.apply(state);
       }
       System.out.println("Flushed : " + SwingUtilities.isEventDispatchThread());
    }
 
-   private void queueDiffs(List<Edit> script)
+   private void queueDiffs(PatchSet script)
    {
       synchronized(dispatchQueue)
       {
          System.out.println("Received the following edit script: " + script);
-         for (Iterator<Edit> i = script.iterator(); i.hasNext();)
-            dispatchQueue.offer(i.next());
+         dispatchQueue.offer(script);
       }
    }
 
@@ -127,7 +127,7 @@ public class React extends JFrame
       }
    }
 
-   public static ReactComponent instantiateNode(Node n)
+   public static Node instantiateNode(Node n)
    {
       try
       {
@@ -136,7 +136,7 @@ public class React extends JFrame
          {
             ReactComponent component = c.newInstance(n);
             n.setUserData("dom", component, null);
-            return component;
+            return n;
          }
       }
       catch(Exception e)
