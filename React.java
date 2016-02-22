@@ -25,21 +25,30 @@ public class React extends JFrame
       React r = new React();
       r.setVirtualDOM(baseDocument);
       nextDocument = builder.parse(new FileInputStream(args[1]));
-      //System.out.println(ZhangShasha.ZhangShasha(baseDocument, nextDocument)); System.exit(-1);
    }
 
-   private Node state = null;
+   private ReactComponent state = null;
    private Node vState = null;
    private LinkedList<PatchSet> dispatchQueue = new LinkedList<PatchSet>();
    public React() throws Exception
    {
       super("React Test");
-      state = builder.newDocument();
-      JPanel form = new Panel();
+      vState = builder.newDocument();
+
+      // Start with a real DOM that looks like <Panel/>
+      // Note that we have to put the Panel *in* something - the Document object
+      // In our case the Document will ALSO be a Panel. This is immutable
+      
+      Panel domRoot = new Panel("document");
+      domRoot.setOwnerDocument(domRoot);
+      domRoot.setBackground(java.awt.Color.GREEN);
       getContentPane().setLayout(new BorderLayout());
-      getContentPane().add(form, BorderLayout.CENTER);
-      state.setUserData("dom", form, null);
-      vState = state;
+      getContentPane().add(domRoot, BorderLayout.CENTER);
+
+      state = new Panel("default node");
+      domRoot.insertChildBefore(state, null);
+
+      
       setSize(800, 600);
       setDefaultCloseOperation(EXIT_ON_CLOSE);      
       setVisible(true);
@@ -80,6 +89,7 @@ public class React extends JFrame
             {
                flushQueue();
                validate();
+               repaint();
             }
          });
    }
@@ -127,16 +137,15 @@ public class React extends JFrame
       }
    }
 
-   public static Node instantiateNode(Node n)
+   public static ReactComponent instantiateNode(Node n)
    {
       try
       {
          Constructor<ReactComponent> c = constructorHash.get(n.getNodeName());
          if (c != null)
          {
-            ReactComponent component = c.newInstance(n);
-            n.setUserData("dom", component, null);
-            return n;
+            System.out.println("Constructing from vNode " + n);
+            return c.newInstance(n);
          }
       }
       catch(Exception e)
@@ -145,6 +154,21 @@ public class React extends JFrame
       }    
       System.out.println("Unhandled type: " + n.getNodeName());
       return null;
+   }
+
+   public static int getFill(Node n)
+   {
+      if (n instanceof Element)
+      {
+         Element e = (Element)n;
+         if (e.getAttribute("fill").equals("horizontal"))
+            return java.awt.GridBagConstraints.HORIZONTAL;
+         else if (e.getAttribute("fill").equals("vertical"))
+            return java.awt.GridBagConstraints.VERTICAL;
+         else if (e.getAttribute("fill").equals("both"))
+            return java.awt.GridBagConstraints.BOTH;
+      }
+      return java.awt.GridBagConstraints.NONE;
    }
 }
 

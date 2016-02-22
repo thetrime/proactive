@@ -36,17 +36,26 @@ public class ReactEdit
       return "<unknown operation " + op + ">";
    }
 
-   public Node apply(Node domNode)
+   public ReactComponent apply(ReactComponent domNode)
    {
       switch(op)
       {
          case NODE:
          {
-            Node parentNode = domNode.getParentNode();
-            Node newNode = React.instantiateNode((Node)patch);
+            ReactComponent parentNode = domNode.getParentNode();
+            ReactComponent newNode = React.instantiateNode((Node)patch);
             if (parentNode != null)
+            {
                parentNode.replaceChild(newNode, domNode);
+            }
             return newNode;
+         }
+         case REMOVE:
+         {
+            ReactComponent parentNode = domNode.getParentNode();
+            if (parentNode != null)
+               parentNode.removeChild(domNode);
+            break;
          }
          default:
             System.out.println("Unimplemented patch op " + op);

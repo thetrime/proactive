@@ -12,18 +12,18 @@ public class PatchSet extends HashMap<Integer, List<ReactEdit>>
       this.a = a;
    }
 
-   public Node apply(Node rootNode)
+   public ReactComponent apply(ReactComponent rootNode)
    {
       return applyRecursive(rootNode);
    }
 
-   private Node applyRecursive(Node rootNode)
+   private ReactComponent applyRecursive(ReactComponent rootNode)
    {
       Set<Integer> indices = new TreeSet<Integer>(keySet());
       if (indices.size() == 0)
          return rootNode;
-      Map<Integer, Node> index = domIndex(rootNode, a, indices);
-      Document ownerDocument = rootNode.getOwnerDocument();
+      Map<Integer, ReactComponent> index = domIndex(rootNode, a, indices);
+      ReactComponent ownerDocument = rootNode.getOwnerDocument();
 
       for (Iterator<Integer> i = indices.iterator(); i.hasNext();)
       {
@@ -33,12 +33,12 @@ public class PatchSet extends HashMap<Integer, List<ReactEdit>>
       return rootNode;
    }
 
-   private Node applyPatch(Node rootNode, Node domNode, List<ReactEdit> patchList)
+   private ReactComponent applyPatch(ReactComponent rootNode, ReactComponent domNode, List<ReactEdit> patchList)
    {
       if (domNode == null)
          return rootNode;
 
-      Node newNode;
+      ReactComponent newNode;
       for (Iterator<ReactEdit> i = patchList.iterator(); i.hasNext();)
       {
          newNode = i.next().apply(domNode);
@@ -48,15 +48,15 @@ public class PatchSet extends HashMap<Integer, List<ReactEdit>>
       return rootNode;
    }
 
-   private HashMap<Integer, Node> domIndex(Node rootNode, Node tree, Set<Integer> indices)
+   private HashMap<Integer, ReactComponent> domIndex(ReactComponent rootNode, Node tree, Set<Integer> indices)
    {
-      HashMap<Integer, Node> result = new HashMap<Integer, Node>();
+      HashMap<Integer, ReactComponent> result = new HashMap<Integer, ReactComponent>();
       if (indices.size() == 0)
          return result;
       return recurse(rootNode, tree, indices.toArray(new Integer[0]), result, 0);
    }
 
-   private HashMap<Integer, Node> recurse(Node rootNode, Node tree, Integer[] indices, HashMap<Integer, Node> nodes, int rootIndex)
+   private HashMap<Integer, ReactComponent> recurse(ReactComponent rootNode, Node tree, Integer[] indices, HashMap<Integer, ReactComponent> nodes, int rootIndex)
    {
       if (rootNode != null)
       {
@@ -66,7 +66,7 @@ public class PatchSet extends HashMap<Integer, List<ReactEdit>>
       if (tree != null && tree.getChildNodes().getLength() > 0)
       {
          NodeList vChildren = tree.getChildNodes();
-         NodeList childNodes = rootNode.getChildNodes();
+         List<ReactComponent> childNodes = rootNode.getChildNodes();
          for (int i = 0; i < tree.getChildNodes().getLength(); i++)
          {
             rootIndex++;
@@ -74,7 +74,7 @@ public class PatchSet extends HashMap<Integer, List<ReactEdit>>
             String count = (vChild == null)?"":((Element)vChild).getAttribute("count"); 
             int nextIndex = rootIndex + ((count.length() == 0)?0:Integer.parseInt(count));
             if (indexInRange(indices, rootIndex, nextIndex))
-               recurse(childNodes.item(i), vChild, indices, nodes, rootIndex);
+               recurse(childNodes.get(i), vChild, indices, nodes, rootIndex);
             rootIndex = nextIndex;
          }
       }
