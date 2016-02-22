@@ -18,11 +18,12 @@ public class Engine
       interpreter = env.createInterpreter();
    }
    
-   public PrologDocument render(String component, Term state) throws Exception
+   public PrologDocument render(String component, Term state, Term props) throws Exception
    {
       VariableTerm replyTerm = new VariableTerm("Result");
       state = AtomTerm.get("FIXME");
-      Term goal = new CompoundTerm(AtomTerm.get("render_" + component), new Term[]{state, replyTerm});
+      props = AtomTerm.get("FIXME");
+      Term goal = new CompoundTerm(AtomTerm.get("render_" + component), new Term[]{state, props, replyTerm});
       interpreter.undo(0);
       Interpreter.Goal g = interpreter.prepareGoal(goal);
       PrologCode.RC rc = interpreter.execute(g);

@@ -20,7 +20,7 @@ public class React extends JFrame
    {
       React r = new React();
       engine = new Engine();
-      PrologDocument newDoc = engine.render("Element", null);
+      PrologDocument newDoc = engine.render("Element", null, null);
       r.setVirtualDOM(newDoc);
    }
 
@@ -54,7 +54,7 @@ public class React extends JFrame
             {
                try
                {
-                  setVirtualDOM(engine.render("SecondElement", null));
+                  setVirtualDOM(engine.render("SecondElement", null, null));
                }
                catch(Exception e)
                {
