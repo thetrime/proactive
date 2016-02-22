@@ -136,6 +136,7 @@ public class Panel extends JPanel implements ReactComponent
    public void replaceChild(ReactComponent newChild, ReactComponent oldChild)
    {
       int i = children.indexOf(oldChild);
+      System.out.println("Created: " + newChild);
       GridBagConstraints constraints = layoutManager.getConstraints((Component)oldChild);
       // We cannot call removeChild here since the list of children will get truncated
       // and we want to swap in-place

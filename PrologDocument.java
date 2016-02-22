@@ -1,12 +1,12 @@
 import gnu.prolog.term.*;
+import java.util.List;
 
 public class PrologDocument extends PrologElement
 {
    Term root;
    public PrologDocument(Term term) throws Exception
    {
-      super();
-      children.add(PrologNode.instantiateNode(term));
+      super(term);
    }
 
    public PrologDocument() throws Exception
@@ -14,4 +14,12 @@ public class PrologDocument extends PrologElement
       super();
       root = null;
    }
+
+   public PrologNode getFirstChild()
+   {
+      if (children.size() == 0)
+         return null;
+      return children.get(0);
+   }
+   
 }

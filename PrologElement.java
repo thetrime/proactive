@@ -4,11 +4,14 @@ import java.util.*;
 
 public class PrologElement extends PrologNode
 {
-   String nodeName;
-
    public PrologElement()
    {
-      nodeName = "<root>";
+      nodeName = "<special-root>";
+   }
+
+   public String toString()
+   {
+      return "element(" + nodeName + "....)";
    }
    
    public PrologElement(Term element) throws Exception
@@ -24,6 +27,8 @@ public class PrologElement extends PrologNode
       Term arg3 = c.args[2];
       if (arg1 instanceof AtomTerm)
          nodeName = ((AtomTerm)arg1).value;
+      else
+         throw new RuntimeException("Invalid XML tree: element tag is not an atom: " + arg1);
       if (!TermConstants.emptyListAtom.equals(arg2))
       {
          if (!(arg2 instanceof CompoundTerm))

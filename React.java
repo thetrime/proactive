@@ -24,7 +24,6 @@ public class React extends JFrame
 //      nextDocument = builder.parse(new FileInputStream(args[1]));
       engine = new Engine();
       PrologDocument newDoc = engine.render("Element", null);
-      System.out.println(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument().getFirstChild());
       r.setVirtualDOM(newDoc);
    }
 
@@ -142,6 +141,7 @@ public class React extends JFrame
    {
       try
       {
+         System.out.println("Constructing from vNode " + n);
          Constructor<ReactComponent> c = constructorHash.get(n.getNodeName());
          if (c != null)
          {
@@ -155,7 +155,8 @@ public class React extends JFrame
       {
          e.printStackTrace();
       }    
-      System.out.println("Unhandled type: " + n.getNodeName());
+      System.out.println("Unhandled type: " + n);
+      System.exit(-1);
       return null;
    }
 
