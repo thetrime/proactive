@@ -54,7 +54,7 @@ public class React extends JFrame
             {
                try
                {
-                  setVirtualDOM(nextDocument);
+                  setVirtualDOM(engine.render("SecondElement", null));
                }
                catch(Exception e)
                {

@@ -4,3 +4,8 @@ render_Element(_, element('Panel',[layout=horiztonal, fill=horizontal], [element
                                                                          element('Field',[label='CP Code'],[]),
                                                                          element('Field',[label='CP Account ID'],[]),
                                                                          element('Button',[label='Submit'],[])])).
+
+render_SecondElement(_, element('Panel',[layout=horiztonal, fill=horizontal], [element('Title',[label='This is a totally different title!'],[]),
+                                                                               element('Field',[label='CP Code'],[]),
+                                                                               element('Field',[label='CP Account ID'],[]),
+                                                                               element('Button',[label='Still Submit'],[])])).
