@@ -36,6 +36,9 @@ public class ReactEdit
             return "<Mutate node: " + node + ", " + patch + ">";
          case REMOVE:
             return "<Remove node: " + patch + ">";
+         case PROPS:
+            return "<Mutate props: " + patch + ">";
+
       }
       return "<unknown operation " + op + ">";
    }

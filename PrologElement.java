@@ -87,6 +87,9 @@ public class PrologElement extends PrologNode
 
    public String getAttribute(String key)
    {
-      return (String)attributes.get(key);
+      String value = (String)attributes.get(key);
+      if (value == null)
+         return "";
+      return value;
    }
 }
