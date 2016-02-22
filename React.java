@@ -145,7 +145,9 @@ public class React extends JFrame
          if (c != null)
          {
             System.out.println("Constructing from vNode " + n);
-            return c.newInstance(n);
+            ReactComponent instance = c.newInstance(n);
+            applyNodeAttributes(n, instance);
+            return instance;
          }
       }
       catch(Exception e)
@@ -156,18 +158,24 @@ public class React extends JFrame
       return null;
    }
 
-   public static int getFill(Node n)
+   public static void applyNodeAttributes(Node n, ReactComponent target)
    {
-      if (n instanceof Element)
+      NamedNodeMap attributes = n.getAttributes();
+      for (int i = 0; i < attributes.getLength(); i++)
       {
-         Element e = (Element)n;
-         if (e.getAttribute("fill").equals("horizontal"))
-            return java.awt.GridBagConstraints.HORIZONTAL;
-         else if (e.getAttribute("fill").equals("vertical"))
-            return java.awt.GridBagConstraints.VERTICAL;
-         else if (e.getAttribute("fill").equals("both"))
-            return java.awt.GridBagConstraints.BOTH;
+         Attr attr = (Attr)(attributes.item(i));
+         target.setProperty(attr.getName(), attr.getValue());
       }
+   }
+   
+   public static int getFill(Object fill)
+   {
+      if (fill.equals("horizontal"))
+         return java.awt.GridBagConstraints.HORIZONTAL;
+      else if (fill.equals("vertical"))
+         return java.awt.GridBagConstraints.VERTICAL;
+      else if (fill.equals("both"))
+         return java.awt.GridBagConstraints.BOTH;
       return java.awt.GridBagConstraints.NONE;
    }
 }

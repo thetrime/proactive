@@ -9,9 +9,7 @@ public class Button extends JButton implements ReactComponent
    private ReactComponent parent;
    private ReactComponent owner;
    public Button(Node n)
-   {
-      super("Hello I am a button");
-      fill = React.getFill(n);
+   {      
    }
    public void insertChildBefore(ReactComponent child, ReactComponent sibling) {}
    public void removeChild(ReactComponent child) {}
@@ -22,4 +20,11 @@ public class Button extends JButton implements ReactComponent
    public void replaceChild(ReactComponent newChild, ReactComponent oldChild) {}
    public List<ReactComponent> getChildNodes() { return null; }
    public int getFill() { return fill; }
+   public void setProperty(String name, Object value)
+   {
+      if (name.equals("label"))
+         setText((String)value);
+      else if (name.equals("fill"))
+         fill = React.getFill(value);
+   }
 }

@@ -11,4 +11,5 @@ public interface ReactComponent
    public void setOwnerDocument(ReactComponent owner);
    public List<ReactComponent> getChildNodes();
    public int getFill();
+   public void setProperty(String name, Object value);
 }

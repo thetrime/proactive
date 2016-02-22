@@ -2,6 +2,7 @@ import org.w3c.dom.*;
 import javax.swing.*;
 import java.awt.*;
 import java.util.List;
+import java.util.Iterator;
 import java.util.LinkedList;
 
 public class Panel extends JPanel implements ReactComponent 
@@ -29,9 +30,6 @@ public class Panel extends JPanel implements ReactComponent
       id = "<generated from " + n + ">";
       setBackground(Color.GRAY);
       setLayout(layoutManager);
-      if ("horizontal".equals(((Element)n).getAttribute("layout")))
-         orientation = HORIZONTAL;
-      fill = React.getFill(n);
       for (Node child = n.getFirstChild(); child != null; child = child.getNextSibling())
       {
          ReactComponent component = React.instantiateNode(child);
@@ -39,7 +37,21 @@ public class Panel extends JPanel implements ReactComponent
       }
       setBorder(BorderFactory.createLineBorder(Color.BLACK));
    }
-
+   public void setProperty(String name, Object value)
+   {
+      if (name.equals("layout"))
+      {
+         int oldOrientation = orientation;
+         if (value == null)
+            orientation = VERTICAL;
+         else if (value.equals("horizontal"))
+            orientation = HORIZONTAL;
+         else if (value.equals("vertical"))
+            orientation = VERTICAL;
+         if (orientation != oldOrientation)
+            repackChildren();
+      }
+   }
    public void insertChildBefore(ReactComponent child, ReactComponent sibling)
    {
       // Remove from any previous child list!
@@ -63,31 +75,35 @@ public class Panel extends JPanel implements ReactComponent
       }
       else
       {
-         int padx = 0;
-         int pady = 0;
-         int x = 0;
-         int y = nextIndex;
-         int fill = child.getFill();
-         double yweight = 0;
-         double xweight = 0;
-         if (fill == GridBagConstraints.HORIZONTAL || fill == GridBagConstraints.BOTH)
-            yweight = 1;
-         if (fill == GridBagConstraints.VERTICAL || fill == GridBagConstraints.BOTH)
-            xweight = 1;
-         
-         if (orientation == HORIZONTAL)
-         {
-            x = nextIndex;
-            y = 0;
-         }
-
-
-         
-         nextIndex++;
-         add((Component)child, new GridBagConstraints(x, y, 1, 1, xweight, yweight, GridBagConstraints.CENTER, fill, new Insets(0,0,0,0), padx, pady));
+         addChildToDOM(nextIndex, child);
+         nextIndex++;         
       }
    }
 
+   private void addChildToDOM(int index, ReactComponent child)
+   {
+      int padx = 0;
+      int pady = 0;
+      int x = (orientation==VERTICAL)?0:index;
+      int y = (orientation==VERTICAL)?index:0;
+      int fill = child.getFill();
+      double yweight = 0;
+      double xweight = 0;
+      if (fill == GridBagConstraints.HORIZONTAL || fill == GridBagConstraints.BOTH)
+         yweight = 1;
+      if (fill == GridBagConstraints.VERTICAL || fill == GridBagConstraints.BOTH)
+         xweight = 1;
+      add((Component)child, new GridBagConstraints(x, y, 1, 1, xweight, yweight, GridBagConstraints.CENTER, fill, new Insets(0,0,0,0), padx, pady));
+   }
+   
+   private void repackChildren()
+   {
+      removeAll();
+      int index = 0;
+      for (Iterator<ReactComponent> i = children.iterator(); i.hasNext();)
+         addChildToDOM(index++, i.next());
+   }
+   
    public String toString()
    {
       return "Panel[" + id + "]";

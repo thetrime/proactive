@@ -1,6 +1,9 @@
 import org.w3c.dom.*;
+import java.util.Set;
+import java.util.Map;
+import java.util.Iterator;
 
-// There are 6 edit operations that React permits:
+// There are 9 edit operations that React permits:
 
 public class ReactEdit
 {
@@ -14,10 +17,10 @@ public class ReactEdit
    public static final int INSERT = 6;   // Insert node (and children)
    public static final int REMOVE = 7;   // Delete node (and children0
    public static final int THUNK = 8;    // ??
-   Object node;
+   Node node;
    Object patch;
    
-   public ReactEdit(int op, Object node, Object patch)
+   public ReactEdit(int op, Node node, Object patch)
    {
       this.op = op;
       this.node = node;
@@ -57,11 +60,57 @@ public class ReactEdit
                parentNode.removeChild(domNode);
             break;
          }
+         case PROPS:
+         {
+            Set<Map.Entry<String, Object>> entries = ((Map<String,Object>)patch).entrySet();
+            NamedNodeMap previous = node.getAttributes();
+            for (Iterator<Map.Entry<String, Object>> i = entries.iterator(); i.hasNext();)
+            {
+               Map.Entry<String, Object> entry = i.next();
+               String propName = entry.getKey();
+               Object propValue = entry.getValue();
+               if (propValue == null)
+               {  // removeProperty
+                  if (previous != null)
+                  {
+                     Object previousValue = previous.getNamedItem(propName);
+                     if (!isHook(previousValue))
+                     {
+                        if (propName.equals("attributes"))
+                        {
+                        }
+                        else if (propName.equals("style"))
+                        {
+                        }
+                        else if (previousValue instanceof String)
+                           domNode.setProperty(propName, "");
+                        else
+                           domNode.setProperty(propName, null);
+                     }
+                     else
+                        ((Hook)previousValue).unHook(domNode, propName, propValue);
+                  }
+               }
+               else // FIXME: Missing case here for isHook and isObject
+               {
+                  domNode.setProperty(propName, propValue);
+               }
+            }
+         }
          default:
             System.out.println("Unimplemented patch op " + op);
          
       }
       return null;
+   }
+
+   private static class Hook
+   {
+      public void unHook(ReactComponent c, String name, Object value) {}
+   }
+   private static boolean isHook(Object anything)
+   {
+      return false;
    }
    
 }

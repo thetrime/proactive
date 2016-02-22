@@ -60,9 +60,42 @@ public class ReactDiff
       }
    }
 
-   private static PropsPatch diffProps(NamedNodeMap a, NamedNodeMap b)
+   private static Map<String, Node> diffProps(NamedNodeMap a, NamedNodeMap b)
    {
-      return null;
+      Map<String, Node> diff = null;
+      for (int i = 0; i < a.getLength(); i++)
+      {
+         Attr attr = (Attr)a.item(i);
+         String aKey = attr.getName();
+         if (b.getNamedItem(aKey) == null)
+         {
+            if (diff == null)
+               diff = new HashMap<String, Node>();
+            diff.put(aKey, null);
+         }
+         Node aValue = a.getNamedItem(aKey);
+         Node bValue = b.getNamedItem(aKey);
+         if (nodesAreEqual(aValue, bValue))
+            continue;
+         else // FIXME: There is actually special handling in React for this. We are missing the else-if isObject case. This makes things overly aggressive here
+         {
+            if (diff == null)
+               diff = new HashMap<String, Node>();
+            diff.put(aKey, bValue);
+         }
+      }
+      for (int i = 0; i < b.getLength(); i++)
+      {
+         Attr attr = (Attr)b.item(i);
+         String bKey = attr.getName();
+         if (a.getNamedItem(bKey) == null)
+         {
+            if (diff == null)
+               diff = new HashMap<String, Node>();
+            diff.put(bKey, b.getNamedItem(bKey));
+         }
+      }
+      return diff;
    }
    
    private static void walk(Node a, Node b, PatchSet patch, int index)
@@ -90,7 +123,7 @@ public class ReactDiff
          {
             if (a.getNodeName().equals(b.getNodeName()) && ((Element)a).getAttribute("key").equals(((Element)b).getAttribute("key")))
             {
-               PropsPatch propsPatch = diffProps(((Element)a).getAttributes(), ((Element)b).getAttributes());
+               Map<String,Node> propsPatch = diffProps(((Element)a).getAttributes(), ((Element)b).getAttributes());
                if (propsPatch != null)
                {
                   apply = appendPatch(apply, new ReactEdit(ReactEdit.PROPS, a, propsPatch));

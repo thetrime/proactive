@@ -12,7 +12,6 @@ public class Field extends JTextField implements ReactComponent
    public Field(Node n)
    {
       super("A field");
-      fill = React.getFill(n);
    }
    public void insertChildBefore(ReactComponent child, ReactComponent sibling) {}
    public void removeChild(ReactComponent child) {}
@@ -23,4 +22,9 @@ public class Field extends JTextField implements ReactComponent
    public void replaceChild(ReactComponent newChild, ReactComponent oldChild) {}
    public List<ReactComponent> getChildNodes() { return null; }
    public int getFill() { return fill; }
+   public void setProperty(String name, Object value)
+   {
+      if (name.equals("fill"))
+         fill = React.getFill(value);
+   }
 }

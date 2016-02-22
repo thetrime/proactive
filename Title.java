@@ -11,8 +11,6 @@ public class Title extends JLabel implements ReactComponent
    
    public Title(Node n)
    {
-      super(((Element)n).getAttribute("label"));
-      fill = React.getFill(n);
       /* This is if the child is the label.
         Node child = n.getFirstChild();
         if (child != null && child instanceof Text)
@@ -28,4 +26,11 @@ public class Title extends JLabel implements ReactComponent
    public void replaceChild(ReactComponent newChild, ReactComponent oldChild) {}
    public List<ReactComponent> getChildNodes() { return null; }
    public int getFill() { return fill; }
+   public void setProperty(String name, Object value)
+   {
+      if (name.equals("label"))
+         setText(value.toString());
+      else if (name.equals("fill"))
+         fill = React.getFill(value);
+   }
 }
