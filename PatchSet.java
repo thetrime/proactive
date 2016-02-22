@@ -1,13 +1,12 @@
 import java.util.*;
-import org.w3c.dom.Node;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.w3c.dom.Document;
 
 public class PatchSet extends HashMap<Integer, List<ReactEdit>>
 {
-   Node a;
-   public PatchSet(Node a)
+   PrologNode a;
+   public PatchSet(PrologNode a)
    {
       this.a = a;
    }
@@ -48,7 +47,7 @@ public class PatchSet extends HashMap<Integer, List<ReactEdit>>
       return rootNode;
    }
 
-   private HashMap<Integer, ReactComponent> domIndex(ReactComponent rootNode, Node tree, Set<Integer> indices)
+   private HashMap<Integer, ReactComponent> domIndex(ReactComponent rootNode, PrologNode tree, Set<Integer> indices)
    {
       HashMap<Integer, ReactComponent> result = new HashMap<Integer, ReactComponent>();
       if (indices.size() == 0)
@@ -56,21 +55,21 @@ public class PatchSet extends HashMap<Integer, List<ReactEdit>>
       return recurse(rootNode, tree, indices.toArray(new Integer[0]), result, 0);
    }
 
-   private HashMap<Integer, ReactComponent> recurse(ReactComponent rootNode, Node tree, Integer[] indices, HashMap<Integer, ReactComponent> nodes, int rootIndex)
+   private HashMap<Integer, ReactComponent> recurse(ReactComponent rootNode, PrologNode tree, Integer[] indices, HashMap<Integer, ReactComponent> nodes, int rootIndex)
    {
       if (rootNode != null)
       {
          if (indexInRange(indices, rootIndex, rootIndex))
             nodes.put(rootIndex, rootNode);
       }
-      if (tree != null && tree.getChildNodes().getLength() > 0)
+      if (tree != null && tree.getChildren().size() > 0)
       {
-         NodeList vChildren = tree.getChildNodes();
+         List<PrologNode> vChildren = tree.getChildren();
          List<ReactComponent> childNodes = rootNode.getChildNodes();
-         for (int i = 0; i < tree.getChildNodes().getLength(); i++)
+         for (int i = 0; i < tree.getChildren().size(); i++)
          {
             rootIndex++;
-            Node vChild = (i > vChildren.getLength())?null:vChildren.item(i);
+            PrologNode vChild = (i > vChildren.size())?null:vChildren.get(i);
             String count = (vChild == null)?"":((Element)vChild).getAttribute("count"); 
             int nextIndex = rootIndex + ((count.length() == 0)?0:Integer.parseInt(count));
             if (indexInRange(indices, rootIndex, nextIndex))

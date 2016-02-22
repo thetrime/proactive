@@ -1,4 +1,3 @@
-import org.w3c.dom.*;
 import java.util.Set;
 import java.util.Map;
 import java.util.Iterator;
@@ -17,10 +16,10 @@ public class ReactEdit
    public static final int INSERT = 6;   // Insert node (and children)
    public static final int REMOVE = 7;   // Delete node (and children0
    public static final int THUNK = 8;    // ??
-   Node node;
+   PrologNode node;
    Object patch;
    
-   public ReactEdit(int op, Node node, Object patch)
+   public ReactEdit(int op, PrologNode node, Object patch)
    {
       this.op = op;
       this.node = node;
@@ -46,7 +45,7 @@ public class ReactEdit
          case NODE:
          {
             ReactComponent parentNode = domNode.getParentNode();
-            ReactComponent newNode = React.instantiateNode((Node)patch);
+            ReactComponent newNode = React.instantiateNode((PrologNode)patch);
             if (parentNode != null)
             {
                parentNode.replaceChild(newNode, domNode);
@@ -63,7 +62,7 @@ public class ReactEdit
          case PROPS:
          {
             Set<Map.Entry<String, Object>> entries = ((Map<String,Object>)patch).entrySet();
-            NamedNodeMap previous = node.getAttributes();
+            Map<String,Object> previous = node.getAttributes();
             for (Iterator<Map.Entry<String, Object>> i = entries.iterator(); i.hasNext();)
             {
                Map.Entry<String, Object> entry = i.next();
@@ -73,7 +72,7 @@ public class ReactEdit
                {  // removeProperty
                   if (previous != null)
                   {
-                     Object previousValue = previous.getNamedItem(propName);
+                     Object previousValue = previous.get(propName);
                      if (!isHook(previousValue))
                      {
                         if (propName.equals("attributes"))

@@ -1,4 +1,3 @@
-import org.w3c.dom.*;
 import javax.swing.*;
 import java.awt.*;
 import java.util.List;
@@ -25,14 +24,14 @@ public class Panel extends JPanel implements ReactComponent
       fill = GridBagConstraints.BOTH;
       setBorder(BorderFactory.createLineBorder(Color.BLACK));
    }
-   public Panel(Node n)
+   public Panel(PrologNode n)
    {
       id = "<generated from " + n + ">";
       setBackground(Color.GRAY);
       setLayout(layoutManager);
-      for (Node child = n.getFirstChild(); child != null; child = child.getNextSibling())
+      for (Iterator<PrologNode> i = n.getChildren().iterator(); i.hasNext();)
       {
-         ReactComponent component = React.instantiateNode(child);
+         ReactComponent component = React.instantiateNode(i.next());
          insertChildBefore(component, null);
       }
       setBorder(BorderFactory.createLineBorder(Color.BLACK));

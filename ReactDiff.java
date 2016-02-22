@@ -1,6 +1,4 @@
 import java.io.*;
-import javax.xml.parsers.*;
-import org.w3c.dom.*;
 import java.util.List;
 import java.util.LinkedList;
 import java.util.Iterator;
@@ -9,14 +7,14 @@ import java.util.Map;
 
 public class ReactDiff
 {
-   public static PatchSet diff(Document a, Document b)
+   public static PatchSet diff(PrologDocument a, PrologDocument b)
    {
-      PatchSet patchSet = new PatchSet(a.getFirstChild());
-      walk(a.getFirstChild(), b.getFirstChild(), patchSet, 0);      
+      PatchSet patchSet = new PatchSet(a.getChildren().get(0));
+      walk(a.getChildren().get(0), b.getChildren().get(0), patchSet, 0);      
       return patchSet;
    }
 
-   public static boolean nodesAreEqual(Node node1, Node node2)
+   public static boolean nodesAreEqual(PrologNode node1, PrologNode node2)
    {
       if (node1 == null && node2 == null)
          return true;
@@ -26,21 +24,31 @@ public class ReactDiff
          return node1.equals(node2);  
    }
 
-   private static boolean isThunk(Node n)
+   public static boolean objectsAreEqual(Object node1, Object node2)
+   {
+      if (node1 == null && node2 == null)
+         return true;
+      else if (node1 == null)
+         return false;
+      else
+         return node1.equals(node2);  
+   }
+
+   private static boolean isThunk(PrologNode n)
    {
       return false;
    }
-   private static boolean isWidget(Node n)
+   private static boolean isWidget(PrologNode n)
    {
       return false;
    }
 
-   private static void thunks(Node a, Node b, PatchSet patch, int index)
+   private static void thunks(PrologNode a, PrologNode b, PatchSet patch, int index)
    {
       return;
    }
 
-   private static void clearState(Node a, PatchSet patch, int index)
+   private static void clearState(PrologNode a, PatchSet patch, int index)
    {
       return;
    }
@@ -60,45 +68,45 @@ public class ReactDiff
       }
    }
 
-   private static Map<String, Node> diffProps(NamedNodeMap a, NamedNodeMap b)
+   private static Map<String, Object> diffProps(Map<String, Object> a, Map<String, Object> b)
    {
-      Map<String, Node> diff = null;
-      for (int i = 0; i < a.getLength(); i++)
+      Map<String, Object> diff = null;
+      for (Iterator<Map.Entry<String, Object>> i = a.entrySet().iterator(); i.hasNext(); )
       {
-         Attr attr = (Attr)a.item(i);
-         String aKey = attr.getName();
-         if (b.getNamedItem(aKey) == null)
+         Map.Entry<String,Object> entry = i.next();
+         String aKey = entry.getKey();
+         if (!b.containsKey(aKey))
          {
             if (diff == null)
-               diff = new HashMap<String, Node>();
+               diff = new HashMap<String, Object>();
             diff.put(aKey, null);
          }
-         Node aValue = a.getNamedItem(aKey);
-         Node bValue = b.getNamedItem(aKey);
-         if (nodesAreEqual(aValue, bValue))
+         Object aValue = a.get(aKey);
+         Object bValue = b.get(aKey);
+         if (objectsAreEqual(aValue, bValue))
             continue;
          else // FIXME: There is actually special handling in React for this. We are missing the else-if isObject case. This makes things overly aggressive here
          {
             if (diff == null)
-               diff = new HashMap<String, Node>();
+               diff = new HashMap<String, Object>();
             diff.put(aKey, bValue);
          }
       }
-      for (int i = 0; i < b.getLength(); i++)
+      for (Iterator<Map.Entry<String, Object>> i = b.entrySet().iterator(); i.hasNext();)
       {
-         Attr attr = (Attr)b.item(i);
-         String bKey = attr.getName();
-         if (a.getNamedItem(bKey) == null)
+         Map.Entry<String,Object> entry = i.next();
+         String bKey = entry.getKey();
+         if (!a.containsKey(bKey))
          {
             if (diff == null)
-               diff = new HashMap<String, Node>();
-            diff.put(bKey, b.getNamedItem(bKey));
+               diff = new HashMap<String, Object>();
+            diff.put(bKey, entry.getValue());
          }
       }
       return diff;
    }
    
-   private static void walk(Node a, Node b, PatchSet patch, int index)
+   private static void walk(PrologNode a, PrologNode b, PatchSet patch, int index)
    {
       if (nodesAreEqual(a, b))
          return;
@@ -117,13 +125,13 @@ public class ReactDiff
          }
          apply = appendPatch(apply, new ReactEdit(ReactEdit.REMOVE, a, b));
       }
-      else if (b instanceof Element)
+      else if (b instanceof PrologElement)
       {
-         if (a instanceof Element)
+         if (a instanceof PrologElement)
          {
-            if (a.getNodeName().equals(b.getNodeName()) && ((Element)a).getAttribute("key").equals(((Element)b).getAttribute("key")))
+            if (a.getNodeName().equals(b.getNodeName()) && ((PrologElement)a).getAttribute("key").equals(((PrologElement)b).getAttribute("key")))
             {
-               Map<String,Node> propsPatch = diffProps(((Element)a).getAttributes(), ((Element)b).getAttributes());
+               Map<String,Object> propsPatch = diffProps(((PrologElement)a).getAttributes(), ((PrologElement)b).getAttributes());
                if (propsPatch != null)
                {
                   apply = appendPatch(apply, new ReactEdit(ReactEdit.PROPS, a, propsPatch));
@@ -142,14 +150,14 @@ public class ReactDiff
             applyClear = true;
          }         
       }
-      else if (b instanceof Text)
+      else if (b instanceof PrologText)
       {
-         if (!(a instanceof Text))
+         if (!(a instanceof PrologText))
          {
             apply = appendPatch(apply, new ReactEdit(ReactEdit.TEXT, a, b));
             applyClear = true;
          }
-         else if (!((Text)a).getWholeText().equals(((Text)b).getWholeText()))
+         else if (!((PrologText)a).getWholeText().equals(((PrologText)b).getWholeText()))
          {
             apply = appendPatch(apply, new ReactEdit(ReactEdit.TEXT, a, b));
          }
@@ -166,18 +174,18 @@ public class ReactDiff
          clearState(a, patch, index);
    }
 
-   public static List<ReactEdit> diffChildren(Node a, Node b, PatchSet patch, List<ReactEdit> apply, int index)
+   public static List<ReactEdit> diffChildren(PrologNode a, PrologNode b, PatchSet patch, List<ReactEdit> apply, int index)
    {
-      NodeList aChildren = a.getChildNodes();
-      OrderedSet orderedSet = reorder(aChildren, b.getChildNodes());
-      Iterator<Node> bChildren = orderedSet.iterator();
-      int aLen = aChildren.getLength();
+      List<PrologNode> aChildren = a.getChildren();
+      OrderedSet orderedSet = reorder(aChildren, b.getChildren());
+      Iterator<PrologNode> bChildren = orderedSet.iterator();
+      int aLen = aChildren.size();
       int bLen = orderedSet.size();
       int len = aLen > bLen ? aLen : bLen;
       for (int i = 0; i < len; i++)
       {
-         Node leftNode = aChildren.item(i);
-         Node rightNode = null;
+         PrologNode leftNode = aChildren.get(i);
+         PrologNode rightNode = null;
          // We may have exhausted bChildren since len is max(aLen, bLen)
          if (bChildren.hasNext())
             rightNode = bChildren.next();
@@ -195,9 +203,9 @@ public class ReactDiff
             walk(leftNode, rightNode, patch, index);
          }
          // FIXME: What is THIS all about?
-         if ((leftNode instanceof Element) && ((Element)leftNode).getAttribute("count").length() > 0)
+         if ((leftNode instanceof PrologElement) && ((PrologElement)leftNode).getAttribute("count").length() > 0)
          {
-            index += Integer.parseInt(((Element)leftNode).getAttribute("count")); // ??
+            index += Integer.parseInt(((PrologElement)leftNode).getAttribute("count")); // ??
          }
       }
 
@@ -209,51 +217,53 @@ public class ReactDiff
       return apply;
    }
 
-   private static String getKey(Node node)
+   private static String getKey(PrologNode node)
    {
       return null;
    }
    
-   private static KeyIndex keyIndex(NodeList children)
+   private static KeyIndex keyIndex(List<PrologNode> children)
    {
       HashMap<String,Integer> keys = new HashMap<String, Integer>();
       LinkedList<Integer> free = new LinkedList<Integer>();
-      for (int i = 0; i < children.getLength(); i++)
+      int index = 0;
+      for (Iterator<PrologNode> i = children.iterator(); i.hasNext();)
       {
-         Node child = children.item(i);
+         PrologNode child = i.next();
          String key = getKey(child);
          if (key != null)
-            keys.put(key, i);
+            keys.put(key, index);
          else
-            free.push(i);
+            free.push(index);
+         index++;
       }
       return new KeyIndex(keys, free);
    }
    
-   private static OrderedSet reorder(NodeList aChildren, NodeList bChildren)
+   private static OrderedSet reorder(List<PrologNode> aChildren, List<PrologNode> bChildren)
    {
       KeyIndex bChildIndex = keyIndex(bChildren);
       HashMap<String,Integer> bKeys = bChildIndex.keys;
       LinkedList<Integer> bFree = bChildIndex.free;
 
-      if (bFree.size() == bChildren.getLength())
+      if (bFree.size() == bChildren.size())
          return new OrderedSet(bChildren, null);
 
       KeyIndex aChildIndex = keyIndex(aChildren);
       HashMap<String,Integer> aKeys = aChildIndex.keys;
       LinkedList<Integer> aFree = aChildIndex.free;
 
-      if (aFree.size() == aChildren.getLength())
+      if (aFree.size() == aChildren.size())
          return new OrderedSet(bChildren, null);
 
-      LinkedList<Node> newChildren = new LinkedList<Node>();
+      LinkedList<PrologNode> newChildren = new LinkedList<PrologNode>();
       int freeIndex = 0;
       int freeCount = bFree.size();
       int deletedItems = 0;
       
-      for (int i = 0; i < aChildren.getLength(); i++)
+      for (int i = 0; i < aChildren.size(); i++)
       {
-         Node aItem = aChildren.item(i);
+         PrologNode aItem = aChildren.get(i);
          Integer itemIndex;
          String aKey = getKey(aItem);
          if (aKey != null)
@@ -261,7 +271,7 @@ public class ReactDiff
             if (bKeys.containsKey(aKey))
             {
                itemIndex = bKeys.get(aKey);
-               newChildren.push(bChildren.item(itemIndex.intValue()));
+               newChildren.push(bChildren.get(itemIndex.intValue()));
             }
             else
             {
@@ -274,7 +284,7 @@ public class ReactDiff
             if (freeIndex < freeCount)
             {
                itemIndex = bFree.get(freeIndex++);
-               newChildren.push(bChildren.item(itemIndex.intValue()));
+               newChildren.push(bChildren.get(itemIndex.intValue()));
             }
             else
             {
@@ -284,10 +294,10 @@ public class ReactDiff
          }
       }
 
-      int lastFreeIndex = freeIndex >= bFree.size()?bChildren.getLength():bFree.get(freeIndex);
-      for (int j = 0; j < bChildren.getLength(); j++)
+      int lastFreeIndex = freeIndex >= bFree.size()?bChildren.size():bFree.get(freeIndex);
+      for (int j = 0; j < bChildren.size(); j++)
       {
-         Node newItem = bChildren.item(j);
+         PrologNode newItem = bChildren.get(j);
          String newKey = getKey(newItem);
          if (newKey != null)
          {
@@ -298,16 +308,16 @@ public class ReactDiff
             newChildren.push(newItem);
       }
 
-      List<Node> simulate = new LinkedList<Node>();
+      List<PrologNode> simulate = new LinkedList<PrologNode>();
       simulate.addAll(newChildren.subList(0, newChildren.size()));
       int simulateIndex = 0;
       LinkedList<Remove> removes = new LinkedList<Remove>();
       LinkedList<Insert> inserts = new LinkedList<Insert>();
-      Node simulateItem;
+      PrologNode simulateItem;
 
-      for (int k = 0; k < bChildren.getLength(); )
+      for (int k = 0; k < bChildren.size(); )
       {
-         Node wantedItem = bChildren.item(k);
+         PrologNode wantedItem = bChildren.get(k);
          simulateItem = simulate.get(simulateIndex);
 
          while (simulateItem == null && simulate.size() > 0)
@@ -374,25 +384,19 @@ public class ReactDiff
       
    }
 
-   public static Remove remove(List<Node> arr, int index, String key)
+   public static Remove remove(List<PrologNode> arr, int index, String key)
    {
       arr.removeAll(arr.subList(index, 1));
       return new Remove(index, key);
    }
 
    
-   private static class OrderedSet extends LinkedList<Node>
+   private static class OrderedSet extends LinkedList<PrologNode>
    {
       public Moves moves;
-      public OrderedSet(List<Node> children, Moves moves)
+      public OrderedSet(List<PrologNode> children, Moves moves)
       {
          addAll(children);
-         this.moves = moves;
-      }
-      public OrderedSet(NodeList children, Moves moves)
-      {
-         for (int i = 0; i < children.getLength(); i++)
-            add(children.item(i));
          this.moves = moves;
       }
 
@@ -443,15 +447,6 @@ public class ReactDiff
       }
    }   
 
-   public static void main(String[] args) throws Exception
-   {
-      DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-      DocumentBuilder builder = factory.newDocumentBuilder();
-      Document baseDocument = builder.parse(new FileInputStream(args[0]));
-      Document nextDocument = builder.parse(new FileInputStream(args[1]));
-      System.out.println(diff(baseDocument, nextDocument));
-      System.exit(-1);
-   }
 }
 
 /*

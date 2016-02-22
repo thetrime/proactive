@@ -8,7 +8,7 @@ public class Button extends JButton implements ReactComponent
    private int fill = GridBagConstraints.NONE;
    private ReactComponent parent;
    private ReactComponent owner;
-   public Button(Node n)
+   public Button(PrologNode n)
    {      
    }
    public void insertChildBefore(ReactComponent child, ReactComponent sibling) {}

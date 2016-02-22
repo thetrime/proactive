@@ -9,7 +9,7 @@ public class Title extends JLabel implements ReactComponent
    private ReactComponent parent;
    private ReactComponent owner;
    
-   public Title(Node n)
+   public Title(PrologNode n)
    {
       /* This is if the child is the label.
         Node child = n.getFirstChild();

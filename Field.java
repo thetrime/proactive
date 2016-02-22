@@ -9,7 +9,7 @@ public class Field extends JTextField implements ReactComponent
    private ReactComponent parent;
    private ReactComponent owner;
 
-   public Field(Node n)
+   public Field(PrologNode n)
    {
       super("A field");
    }

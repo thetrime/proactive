@@ -1,7 +1,7 @@
-SRC= React.java ReactDiff.java ReactEdit.java ReactComponent.java Panel.java Button.java Field.java PatchSet.java Title.java
+SRC= React.java ReactDiff.java ReactEdit.java ReactComponent.java Panel.java Button.java Field.java PatchSet.java Title.java Engine.java PrologDocument.java PrologNode.java PrologElement.java PrologText.java
 
 all:	$(SRC)
-	javac $(SRC)
+	javac -cp gpj.jar $(SRC)
 
 run:
-	java React base.xml new.xml
+	java -cp gpj.jar:. React

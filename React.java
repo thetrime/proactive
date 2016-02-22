@@ -4,8 +4,6 @@
 import java.io.*;
 import java.util.*;
 import javax.swing.*;
-import org.w3c.dom.*;
-import javax.xml.parsers.*;
 import java.awt.BorderLayout;
 import java.awt.Container;
 import java.awt.Component;
@@ -15,25 +13,26 @@ import java.lang.reflect.*;
 
 public class React extends JFrame
 {
-   static DocumentBuilder builder;
-   static Document nextDocument = null;   
+   static PrologDocument nextDocument = null;
+   static Engine engine = null;
    public static void main(String[] args) throws Exception
    {
-      DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-      builder = factory.newDocumentBuilder();
-      Document baseDocument = builder.parse(new FileInputStream(args[0]));
+//      Document baseDocument = builder.parse(new FileInputStream(args[0]));
       React r = new React();
-      r.setVirtualDOM(baseDocument);
-      nextDocument = builder.parse(new FileInputStream(args[1]));
+//      r.setVirtualDOM(baseDocument);
+//      nextDocument = builder.parse(new FileInputStream(args[1]));
+      engine = new Engine();
+      PrologDocument newDoc = engine.render("Element", null);
+      r.setVirtualDOM(newDoc);
    }
 
    private ReactComponent state = null;
-   private Node vState = null;
+   private PrologNode vState = null;
    private LinkedList<PatchSet> dispatchQueue = new LinkedList<PatchSet>();
    public React() throws Exception
    {
       super("React Test");
-      vState = builder.newDocument();
+      vState = new PrologDocument();
 
       // Start with a real DOM that looks like <Panel/>
       // Note that we have to put the Panel *in* something - the Document object
@@ -70,16 +69,16 @@ public class React extends JFrame
       getContentPane().add(button, BorderLayout.SOUTH);
    }
 
-   public synchronized void setVirtualDOM(Document newState) throws Exception
+   public synchronized void setVirtualDOM(PrologDocument newState) throws Exception
    {
       updateState(newState);
       vState = newState;
    }
       
-   private void updateState(Document newState)
+   private void updateState(PrologDocument newState)
    {
       // Compute diffs between prevState and currentState, putting them in a queue
-      PatchSet editScript = ReactDiff.diff((Document)vState, newState);
+      PatchSet editScript = ReactDiff.diff((PrologDocument)vState, newState);
       queueDiffs(editScript);
       // Some other thread should flush that queue every second (or whatever seems appropriate)
       //     but for now we will request it to happen after each updateState() call
@@ -126,10 +125,10 @@ public class React extends JFrame
    {
       try
       {
-         constructorHash.put("Panel", (Constructor)Panel.class.getConstructor(Node.class));
-         constructorHash.put("Field", (Constructor)Field.class.getConstructor(Node.class));
-         constructorHash.put("Button", (Constructor)Button.class.getConstructor(Node.class));
-         constructorHash.put("Title", (Constructor)Title.class.getConstructor(Node.class));
+         constructorHash.put("Panel", (Constructor)Panel.class.getConstructor(PrologNode.class));
+         constructorHash.put("Field", (Constructor)Field.class.getConstructor(PrologNode.class));
+         constructorHash.put("Button", (Constructor)Button.class.getConstructor(PrologNode.class));
+         constructorHash.put("Title", (Constructor)Title.class.getConstructor(PrologNode.class));
       }
       catch(Exception e)
       {
@@ -137,7 +136,7 @@ public class React extends JFrame
       }
    }
 
-   public static ReactComponent instantiateNode(Node n)
+   public static ReactComponent instantiateNode(PrologNode n)
    {
       try
       {
@@ -158,13 +157,13 @@ public class React extends JFrame
       return null;
    }
 
-   public static void applyNodeAttributes(Node n, ReactComponent target)
+   public static void applyNodeAttributes(PrologNode n, ReactComponent target)
    {
-      NamedNodeMap attributes = n.getAttributes();
-      for (int i = 0; i < attributes.getLength(); i++)
+      Map<String, Object> attributes = n.getAttributes();
+      for (Iterator<Map.Entry<String, Object>> i = attributes.entrySet().iterator(); i.hasNext();)
       {
-         Attr attr = (Attr)(attributes.item(i));
-         target.setProperty(attr.getName(), attr.getValue());
+         Map.Entry<String, Object> entry = i.next();
+         target.setProperty(entry.getKey(), entry.getValue());
       }
    }
    
