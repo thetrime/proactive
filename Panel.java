@@ -39,6 +39,7 @@ public class Panel extends JPanel implements ReactComponent
    }
    public void setProperty(String name, Object value)
    {
+      System.out.println("Setting " + name + " on " + this + " to " + value);
       if (name.equals("layout"))
       {
          int oldOrientation = orientation;
@@ -51,10 +52,12 @@ public class Panel extends JPanel implements ReactComponent
          if (orientation != oldOrientation)
             repackChildren();
       }
+      else if (name.equals("fill"))
+         fill = React.getFill(value);
    }
    public void insertChildBefore(ReactComponent child, ReactComponent sibling)
    {
-      // Remove from any previous child list!
+      // Remove from any previous child list first
       if (child.getParentNode() != null)
          child.getParentNode().removeChild(child);
       children.add(child);
@@ -64,14 +67,8 @@ public class Panel extends JPanel implements ReactComponent
       if (sibling != null)
       {
          // FIXME: This is definitely wrong
-         for (int i = 0; i < getComponentCount(); i++)
-         {
-            if (getComponent(i) == sibling)
-            {
-               index = i-1;
-               break;
-            }
-         }         
+         System.out.println("THIS IS WRONG");
+         System.exit(-1);
       }
       else
       {
@@ -86,14 +83,14 @@ public class Panel extends JPanel implements ReactComponent
       int pady = 0;
       int x = (orientation==VERTICAL)?0:index;
       int y = (orientation==VERTICAL)?index:0;
-      int fill = child.getFill();
+      int childFill = child.getFill();
       double yweight = 0;
       double xweight = 0;
-      if (fill == GridBagConstraints.HORIZONTAL || fill == GridBagConstraints.BOTH)
-         yweight = 1;
-      if (fill == GridBagConstraints.VERTICAL || fill == GridBagConstraints.BOTH)
+      if (childFill == GridBagConstraints.HORIZONTAL || childFill == GridBagConstraints.BOTH)
          xweight = 1;
-      add((Component)child, new GridBagConstraints(x, y, 1, 1, xweight, yweight, GridBagConstraints.CENTER, fill, new Insets(0,0,0,0), padx, pady));
+      if (childFill == GridBagConstraints.VERTICAL || childFill == GridBagConstraints.BOTH)
+         yweight = 1;
+      add((Component)child, new GridBagConstraints(x, y, 1, 1, xweight, yweight, GridBagConstraints.CENTER, childFill, new Insets(0,0,0,0), padx, pady));
    }
    
    private void repackChildren()
@@ -145,6 +142,8 @@ public class Panel extends JPanel implements ReactComponent
       // and we want to swap in-place
       children.set(i, newChild);
       remove((Component)oldChild);
+      // We may have to edit the constraints if the child has a different fill
+      constraints.fill = newChild.getFill();
       add((Component)newChild, constraints);
    }
 
