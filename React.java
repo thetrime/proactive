@@ -10,6 +10,7 @@ import java.awt.Component;
 import java.awt.event.*;
 import java.lang.reflect.*;
 import java.lang.reflect.*;
+import javax.xml.parsers.*;
 
 public class React extends JFrame
 {
@@ -23,6 +24,7 @@ public class React extends JFrame
 //      nextDocument = builder.parse(new FileInputStream(args[1]));
       engine = new Engine();
       PrologDocument newDoc = engine.render("Element", null);
+      System.out.println(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument().getFirstChild());
       r.setVirtualDOM(newDoc);
    }
 
