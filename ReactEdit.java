@@ -14,7 +14,7 @@ public class ReactEdit
    public static final int PROPS = 4;    // Mutate properties
    public static final int ORDER = 5;    // Change order
    public static final int INSERT = 6;   // Insert node (and children)
-   public static final int REMOVE = 7;   // Delete node (and children0
+   public static final int REMOVE = 7;   // Delete node (and children)
    public static final int THUNK = 8;    // ??
    PrologNode node;
    Object patch;
@@ -34,6 +34,8 @@ public class ReactEdit
             return "<Insert: " + node + ">";
          case NODE:
             return "<Mutate node: " + node + ", " + patch + ">";
+         case REMOVE:
+            return "<Remove node: " + patch + ">";
       }
       return "<unknown operation " + op + ">";
    }

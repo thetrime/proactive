@@ -68,7 +68,7 @@ public class PatchSet extends HashMap<Integer, List<ReactEdit>>
             rootIndex++;
             PrologNode vChild = (i > vChildren.size())?null:vChildren.get(i);
             String count = (vChild == null)?"":((PrologElement)vChild).getAttribute("count"); 
-            int nextIndex = rootIndex + ((count.length() == 0)?0:Integer.parseInt(count));
+            int nextIndex = rootIndex + ((count==null)?0:Integer.parseInt(count));
             if (indexInRange(indices, rootIndex, nextIndex))
                recurse(childNodes.get(i), vChild, indices, nodes, rootIndex);
             rootIndex = nextIndex;
