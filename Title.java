@@ -1,4 +1,3 @@
-import org.w3c.dom.*;
 import javax.swing.*;
 import java.util.List;
 import java.awt.GridBagConstraints;

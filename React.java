@@ -18,10 +18,7 @@ public class React extends JFrame
    static Engine engine = null;
    public static void main(String[] args) throws Exception
    {
-//      Document baseDocument = builder.parse(new FileInputStream(args[0]));
       React r = new React();
-//      r.setVirtualDOM(baseDocument);
-//      nextDocument = builder.parse(new FileInputStream(args[1]));
       engine = new Engine();
       PrologDocument newDoc = engine.render("Element", null);
       r.setVirtualDOM(newDoc);
@@ -33,8 +30,6 @@ public class React extends JFrame
    public React() throws Exception
    {
       super("React Test");
-      vState = new PrologDocument();
-
       // Start with a real DOM that looks like <Panel/>
       // Note that we have to put the Panel *in* something - the Document object
       // In our case the Document will ALSO be a Panel. This is immutable

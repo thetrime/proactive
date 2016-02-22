@@ -8,18 +8,4 @@ public class PrologDocument extends PrologElement
    {
       super(term);
    }
-
-   public PrologDocument() throws Exception
-   {
-      super();
-      root = null;
-   }
-
-   public PrologNode getFirstChild()
-   {
-      if (children.size() == 0)
-         return null;
-      return children.get(0);
-   }
-   
 }

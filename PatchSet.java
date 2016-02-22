@@ -1,7 +1,4 @@
 import java.util.*;
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
-import org.w3c.dom.Document;
 
 public class PatchSet extends HashMap<Integer, List<ReactEdit>>
 {
@@ -70,7 +67,7 @@ public class PatchSet extends HashMap<Integer, List<ReactEdit>>
          {
             rootIndex++;
             PrologNode vChild = (i > vChildren.size())?null:vChildren.get(i);
-            String count = (vChild == null)?"":((Element)vChild).getAttribute("count"); 
+            String count = (vChild == null)?"":((PrologElement)vChild).getAttribute("count"); 
             int nextIndex = rootIndex + ((count.length() == 0)?0:Integer.parseInt(count));
             if (indexInRange(indices, rootIndex, nextIndex))
                recurse(childNodes.get(i), vChild, indices, nodes, rootIndex);

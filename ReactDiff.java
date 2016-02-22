@@ -9,8 +9,8 @@ public class ReactDiff
 {
    public static PatchSet diff(PrologDocument a, PrologDocument b)
    {
-      PatchSet patchSet = new PatchSet(a.getFirstChild());
-      walk(a.getFirstChild(), b, patchSet, 0);      
+      PatchSet patchSet = new PatchSet(a);
+      walk(a, b, patchSet, 0);      
       return patchSet;
    }
 
