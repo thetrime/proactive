@@ -11,7 +11,6 @@ import java.awt.event.*;
 import java.lang.reflect.*;
 import java.lang.reflect.*;
 import javax.xml.parsers.*;
-import gnu.prolog.term.Term;
 
 public class React extends JFrame
 {
@@ -23,7 +22,7 @@ public class React extends JFrame
       engine = new Engine();
       // Start our app off with <App> as the root. This is hard-coded (for now)
       String rootElementId = "App";
-      Term baseState = engine.getInitialState(rootElementId);
+      PrologState baseState = engine.getInitialState(rootElementId);
       PrologDocument newDoc = engine.render(rootElementId, baseState, null);
       r.setVirtualDOM(newDoc);
    }
@@ -162,7 +161,7 @@ public class React extends JFrame
          e.printStackTrace();
       }
       // User-defined component
-      Term initialState = engine.getInitialState(n.getNodeName());
+      PrologState initialState = engine.getInitialState(n.getNodeName());
       PrologDocument userComponent = engine.render(n.getNodeName(), initialState, engine.instantiateProps(n.getAttributes()));
       if (userComponent == null)
       {
@@ -192,6 +191,11 @@ public class React extends JFrame
       else if (fill.equals("both"))
          return java.awt.GridBagConstraints.BOTH;
       return java.awt.GridBagConstraints.NONE;
+   }
+
+   public static void triggerEvent(Object q)
+   {
+      engine.triggerEvent(q);
    }
 }
 

@@ -14,17 +14,41 @@ public class Engine
    public Engine() throws Exception
    {
       env = new Environment();
+      env.ensureLoaded(AtomTerm.get("boilerplate.pl"));
       env.ensureLoaded(AtomTerm.get("sample.pl"));
       interpreter = env.createInterpreter();
+      installBuiltin("java_println", 1);
+      System.out.println("Checking for load errors...");
+      List<PrologTextLoaderError> errors = env.getLoadingErrors();
+      for (PrologTextLoaderError error : errors)
+      {
+         error.printStackTrace();
+      }
+   }
+
+   public void installBuiltin(String functor, int arity) throws PrologException
+   {
+      Module module = env.getModule();
+      CompoundTermTag head = CompoundTermTag.get(AtomTerm.get(functor), arity);
+      Predicate p = module.createDefinedPredicate(head);
+      p.setType(Predicate.TYPE.BUILD_IN);
+      p.setJavaClassName("Predicate_" + functor);
+      PrologCode q = env.loadPrologCode(head);
    }
    
-   public PrologDocument render(String component, Term state, Term props) throws Exception
+   public PrologDocument render(String component, PrologState stateWrapper, PrologState propsWrapper) throws Exception
    {
       System.out.println("Rendering " + component);
-      if (state == null)
+      Term state;
+      Term props;
+      if (stateWrapper == null)
          state = TermConstants.emptyListAtom;
-      if (props == null)
+      else
+         state = stateWrapper.getValue();
+      if (propsWrapper == null)
          props = TermConstants.emptyListAtom;
+      else
+         props = propsWrapper.getValue();
       VariableTerm replyTerm = new VariableTerm("Result");
       Term goal = new CompoundTerm(AtomTerm.get("render_" + component), new Term[]{state, props, replyTerm});
       interpreter.undo(0);
@@ -41,7 +65,7 @@ public class Engine
       return null;
    }
 
-   public Term getInitialState(String component)
+   public PrologState getInitialState(String component)
    {
       VariableTerm replyTerm = new VariableTerm("Result");
       Term goal = new CompoundTerm(AtomTerm.get("getInitialState_" + component), new Term[]{replyTerm});
@@ -55,14 +79,13 @@ public class Engine
          if (rc == PrologCode.RC.SUCCESS || rc == PrologCode.RC.SUCCESS_LAST)
          {
             // FIXME: Check that it is a list!
-            return replyTerm.dereference();
+            return new PrologState(replyTerm.dereference());
          }
       }
       catch (PrologException notDefined)
       {
-         notDefined.printStackTrace();
       }
-      return TermConstants.emptyListAtom;
+      return PrologState.emptyState();
    }
 
    public void componentWillMount(String component)
@@ -97,7 +120,7 @@ public class Engine
       }
    }
 
-   public Term instantiateProps(Map<String, Object> properties)
+   public PrologState instantiateProps(Map<String, Object> properties)
    {
       Term[] elements = new Term[properties.size()];
       int j = 0;
@@ -109,9 +132,29 @@ public class Engine
                                         (Term)entry.getValue());
          j++;
       }
-      return CompoundTerm.getList(elements);
+      return new PrologState(CompoundTerm.getList(elements));
    }
 
+   public void triggerEvent(Object q)
+   {
+      Term goal = (Term)q;
+      interpreter.undo(0);
+      Interpreter.Goal g = interpreter.prepareGoal(goal);
+      try
+      {
+         PrologCode.RC rc = interpreter.execute(g);
+         if (rc == PrologCode.RC.SUCCESS)
+            interpreter.stop(g);
+      }
+      catch (PrologException notDefined)
+      {
+         notDefined.printStackTrace();
+      }
+   }
+
+
+
+   
    public static String asString(Object value)
    {      
       if (value instanceof AtomTerm)
