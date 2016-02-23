@@ -18,98 +18,101 @@ public class React extends JFrame
    static Engine engine = null;
    public static void main(String[] args) throws Exception
    {
-      React r = new React();
       engine = new Engine();
-      // Start our app off with <App> as the root. This is hard-coded (for now)
-      String rootElementId = "App";
-      PrologState baseState = engine.getInitialState(rootElementId);
-      PrologDocument newDoc = engine.render(rootElementId, baseState, null);
-      r.setVirtualDOM(newDoc);
+      React r = new React("App");
    }
 
-   private ReactComponent state = null;
-   private PrologNode vState = null;
-   private LinkedList<PatchSet> dispatchQueue = new LinkedList<PatchSet>();
-   public React() throws Exception
+   private static LinkedList<TreePatch> dispatchQueue = new LinkedList<TreePatch>();
+   public React(String rootElementId) throws Exception
    {
       super("React Test");
-      // Start with a real DOM that looks like <Panel/>
-      // Note that we have to put the Panel *in* something - the Document object
-      // In our case the Document will ALSO be a Panel. This is immutable
+      // This is a bit finicky. First we have to set up the state as 'empty'.
+      // The empty state is not as empty as you might think. It contains 2 nodes:
+      //    * The global domRoot. This is akin to the JFrame
+      //    * Inside this is a RootPanel. This is like the contentPane in the frame
+      // Unlike in Swing, we can change the contentPane to a new one by patching it
+      // but the global domRoot is immutable
       
-      Panel domRoot = new Panel("document");
+      Panel domRoot = new Panel("root");
       domRoot.setOwnerDocument(domRoot);
       domRoot.setBackground(java.awt.Color.GREEN);
       getContentPane().setLayout(new BorderLayout());
       getContentPane().add(domRoot, BorderLayout.CENTER);
 
-      state = new Panel("default node");
-      domRoot.insertChildBefore(state, null);
-
-      
+      ReactComponent swingTree = new RootPanel(rootElementId);
+      domRoot.insertChildBefore(swingTree, null);
+      swingTree.getContext().setRoot(swingTree);
+      swingTree.getContext().reRender();
+           
       setSize(800, 600);
       setDefaultCloseOperation(EXIT_ON_CLOSE);      
       setVisible(true);      
    }
 
-   public synchronized void setVirtualDOM(PrologDocument newState) throws Exception
+
+   public static void queuePatch(PatchSet p, ReactComponent root, PrologContext context)
    {
-      updateState(newState);
-      vState = newState;
+      synchronized(dispatchQueue)
+      {
+         dispatchQueue.offer(new TreePatch(p, root, context));
+      }
+      flushQueue();
    }
-      
-   private void updateState(PrologDocument newState)
+
+   private static class TreePatch
    {
-      // Compute diffs between prevState and currentState, putting them in a queue
-      PatchSet editScript = ReactDiff.diff((PrologDocument)vState, newState);
-      queueDiffs(editScript);
-      // Some other thread should flush that queue every second (or whatever seems appropriate)
-      //     but for now we will request it to happen after each updateState() call
+      private PatchSet patch;
+      private ReactComponent root;
+      private PrologContext context;
+      public TreePatch(PatchSet patch, ReactComponent root, PrologContext context)
+      {
+         this.patch = patch;
+         this.root = root;
+         this.context = context;
+      }
+      public void apply() throws Exception
+      {
+         root = patch.apply(root);
+         if (context != null)
+            context.setRoot(root);
+      }
+   }
+
+   public static void flushQueue()
+   {
       SwingUtilities.invokeLater(new Runnable()
          {
             public void run()
             {
-               flushQueue();
-               validate();
-               repaint();
+               flushQueueAsAWT();
             }
          });
    }
    
-   
 
-   private void flushQueue()
+   private static void flushQueueAsAWT()
    {
-      LinkedList<PatchSet> queue = null;
+      LinkedList<TreePatch> queue = null;
       synchronized(dispatchQueue)
       {
+         // Swap the old queue for a new one
          queue = dispatchQueue;
-         dispatchQueue = new LinkedList<PatchSet>();
+         dispatchQueue = new LinkedList<TreePatch>();
       }
-      PatchSet p;
+      TreePatch p;
       while ((p = queue.poll()) != null)
       {
          try
          {
-            state = p.apply(state);
+            p.apply();
          }
          catch(Exception e)
          {
             e.printStackTrace();
          }
       }
-      System.out.println("Flushed : " + SwingUtilities.isEventDispatchThread());
    }
 
-   private void queueDiffs(PatchSet script)
-   {
-      synchronized(dispatchQueue)
-      {
-         System.out.println("Received the following edit script: " + script);
-         dispatchQueue.offer(script);
-      }
-   }   
-   
    public static int getFill(Object fillSpec)
    {
       String fill = engine.asString(fillSpec);

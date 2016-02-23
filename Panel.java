@@ -16,8 +16,15 @@ public class Panel extends JPanel implements ReactComponent
    private GridBagLayout layoutManager = new GridBagLayout();
    private String id;
    private int fill = GridBagConstraints.NONE;
-   private PrologContext context;
-   
+   protected PrologContext context;
+
+   protected Panel()
+   {
+      this.id = "<default node>";
+      setLayout(layoutManager);
+      fill = GridBagConstraints.BOTH;
+      setBorder(BorderFactory.createLineBorder(Color.BLUE));
+   }
    public Panel(String id)
    {
       this.id = id;

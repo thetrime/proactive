@@ -32,6 +32,8 @@ public class ReactComponentFactory
          {
             System.out.println("Constructing from vNode " + n);
             ReactComponent instance = c.newInstance(n, context);
+            if (context != null)
+               context.setRoot(instance);
             applyNodeAttributes(n, instance);
             return instance;
          }
