@@ -244,6 +244,34 @@ public class Engine
    {      
       if (value instanceof AtomTerm)
          return ((AtomTerm)value).value;
+      if (value instanceof CompoundTerm)
+      {
+         if (((CompoundTerm)value).tag.functor.value.equals("$state"))
+         {
+            // Fake maps
+            CompoundTerm c = (CompoundTerm)value;
+            String key = ((AtomTerm)(c.args[0])).value;
+            if (TermConstants.emptyListAtom.equals(c.args[1]))
+               return "";
+            else if (!(c.args[1] instanceof CompoundTerm))
+               return "";                        
+            CompoundTerm list = (CompoundTerm)c.args[1];
+            while (list.tag.arity == 2 && list.tag.functor.value.equals("."))
+            {
+               Term head = list.args[0];
+               if (head instanceof CompoundTerm && ((CompoundTerm)head).tag.functor.value.equals("=") && ((CompoundTerm)head).tag.arity == 2)
+               {
+                  CompoundTerm pair = (CompoundTerm)head;
+                  if (pair.args[0] instanceof AtomTerm && ((AtomTerm)pair.args[0]).value.equals(key))
+                     return asString(pair.args[1]);
+               }
+               if (list.args[1] instanceof CompoundTerm)
+                  list = (CompoundTerm)list.args[1];
+               else
+                  return "";
+            }
+         }
+      }
       System.out.println("Invalid request for string version of " + value + "(" + value.getClass().getName() + ")");  
       return "";
    }

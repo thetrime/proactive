@@ -10,7 +10,7 @@ public class PrologContext
 
    public PrologContext(String componentName)
    {
-      this.state = null;
+      this.state = React.engine.getInitialState(componentName);
       this.props = null;
       this.componentName = componentName;
       this.document = null;

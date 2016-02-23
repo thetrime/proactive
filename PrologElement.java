@@ -71,7 +71,29 @@ public class PrologElement extends PrologNode
          {
             while(childTerm.tag.arity == 2)
             {
-               children.add(PrologNode.instantiateNode(childTerm.args[0]));
+               if (childTerm.args[0] instanceof CompoundTerm && ((CompoundTerm)childTerm.args[0]).tag.functor.value.equals("list"))
+               {
+                  // special nested case
+                  if (((CompoundTerm)childTerm.args[0]).tag.arity != 1)
+                     throw new RuntimeException("Invalid XML tree: Invalid list: " + childTerm.args[0]);
+                  CompoundTerm list = ((CompoundTerm)childTerm.args[0]);
+                  if (!TermConstants.emptyListAtom.equals(list.args[0]))
+                  {
+                     list = (CompoundTerm)list.args[0];
+                     while (list.tag.arity == 2)
+                     {
+                        children.add(PrologNode.instantiateNode(list.args[0]));
+                        if (list.args[1] instanceof CompoundTerm)
+                           list = (CompoundTerm)list.args[1];
+                        else if (TermConstants.emptyListAtom.equals(list.args[1]))
+                           break;
+                        else
+                           throw new RuntimeException("Invalid XML: list is not a list: " + list);
+                     }
+                  }                  
+               }
+               else
+                  children.add(PrologNode.instantiateNode(childTerm.args[0]));
                if (childTerm.args[1] instanceof CompoundTerm)
                   childTerm = (CompoundTerm)childTerm.args[1];
                else if (TermConstants.emptyListAtom.equals(childTerm.args[1]))
