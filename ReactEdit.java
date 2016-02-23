@@ -50,7 +50,9 @@ public class ReactEdit
          case NODE:
          {
             ReactComponent parentNode = domNode.getParentNode();
-            ReactComponent newNode = React.instantiateNode((PrologNode)patch);
+            // FIXME: is this right? If the parent has a different execution context, then the child will create a completely
+            // new context in instantiateNode() and this will be ignored
+            ReactComponent newNode = React.instantiateNode((PrologNode)patch, parentNode.getContext());
             if (parentNode != null)
             {
                parentNode.replaceChild(newNode, domNode);

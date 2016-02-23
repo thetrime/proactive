@@ -115,10 +115,10 @@ public class React extends JFrame
    {
       try
       {
-         constructorHash.put("Panel", (Constructor)Panel.class.getConstructor(PrologNode.class));
-         constructorHash.put("Field", (Constructor)Field.class.getConstructor(PrologNode.class));
-         constructorHash.put("Button", (Constructor)Button.class.getConstructor(PrologNode.class));
-         constructorHash.put("Title", (Constructor)Title.class.getConstructor(PrologNode.class));
+         constructorHash.put("Panel", (Constructor)Panel.class.getConstructor(PrologNode.class, PrologContext.class));
+         constructorHash.put("Field", (Constructor)Field.class.getConstructor(PrologNode.class, PrologContext.class));
+         constructorHash.put("Button", (Constructor)Button.class.getConstructor(PrologNode.class, PrologContext.class));
+         constructorHash.put("Title", (Constructor)Title.class.getConstructor(PrologNode.class, PrologContext.class));
       }
       catch(Exception e)
       {
@@ -126,7 +126,7 @@ public class React extends JFrame
       }
    }
 
-   public static ReactComponent instantiateNode(PrologNode n) throws Exception
+   public static ReactComponent instantiateNode(PrologNode n, PrologContext context) throws Exception
    {
       try
       {
@@ -135,7 +135,7 @@ public class React extends JFrame
          if (c != null)
          {
             System.out.println("Constructing from vNode " + n);
-            ReactComponent instance = c.newInstance(n);
+            ReactComponent instance = c.newInstance(n, context);
             applyNodeAttributes(n, instance);
             return instance;
          }
@@ -152,7 +152,7 @@ public class React extends JFrame
          System.out.println("Unhandled type: " + n);
          System.exit(-1);
       }
-      return instantiateNode(userComponent);
+      return instantiateNode(userComponent, userComponent.getContext());
    }
    
    public static void applyNodeAttributes(PrologNode n, ReactComponent target)

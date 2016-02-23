@@ -12,4 +12,5 @@ public interface ReactComponent
    public List<ReactComponent> getChildNodes();
    public int getFill();
    public void setProperty(String name, Object value);
+   public PrologContext getContext();
 }

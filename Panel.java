@@ -16,6 +16,8 @@ public class Panel extends JPanel implements ReactComponent
    private GridBagLayout layoutManager = new GridBagLayout();
    private String id;
    private int fill = GridBagConstraints.NONE;
+   private PrologContext context;
+   
    public Panel(String id)
    {
       this.id = id;
@@ -24,17 +26,18 @@ public class Panel extends JPanel implements ReactComponent
       fill = GridBagConstraints.BOTH;
       setBorder(BorderFactory.createLineBorder(Color.BLACK));
    }
-   public Panel(PrologNode n) throws Exception
+   public Panel(PrologNode n, PrologContext context) throws Exception
    {
       id = "<generated from " + n + ">";
       setBackground(Color.GRAY);
       setLayout(layoutManager);
       for (Iterator<PrologNode> i = n.getChildren().iterator(); i.hasNext();)
       {
-         ReactComponent component = React.instantiateNode(i.next());
+         ReactComponent component = React.instantiateNode(i.next(), context);
          insertChildBefore(component, null);
       }
       setBorder(BorderFactory.createLineBorder(Color.BLACK));
+      this.context = context;
    }
    public void setProperty(String name, Object value)
    {
@@ -153,4 +156,5 @@ public class Panel extends JPanel implements ReactComponent
    }
 
    public int getFill() { return fill; }
+   public PrologContext getContext() {return context;}
 }

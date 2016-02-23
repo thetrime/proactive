@@ -4,12 +4,14 @@ import java.util.List;
 public class PrologDocument extends PrologElement
 {
    Term root;
-   Term state;
-   Term props;
-   public PrologDocument(Term term, Term state, Term props) throws Exception
+   PrologContext context;
+   public PrologDocument(Term term, Term state, Term props, String componentName) throws Exception
    {
       super(term);
-      this.state = state;
-      this.props = props;
+      this.context = new PrologContext(state, props, componentName, this);
    }
+   public PrologContext getContext()
+   {
+      return context;
+   }      
 }

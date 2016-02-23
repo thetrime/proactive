@@ -8,9 +8,12 @@ public class Button extends JButton implements ReactComponent
    private int fill = GridBagConstraints.NONE;
    private ReactComponent parent;
    private ReactComponent owner;
-   public Button(PrologNode n)
-   {      
+   private PrologContext context;
+   public Button(PrologNode n, PrologContext context)
+   {
+      this.context = context;
    }
+   public PrologContext getContext() {return context;}
    public void insertChildBefore(ReactComponent child, ReactComponent sibling) {}
    public void removeChild(ReactComponent child) {}
    public ReactComponent getParentNode() { return parent; }
@@ -34,7 +37,14 @@ public class Button extends JButton implements ReactComponent
          {
             public void actionPerformed(ActionEvent ae)
             {
-               React.triggerEvent(value);
+               try
+               {
+                  context.triggerEvent(value);
+               }
+               catch (Exception e)
+               {
+                  e.printStackTrace();
+               }
             }
          };
       addActionListener(actionListener);

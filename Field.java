@@ -7,11 +7,13 @@ public class Field extends JTextField implements ReactComponent
    private int fill = GridBagConstraints.NONE;
    private ReactComponent parent;
    private ReactComponent owner;
-
-   public Field(PrologNode n)
+   private PrologContext context;
+   public Field(PrologNode n, PrologContext context)
    {
       super("A field");
+      this.context = context;
    }
+   public PrologContext getContext() {return context;}
    public void insertChildBefore(ReactComponent child, ReactComponent sibling) {}
    public void removeChild(ReactComponent child) {}
    public ReactComponent getParentNode() { return parent; }
