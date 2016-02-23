@@ -1,5 +1,3 @@
-:-splunge('App', []).
-
 my_event_handler:-
         writeln(ohai).
 
