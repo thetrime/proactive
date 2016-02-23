@@ -6,15 +6,15 @@ import java.lang.reflect.*;
 
 public class ReactComponentFactory
 {
-   private static HashMap<String, Constructor<ReactComponent>> constructorHash = new HashMap<String, Constructor<ReactComponent>>();
+   private static HashMap<String, Constructor<? extends ReactComponent>> constructorHash = new HashMap<String, Constructor<? extends ReactComponent>>();
    static
    {
       try
       {
-         constructorHash.put("Panel", (Constructor)Panel.class.getConstructor(PrologNode.class, PrologContext.class));
-         constructorHash.put("Field", (Constructor)Field.class.getConstructor(PrologNode.class, PrologContext.class));
-         constructorHash.put("Button", (Constructor)Button.class.getConstructor(PrologNode.class, PrologContext.class));
-         constructorHash.put("Title", (Constructor)Title.class.getConstructor(PrologNode.class, PrologContext.class));
+         constructorHash.put("Panel", Panel.class.getConstructor(PrologNode.class, PrologContext.class));
+         constructorHash.put("Field", Field.class.getConstructor(PrologNode.class, PrologContext.class));
+         constructorHash.put("Button", Button.class.getConstructor(PrologNode.class, PrologContext.class));
+         constructorHash.put("Title", Title.class.getConstructor(PrologNode.class, PrologContext.class));
       }
       catch(Exception e)
       {
@@ -27,7 +27,7 @@ public class ReactComponentFactory
       try
       {
          System.out.println("Constructing from vNode " + n);
-         Constructor<ReactComponent> c = constructorHash.get(n.getNodeName());
+         Constructor<? extends ReactComponent> c = constructorHash.get(n.getNodeName());
          if (c != null)
          {
             System.out.println("Constructing from vNode " + n);
