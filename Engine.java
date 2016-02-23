@@ -26,7 +26,6 @@ public class Engine
       if (props == null)
          props = TermConstants.emptyListAtom;
       VariableTerm replyTerm = new VariableTerm("Result");
-      state = AtomTerm.get("FIXME");
       Term goal = new CompoundTerm(AtomTerm.get("render_" + component), new Term[]{state, props, replyTerm});
       interpreter.undo(0);
       Interpreter.Goal g = interpreter.prepareGoal(goal);
@@ -36,10 +35,66 @@ public class Engine
       if (rc == PrologCode.RC.SUCCESS || rc == PrologCode.RC.SUCCESS_LAST)
       {
          Term result = replyTerm.dereference();
-         return new PrologDocument(result);
+         return new PrologDocument(result, state, props);
       }
       System.out.println("Failed");
       return null;
+   }
+
+   public Term getInitialState(String component)
+   {
+      VariableTerm replyTerm = new VariableTerm("Result");
+      Term goal = new CompoundTerm(AtomTerm.get("getInitialState_" + component), new Term[]{replyTerm});
+      interpreter.undo(0);
+      Interpreter.Goal g = interpreter.prepareGoal(goal);
+      try
+      {
+         PrologCode.RC rc = interpreter.execute(g);
+         if (rc == PrologCode.RC.SUCCESS)
+            interpreter.stop(g);
+         if (rc == PrologCode.RC.SUCCESS || rc == PrologCode.RC.SUCCESS_LAST)
+         {
+            // FIXME: Check that it is a list!
+            return replyTerm.dereference();
+         }
+      }
+      catch (PrologException notDefined)
+      {
+         notDefined.printStackTrace();
+      }
+      return TermConstants.emptyListAtom;
+   }
+
+   public void componentWillMount(String component)
+   {
+      Term goal = AtomTerm.get("componentWillMount_" + component);      
+      interpreter.undo(0);
+      Interpreter.Goal g = interpreter.prepareGoal(goal);
+      try
+      {
+         PrologCode.RC rc = interpreter.execute(g);
+         if (rc == PrologCode.RC.SUCCESS)
+            interpreter.stop(g);
+      }
+      catch (PrologException notDefined)
+      {
+      }
+   }
+
+   public void componentWillUnmount(String component)
+   {
+      Term goal = AtomTerm.get("componentWillUnmount_" + component);      
+      interpreter.undo(0);
+      Interpreter.Goal g = interpreter.prepareGoal(goal);
+      try
+      {
+         PrologCode.RC rc = interpreter.execute(g);
+         if (rc == PrologCode.RC.SUCCESS)
+            interpreter.stop(g);
+      }
+      catch (PrologException notDefined)
+      {
+      }
    }
 
    public Term instantiateProps(Map<String, Object> properties)
@@ -58,9 +113,10 @@ public class Engine
    }
 
    public static String asString(Object value)
-   {
+   {      
       if (value instanceof AtomTerm)
          return ((AtomTerm)value).value;
+      System.out.println("Invalid request for string version of " + value + "(" + value.getClass().getName() + ")");  
       return "";
    }
 }

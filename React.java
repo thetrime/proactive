@@ -11,6 +11,7 @@ import java.awt.event.*;
 import java.lang.reflect.*;
 import java.lang.reflect.*;
 import javax.xml.parsers.*;
+import gnu.prolog.term.Term;
 
 public class React extends JFrame
 {
@@ -20,7 +21,10 @@ public class React extends JFrame
    {
       React r = new React();
       engine = new Engine();
-      PrologDocument newDoc = engine.render("Element", null, null);
+      // Start our app off with <App> as the root. This is hard-coded (for now)
+      String rootElementId = "App";
+      Term baseState = engine.getInitialState(rootElementId);
+      PrologDocument newDoc = engine.render(rootElementId, baseState, null);
       r.setVirtualDOM(newDoc);
    }
 
@@ -158,7 +162,8 @@ public class React extends JFrame
          e.printStackTrace();
       }
       // User-defined component
-      PrologDocument userComponent = engine.render(n.getNodeName(), null, engine.instantiateProps(n.getAttributes()));
+      Term initialState = engine.getInitialState(n.getNodeName());
+      PrologDocument userComponent = engine.render(n.getNodeName(), initialState, engine.instantiateProps(n.getAttributes()));
       if (userComponent == null)
       {
          System.out.println("Unhandled type: " + n);
