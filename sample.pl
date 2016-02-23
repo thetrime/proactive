@@ -1,5 +1,4 @@
-my_event_handler:-
-        writeln(ohai).
+my_event_handler(_State, _Props, [something='Did this just change?']).
 
 render_App(_, _, element('Panel',[layout=horiztonal, fill=horizontal], [element('Title',[label='This is a title from Prolog'],[]),
                                                                         element('Splunge', [some_property='This is a property'], []),

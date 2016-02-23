@@ -135,9 +135,21 @@ public class Engine
       return new PrologState(CompoundTerm.getList(elements));
    }
 
-   public void triggerEvent(Object q)
+   public PrologState triggerEvent(Object handler, PrologState stateWrapper, PrologState propsWrapper)
    {
-      Term goal = (Term)q;
+      Term state;
+      Term props;
+      if (stateWrapper == null)
+         state = TermConstants.emptyListAtom;
+      else
+         state = stateWrapper.getValue();
+      if (propsWrapper == null)
+         props = TermConstants.emptyListAtom;
+      else
+         props = propsWrapper.getValue();
+      // FIXME: handler may not be an atom
+      VariableTerm newState = new VariableTerm("NewState");
+      Term goal = new CompoundTerm((AtomTerm)handler, new Term[]{state, props, newState});
       interpreter.undo(0);
       Interpreter.Goal g = interpreter.prepareGoal(goal);
       try
@@ -145,13 +157,23 @@ public class Engine
          PrologCode.RC rc = interpreter.execute(g);
          if (rc == PrologCode.RC.SUCCESS)
             interpreter.stop(g);
+         if (rc == PrologCode.RC.SUCCESS || rc == PrologCode.RC.SUCCESS_LAST)
+         {            
+            return applyState(state, newState.dereference());
+         }
       }
       catch (PrologException notDefined)
       {
          notDefined.printStackTrace();
       }
+      return null;
    }
 
+   private PrologState applyState(Term oldState, Term newState)
+   {
+      // FIXME: Need to actually apply changes here
+      return new PrologState(newState);
+   }
 
 
    

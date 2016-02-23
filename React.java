@@ -49,23 +49,7 @@ public class React extends JFrame
       
       setSize(800, 600);
       setDefaultCloseOperation(EXIT_ON_CLOSE);      
-      setVisible(true);
-      JButton button = new JButton("Apply a change");
-      button.addActionListener(new ActionListener()
-         {
-            public void actionPerformed(ActionEvent ae)
-            {
-               try
-               {
-                  setVirtualDOM(engine.render("SecondElement", null, null));
-               }
-               catch(Exception e)
-               {
-                  e.printStackTrace();
-               }
-            }
-         });
-      getContentPane().add(button, BorderLayout.SOUTH);
+      setVisible(true);      
    }
 
    public synchronized void setVirtualDOM(PrologDocument newState) throws Exception
@@ -193,9 +177,9 @@ public class React extends JFrame
       return java.awt.GridBagConstraints.NONE;
    }
 
-   public static void triggerEvent(Object q)
+   public static void triggerEvent(Object handler)
    {
-      engine.triggerEvent(q);
+      engine.triggerEvent(handler, null, null);
    }
 }
 
