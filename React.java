@@ -1,54 +1,27 @@
 //https://github.com/Matt-Esch/virtual-dom
 
-
-import java.io.*;
 import java.util.*;
 import javax.swing.*;
 import java.awt.BorderLayout;
-import java.awt.Container;
-import java.awt.Component;
-import java.awt.event.*;
-import java.lang.reflect.*;
-import java.lang.reflect.*;
-import javax.xml.parsers.*;
 
 public class React extends JFrame
 {
+   // Prevent instantiation
+   private React() {}
+   
    static PrologDocument nextDocument = null;
    static Engine engine = null;
    public static void main(String[] args) throws Exception
    {
       engine = new Engine();
-      React r = new React("App");
+      ReactApp app = new ReactApp("App");
+      app.setSize(800, 600);
+      app.setDefaultCloseOperation(EXIT_ON_CLOSE);      
+      app.setVisible(true);
    }
 
-   private static LinkedList<TreePatch> dispatchQueue = new LinkedList<TreePatch>();
-   public React(String rootElementId) throws Exception
-   {
-      super("React Test");
-      // This is a bit finicky. First we have to set up the state as 'empty'.
-      // The empty state is not as empty as you might think. It contains 2 nodes:
-      //    * The global domRoot. This is akin to the JFrame
-      //    * Inside this is a RootPanel. This is like the contentPane in the frame
-      // Unlike in Swing, we can change the contentPane to a new one by patching it
-      // but the global domRoot is immutable
-      
-      Panel domRoot = new Panel("root");
-      domRoot.setOwnerDocument(domRoot);
-      domRoot.setBackground(java.awt.Color.GREEN);
-      getContentPane().setLayout(new BorderLayout());
-      getContentPane().add(domRoot, BorderLayout.CENTER);
-
-      ReactComponent swingTree = new RootPanel(rootElementId);
-      domRoot.insertChildBefore(swingTree, null);
-      swingTree.getContext().setRoot(swingTree);
-      swingTree.getContext().reRender();
-           
-      setSize(800, 600);
-      setDefaultCloseOperation(EXIT_ON_CLOSE);      
-      setVisible(true);      
-   }
-
+   
+   private static LinkedList<TreePatch> dispatchQueue = new LinkedList<TreePatch>();   
 
    public static void queuePatch(PatchSet p, ReactComponent root, PrologContext context)
    {
@@ -112,7 +85,8 @@ public class React extends JFrame
          }
       }
    }
-
+   
+   // this is just a convenience method
    public static int getFill(Object fillSpec)
    {
       String fill = engine.asString(fillSpec);

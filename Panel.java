@@ -22,6 +22,7 @@ public class Panel extends JPanel implements ReactComponent
    {
       this.id = "<default node>";
       setLayout(layoutManager);
+      setBackground(Color.RED);
       fill = GridBagConstraints.BOTH;
       setBorder(BorderFactory.createLineBorder(Color.BLUE));
    }
@@ -152,6 +153,7 @@ public class Panel extends JPanel implements ReactComponent
       // and we want to swap in-place
       children.set(i, newChild);
       remove((Component)oldChild);
+      newChild.setParentNode(this);
       // We may have to edit the constraints if the child has a different fill
       constraints.fill = newChild.getFill();
       add((Component)newChild, constraints);

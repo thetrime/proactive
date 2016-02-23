@@ -11,8 +11,8 @@ render_SecondElement(_, _, element('Panel',[layout=horiztonal, fill=horizontal],
                                                                                   element('Field',[label='CP Account ID'],[]),
                                                                                   element('Button',[label='Still Submit'],[])])).
 
-render_Splunge(State, Props, element('Panel', [layout=horizontal], [element('Title', [label=Label], []),
-                                                                    element('Button', [label=Something, onClick=my_event_handler], [])])):-
+render_Splunge(State, Props, element('Panel', [layout=horizontal, fill=horizontal], [element('Title', [label=Label], []),
+                                                                                     element('Button', [label=Something, onClick=my_event_handler], [])])):-
         memberchk(some_property=Label, Props),
         memberchk(something=Something, State).
 
