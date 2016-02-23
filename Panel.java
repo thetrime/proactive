@@ -24,7 +24,7 @@ public class Panel extends JPanel implements ReactComponent
       fill = GridBagConstraints.BOTH;
       setBorder(BorderFactory.createLineBorder(Color.BLACK));
    }
-   public Panel(PrologNode n)
+   public Panel(PrologNode n) throws Exception
    {
       id = "<generated from " + n + ">";
       setBackground(Color.GRAY);

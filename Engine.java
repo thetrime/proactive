@@ -20,9 +20,13 @@ public class Engine
    
    public PrologDocument render(String component, Term state, Term props) throws Exception
    {
+      System.out.println("Rendering " + component);
+      if (state == null)
+         state = TermConstants.emptyListAtom;
+      if (props == null)
+         props = TermConstants.emptyListAtom;
       VariableTerm replyTerm = new VariableTerm("Result");
       state = AtomTerm.get("FIXME");
-      props = AtomTerm.get("FIXME");
       Term goal = new CompoundTerm(AtomTerm.get("render_" + component), new Term[]{state, props, replyTerm});
       interpreter.undo(0);
       Interpreter.Goal g = interpreter.prepareGoal(goal);
@@ -37,5 +41,26 @@ public class Engine
       System.out.println("Failed");
       return null;
    }
-   
+
+   public Term instantiateProps(Map<String, Object> properties)
+   {
+      Term[] elements = new Term[properties.size()];
+      int j = 0;
+      for (Iterator<Map.Entry<String, Object>> i = properties.entrySet().iterator(); i.hasNext();)
+      {
+         Map.Entry<String, Object> entry = i.next();
+         elements[j] = new CompoundTerm(CompoundTermTag.get(AtomTerm.get("="), 2),
+                                        AtomTerm.get(entry.getKey()),
+                                        (Term)entry.getValue());
+         j++;
+      }
+      return CompoundTerm.getList(elements);
+   }
+
+   public static String asString(Object value)
+   {
+      if (value instanceof AtomTerm)
+         return ((AtomTerm)value).value;
+      return "";
+   }
 }

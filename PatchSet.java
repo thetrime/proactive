@@ -8,12 +8,12 @@ public class PatchSet extends HashMap<Integer, List<ReactEdit>>
       this.a = a;
    }
 
-   public ReactComponent apply(ReactComponent rootNode)
+   public ReactComponent apply(ReactComponent rootNode) throws Exception
    {
       return applyRecursive(rootNode);
    }
 
-   private ReactComponent applyRecursive(ReactComponent rootNode)
+   private ReactComponent applyRecursive(ReactComponent rootNode) throws Exception
    {
       Set<Integer> indices = new TreeSet<Integer>(keySet());
       if (indices.size() == 0)
@@ -29,7 +29,7 @@ public class PatchSet extends HashMap<Integer, List<ReactEdit>>
       return rootNode;
    }
 
-   private ReactComponent applyPatch(ReactComponent rootNode, ReactComponent domNode, List<ReactEdit> patchList)
+   private ReactComponent applyPatch(ReactComponent rootNode, ReactComponent domNode, List<ReactEdit> patchList) throws Exception
    {
       if (domNode == null)
          return rootNode;

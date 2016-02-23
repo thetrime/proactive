@@ -43,7 +43,7 @@ public class ReactEdit
       return "<unknown operation " + op + ">";
    }
 
-   public ReactComponent apply(ReactComponent domNode)
+   public ReactComponent apply(ReactComponent domNode) throws Exception
    {
       switch(op)
       {

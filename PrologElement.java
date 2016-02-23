@@ -47,9 +47,7 @@ public class PrologElement extends PrologNode
                   Term attrValue = attr.args[1];
                   if (!(attrName instanceof AtomTerm))
                      throw new RuntimeException("Invalid XML tree: Attribute name is not an atom: " + attrName);
-                  if (!(attrValue instanceof AtomTerm))
-                     throw new RuntimeException("Invalid XML tree: Attribute vallue is not an atom: " + attrValue);
-                  attributes.put(((AtomTerm)attrName).value, ((AtomTerm)attrValue).value);                                 
+                  attributes.put(((AtomTerm)attrName).value, attrValue);
                }               
                else
                {

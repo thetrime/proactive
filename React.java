@@ -102,7 +102,14 @@ public class React extends JFrame
       PatchSet p;
       while ((p = queue.poll()) != null)
       {
-         state = p.apply(state);
+         try
+         {
+            state = p.apply(state);
+         }
+         catch(Exception e)
+         {
+            e.printStackTrace();
+         }
       }
       System.out.println("Flushed : " + SwingUtilities.isEventDispatchThread());
    }
@@ -132,7 +139,7 @@ public class React extends JFrame
       }
    }
 
-   public static ReactComponent instantiateNode(PrologNode n)
+   public static ReactComponent instantiateNode(PrologNode n) throws Exception
    {
       try
       {
@@ -149,12 +156,17 @@ public class React extends JFrame
       catch(Exception e)
       {
          e.printStackTrace();
-      }    
-      System.out.println("Unhandled type: " + n);
-      System.exit(-1);
-      return null;
+      }
+      // User-defined component
+      PrologDocument userComponent = engine.render(n.getNodeName(), null, engine.instantiateProps(n.getAttributes()));
+      if (userComponent == null)
+      {
+         System.out.println("Unhandled type: " + n);
+         System.exit(-1);
+      }
+      return instantiateNode(userComponent);
    }
-
+   
    public static void applyNodeAttributes(PrologNode n, ReactComponent target)
    {
       Map<String, Object> attributes = n.getAttributes();
@@ -165,8 +177,9 @@ public class React extends JFrame
       }
    }
    
-   public static int getFill(Object fill)
+   public static int getFill(Object fillSpec)
    {
+      String fill = engine.asString(fillSpec);
       if (fill.equals("horizontal"))
          return java.awt.GridBagConstraints.HORIZONTAL;
       else if (fill.equals("vertical"))

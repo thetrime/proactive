@@ -22,7 +22,7 @@ public class Button extends JButton implements ReactComponent
    public void setProperty(String name, Object value)
    {
       if (name.equals("label"))
-         setText((String)value);
+         setText(Engine.asString(value));
       else if (name.equals("fill"))
          fill = React.getFill(value);
    }
