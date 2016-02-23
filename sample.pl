@@ -7,9 +7,12 @@ render_App(_, _, element('Panel',[layout=horiztonal, fill=horizontal], [element(
                                                                         element('Button',[label='Submit'],[])])).
 
 render_SomeSubcomponent(State, Props, element('Panel', [layout=horizontal, fill=horizontal], [element('Title', [label=Label], []),
-                                                                                              element('Button', [label=ButtonLabel, onClick=my_event_handler], [])])):-
+                                                                                              element('Button', [label=ButtonLabel, onClick=my_event_handler], []),
+                                                                                              element('Button', [label=StaticLabel], [])])):-
         memberchk(title_label=Label, Props),
-        memberchk(button_label=ButtonLabel, State).
+        memberchk(button_label=ButtonLabel, State),
+        memberchk(static_label=StaticLabel, State).
 
 
-getInitialState_SomeSubcomponent([button_label='This is determined by state!']).
+getInitialState_SomeSubcomponent([button_label='This is determined by state!',
+                                  static_label='This label should not change']).

@@ -61,7 +61,7 @@ public class Engine
          Term result = replyTerm.dereference();
          return new PrologDocument(result, state, props, component);
       }
-      System.out.println("Failed");
+      System.out.println("Failed to render");
       return null;
    }
 
@@ -132,7 +132,7 @@ public class Engine
       return new PrologState(CompoundTerm.getList(elements));
    }
 
-   public PrologState triggerEvent(Object handler, PrologState stateWrapper, PrologState propsWrapper)
+   public PrologState triggerEvent(Object handler, PrologState stateWrapper, PrologState propsWrapper) throws Exception
    {
       Term state;
       Term props;
@@ -183,10 +183,59 @@ public class Engine
       return null;
    }
 
-   private PrologState applyState(Term oldState, Term newState)
+   private PrologState applyState(Term oldState, Term newState) throws Exception
    {
-      // FIXME: Need to actually apply changes here
-      return new PrologState(newState);
+      Map<String, Object> properties = new HashMap<String, Object>();
+      addProperties(oldState, properties);
+      addProperties(newState, properties);
+      return instantiateProps(properties);
+   }
+
+   private static boolean isNull(Term t)
+   {
+      if (t instanceof CompoundTerm)
+      {
+         CompoundTerm c = (CompoundTerm)t;
+         if (c.tag == CompoundTermTag.curly1 && c.args[0] instanceof AtomTerm && "null".equals(((AtomTerm)c.args[0]).value))
+            return true;
+      }
+      return false;
+   }
+   
+   private void addProperties(Term state, Map<String, Object> props) throws Exception
+   {
+      if (TermConstants.emptyListAtom.equals(state))
+         return;
+      else if (state instanceof CompoundTerm)
+      {
+         CompoundTerm c = (CompoundTerm)state;
+         while(c.tag.arity == 2)
+         {
+            if (c.args[0] instanceof CompoundTerm)
+            {
+               CompoundTerm attr = (CompoundTerm)c.args[0];
+               if (attr.tag.arity != 2 || !attr.tag.functor.value.equals("="))                     
+                  throw new RuntimeException("Invalid state: element is not =/2: " + attr);
+               Term attrName = attr.args[0];
+               Term attrValue = attr.args[1];
+               if (!(attrName instanceof AtomTerm))
+                  throw new RuntimeException("Invalid state: element name is not an atom: " + attrName);
+               attrValue = attrValue.dereference();
+               if (isNull(attrValue))
+                  props.remove(((AtomTerm)attrName).value);
+               else
+                  props.put(((AtomTerm)attrName).value, attrValue.dereference());
+            }
+            else
+               throw new RuntimeException("Invalid state element: " + c);
+            if (c.args[1] instanceof CompoundTerm)
+               c = (CompoundTerm)c.args[1];
+            else if (TermConstants.emptyListAtom.equals(c.args[1]))
+               break;
+            else
+               throw new RuntimeException("Invalid state. Not a list: " + c);
+         }
+      }
    }
 
 
