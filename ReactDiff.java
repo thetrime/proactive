@@ -123,7 +123,7 @@ public class ReactDiff
             clearState(a, patch, index);
             apply = patch.get(index);
          }
-         apply = appendPatch(apply, new ReactEdit(ReactEdit.REMOVE, a, b));
+         apply = appendPatch(apply, new ReactEditRemove(a, b));
       }
       else if (b instanceof PrologElement)
       {
@@ -134,19 +134,19 @@ public class ReactDiff
                Map<String,Object> propsPatch = diffProps(((PrologElement)a).getAttributes(), ((PrologElement)b).getAttributes());
                if (propsPatch != null)
                {
-                  apply = appendPatch(apply, new ReactEdit(ReactEdit.PROPS, a, propsPatch));
+                  apply = appendPatch(apply, new ReactEditProps(a, propsPatch));
                }
                apply = diffChildren(a, b, patch, apply, index);
             }
             else
             {
-               apply = appendPatch(apply, new ReactEdit(ReactEdit.NODE, a, b));
+               apply = appendPatch(apply, new ReactEditNode(a, b));
                applyClear = true;
             }
          }
          else
          {
-            apply = appendPatch(apply, new ReactEdit(ReactEdit.NODE, a, b));
+            apply = appendPatch(apply, new ReactEditNode(a, b));
             applyClear = true;
          }         
       }
