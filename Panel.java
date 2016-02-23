@@ -33,7 +33,7 @@ public class Panel extends JPanel implements ReactComponent
       setLayout(layoutManager);
       for (Iterator<PrologNode> i = n.getChildren().iterator(); i.hasNext();)
       {
-         ReactComponent component = React.instantiateNode(i.next(), context);
+         ReactComponent component = ReactComponentFactory.instantiateNode(i.next(), context);
          insertChildBefore(component, null);
       }
       setBorder(BorderFactory.createLineBorder(Color.BLACK));

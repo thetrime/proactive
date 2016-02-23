@@ -20,7 +20,7 @@ public class PrologContext
         state = React.engine.triggerEvent(handler, state, props);
         PrologDocument newDocument = React.engine.render(componentName, state, props);
         PatchSet editScript = ReactDiff.diff(document, newDocument);
-        System.out.println(editScript);
-        // FIXME: Compute a patch and apply it
+        // Hmm. We can only apply a patch to the root, at present...
+        // Really updateState(PrologDocument) should be a member function of ReactComponent
     }
 }
