@@ -77,10 +77,7 @@ public class Engine
          if (rc == PrologCode.RC.SUCCESS)
             interpreter.stop(g);
          if (rc == PrologCode.RC.SUCCESS || rc == PrologCode.RC.SUCCESS_LAST)
-         {
-            // FIXME: Check that it is a list!
             return new PrologState(replyTerm.dereference());
-         }
       }
       catch (PrologException notDefined)
       {
@@ -147,9 +144,26 @@ public class Engine
          props = TermConstants.emptyListAtom;
       else
          props = propsWrapper.getValue();
-      // FIXME: handler may not be an atom
       VariableTerm newState = new VariableTerm("NewState");
-      Term goal = new CompoundTerm((AtomTerm)handler, new Term[]{state, props, newState});
+      Term goal;
+      if (handler instanceof AtomTerm)
+         goal = new CompoundTerm((AtomTerm)handler, new Term[]{state, props, newState});
+      else if (handler instanceof CompoundTerm)
+      {
+         CompoundTerm c_handler = (CompoundTerm)handler;
+         Term[] args = new Term[c_handler.tag.arity + 3];
+         for (int i = 0; i < c_handler.tag.arity; i++)
+            args[i] = c_handler.args[i];
+         args[c_handler.tag.arity+0] = state;
+         args[c_handler.tag.arity+1] = props;
+         args[c_handler.tag.arity+2] = newState;         
+         goal = new CompoundTerm(c_handler.tag.functor, args);
+      }
+      else
+      {
+         System.out.println("Handler is not callable: " + handler);
+         return null;
+      }      
       interpreter.undo(0);
       Interpreter.Goal g = interpreter.prepareGoal(goal);
       try
