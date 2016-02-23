@@ -140,7 +140,8 @@ public class Panel extends JPanel implements ReactComponent
    public void setOwnerDocument(ReactComponent owner)
    {
       this.owner = owner;
-      // FIXME: Also set on all children!
+      for (ReactComponent child : children)
+         child.setOwnerDocument(owner);
    }
 
    
