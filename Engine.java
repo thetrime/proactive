@@ -11,13 +11,19 @@ public class Engine
 {
    private Environment env;
    private Interpreter interpreter;
-   public Engine(String rootElementId) throws Exception
+   private String URL;
+   public Engine(String URL) throws Exception
+   {
+      this.URL = URL;
+      make();
+   }
+
+   public void make() throws Exception
    {
       env = new Environment();
       env.ensureLoaded(AtomTerm.get("boilerplate.pl"));
-      //env.ensureLoaded(AtomTerm.get("http://localhost:8080/react/" + rootElementId));
       env.ensureLoaded(new CompoundTerm(CompoundTermTag.get("url", 1),
-                                        AtomTerm.get("http://localhost:8080/react/" + rootElementId)));
+                                        AtomTerm.get(URL)));
       interpreter = env.createInterpreter();
       installBuiltin("java_println", 1);
       System.out.println("Checking for load errors...");

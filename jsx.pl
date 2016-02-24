@@ -5,12 +5,11 @@
 jsx(Content, Vars, Dict, DOM):-
         phrase_from_quasi_quotation(jsx_children(Vars, Dict, [DOM]), Content).
 
-qqq(X, X):- format(user_error, 'Hello: ~w~n', [X]).
-
 jsx_node(Vars, Dict, element(Tag, Attributes, Content)) -->
         optional_spaces,
         `<`,
-        jsx_tag(Tag), optional_spaces, jsx_attributes(Vars, Dict, Attributes), 
+        jsx_tag(Tag), optional_spaces, jsx_attributes(Vars, Dict, Attributes),
+        % {compile_aux_clauses([jsx_require(Tag)])}, This causes swipl to crash :(
         ( `/>` ->
             {Content = []}
         ; `>` ->

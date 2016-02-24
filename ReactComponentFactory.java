@@ -26,11 +26,9 @@ public class ReactComponentFactory
    {
       try
       {
-         System.out.println("Constructing from vNode " + n);
          Constructor<? extends ReactComponent> c = constructorHash.get(n.getNodeName());
          if (c != null)
          {
-            System.out.println("Constructing from vNode " + n);
             ReactComponent instance = c.newInstance(n, context);
             if (context != null)
                context.setRoot(instance);

@@ -12,7 +12,7 @@ public class React extends JFrame
    static PrologDocument nextDocument = null;
    public static void main(String[] args) throws Exception
    {
-     ReactApp app = new ReactApp("App");
+      ReactApp app = new ReactApp("http://localhost:8080/react", "App");
       app.setSize(800, 600);
       app.setDefaultCloseOperation(EXIT_ON_CLOSE);      
       app.setVisible(true);
@@ -59,7 +59,6 @@ public class React extends JFrame
             }
          });
    }
-   
 
    private static void flushQueueAsAWT()
    {
@@ -99,6 +98,12 @@ public class React extends JFrame
             return java.awt.GridBagConstraints.BOTH;
       }
       return java.awt.GridBagConstraints.NONE;      
+   }
+
+   public static void addCodeChangeListener(String url, String rootElementId, CodeChangeListener listener) throws Exception
+   {
+      ServerConnection connection = ServerConnection.getServerConnection(url);
+      connection.addCodeChangeListener(rootElementId, listener);
    }
 }
 

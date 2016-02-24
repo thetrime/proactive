@@ -4,14 +4,20 @@ import javax.swing.*;
 import java.util.*;
 
 
-public class ReactApp extends JFrame implements ReactComponent
+public class ReactApp extends JFrame implements ReactComponent, CodeChangeListener
 {
    private Engine engine = null;
+   private PrologContext context = null;
    List<ReactComponent> children = new LinkedList<ReactComponent>();
-   public ReactApp(String rootElementId) throws Exception
+   String URL = null;
+   String rootElementId = null;
+   public ReactApp(String URL, String rootElementId) throws Exception
    {
       super("React Test");
-      engine = new Engine(rootElementId);
+      engine = new Engine(URL + "/" + rootElementId);
+      this.URL = URL;
+      this.rootElementId = rootElementId;
+      React.addCodeChangeListener(URL, rootElementId, this);
       
       // This is a bit finicky. First we have to set up the state as 'empty'.
       // The empty state is not as empty as you might think. It contains 2 nodes:
@@ -29,26 +35,45 @@ public class ReactApp extends JFrame implements ReactComponent
       contentPane.getContext().reRender();
    }
 
-   public PrologContext getContext() { return null; }
-   public void insertChildBefore(ReactComponent child, ReactComponent sibling)
+   public void handleCodeChange() 
    {
+      try
+      {
+         if (context != null)
+         {
+            context.getEngine().make();
+            context.reRender();
+         }
+      }
+      catch(Exception e)
+      {
+         e.printStackTrace();
+      }
+   }
+
+   public PrologContext getContext() { return context; }
+   public void insertChildBefore(ReactComponent child, ReactComponent sibling)
+   {      
       if (sibling == null)
       {
          child.setParentNode(this);
          children.add(child);
          getContentPane().add((Component)child, BorderLayout.CENTER);
-      }      
+         context = child.getContext();
+      }
+      validate();
+      repaint();
    }
    public void removeChild(ReactComponent child)
    {
+      context = null;
       children.remove(child);
       getContentPane().remove((Component)child);
    }  
    public ReactComponent getParentNode() { return this; }
    public void replaceChild(ReactComponent newNode, ReactComponent oldNode)
    {
-      children.remove(oldNode);
-      getContentPane().remove((Component)oldNode);
+      removeChild(oldNode);
       insertChildBefore(newNode, null);
    }
    public void setParentNode(ReactComponent parent) {}
