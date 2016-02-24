@@ -59,7 +59,7 @@ public class Engine
       if (rc == PrologCode.RC.SUCCESS || rc == PrologCode.RC.SUCCESS_LAST)
       {
          Term result = replyTerm.dereference();
-         return new PrologDocument(result, state, props, component);
+         return new PrologDocument(result, state, props, component, this);
       }
       System.out.println("Failed to render");
       return null;

@@ -5,10 +5,10 @@ public class PrologDocument extends PrologElement
 {
    Term root;
    PrologContext context;
-   public PrologDocument(Term term, Term state, Term props, String componentName) throws Exception
+   public PrologDocument(Term term, Term state, Term props, String componentName, Engine engine) throws Exception
    {
       super(term);
-      this.context = new PrologContext(state, props, componentName, this);
+      this.context = new PrologContext(state, props, componentName, this, engine);
    }
    public PrologContext getContext()
    {

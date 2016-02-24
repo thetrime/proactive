@@ -10,10 +10,8 @@ public class React extends JFrame
    private React() {}
    
    static PrologDocument nextDocument = null;
-   static Engine engine = null;
    public static void main(String[] args) throws Exception
    {
-      engine = new Engine();
       ReactApp app = new ReactApp("App");
       app.setSize(800, 600);
       app.setDefaultCloseOperation(EXIT_ON_CLOSE);      
@@ -89,14 +87,17 @@ public class React extends JFrame
    // this is just a convenience method
    public static int getFill(Object fillSpec)
    {
-      String fill = engine.asString(fillSpec);
-      if (fill.equals("horizontal"))
-         return java.awt.GridBagConstraints.HORIZONTAL;
-      else if (fill.equals("vertical"))
-         return java.awt.GridBagConstraints.VERTICAL;
-      else if (fill.equals("both"))
-         return java.awt.GridBagConstraints.BOTH;
-      return java.awt.GridBagConstraints.NONE;
+      if (fillSpec instanceof String)
+      {
+         String fill = (String)fillSpec;
+         if (fill.equals("horizontal"))
+            return java.awt.GridBagConstraints.HORIZONTAL;
+         else if (fill.equals("vertical"))
+            return java.awt.GridBagConstraints.VERTICAL;
+         else if (fill.equals("both"))
+            return java.awt.GridBagConstraints.BOTH;
+      }
+      return java.awt.GridBagConstraints.NONE;      
    }
 }
 

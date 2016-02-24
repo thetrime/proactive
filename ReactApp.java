@@ -6,10 +6,13 @@ import java.util.*;
 
 public class ReactApp extends JFrame implements ReactComponent
 {
+   private Engine engine = null;
    List<ReactComponent> children = new LinkedList<ReactComponent>();
    public ReactApp(String rootElementId) throws Exception
    {
       super("React Test");
+      engine = new Engine();
+      
       // This is a bit finicky. First we have to set up the state as 'empty'.
       // The empty state is not as empty as you might think. It contains 2 nodes:
       //    * The global root. This is the representation of this JFrame
@@ -21,7 +24,7 @@ public class ReactApp extends JFrame implements ReactComponent
       getContentPane().setBackground(java.awt.Color.GREEN);
       getContentPane().setLayout(new BorderLayout());
       
-      ReactComponent contentPane = new RootPanel(rootElementId);
+      ReactComponent contentPane = new RootPanel(rootElementId, engine);
       insertChildBefore(contentPane, null);
       contentPane.getContext().reRender();
    }

@@ -3,10 +3,10 @@ import java.awt.*;
 
 public class RootPanel extends Panel
 {
-    public RootPanel(String componentId)
+    public RootPanel(String componentId, Engine engine)
     {
         super();
-        context = new PrologContext(componentId);
+        context = new PrologContext(componentId, engine);
         context.setRoot(this);        
     }
 

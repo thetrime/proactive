@@ -7,17 +7,20 @@ public class PrologContext
    String componentName;
    PrologDocument document;
    ReactComponent root;
-
-   public PrologContext(String componentName)
+   Engine engine;
+   
+   public PrologContext(String componentName, Engine engine)
    {
-      this.state = React.engine.getInitialState(componentName);
+      this.engine = engine;
+      this.state = engine.getInitialState(componentName);
       this.props = null;
       this.componentName = componentName;
       this.document = null;
    }
    
-   public PrologContext(Term state, Term props, String componentName, PrologDocument document)
+   public PrologContext(Term state, Term props, String componentName, PrologDocument document, Engine engine)
    {
+      this.engine = engine;
       this.state = new PrologState(state);
       this.props = new PrologState(props);
       this.componentName = componentName;
@@ -31,14 +34,19 @@ public class PrologContext
    
    public void triggerEvent(Object handler) throws Exception
    {
-      state = React.engine.triggerEvent(handler, state, props);
+      state = engine.triggerEvent(handler, state, props);
       reRender();
    }
 
    public void reRender() throws Exception
    {
-      PrologDocument newDocument = React.engine.render(componentName, state, props);
+      PrologDocument newDocument = engine.render(componentName, state, props);
       PatchSet editScript = ReactDiff.diff(document, newDocument);
       React.queuePatch(editScript, root, this);
+   }
+
+   public Engine getEngine()
+   {
+      return engine;
    }
 }
