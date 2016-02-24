@@ -1,4 +1,4 @@
-:-module(jsx_test, []).
+:-module('App', []).
 
 :- quasi_quotation_syntax(jsx).
 
@@ -19,3 +19,5 @@ get_some_fields(Fields):-
                 <Button label={Label}/>|},
                 member(Label, [foo, bar, baz]),
                 Fields).
+
+getInitialState_App([label=boing]).

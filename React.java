@@ -12,7 +12,7 @@ public class React extends JFrame
    static PrologDocument nextDocument = null;
    public static void main(String[] args) throws Exception
    {
-      ReactApp app = new ReactApp("App");
+     ReactApp app = new ReactApp("App");
       app.setSize(800, 600);
       app.setDefaultCloseOperation(EXIT_ON_CLOSE);      
       app.setVisible(true);
@@ -85,6 +85,7 @@ public class React extends JFrame
    }
    
    // this is just a convenience method
+   // FIXME: It might also be wrong, since fillSpec might be a term?
    public static int getFill(Object fillSpec)
    {
       if (fillSpec instanceof String)

@@ -11,7 +11,7 @@ public class ReactApp extends JFrame implements ReactComponent
    public ReactApp(String rootElementId) throws Exception
    {
       super("React Test");
-      engine = new Engine();
+      engine = new Engine(rootElementId);
       
       // This is a bit finicky. First we have to set up the state as 'empty'.
       // The empty state is not as empty as you might think. It contains 2 nodes:
