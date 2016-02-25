@@ -19,33 +19,47 @@ public class ReactEditProps extends ReactEdit
          String propName = entry.getKey();
          Object propValue = entry.getValue();
          if (propValue == null)
-         {  // removeProperty
-            if (previous != null)
+         {
+            removeProperty(domNode, propName, propValue, previous);
+         }
+         else if (isHook(propValue))
+         {
+            removeProperty(domNode, propName, propValue, previous);
+            if (((Hook)propValue).hook != null)
             {
-               Object previousValue = previous.get(propName);
-               if (!isHook(previousValue))
-               {
-                  if (propName.equals("attributes"))
-                  {
-                  }
-                  else if (propName.equals("style"))
-                  {
-                  }
-                  else if (previousValue instanceof String)
-                     domNode.setProperty(propName, "");
-                  else
-                     domNode.setProperty(propName, null);
-               }
-               else
-                  ((Hook)previousValue).unHook(domNode, propName, propValue);
+               ((Hook)propValue).hook.somethingChanged(domNode, propName, previous!=null?previous.get(propName) : null);
             }
          }
-         else // FIXME: Missing case here for isHook and isObject
+         else
          {
+            // setProperty expects an object and sorts that out itself, so we dont need the isObject() case
             domNode.setProperty(propName, propValue);
          }
       }
       return null;
+   }
+
+   private void removeProperty(ReactComponent domNode, String propName, Object propValue, Map<String, Object> previous)
+   {
+      if (previous != null)
+      {
+         Object previousValue = previous.get(propName);
+         if (!isHook(previousValue))
+         {
+            if (propName.equals("attributes"))
+            {
+            }
+            else if (propName.equals("style"))
+            {
+            }
+            else if (previousValue instanceof String)
+               domNode.setProperty(propName, "");
+            else
+               domNode.setProperty(propName, null);
+         }
+         else
+            ((Hook)previousValue).unHook(domNode, propName, propValue);
+      }
    }
 
    public String toString()
@@ -53,9 +67,15 @@ public class ReactEditProps extends ReactEdit
       return "<Mutate props: " + patch + ">";
    }
 
-   private static class Hook
+   // Hooks are not really implemented. See also widgets and thunks
+   private static class Hook   
    {
+      public HookListener hook;
       public void unHook(ReactComponent c, String name, Object value) {}
+      public abstract static class HookListener
+      {
+         public abstract void somethingChanged(ReactComponent c, String name, Object previous);
+      }
    }
    private static boolean isHook(Object anything)
    {

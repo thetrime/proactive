@@ -7,7 +7,7 @@ import java.util.Map;
 
 public class ReactDiff
 {
-   public static PatchSet diff(PrologDocument a, PrologDocument b)
+   public static PatchSet diff(PrologNode a, PrologNode b)
    {
       PatchSet patchSet = new PatchSet(a);
       walk(a, b, patchSet, 0);      
@@ -36,8 +36,7 @@ public class ReactDiff
 
    private static boolean isThunk(PrologNode n)
    {
-      // FIXME: Stub
-      return false;
+      return (n instanceof PrologThunk);
    }
    private static boolean isWidget(PrologNode n)
    {
@@ -47,8 +46,48 @@ public class ReactDiff
 
    private static void thunks(PrologNode a, PrologNode b, PatchSet patch, int index)
    {
-      // FIXME: Stub
-      return;
+      ThunkPatch p = handleThunk(a, b);
+      PatchSet thunkPatch = diff(p.a, p.b);
+      if (patch.size() > 0)
+      {
+         // This nukes any existing patches for this index
+         List<ReactEdit> list = new LinkedList<ReactEdit>();
+         list.add(new ReactEditThunk(null, thunkPatch));
+         patch.put(index, list);
+      }
+   }
+
+   private static ThunkPatch handleThunk(PrologNode a, PrologNode b)
+   {
+      PrologNode renderedA = a;
+      PrologNode renderedB = b;
+      if (isThunk(b))
+         renderedB = renderThunk((PrologThunk)b, a);
+      if (isThunk(a))
+         renderedA = renderThunk((PrologThunk)a, null);
+      return new ThunkPatch(renderedA, renderedB);
+   }
+
+   private static PrologNode renderThunk(PrologThunk thunk, PrologNode previous)
+   {
+      PrologNode renderedThunk = thunk.vNode;
+      if (renderedThunk == null)
+      {
+         thunk.vNode = thunk.render(previous);
+         renderedThunk = thunk.vNode;
+      }
+      return renderedThunk;
+   }
+   
+   private static class ThunkPatch
+   {
+      public PrologNode a;
+      public PrologNode b;
+      public ThunkPatch(PrologNode a, PrologNode b)
+      {
+         this.a = a;
+         this.b = b;
+      }
    }
 
    private static void clearState(PrologNode a, PatchSet patch, int index)
