@@ -249,8 +249,6 @@ public class ReactDiff
       KeyIndex bChildIndex = keyIndex(bChildren);
       HashMap<String,Integer> bKeys = bChildIndex.keys;
       LinkedList<Integer> bFree = bChildIndex.free;
-      System.out.println("Reordering children: " +aChildren + " vs " + bChildren);
-      System.out.println("bFree: " + bFree);
       if (bFree.size() == bChildren.size())
          return new OrderedSet(bChildren, null);
 
@@ -265,23 +263,24 @@ public class ReactDiff
       int freeIndex = 0;
       int freeCount = bFree.size();
       int deletedItems = 0;
-      
+
       for (int i = 0; i < aChildren.size(); i++)
       {
          PrologNode aItem = aChildren.get(i);
          Integer itemIndex;
          String aKey = aItem.getKey();
+         // .push() in javascript adds to the end of the array
          if (aKey != null)
          {
             if (bKeys.containsKey(aKey))
             {
                itemIndex = bKeys.get(aKey);
-               newChildren.push(bChildren.get(itemIndex.intValue()));
+               newChildren.add(bChildren.get(itemIndex.intValue()));
             }
             else
             {
                itemIndex = i - deletedItems++;
-               newChildren.push(null);
+               newChildren.add(null);
             }
          }
          else
@@ -289,12 +288,12 @@ public class ReactDiff
             if (freeIndex < freeCount)
             {
                itemIndex = bFree.get(freeIndex++);
-               newChildren.push(bChildren.get(itemIndex.intValue()));
+               newChildren.add(bChildren.get(itemIndex.intValue()));
             }
             else
             {
                itemIndex = i - deletedItems++;
-               newChildren.push(null);
+               newChildren.add(null);
             }
          }
       }
@@ -306,7 +305,7 @@ public class ReactDiff
          String newKey = newItem.getKey();
          if (newKey != null)
          {
-            if (aKeys.containsKey(newKey))
+            if (!aKeys.containsKey(newKey))
                newChildren.push(newItem);
          }
          else if (j >= lastFreeIndex)
@@ -314,6 +313,7 @@ public class ReactDiff
       }
 
       List<PrologNode> simulate = new LinkedList<PrologNode>();
+      // FIXME: Does this clone do what we want? We need a deep-ish clone, I think...
       simulate.addAll(newChildren.subList(0, newChildren.size()));
       int simulateIndex = 0;
       LinkedList<Remove> removes = new LinkedList<Remove>();

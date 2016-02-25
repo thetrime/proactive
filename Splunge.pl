@@ -4,7 +4,7 @@
 
 render_Splunge(State, _Props, Form):-
         memberchk(order=Order, State),
-        ( Order == swapped->
+        ( Order == default->
             Label1 = top,
             Label2 = bottom,
             Key1 = top,
