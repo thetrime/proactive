@@ -162,7 +162,7 @@ public class Engine
          CompoundTerm c_handler = (CompoundTerm)handler;
          Term[] args = new Term[c_handler.tag.arity + 3];
          for (int i = 0; i < c_handler.tag.arity; i++)
-            args[i] = c_handler.args[i];
+            args[i] = unpack_recursive(c_handler.args[i]);
          args[c_handler.tag.arity+0] = state;
          args[c_handler.tag.arity+1] = props;
          args[c_handler.tag.arity+2] = newState;         
@@ -247,12 +247,26 @@ public class Engine
       }
    }
 
+   // This adds quite a bit of overhead
+   public static Term unpack_recursive(Term value)
+   {
+      if (value instanceof CompoundTerm)
+      {
+         CompoundTerm c = (CompoundTerm)value;
+         if (c.tag.functor.value.equals("$state"))
+            return unpack(c);
+         
+         Term[] args = new Term[c.args.length];
+         for (int i = 0; i < c.args.length; i++)
+            args[i] = unpack_recursive(c.args[i]);
+         CompoundTerm replacement = new CompoundTerm(c.tag.functor.value, args);
+         return replacement;
+      }
+      return value;
+   }
 
-   
-   public static String asString(Object value)
-   {      
-      if (value instanceof AtomTerm)
-         return ((AtomTerm)value).value;
+   public static Term unpack(Term value)
+   {
       if (value instanceof CompoundTerm)
       {
          if (((CompoundTerm)value).tag.functor.value.equals("$state"))
@@ -261,9 +275,9 @@ public class Engine
             CompoundTerm c = (CompoundTerm)value;
             String key = ((AtomTerm)(c.args[0])).value;
             if (TermConstants.emptyListAtom.equals(c.args[1]))
-               return "";
+               return value;
             else if (!(c.args[1] instanceof CompoundTerm))
-               return "";                        
+               return value;                      
             CompoundTerm list = (CompoundTerm)c.args[1];
             while (list.tag.arity == 2 && list.tag.functor.value.equals("."))
             {
@@ -272,14 +286,27 @@ public class Engine
                {
                   CompoundTerm pair = (CompoundTerm)head;
                   if (pair.args[0] instanceof AtomTerm && ((AtomTerm)pair.args[0]).value.equals(key))
-                     return asString(pair.args[1]);
+                     return pair.args[1];
                }
                if (list.args[1] instanceof CompoundTerm)
                   list = (CompoundTerm)list.args[1];
                else
-                  return "";
+                  return value;
             }
          }
+      }
+      return value;
+   }
+   
+   public static String asString(Object value)
+   {      
+      if (value instanceof AtomTerm)
+         return ((AtomTerm)value).value;
+      else if (value instanceof CompoundTerm)
+      {
+         Term unpacked = unpack((CompoundTerm)value);
+         if (unpacked instanceof AtomTerm)
+            return ((AtomTerm)unpacked).value;
       }
       System.out.println("Invalid request for string version of " + value + "(" + value.getClass().getName() + ")");  
       return "";
