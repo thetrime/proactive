@@ -25,6 +25,7 @@ public class React extends JFrame
    {
       synchronized(dispatchQueue)
       {
+         System.out.println("Received patch: " + p);
          dispatchQueue.offer(new TreePatch(p, root, context));
       }
       flushQueue();

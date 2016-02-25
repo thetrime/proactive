@@ -12,9 +12,7 @@ public class Predicate_java_println extends ExecuteOnlyCode
    {
       Environment environment = interpreter.getEnvironment();
       PrologStream stream;
-      if (!(args[0] instanceof AtomTerm))
-         PrologException.typeError(TermConstants.atomAtom, args[0]);
-      System.out.println(((AtomTerm)args[0]).value);
+      System.out.println(args[0]);
       return RC.SUCCESS_LAST;
    }
 }

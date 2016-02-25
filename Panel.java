@@ -67,21 +67,22 @@ public class Panel extends JPanel implements ReactComponent
    }
    public void insertChildBefore(ReactComponent child, ReactComponent sibling)
    {
-      // Remove from any previous child list first      
+      // First rehome the child in the document
       if (child.getParentNode() != null)
          child.getParentNode().removeChild(child);
-      children.add(child);
       child.setParentNode(this);
       child.setOwnerDocument(owner);
-      int index = -1;
-      if (sibling != null)
+      
+      // Now insert the visual component
+      int index = (sibling==null)?-1:children.indexOf(sibling);
+      if (index != -1)
       {
-         // FIXME: This is definitely wrong
-         System.out.println("THIS IS WRONG");
-         System.exit(-1);
+         children.add(index, child);
+         repackChildren();
       }
       else
       {
+         children.add(child);
          addChildToDOM(nextIndex, child);
          nextIndex++;         
       }

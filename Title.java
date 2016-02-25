@@ -30,7 +30,7 @@ public class Title extends JLabel implements ReactComponent
    public void setProperty(String name, Object value)
    {
       if (name.equals("label"))
-         setText(value.toString());
+         setText(Engine.asString(value));
       else if (name.equals("fill"))
          fill = React.getFill(value);
    }

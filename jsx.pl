@@ -5,6 +5,16 @@
 jsx(Content, Vars, Dict, DOM):-
         phrase_from_quasi_quotation(jsx_children(Vars, Dict, [DOM]), Content).
 
+garbage(X,_):-
+        length(Codes, 10),
+        append(Codes, _, X),
+        ( ground(Codes)->
+            atom_codes(Atom, Codes),
+            throw(garbage(Atom))
+        ; otherwise->
+            throw(garbage)
+        ).
+
 jsx_node(Vars, Dict, element(Tag, Attributes, Content)) -->
         optional_spaces,
         `<`,
@@ -16,6 +26,8 @@ jsx_node(Vars, Dict, element(Tag, Attributes, Content)) -->
             jsx_children(Vars, Dict, Content),
             optional_spaces, 
             `</`, jsx_tag(Tag), `>`
+        ; {otherwise}->
+            garbage
         ),
         optional_spaces.
 
@@ -59,25 +71,58 @@ jsx_children(_Vars, _Dict, [])--> [].
 jsx_attributes(Vars, Dict, [Name=Value|Attributes])-->
         jsx_atom(Name), `=`, jsx_value(Value, Vars, Dict),
         ( spaces,
-          jsx_attributes(Attributes)->
+          jsx_attributes(Vars, Dict, Attributes)->
             !
         ; {Attributes = []}
         ).
 jsx_attributes(_, _, [])--> [].
 
-jsx_value(Value, _Vars, Dict)-->
-        `{`, !, variable_name(VarName),
-          {memberchk(VarName=Variable, Dict)},
-          ( `.` ->
-              % Fake maps
-              jsx_atom(Key),
-              {Value = '$state'(Key, Variable)}
-          ; {Variable = Value}
-          ),
-          `}`.
+jsx_value(Value, Vars, Dict)-->
+        `{`, !,
+          jsx_term(Value, Vars, Dict),
+         `}`.
 
 jsx_value(Value, _Vars, _Dict)-->
         quoted_string(Value).
+
+% Variable
+jsx_term(Value, _Vars, Dict)-->
+        optional_spaces,
+        variable_name(VarName),
+        {memberchk(VarName=Variable, Dict)},
+        !,
+        ( `.` ->
+            % Fake maps
+            jsx_atom(Key),
+            {Value = '$state'(Key, Variable)}
+        ; {Variable = Value}
+        ).
+
+% Atom and compound
+jsx_term(Value, Vars, Dict)-->
+        optional_spaces,
+        jsx_atom(Atom),
+        ( `(` ->
+            % compound
+            optional_spaces,
+            jsx_term_args(Args, Vars, Dict),
+            `)`,
+            {Value =.. [Atom|Args]}
+        ; {Value = Atom}
+        ).
+
+jsx_term_args([Value|Args], Vars, Dict)-->
+        optional_spaces,
+        jsx_term(Value, Vars, Dict),
+        !,
+        optional_spaces,
+        ( `,` ->
+            jsx_term_args(Args, Vars, Dict)
+        ; {Args = []}
+        ).
+jsx_term_args([], _, _)--> [].
+        
+        
 
 variable_name(VarName)-->
         optional_spaces, 

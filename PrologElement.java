@@ -107,9 +107,11 @@ public class PrologElement extends PrologNode
 
    public String getAttribute(String key)
    {
-      String value = (String)attributes.get(key);
+      Object value = attributes.get(key);
+      if (value instanceof AtomTerm)
+         return ((AtomTerm)value).value;
       if (value == null)
          return "";
-      return value;
+      return "???";
    }
 }

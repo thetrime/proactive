@@ -154,6 +154,7 @@ public class Engine
          props = propsWrapper.getValue();
       VariableTerm newState = new VariableTerm("NewState");
       Term goal;
+      System.out.println("Handler: " + handler);
       if (handler instanceof AtomTerm)
          goal = new CompoundTerm((AtomTerm)handler, new Term[]{state, props, newState});
       else if (handler instanceof CompoundTerm)

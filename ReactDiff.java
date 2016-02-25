@@ -154,19 +154,19 @@ public class ReactDiff
       {
          if (!(a instanceof PrologText))
          {
-            apply = appendPatch(apply, new ReactEdit(ReactEdit.TEXT, a, b));
+            apply = appendPatch(apply, new ReactEditText(a, b));
             applyClear = true;
          }
          else if (!((PrologText)a).getWholeText().equals(((PrologText)b).getWholeText()))
          {
-            apply = appendPatch(apply, new ReactEdit(ReactEdit.TEXT, a, b));
+            apply = appendPatch(apply, new ReactEditText(a, b));
          }
       }
       else if (isWidget(b))
       {
          if (!isWidget(a))
             applyClear = true;
-         apply = appendPatch(apply, new ReactEdit(ReactEdit.WIDGET, a, b));
+         apply = appendPatch(apply, new ReactEditWidget(a, b));
       }
       if (apply != null)
          patch.put(index, apply);
@@ -195,7 +195,7 @@ public class ReactDiff
             if (rightNode != null)
             {
                // Exccess nodes in b need to be added
-               apply = appendPatch(apply, new ReactEdit(ReactEdit.INSERT, null, rightNode));
+               apply = appendPatch(apply, new ReactEditInsert(rightNode));
             }
          }
          else
@@ -212,7 +212,7 @@ public class ReactDiff
       Moves moves = orderedSet.moves;
       if (moves != null)
       {
-         apply = appendPatch(apply, new ReactEdit(ReactEdit.ORDER, a, moves));
+         apply = appendPatch(apply, new ReactEditOrder(a, moves));
       }
       return apply;
    }
@@ -401,7 +401,7 @@ public class ReactDiff
       }
 
    }
-   private static class Moves
+   public static class Moves
    {
       public List<Remove> removes;
       public List<Insert> inserts;
@@ -412,7 +412,7 @@ public class ReactDiff
       }
    }
 
-   private static class Remove
+   public static class Remove
    {
       public int index;
       public String key;
@@ -423,7 +423,7 @@ public class ReactDiff
       }
    }
    
-   private static class Insert
+   public static class Insert
    {
       public int to;
       public String key;

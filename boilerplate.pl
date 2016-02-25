@@ -3,3 +3,5 @@ memberchk(A, B):-
 
 writeln(X):-
         java_println(X).
+
+otherwise.
