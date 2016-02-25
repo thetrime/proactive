@@ -7,7 +7,7 @@ public class PrologState
     private static PrologState emptyState = new PrologState(TermConstants.emptyListAtom);
     public PrologState(Term t)
     {
-        // FIXME: Check that this is a list, I guess?
+        // DEBUG: Check that this is a list, I guess?
         this.t = t;
     }
     public Term getValue()
