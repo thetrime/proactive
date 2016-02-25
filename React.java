@@ -4,17 +4,17 @@ import java.util.*;
 import javax.swing.*;
 import java.awt.BorderLayout;
 
-public class React extends JFrame
+public class React
 {
    // Prevent instantiation
    private React() {}
    
    static PrologDocument nextDocument = null;
    public static void main(String[] args) throws Exception
-   {
+   {     
       ReactApp app = new ReactApp("http://localhost:8080/react", "App");
       app.setSize(800, 600);
-      app.setDefaultCloseOperation(EXIT_ON_CLOSE);      
+      app.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);      
       app.setVisible(true);
    }
 
