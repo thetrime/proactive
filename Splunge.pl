@@ -20,13 +20,13 @@ render_Splunge(State, _Props, Form):-
         Form = {|jsx||
                <Panel>
                <Title label={State.order}/>
-               <Button key={Key1} label={Label1} onClick={swap_labels(boing(Foo, x))}/>
-               <Button key={Key2} label={Label2} onClick={swap_labels(boing(Bar, State.order))}/>
+               <Button key={Key1} label={Label1} onClick={swap_labels}/>
+               <Button key={Key2} label={Label2} onClick={swap_labels}/>
                </Panel>|}.
 
 getInitialState_Splunge([order=default]).
 
-swap_labels(X, State, _, [order=swapped]):- memberchk(order=default, State), writeln(X).
-swap_labels(X, State, _, [order=default]):- memberchk(order=swapped, State), writeln(X).
+swap_labels(State, _, [order=swapped]):- memberchk(order=default, State).
+swap_labels(State, _, [order=default]):- memberchk(order=swapped, State).
 
 
