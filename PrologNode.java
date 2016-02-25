@@ -7,7 +7,12 @@ public class PrologNode
    String nodeName;
    Map<String, Object> attributes = new HashMap<String, Object>();
    List<PrologNode> children = new LinkedList<PrologNode>();
-  
+
+   public String getKey()
+   {
+      return null;
+   }
+   
    public String getNodeName()
    {
       return nodeName;

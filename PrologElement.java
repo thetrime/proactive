@@ -4,6 +4,7 @@ import java.util.*;
 
 public class PrologElement extends PrologNode
 {
+   private String key = null;
    public PrologElement()
    {
       nodeName = "<special-root>";
@@ -47,6 +48,12 @@ public class PrologElement extends PrologNode
                   Term attrValue = attr.args[1];
                   if (!(attrName instanceof AtomTerm))
                      throw new RuntimeException("Invalid XML tree: Attribute name is not an atom: " + attrName);
+                  if (((AtomTerm)attrName).value.equals("key"))
+                  {
+                     Term keyVal = attrValue.dereference();
+                     if (keyVal instanceof AtomTerm)
+                        this.key = ((AtomTerm)keyVal).value;
+                  }
                   attributes.put(((AtomTerm)attrName).value, attrValue.dereference());
                }               
                else
@@ -105,6 +112,11 @@ public class PrologElement extends PrologNode
       }
    }
 
+   public String getKey()
+   {
+      return key;
+   }
+   
    public String getAttribute(String key)
    {
       Object value = attributes.get(key);
