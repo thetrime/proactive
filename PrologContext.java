@@ -43,6 +43,7 @@ public class PrologContext
       PrologDocument newDocument = engine.render(componentName, state, props);
       PatchSet editScript = ReactDiff.diff(document, newDocument);
       React.queuePatch(editScript, root, this);
+      document = newDocument;
    }
 
    public Engine getEngine()
