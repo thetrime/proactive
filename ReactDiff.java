@@ -36,20 +36,24 @@ public class ReactDiff
 
    private static boolean isThunk(PrologNode n)
    {
+      // FIXME: Stub
       return false;
    }
    private static boolean isWidget(PrologNode n)
    {
+      // FIXME: Stub
       return false;
    }
 
    private static void thunks(PrologNode a, PrologNode b, PatchSet patch, int index)
    {
+      // FIXME: Stub
       return;
    }
 
    private static void clearState(PrologNode a, PatchSet patch, int index)
    {
+      // FIXME: Stub
       return;
    }
  
@@ -85,7 +89,12 @@ public class ReactDiff
          Object bValue = b.get(aKey);
          if (objectsAreEqual(aValue, bValue))
             continue;
-         else // FIXME: There is actually special handling in React for this. We are missing the else-if isObject case. This makes things overly aggressive here
+//         else if (isObject(aValue) && isObject(bValue))
+//         {
+//            FIXME: There is actually special handling in React for this. We are missing the else-if isObject case. This makes things overly aggressive here
+//            System.out.println(">>>>>>>>>>>>> HERE");
+//         }
+         else 
          {
             if (diff == null)
                diff = new HashMap<String, Object>();
@@ -216,11 +225,6 @@ public class ReactDiff
       }
       return apply;
    }
-
-   private static String getKey(PrologNode node)
-   {
-      return null;
-   }
    
    private static KeyIndex keyIndex(List<PrologNode> children)
    {
@@ -230,7 +234,7 @@ public class ReactDiff
       for (Iterator<PrologNode> i = children.iterator(); i.hasNext();)
       {
          PrologNode child = i.next();
-         String key = getKey(child);
+         String key = child.getKey();
          if (key != null)
             keys.put(key, index);
          else
@@ -245,7 +249,8 @@ public class ReactDiff
       KeyIndex bChildIndex = keyIndex(bChildren);
       HashMap<String,Integer> bKeys = bChildIndex.keys;
       LinkedList<Integer> bFree = bChildIndex.free;
-
+      System.out.println("Reordering children: " +aChildren + " vs " + bChildren);
+      System.out.println("bFree: " + bFree);
       if (bFree.size() == bChildren.size())
          return new OrderedSet(bChildren, null);
 
@@ -265,7 +270,7 @@ public class ReactDiff
       {
          PrologNode aItem = aChildren.get(i);
          Integer itemIndex;
-         String aKey = getKey(aItem);
+         String aKey = aItem.getKey();
          if (aKey != null)
          {
             if (bKeys.containsKey(aKey))
@@ -298,7 +303,7 @@ public class ReactDiff
       for (int j = 0; j < bChildren.size(); j++)
       {
          PrologNode newItem = bChildren.get(j);
-         String newKey = getKey(newItem);
+         String newKey = newItem.getKey();
          if (newKey != null)
          {
             if (aKeys.containsKey(newKey))
@@ -314,7 +319,6 @@ public class ReactDiff
       LinkedList<Remove> removes = new LinkedList<Remove>();
       LinkedList<Insert> inserts = new LinkedList<Insert>();
       PrologNode simulateItem;
-
       for (int k = 0; k < bChildren.size(); )
       {
          PrologNode wantedItem = bChildren.get(k);
@@ -326,20 +330,20 @@ public class ReactDiff
             simulateItem = simulate.get(simulateIndex);
          }
 
-         if (simulateItem == null || getKey(simulateItem) != getKey(wantedItem))
+         if (simulateItem == null || simulateItem.getKey() != wantedItem.getKey())
          {
-            String wantedItemKey = getKey(wantedItem);
+            String wantedItemKey = wantedItem.getKey();
             if (wantedItemKey != null)
             {
-               if (simulateItem != null && getKey(simulateItem) != null)
+               if (simulateItem != null && simulateItem.getKey() != null)
                {
-                  if (bKeys.get(getKey(simulateItem)) != k+1)
+                  if (bKeys.get(simulateItem.getKey()) != k+1)
                   {
-                     removes.push(remove(simulate, simulateIndex, getKey(simulateItem)));
+                     removes.push(remove(simulate, simulateIndex, simulateItem.getKey()));
                      simulateItem = simulate.get(simulateIndex);
-                     if (simulateItem == null || getKey(simulateItem) != getKey(wantedItem))
+                     if (simulateItem == null || simulateItem.getKey() != wantedItem.getKey())
                      {
-                        inserts.push(new Insert(getKey(wantedItem), k));
+                        inserts.push(new Insert(wantedItem.getKey(), k));
                      }
                      else
                      {
@@ -348,18 +352,18 @@ public class ReactDiff
                   }
                   else
                   {
-                     inserts.push(new Insert(getKey(wantedItem), k));
+                     inserts.push(new Insert(wantedItem.getKey(), k));
                   }
                }
                else
                {
-                  inserts.push(new Insert(getKey(wantedItem), k));
+                  inserts.push(new Insert(wantedItem.getKey(), k));
                }
                k++;
             }
-            else if (simulateItem != null && getKey(simulateItem) != null)
+            else if (simulateItem != null && simulateItem.getKey() != null)
             {
-               removes.push(remove(simulate, simulateIndex, getKey(simulateItem)));
+               removes.push(remove(simulate, simulateIndex, simulateItem.getKey()));
             }
          }
          else
@@ -368,13 +372,12 @@ public class ReactDiff
             k++;
          }
       }
-
       while (simulateIndex < simulate.size())
       {
          simulateItem = simulate.get(simulateIndex);
          String simulateItemKey = null;
          if (simulateItem != null)
-            simulateItemKey = getKey(simulateItem);
+            simulateItemKey = simulateItem.getKey();
          removes.push(remove(simulate, simulateIndex, simulateItemKey));
       }
 
@@ -386,7 +389,7 @@ public class ReactDiff
 
    public static Remove remove(List<PrologNode> arr, int index, String key)
    {
-      arr.removeAll(arr.subList(index, 1));
+      arr.remove(arr.get(index));
       return new Remove(index, key);
    }
 
@@ -433,8 +436,6 @@ public class ReactDiff
          this.key = key;
       }
    }
-
-
    
    private static class KeyIndex
    {
@@ -446,14 +447,4 @@ public class ReactDiff
          this.free = free;
       }
    }   
-
 }
-
-/*
- var h = require('virtual-dom/h')
- var x = require('virtual-dom/vtree/diff')(h('Panel', {}, [h('Title', {label:"This is a title specified in XML"}, []), h('Field', {label:"CP Code"}, []), h('Field', {label:"CP Account ID"}, []), h('Button', {label:"Submit"}, [])]), h('Panel', {}, [h('Panel', {}, [h('Title', {label:"This is a title specified in XML"}, []), h('Field', {label:"CP Code"}, []), h('Field', {label:"CP Account ID"}, [])]), h('Button', {label:"Submit"}, [])]));
-*/
-
-
-// js gets 2, 2, 7, 7
-// We get 6, 6, 6, 7, 7
