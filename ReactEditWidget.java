@@ -9,6 +9,7 @@ public class ReactEditWidget extends ReactEdit
 
    public ReactComponent apply(ReactComponent domNode) throws Exception
    {
+      // FIXME: Implement
       throw(new RuntimeException("WIDGET patch not implemented"));
    }
    
