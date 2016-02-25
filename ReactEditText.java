@@ -9,8 +9,22 @@ public class ReactEditText extends ReactEdit
 
    public ReactComponent apply(ReactComponent domNode) throws Exception
    {
-      // FIXME: Implement!
-      throw(new RuntimeException("TEXT patch not implemented"));
+      /*
+      if (domNode instanceof ReactTextComponent)
+      {
+         ((ReactTextComponent)domNode).replaceData(patch);
+         return domNode;
+      }
+      */
+      ReactComponent parentNode = domNode.getParentNode();
+      if (parentNode != null)
+      {
+         ReactComponent newNode = ReactComponentFactory.instantiateNode(patch, parentNode.getContext());
+         if (!newNode.equals(domNode))
+            parentNode.replaceChild(newNode, domNode);
+         return newNode;
+      }
+      return domNode;
    }
    
    public String toString()

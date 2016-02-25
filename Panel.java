@@ -63,7 +63,7 @@ public class Panel extends JPanel implements ReactComponent
             repackChildren();
       }
       else if (name.equals("fill"))
-         fill = React.getFill(value);
+         fill = context.getFill(value);
    }
    public void insertChildBefore(ReactComponent child, ReactComponent sibling)
    {

@@ -46,6 +46,23 @@ public class PrologContext
       document = newDocument;
    }
 
+   // this is just a convenience method
+   public int getFill(Object fillSpec)
+   {
+      if (fillSpec instanceof String)
+      {
+         String fill = (String)fillSpec;
+         if (fill.equals("horizontal"))
+            return java.awt.GridBagConstraints.HORIZONTAL;
+         else if (fill.equals("vertical"))
+            return java.awt.GridBagConstraints.VERTICAL;
+         else if (fill.equals("both"))
+            return java.awt.GridBagConstraints.BOTH;
+      }
+      return java.awt.GridBagConstraints.NONE;      
+   }
+
+   
    public Engine getEngine()
    {
       return engine;

@@ -26,6 +26,6 @@ public class Field extends JTextField implements ReactComponent
    public void setProperty(String name, Object value)
    {
       if (name.equals("fill"))
-         fill = React.getFill(value);
+         fill = context.getFill(value);
    }
 }

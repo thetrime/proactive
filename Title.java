@@ -32,6 +32,6 @@ public class Title extends JLabel implements ReactComponent
       if (name.equals("label"))
          setText(Engine.asString(value));
       else if (name.equals("fill"))
-         fill = React.getFill(value);
+         fill = context.getFill(value);
    }
 }

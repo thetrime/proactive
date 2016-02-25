@@ -83,23 +83,7 @@ public class React extends JFrame
          }
       }
    }
-   
-   // this is just a convenience method
-   // FIXME: It might also be wrong, since fillSpec might be a term?
-   public static int getFill(Object fillSpec)
-   {
-      if (fillSpec instanceof String)
-      {
-         String fill = (String)fillSpec;
-         if (fill.equals("horizontal"))
-            return java.awt.GridBagConstraints.HORIZONTAL;
-         else if (fill.equals("vertical"))
-            return java.awt.GridBagConstraints.VERTICAL;
-         else if (fill.equals("both"))
-            return java.awt.GridBagConstraints.BOTH;
-      }
-      return java.awt.GridBagConstraints.NONE;      
-   }
+    
 
    public static void addCodeChangeListener(String url, String rootElementId, CodeChangeListener listener) throws Exception
    {

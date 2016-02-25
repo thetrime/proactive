@@ -55,7 +55,7 @@ public class Button extends JButton implements ReactComponent
       if (name.equals("label"))
          setText(Engine.asString(value));
       else if (name.equals("fill"))
-         fill = React.getFill(value);
+         fill = getContext().getFill(value);
       else if (name.equals("onClick"))
          setClickHandler(value);
    }
