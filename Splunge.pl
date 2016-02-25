@@ -15,8 +15,6 @@ render_Splunge(State, _Props, Form):-
             Label1 = bottom,
             Label2 = top
         ),
-        Foo = foox,
-        Bar = barx,
         Form = {|jsx||
                <Panel>
                <Title label={State.order}/>
@@ -26,7 +24,7 @@ render_Splunge(State, _Props, Form):-
 
 getInitialState_Splunge([order=default]).
 
-swap_labels(State, _, [order=swapped]):- memberchk(order=default, State).
+swap_labels(State, _, [order=swapped]):- memberchk(order=default, State), on_server(member(A, [a,b,c])), writeln(A), A == c.
 swap_labels(State, _, [order=default]):- memberchk(order=swapped, State).
 
 

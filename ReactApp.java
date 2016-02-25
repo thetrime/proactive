@@ -14,7 +14,7 @@ public class ReactApp extends JFrame implements ReactComponent, CodeChangeListen
    public ReactApp(String URL, String rootElementId) throws Exception
    {
       super("React Test");
-      engine = new Engine(URL + "/" + rootElementId);
+      engine = new Engine(URL + "/component/" + rootElementId);
       this.URL = URL;
       this.rootElementId = rootElementId;
       React.addCodeChangeListener(URL, rootElementId, this);

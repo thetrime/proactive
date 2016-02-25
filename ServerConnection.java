@@ -28,7 +28,7 @@ public class ServerConnection extends Thread
 
    private void reconnect() throws IOException
    {
-      connection = new URL(URL).openConnection();
+      connection = new URL(URL + "/listen").openConnection();
       input = new BufferedReader(new InputStreamReader(connection.getInputStream()));
    }
 

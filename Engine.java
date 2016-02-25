@@ -1,4 +1,6 @@
 import gnu.prolog.database.*;
+//import gnu.prolog.io.parser.*;
+//import gnu.prolog.io.parser.gen.*;
 import gnu.prolog.io.*;
 import gnu.prolog.term.*;
 import gnu.prolog.vm.*;
@@ -26,6 +28,7 @@ public class Engine
                                         AtomTerm.get(URL)));
       interpreter = env.createInterpreter();
       installBuiltin("java_println", 1);
+      installBuiltin("on_server", 1);
       System.out.println("Checking for load errors...");
       List<PrologTextLoaderError> errors = env.getLoadingErrors();
       for (PrologTextLoaderError error : errors)
@@ -311,4 +314,81 @@ public class Engine
       System.out.println("Invalid request for string version of " + value + "(" + value.getClass().getName() + ")");  
       return "";
    }
+
+   public static class ExecutionState
+   {
+      public enum RC
+      {
+         FAIL, EXCEPTION, SUCCESS_LAST, SUCCESS;
+      }
+      private RC state;
+      private URLConnection connection;
+      private Environment environment;
+      //private TermParser input;
+      
+      ReadOptions options;
+      private TermReader input;
+      private Term exception;
+      private Term response;
+      private OutputStream output;
+      public ExecutionState(Term t, Environment e) throws IOException         
+      {
+         this.environment = e;
+         options = new ReadOptions(e.getOperatorSet());
+         connection = new URL("http://localhost:8080/react/goal").openConnection();
+         connection.setDoOutput(true);
+         output = connection.getOutputStream();
+         String goal = t.toString() + ".\n";
+         output.write(goal.getBytes());
+         output.flush();
+         input = new TermReader(new BufferedReader(new InputStreamReader(connection.getInputStream())), e);
+      }
+      public Term getException()
+      {
+         return exception;
+      }
+      public Term getResponse()
+      {
+         return response;
+      }
+      public RC nextSolution() throws IOException, gnu.prolog.io.parser.gen.ParseException
+      {
+         output.write(';');
+         output.flush();
+         System.out.println("Flushed");
+         System.out.println("About to read");
+         CompoundTerm reply = (CompoundTerm)input.readTerm(options); // FIXME: need options!
+         System.out.println("Read: " + reply);
+         if (reply.tag.functor.value.equals("fail"))
+         {
+            input.close();
+            state = RC.FAIL;
+         }
+         else if (reply.tag.functor.value.equals("exception"))
+         {
+            input.close();
+            state = RC.EXCEPTION;
+            exception = reply.args[0];
+         }
+         else
+         {
+            if (reply.tag.functor.value.equals("cut"))
+            {
+               input.close();
+               state = RC.SUCCESS_LAST;
+            }
+            else
+               state = RC.SUCCESS;
+            response = reply.args[0];
+         }
+         return state;
+      }
+   }
+   
+   public static ExecutionState prepareGoal(Term t, Environment e) throws IOException
+   {
+      return new ExecutionState(t, e);
+   }
+
+
 }
