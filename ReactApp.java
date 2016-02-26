@@ -4,16 +4,16 @@ import javax.swing.*;
 import java.util.*;
 
 
-public class ReactApp extends JFrame implements ReactComponent, CodeChangeListener
+public class ReactApp extends ReactComponent implements CodeChangeListener
 {
    private Engine engine = null;
-   private PrologContext context = null;
    List<ReactComponent> children = new LinkedList<ReactComponent>();
    String URL = null;
    String rootElementId = null;
+   JFrame frame = new JFrame("React Test");
    public ReactApp(String URL, String rootElementId) throws Exception
    {
-      super("React Test");
+      super(null);
       engine = new Engine(URL, rootElementId);
       this.URL = URL;
       this.rootElementId = rootElementId;
@@ -27,8 +27,8 @@ public class ReactApp extends JFrame implements ReactComponent, CodeChangeListen
       // but the global domRoot is immutable. In reality, we should only EVER have one
       // child here, otherwise Swing goes a bit... well, weird.
       
-      getContentPane().setBackground(java.awt.Color.GREEN);
-      getContentPane().setLayout(new BorderLayout());
+      frame.getContentPane().setBackground(java.awt.Color.GREEN);
+      frame.getContentPane().setLayout(new BorderLayout());
       
       ReactComponent contentPane = new RootPanel(rootElementId, engine);
       insertChildBefore(contentPane, null);
@@ -51,35 +51,39 @@ public class ReactApp extends JFrame implements ReactComponent, CodeChangeListen
       }
    }
 
-   public PrologContext getContext() { return context; }
    public void insertChildBefore(ReactComponent child, ReactComponent sibling)
    {      
       if (sibling == null)
       {
          child.setParentNode(this);
          children.add(child);
-         getContentPane().add((Component)child, BorderLayout.CENTER);
+         frame.getContentPane().add(child.getAWTComponent(), BorderLayout.CENTER);
          context = child.getContext();
       }
-      validate();
-      repaint();
+      frame.validate();
+      frame.repaint();
    }
    public void removeChild(ReactComponent child)
    {
       context = null;
       children.remove(child);
-      getContentPane().remove((Component)child);
+      frame.getContentPane().remove(child.getAWTComponent());
    }  
-   public ReactComponent getParentNode() { return this; }
    public void replaceChild(ReactComponent newNode, ReactComponent oldNode)
    {
       removeChild(oldNode);
       insertChildBefore(newNode, null);
    }
-   public void setParentNode(ReactComponent parent) {}
-   public ReactComponent getOwnerDocument() { return this; }
-   public void setOwnerDocument(ReactComponent owner) {}
-   public List<ReactComponent> getChildNodes() { return children; }
-   public int getFill() { return 0; }
-   public void setProperty(String name, Object value) {}
+   public List<ReactComponent> getChildNodes()
+   {
+      return children;
+   }
+   public void setProperty(String name, Object value)
+   {
+   }
+
+   public JFrame getAWTComponent()
+   {
+      return frame;
+   }
 }

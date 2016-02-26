@@ -1,31 +1,21 @@
 import javax.swing.*;
 import java.util.List;
-import java.awt.GridBagConstraints;
+import java.awt.Component;
 
-public class Field extends JTextField implements ReactComponent 
+public class Field extends ReactLeafComponent 
 {
-   private int fill = GridBagConstraints.NONE;
-   private ReactComponent parent;
-   private ReactComponent owner;
-   private PrologContext context;
+   private JTextField field = new JTextField("A field");
    public Field(PrologNode n, PrologContext context)
    {
-      super("A field");
-      this.context = context;
+      super(context);
    }
-   public PrologContext getContext() {return context;}
-   public void insertChildBefore(ReactComponent child, ReactComponent sibling) {}
-   public void removeChild(ReactComponent child) {}
-   public ReactComponent getParentNode() { return parent; }
-   public void setParentNode(ReactComponent parent) { this.parent = parent; }
-   public ReactComponent getOwnerDocument() { return owner; }
-   public void setOwnerDocument(ReactComponent owner) { this.owner = owner; }
-   public void replaceChild(ReactComponent newChild, ReactComponent oldChild) {}
-   public List<ReactComponent> getChildNodes() { return null; }
-   public int getFill() { return fill; }
    public void setProperty(String name, Object value)
    {
       if (name.equals("fill"))
          fill = context.getFill(value);
+   }
+   public Component getAWTComponent()
+   {
+      return field;
    }
 }

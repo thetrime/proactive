@@ -391,6 +391,7 @@ public class Engine
                else
                   state = RC.SUCCESS;
                response = c.args[0];
+               System.out.println("Got: " + response);
             }
          }
          return state;

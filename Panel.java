@@ -4,48 +4,34 @@ import java.util.List;
 import java.util.Iterator;
 import java.util.LinkedList;
 
-public class Panel extends JPanel implements ReactComponent 
+public class Panel extends ReactComponent 
 {
    private static final int HORIZONTAL = 0;
    private static final int VERTICAL = 1;
    int nextIndex = 0;
    int orientation = VERTICAL;
-   private ReactComponent parent = null;
-   private ReactComponent owner = null;
    private java.util.List<ReactComponent> children = new LinkedList<ReactComponent>();
    private GridBagLayout layoutManager = new GridBagLayout();
-   private String id;
-   private int fill = GridBagConstraints.NONE;
-   protected PrologContext context;
-
+   private JPanel panel = new JPanel();
    protected Panel()
    {
-      this.id = "<default node>";
-      setLayout(layoutManager);
-      setBackground(Color.RED);
+      super(null);
+      panel.setLayout(layoutManager);
+      panel.setBackground(Color.RED);
       fill = GridBagConstraints.BOTH;
-      setBorder(BorderFactory.createLineBorder(Color.BLUE));
-   }
-   public Panel(String id)
-   {
-      this.id = id;
-      setBackground(Color.RED);
-      setLayout(layoutManager);
-      fill = GridBagConstraints.BOTH;
-      setBorder(BorderFactory.createLineBorder(Color.BLACK));
+      panel.setBorder(BorderFactory.createLineBorder(Color.BLUE));
    }
    public Panel(PrologNode n, PrologContext context) throws Exception
    {
-      id = "<generated from " + n + ">";
-      setBackground(Color.GRAY);
-      setLayout(layoutManager);
+      super(context);
+      panel.setBackground(Color.GRAY);
+      panel.setLayout(layoutManager);
       for (Iterator<PrologNode> i = n.getChildren().iterator(); i.hasNext();)
       {
          ReactComponent component = ReactComponentFactory.instantiateNode(i.next(), context);
          insertChildBefore(component, null);
       }
-      setBorder(BorderFactory.createLineBorder(Color.BLACK));
-      this.context = context;
+      panel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
    }
    public void setProperty(String name, Object value)
    {
@@ -101,63 +87,35 @@ public class Panel extends JPanel implements ReactComponent
          xweight = 1;
       if (childFill == GridBagConstraints.VERTICAL || childFill == GridBagConstraints.BOTH)
          yweight = 1;
-      add((Component)child, new GridBagConstraints(x, y, 1, 1, xweight, yweight, GridBagConstraints.CENTER, childFill, new Insets(0,0,0,0), padx, pady));
+      panel.add(child.getAWTComponent(), new GridBagConstraints(x, y, 1, 1, xweight, yweight, GridBagConstraints.CENTER, childFill, new Insets(0,0,0,0), padx, pady));
    }
    
    private void repackChildren()
    {
-      removeAll();
+      panel.removeAll();
       int index = 0;
       for (Iterator<ReactComponent> i = children.iterator(); i.hasNext();)
          addChildToDOM(index++, i.next());
-   }
-   
-   public String toString()
-   {
-      return "Panel[" + id + "]";
-   }
+   }   
 
    public void removeChild(ReactComponent child)
    {
       children.remove(child);
-      remove((Component)child);
+      panel.remove(child.getAWTComponent());
    }
 
-   public ReactComponent getParentNode()
-   {
-      return parent;
-   }
-
-   public void setParentNode(ReactComponent parent)
-   {
-      this.parent = parent;
-   }
-
-   public ReactComponent getOwnerDocument()
-   {
-      return owner;
-   }
-
-   public void setOwnerDocument(ReactComponent owner)
-   {
-      this.owner = owner;
-      for (ReactComponent child : children)
-         child.setOwnerDocument(owner);
-   }
-
-   
    public void replaceChild(ReactComponent newChild, ReactComponent oldChild)
    {
       int i = children.indexOf(oldChild);
-      GridBagConstraints constraints = layoutManager.getConstraints((Component)oldChild);
+      GridBagConstraints constraints = layoutManager.getConstraints(oldChild.getAWTComponent());
       // We cannot call removeChild here since the list of children will get truncated
       // and we want to swap in-place
       children.set(i, newChild);
-      remove((Component)oldChild);
+      panel.remove(oldChild.getAWTComponent());
       newChild.setParentNode(this);
       // We may have to edit the constraints if the child has a different fill
       constraints.fill = newChild.getFill();
-      add((Component)newChild, constraints);
+      panel.add(newChild.getAWTComponent(), constraints);
    }
 
    public List<ReactComponent> getChildNodes()
@@ -165,6 +123,8 @@ public class Panel extends JPanel implements ReactComponent
       return children;
    }
 
-   public int getFill() { return fill; }
-   public PrologContext getContext() {return context;}
+   public Component getAWTComponent()
+   {
+      return panel;
+   }
 }

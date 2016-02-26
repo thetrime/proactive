@@ -13,9 +13,10 @@ public class React
    public static void main(String[] args) throws Exception
    {     
       ReactApp app = new ReactApp("http://localhost:8080/react", "App");
-      app.setSize(800, 600);
-      app.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);      
-      app.setVisible(true);
+      JFrame frame = app.getAWTComponent();
+      frame.setSize(800, 600);
+      frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);      
+      frame.setVisible(true);
    }
 
    
