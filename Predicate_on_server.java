@@ -26,7 +26,7 @@ public class Predicate_on_server extends ExecuteOnlyCode
          {
             rc = state.nextSolution();
          }
-         catch (gnu.prolog.io.parser.gen.ParseException | IOException e)
+         catch (InterruptedException e)
          {
             throw new PrologException(AtomTerm.get("io_error"), e);
          }
@@ -64,7 +64,7 @@ public class Predicate_on_server extends ExecuteOnlyCode
          {
             bi.state = Engine.prepareGoal(args[0], environment);
          }
-         catch (IOException e)
+         catch (IOException e )
          {
             throw new PrologException(AtomTerm.get("io_error"), e);
          }

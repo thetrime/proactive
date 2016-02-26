@@ -8,6 +8,12 @@ import java.util.*;
 import java.io.*;
 import java.net.*;
 import java.lang.reflect.*;
+import java.util.concurrent.*;
+
+// See https://github.com/TooTallNate/Java-WebSocket
+import org.java_websocket.client.WebSocketClient;
+import org.java_websocket.drafts.Draft_17;
+import org.java_websocket.handshake.ServerHandshake;
 
 public class Engine
 {
@@ -315,7 +321,7 @@ public class Engine
       return "";
    }
 
-   public static class ExecutionState
+   public static class ExecutionState extends WebSocketClient
    {
       public enum RC
       {
@@ -327,21 +333,17 @@ public class Engine
       //private TermParser input;
       
       ReadOptions options;
-      private TermReader input;
       private Term exception;
       private Term response;
-      private OutputStream output;
-      public ExecutionState(Term t, Environment e) throws IOException         
+      LinkedBlockingQueue<Term> replies = new LinkedBlockingQueue<Term>();
+      public ExecutionState(URI uri, Term t, Environment e) throws IOException, InterruptedException
       {
+         super(uri, new Draft_17());
          this.environment = e;
          options = new ReadOptions(e.getOperatorSet());
-         connection = new URL("http://localhost:8080/react/goal").openConnection();
-         connection.setDoOutput(true);
-         output = connection.getOutputStream();
+         connectBlocking();
          String goal = t.toString() + ".\n";
-         output.write(goal.getBytes());
-         output.flush();
-         input = new TermReader(new BufferedReader(new InputStreamReader(connection.getInputStream())), e);
+         send(goal);
       }
       public Term getException()
       {
@@ -351,44 +353,87 @@ public class Engine
       {
          return response;
       }
-      public RC nextSolution() throws IOException, gnu.prolog.io.parser.gen.ParseException
+      public RC nextSolution() throws InterruptedException
       {
-         output.write(';');
-         output.flush();
-         System.out.println("Flushed");
-         System.out.println("About to read");
-         CompoundTerm reply = (CompoundTerm)input.readTerm(options); // FIXME: need options!
-         System.out.println("Read: " + reply);
-         if (reply.tag.functor.value.equals("fail"))
+         send(";");
+         Term reply = replies.take();
+         if (reply instanceof AtomTerm && ((AtomTerm)reply).value.equals("fail"))
          {
-            input.close();
+            close();
             state = RC.FAIL;
          }
-         else if (reply.tag.functor.value.equals("exception"))
+         else if (reply instanceof CompoundTerm)
          {
-            input.close();
-            state = RC.EXCEPTION;
-            exception = reply.args[0];
-         }
-         else
-         {
-            if (reply.tag.functor.value.equals("cut"))
+            CompoundTerm c = (CompoundTerm)reply;
+            if (c.tag.functor.value.equals("exception"))
             {
-               input.close();
-               state = RC.SUCCESS_LAST;
+               close();
+               state = RC.EXCEPTION;
+               exception = c.args[0];
             }
             else
-               state = RC.SUCCESS;
-            response = reply.args[0];
+            {
+               if (c.tag.functor.value.equals("cut"))
+               {
+                  close();
+                  state = RC.SUCCESS_LAST;
+               }
+               else
+                  state = RC.SUCCESS;
+               response = c.args[0];
+            }
          }
          return state;
       }
+   
+      @Override
+      public void onMessage(String message)
+      {
+         try
+         {
+            replies.put(TermReader.stringToTerm(options, message, environment));
+         }
+         catch(InterruptedException | ParseException e)
+         {
+            // FIXME: Should actually poke an exception term onto the queue, but... that could just raise another exception. hmm.
+            e.printStackTrace();
+         }
+      }
+      
+      @Override
+      public void onOpen( ServerHandshake handshake )
+      {
+         System.out.println( "opened connection" );
+      }
+      
+      @Override
+      public void onClose( int code, String reason, boolean remote )
+      {
+         System.out.println( "closed connection" );
+      }
+      
+      @Override
+      public void onError( Exception ex )
+      {
+         ex.printStackTrace();
+      }      
    }
    
    public static ExecutionState prepareGoal(Term t, Environment e) throws IOException
    {
-      return new ExecutionState(t, e);
-   }
+      try
+      {
+         // FIXME: Get this from the environment, then we do not have an exception to deal with
+         URI u = new URI( "ws://localhost:8080/react/goal");
+         return new ExecutionState(u, t, e);
+      }
+      catch(Exception f)
+      {
+         f.printStackTrace();
+         return null;
+      }
 
+   }
+    
 
 }
