@@ -24,7 +24,12 @@ render_Splunge(State, _Props, Form):-
 
 getInitialState_Splunge([order=default]).
 
-swap_labels(State, _, [order=swapped]):- memberchk(order=default, State), on_server(member(A, [a,b,c])), writeln(A), A == d.
+swap_labels(State, _, [order=swapped]):-
+        memberchk(order=default, State),
+        some_local_goal,
+        on_server(member(A, [a,b,c])), writeln(A), A == d.
 swap_labels(State, _, [order=default]):- memberchk(order=swapped, State).
 
 
+some_local_goal:-
+        some_exported_goal.

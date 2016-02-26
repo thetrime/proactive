@@ -1,6 +1,4 @@
 import gnu.prolog.database.*;
-//import gnu.prolog.io.parser.*;
-//import gnu.prolog.io.parser.gen.*;
 import gnu.prolog.io.*;
 import gnu.prolog.term.*;
 import gnu.prolog.vm.*;
@@ -17,34 +15,34 @@ import org.java_websocket.handshake.ServerHandshake;
 
 public class Engine
 {
-   private Environment env;
+   private ReactEnvironment env;
    private Interpreter interpreter;
-   private String URL;
+   private String componentURL;
+   private String rootElementId;
    private URI goalURI;
    public Engine(String baseURL, String rootElementId) throws Exception
    {
       this.goalURI = new URI(baseURL + "/goal");
-      this.URL = baseURL + "/component/" + rootElementId;
+      this.componentURL = baseURL + "/component/";
+      this.rootElementId = rootElementId;
       make();
-   }
-
-   public class ReactEnvironment extends Environment
-   {
-      public Engine getEngine()
-      {
-         return Engine.this;
-      }
-   }
+   }   
 
    public void make() throws Exception
    {
-      env = new ReactEnvironment();
-      env.ensureLoaded(AtomTerm.get("boilerplate.pl"));
-      env.ensureLoaded(new CompoundTerm(CompoundTermTag.get("url", 1),
-                                        AtomTerm.get(URL)));
-      interpreter = env.createInterpreter();
+      env = new ReactEnvironment(this);
       installBuiltin("java_println", 1);
       installBuiltin("on_server", 1);
+      installBuiltin("module", 2);
+      env.ensureLoaded(AtomTerm.get("boilerplate.pl"));
+
+      interpreter = env.createInterpreter();      
+      env.ensureLoaded(componentURL, rootElementId);
+      // FIXME: hard-coded
+      env.runInitialization(interpreter);
+//      env.ensureLoaded(componentURL, "Splunge");
+//      env.runInitialization(interpreter);
+      env.linkModules();
       System.out.println("Checking for load errors...");
       List<PrologTextLoaderError> errors = env.getLoadingErrors();
       for (PrologTextLoaderError error : errors)

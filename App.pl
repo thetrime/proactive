@@ -1,4 +1,4 @@
-:-module('App', []).
+:-module('App', [some_exported_goal/0]).
 
 :- quasi_quotation_syntax(jsx).
 
@@ -23,3 +23,7 @@ get_some_fields(Fields):-
                 Fields).
 
 getInitialState_App([label=boing]).
+
+
+some_exported_goal:-
+        writeln('Yes, this is dog').
