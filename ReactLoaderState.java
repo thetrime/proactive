@@ -6,15 +6,19 @@ import java.util.*;
 
 public class ReactLoaderState extends PrologTextLoaderState
 {
-   protected Module module = new ReactModule("user", new LinkedList<CompoundTermTag>());
+   protected ReactModule module = new ReactUserModule();
    private final Object currentPredicateLock = new Object();
    
    public ReactLoaderState(ReactEnvironment env)
-   {
+   {      
       super(env);
    }
 
 
+   public void setModule(ReactModule module)
+   {
+      this.module = module;
+   }
    
    @Override
    public void addInitialization(PrologTextLoader loader, Term term)
@@ -73,7 +77,7 @@ public class ReactLoaderState extends PrologTextLoaderState
 
    // Yuck :(
    @Override
-   public Module getModule()
+   public ReactModule getModule()
    {
       return module;
    }
@@ -179,7 +183,6 @@ public class ReactLoaderState extends PrologTextLoaderState
    @Override
    public void addClause(PrologTextLoader loader, Term term)
    {
-      System.out.println("Loading " + term + " into " + module);
       Term head = term;
       CompoundTermTag headTag;
       if (term instanceof CompoundTerm && ((CompoundTerm) term).tag == TermConstants.clauseTag)
@@ -199,7 +202,6 @@ public class ReactLoaderState extends PrologTextLoaderState
          logError(loader, "predicate head is not a callable term.");
          return;
       }
-
       synchronized (currentPredicateLock)
       {
          if (currentPredicate == null || headTag != currentPredicate.getTag())
@@ -241,7 +243,6 @@ public class ReactLoaderState extends PrologTextLoaderState
             logError(loader, ex.getMessage());
          }
       }
-
    }
 
    @Override

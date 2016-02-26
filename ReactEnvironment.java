@@ -7,14 +7,16 @@ import java.util.*;
 public class ReactEnvironment extends Environment
 {
    private Engine engine;
-   public String currentModule = "user";
+   public Stack<String> moduleStack = new Stack<String>();
    private Map<String, ReactModule> modules;
    public ReactEnvironment(Engine engine)
    {
       modules = new HashMap<String, ReactModule>();
-      // In reality, EVERYTHING in user is exported...
-      ReactModule userModule = new ReactModule("user", new LinkedList<CompoundTermTag>());
+      // The user module exports everything by default
+      ReactModule userModule = ((ReactLoaderState)prologTextLoaderState).getModule();
       modules.put("user", userModule);
+      moduleStack.push("user");
+      ((ReactLoaderState)prologTextLoaderState).setModule(userModule);
       this.engine = engine;
    }
    
@@ -23,11 +25,21 @@ public class ReactEnvironment extends Environment
       return engine;
    }
 
+   public void pushModule(String moduleName)
+   {
+      moduleStack.push(moduleName);
+   }
+
+   public void popModule()
+   {
+      moduleStack.pop();
+   }
+
    @Override
    public ReactModule getModule()
    {
-      System.out.println("Returning module for " + currentModule + ": " + modules.get("user"));
-      return modules.get(currentModule);
+      //System.out.println("Returning module " + moduleStack.peek());
+      return modules.get(moduleStack.peek());
    }
 
    @Override
@@ -39,7 +51,6 @@ public class ReactEnvironment extends Environment
    public synchronized void ensureLoaded(String baseURI, String component)
    {      
       prologTextLoaderState.ensureLoaded(new CompoundTerm(CompoundTermTag.get("url", 1), AtomTerm.get(baseURI + component)));
-      // Now find solutions to require() and recursively load them too? In reality, we can load a single file and declare many modules inside it
    }
 
    public ReactModule startNewModule(String name, List<CompoundTermTag> exports)
@@ -47,11 +58,20 @@ public class ReactEnvironment extends Environment
       System.out.println("Module: " + name + " with exports " + exports);
       ReactModule newModule = new ReactModule(name, exports);
       modules.put(name, newModule);
-      currentModule = name;
+      moduleStack.push(name);
+      try
+      {
+         // Enable us to get out later!
+         installBuiltin("with_module", 2);
+      }
+      catch(Exception surelyNot)
+      {
+         surelyNot.printStackTrace();
+      }
       return newModule;
    }
 
-   public void linkModules()
+   public void linkModules() throws PrologException
    {
       for (Map.Entry<String, ReactModule> exporter : modules.entrySet())
       {
@@ -59,8 +79,39 @@ public class ReactEnvironment extends Environment
          {
             if (exporter.getKey().equals(importer.getKey()))
                continue;
-            importer.getValue().importPredicates(exporter.getValue());
+            if (importer.getKey().equals("user"))
+               continue;
+            System.out.println("================== importing " + exporter.getValue() + " into " + importer.getValue());            
+            importer.getValue().importPredicates(exporter.getValue(), this);
          }
       }
+      
+      for (Map.Entry<String, ReactModule> exporter : modules.entrySet())
+      {
+         if (exporter.getKey().equals("user"))
+             continue;
+         ReactModule importer = modules.get("user");
+         importer.importPredicates(exporter.getValue(), this);
+      }
+      // Ok, now we can go back to user
+      moduleStack = new Stack<String>();
+      moduleStack.push("user");
    }
+
+   public void installBuiltin(String functor, int arity) throws PrologException
+   {
+      Module module = getModule();
+      CompoundTermTag head = CompoundTermTag.get(AtomTerm.get(functor), arity);
+      Predicate p = module.createDefinedPredicate(head);
+      p.setType(Predicate.TYPE.BUILD_IN);
+      if (functor.equals(":"))
+      {
+         System.out.println("Loading :/2");
+         p.setJavaClassName("Predicate_colon");
+      }
+      else
+         p.setJavaClassName("Predicate_" + functor);
+      PrologCode q = loadPrologCode(head);
+   }
+   
 }

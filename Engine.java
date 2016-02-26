@@ -31,11 +31,11 @@ public class Engine
    public void make() throws Exception
    {
       env = new ReactEnvironment(this);
-      installBuiltin("java_println", 1);
-      installBuiltin("on_server", 1);
-      installBuiltin("module", 2);
+      env.installBuiltin("java_println", 1);
+      env.installBuiltin("on_server", 1);
+      env.installBuiltin("module", 2);
+      env.installBuiltin(":", 2);
       env.ensureLoaded(AtomTerm.get("boilerplate.pl"));
-
       interpreter = env.createInterpreter();      
       env.ensureLoaded(componentURL, rootElementId);
       // FIXME: hard-coded
@@ -43,30 +43,21 @@ public class Engine
 //      env.ensureLoaded(componentURL, "Splunge");
 //      env.runInitialization(interpreter);
       env.linkModules();
+      //env.installBuiltin("with_module", 2);
       System.out.println("Checking for load errors...");
       List<PrologTextLoaderError> errors = env.getLoadingErrors();
       for (PrologTextLoaderError error : errors)
       {
          error.printStackTrace();
       }
-   }
-
-   public void installBuiltin(String functor, int arity) throws PrologException
-   {
-      Module module = env.getModule();
-      CompoundTermTag head = CompoundTermTag.get(AtomTerm.get(functor), arity);
-      Predicate p = module.createDefinedPredicate(head);
-      p.setType(Predicate.TYPE.BUILD_IN);
-      p.setJavaClassName("Predicate_" + functor);
-      PrologCode q = env.loadPrologCode(head);
-   }
+   }   
    
    public PrologDocument render(String component, PrologState stateWrapper, PrologState propsWrapper) throws Exception
    {
       System.out.println("Rendering " + component);
       Term state;
       Term props;
-      if (stateWrapper == null)
+      if (stateWrapper == null) 
          state = TermConstants.emptyListAtom;
       else
          state = stateWrapper.getValue();
@@ -75,7 +66,8 @@ public class Engine
       else
          props = propsWrapper.getValue();
       VariableTerm replyTerm = new VariableTerm("Result");
-      Term goal = new CompoundTerm(AtomTerm.get("render_" + component), new Term[]{state, props, replyTerm});
+      Term goal = ReactModule.crossModuleCall(component, new CompoundTerm(AtomTerm.get("render_" + component), new Term[]{state, props, replyTerm}));
+      System.out.println("Execute: " + goal);
       interpreter.undo(0);
       Interpreter.Goal g = interpreter.prepareGoal(goal);
       PrologCode.RC rc = interpreter.execute(g);
@@ -93,7 +85,7 @@ public class Engine
    public PrologState getInitialState(String component)
    {
       VariableTerm replyTerm = new VariableTerm("Result");
-      Term goal = new CompoundTerm(AtomTerm.get("getInitialState_" + component), new Term[]{replyTerm});
+      Term goal = ReactModule.crossModuleCall(component, new CompoundTerm(AtomTerm.get("getInitialState_" + component), new Term[]{replyTerm}));
       interpreter.undo(0);
       Interpreter.Goal g = interpreter.prepareGoal(goal);
       try
@@ -104,8 +96,10 @@ public class Engine
          if (rc == PrologCode.RC.SUCCESS || rc == PrologCode.RC.SUCCESS_LAST)
             return new PrologState(replyTerm.dereference());
       }
-      catch (PrologException notDefined)
+      catch (PrologException notDefined)         
       {
+         notDefined.printStackTrace();
+         System.exit(-1);
       }
       return PrologState.emptyState();
    }
