@@ -34,8 +34,13 @@ public class PrologContext
    
    public void triggerEvent(Object handler) throws Exception
    {
-      state = engine.triggerEvent(handler, state, props);
-      reRender();
+      PrologState proposedState = engine.triggerEvent(handler, state, props);
+      if (proposedState != null)
+      {
+         // We get null if the handler failed
+         state = proposedState;
+         reRender();
+      }
    }
 
    public void reRender() throws Exception
