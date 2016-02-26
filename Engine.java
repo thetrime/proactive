@@ -20,15 +20,25 @@ public class Engine
    private Environment env;
    private Interpreter interpreter;
    private String URL;
-   public Engine(String URL) throws Exception
+   private URI goalURI;
+   public Engine(String baseURL, String rootElementId) throws Exception
    {
-      this.URL = URL;
+      this.goalURI = new URI(baseURL + "/goal");
+      this.URL = baseURL + "/component/" + rootElementId;
       make();
+   }
+
+   public class ReactEnvironment extends Environment
+   {
+      public Engine getEngine()
+      {
+         return Engine.this;
+      }
    }
 
    public void make() throws Exception
    {
-      env = new Environment();
+      env = new ReactEnvironment();
       env.ensureLoaded(AtomTerm.get("boilerplate.pl"));
       env.ensureLoaded(new CompoundTerm(CompoundTermTag.get("url", 1),
                                         AtomTerm.get(URL)));
@@ -401,38 +411,28 @@ public class Engine
       }
       
       @Override
-      public void onOpen( ServerHandshake handshake )
+      public void onOpen(ServerHandshake handshake)
       {
-         System.out.println( "opened connection" );
+         System.out.println("opened connection");
       }
       
       @Override
-      public void onClose( int code, String reason, boolean remote )
+      public void onClose(int code, String reason, boolean remote)
       {
-         System.out.println( "closed connection" );
+         System.out.println("closed connection");
       }
       
       @Override
-      public void onError( Exception ex )
+      public void onError(Exception ex)
       {
          ex.printStackTrace();
       }      
    }
    
-   public static ExecutionState prepareGoal(Term t, Environment e) throws IOException
+   public ExecutionState prepareGoal(Term t, Environment e) throws IOException, InterruptedException
    {
-      try
-      {
-         // FIXME: Get this from the environment, then we do not have an exception to deal with
-         URI u = new URI( "ws://localhost:8080/react/goal");
-         return new ExecutionState(u, t, e);
-      }
-      catch(Exception f)
-      {
-         f.printStackTrace();
-         return null;
-      }
-
+      System.out.println(goalURI);
+      return new ExecutionState(goalURI, t, e);
    }
     
 

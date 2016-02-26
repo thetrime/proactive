@@ -62,9 +62,9 @@ public class Predicate_on_server extends ExecuteOnlyCode
          bi.startUndoPosition = interpreter.getUndoPosition();
          try
          {
-            bi.state = Engine.prepareGoal(args[0], environment);
+            bi.state = ((Engine.ReactEnvironment)environment).getEngine().prepareGoal(args[0], environment);
          }
-         catch (IOException e )
+         catch (IOException | InterruptedException e)
          {
             throw new PrologException(AtomTerm.get("io_error"), e);
          }
