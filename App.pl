@@ -26,4 +26,10 @@ getInitialState([label=boing]).
 
 
 some_exported_goal:-
-        writeln('Yes, this is dog').
+        writeln('Yes, this is dog'),
+        some_local_goal(X),
+        writeln(X).
+
+some_local_goal(cat).
+some_local_goal(dog).
+some_local_goal(mouse).

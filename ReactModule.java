@@ -35,7 +35,17 @@ public class ReactModule extends Module
       }
       for (CompoundTermTag export : exportModule.exports)
       {
-         Predicate p = createDefinedPredicate(export);
+         Predicate p;
+         try
+         {
+            p = createDefinedPredicate(export);
+         }
+         catch(IllegalStateException e)
+         {
+            System.out.println("Error creating " + export + " in " + name);
+            e.printStackTrace();
+            continue;
+         }
          Term[] args = new Term[export.arity];
          for (int i = 0; i < args.length; i++)
             args[i] = new VariableTerm();

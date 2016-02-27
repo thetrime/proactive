@@ -32,4 +32,8 @@ swap_labels(State, _, [order=default]):- memberchk(order=swapped, State).
 
 
 some_local_goal:-
-        some_exported_goal.
+        some_exported_goal,
+        fail.
+
+some_local_goal:-
+        writeln(other_clause).
