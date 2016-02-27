@@ -3,6 +3,8 @@ import gnu.prolog.io.*;
 import gnu.prolog.term.*;
 import gnu.prolog.vm.*;
 import java.util.*;
+import java.lang.ref.WeakReference;
+import java.lang.ref.ReferenceQueue;
 
 public class ReactEnvironment extends Environment
 {
@@ -38,7 +40,6 @@ public class ReactEnvironment extends Environment
    @Override
    public ReactModule getModule()
    {
-      //System.out.println("Returning module " + moduleStack.peek());
       return modules.get(moduleStack.peek());
    }
 
@@ -113,5 +114,40 @@ public class ReactEnvironment extends Environment
          p.setJavaClassName("Predicate_" + functor);
       PrologCode q = loadPrologCode(head);
    }
+
+
+   private static class PrologCodeListenerRef extends WeakReference<PrologCodeListener>
+   {
+      PrologCodeListenerRef(ReferenceQueue<? super PrologCodeListener> queue, PrologCodeListener listener,
+                            CompoundTermTag tag)
+      {
+         super(listener, queue);
+         this.tag = tag;
+      }      
+      CompoundTermTag tag;
+   }
    
+   public void addPrologCodeListener(CompoundTermTag tag, PrologCodeListener listener)
+   {
+      getModule().addPrologCodeListener(this, tag, listener);
+   }
+  
+
+   public void removePrologCodeListener(CompoundTermTag tag, PrologCodeListener listener)
+   {
+      getModule().removePrologCodeListener(this, tag, listener);
+   }
+
+
+   @Override
+   public synchronized PrologCode getPrologCode(CompoundTermTag tag) throws PrologException
+   {
+      return getModule().getPrologCode(this, tag);
+   }
+
+   @Override
+   public void predicateUpdated(PredicateUpdatedEvent evt)
+   {
+      getModule().predicateUpdated(this, evt);
+   }
 }

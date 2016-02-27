@@ -66,7 +66,7 @@ public class Engine
       else
          props = propsWrapper.getValue();
       VariableTerm replyTerm = new VariableTerm("Result");
-      Term goal = ReactModule.crossModuleCall(component, new CompoundTerm(AtomTerm.get("render_" + component), new Term[]{state, props, replyTerm}));
+      Term goal = ReactModule.crossModuleCall(component, new CompoundTerm(AtomTerm.get("render"), new Term[]{state, props, replyTerm}));
       System.out.println("Execute: " + goal);
       interpreter.undo(0);
       Interpreter.Goal g = interpreter.prepareGoal(goal);
@@ -85,7 +85,7 @@ public class Engine
    public PrologState getInitialState(String component)
    {
       VariableTerm replyTerm = new VariableTerm("Result");
-      Term goal = ReactModule.crossModuleCall(component, new CompoundTerm(AtomTerm.get("getInitialState_" + component), new Term[]{replyTerm}));
+      Term goal = ReactModule.crossModuleCall(component, new CompoundTerm(AtomTerm.get("getInitialState"), new Term[]{replyTerm}));
       interpreter.undo(0);
       Interpreter.Goal g = interpreter.prepareGoal(goal);
       try
@@ -94,13 +94,15 @@ public class Engine
          if (rc == PrologCode.RC.SUCCESS)
             interpreter.stop(g);
          if (rc == PrologCode.RC.SUCCESS || rc == PrologCode.RC.SUCCESS_LAST)
+         {
             return new PrologState(replyTerm.dereference());
+         }
       }
       catch (PrologException notDefined)         
       {
          notDefined.printStackTrace();
          System.exit(-1);
-      }
+      }      
       return PrologState.emptyState();
    }
 
@@ -151,7 +153,7 @@ public class Engine
       return new PrologState(CompoundTerm.getList(elements));
    }
 
-   public PrologState triggerEvent(Object handler, PrologState stateWrapper, PrologState propsWrapper) throws Exception
+   public PrologState triggerEvent(String componentName, Object handler, PrologState stateWrapper, PrologState propsWrapper) throws Exception
    {
       Term state;
       Term props;
@@ -167,7 +169,7 @@ public class Engine
       Term goal;
       System.out.println("Handler: " + handler);
       if (handler instanceof AtomTerm)
-         goal = new CompoundTerm((AtomTerm)handler, new Term[]{state, props, newState});
+         goal = ReactModule.crossModuleCall(componentName, new CompoundTerm((AtomTerm)handler, new Term[]{state, props, newState}));
       else if (handler instanceof CompoundTerm)
       {
          CompoundTerm c_handler = (CompoundTerm)handler;

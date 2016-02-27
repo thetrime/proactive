@@ -4,7 +4,7 @@
 
 require('Splunge').
 
-render_App(State, _Props, Form):-
+render(State, _Props, Form):-
         get_some_fields(Fields),
         Form = {|jsx||
                <Panel>
@@ -22,7 +22,7 @@ get_some_fields(Fields):-
                 member(Label, [foo, bar, qux, baz]),
                 Fields).
 
-getInitialState_App([label=boing]).
+getInitialState([label=boing]).
 
 
 some_exported_goal:-

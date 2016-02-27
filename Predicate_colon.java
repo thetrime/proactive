@@ -12,10 +12,8 @@ public class Predicate_colon extends ExecuteOnlyCode
    {
       ReactEnvironment environment = (ReactEnvironment)interpreter.getEnvironment();
       AtomTerm moduleName = (AtomTerm)args[0];
-      System.out.println("Cross-module call to " + args[0] + " : " + args[1]);
       environment.pushModule(moduleName.value);
-      System.out.println("Current module is " + environment.getModule());
-      System.out.println("About to call " + args[1]);
+      ReactModule module = environment.getModule();
       RC rc = Predicate_call.staticExecute(interpreter, false, args[1]);
       // Actually we need a backtrack point here to recover it...
       environment.popModule();

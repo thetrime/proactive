@@ -14,8 +14,6 @@ public class Predicate_with_module extends ExecuteOnlyCode
       ReactEnvironment environment = (ReactEnvironment)interpreter.getEnvironment();
       AtomTerm moduleName = (AtomTerm)args[0];
       environment.pushModule(moduleName.value);
-      System.out.println("Pushed " + moduleName + " and will now call " +args[1]);
-      System.exit(-1);
       RC rc = Predicate_call.staticExecute(interpreter, false, args[1]);
       // Actually we need a backtrack point here to recover it...
       environment.popModule();

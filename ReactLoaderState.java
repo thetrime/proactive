@@ -183,6 +183,8 @@ public class ReactLoaderState extends PrologTextLoaderState
    @Override
    public void addClause(PrologTextLoader loader, Term term)
    {
+      if (!(module instanceof ReactUserModule))
+         System.out.println("-->" + module + ":" +term);
       Term head = term;
       CompoundTermTag headTag;
       if (term instanceof CompoundTerm && ((CompoundTerm) term).tag == TermConstants.clauseTag)

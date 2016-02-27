@@ -2,7 +2,7 @@
 
 :- quasi_quotation_syntax(jsx).
 
-render_Splunge(State, _Props, Form):-
+render(State, _Props, Form):-
         memberchk(order=Order, State),
         ( Order == default->
             Label1 = top,
@@ -22,7 +22,7 @@ render_Splunge(State, _Props, Form):-
                <Button key={Key2} label={Label2} onClick={swap_labels}/>
                </Panel>|}.
 
-getInitialState_Splunge([order=default]).
+getInitialState([order=default]).
 
 swap_labels(State, _, [order=swapped]):-
         memberchk(order=default, State),
