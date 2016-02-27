@@ -10,4 +10,4 @@ run:
 	java -cp gpj.jar:java_websocket.jar:. React "http://localhost:${PORT}/react" "App"
 
 run-server:
-	/opt/swipl-7.3.16/bin/swipl -f server.pl -g "start_react_server(${PORT})"
+	swipl -f server.pl -g "start_react_server(${PORT})"
