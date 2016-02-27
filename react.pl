@@ -1,5 +1,5 @@
 :-module(react,
-         []).
+         [trigger_react_recompile/1]).
 
 :- use_module(library(http/websocket)).
 :- use_module(library(http/thread_httpd)).
@@ -114,8 +114,6 @@ send_reply(WebSocket, Term):-
         format(atom(Text), '~q', [Term]),
         ws_send(WebSocket, text(Text)).
 
-user:end_of_file_hook:-
-        prolog_load_context(module, Module),
+trigger_react_recompile(Module):-
         forall(react_listener(Queue),
-               thread_send_message(Queue, Module)),
-        fail.
+               thread_send_message(Queue, Module)).
