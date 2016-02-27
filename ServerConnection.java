@@ -1,60 +1,61 @@
 import java.util.*;
 import java.net.*;
 import java.io.*;
+import org.java_websocket.client.WebSocketClient;
+import org.java_websocket.drafts.Draft_17;
+import org.java_websocket.handshake.ServerHandshake;
 
-public class ServerConnection extends Thread
+
+public class ServerConnection extends WebSocketClient
 {
-   private static Map<String, ServerConnection> connections = new HashMap<String, ServerConnection>();
-   public static synchronized ServerConnection getServerConnection(String URL) throws IOException
+   private static Map<URI, ServerConnection> connections = new HashMap<URI, ServerConnection>();
+   public static synchronized ServerConnection getServerConnection(URI uri) throws IOException
    {
-      ServerConnection connection = connections.get(URL);
+      ServerConnection connection = connections.get(uri);
       if (connection == null)
       {
-         connection = new ServerConnection(URL);
-         connections.put(URL, connection);
+         connection = new ServerConnection(uri);
+         connections.put(uri, connection);
       }
       return connection;
    }
 
-   private String URL;
-   private URLConnection connection;
-   private BufferedReader input;
-   private ServerConnection(String URL) throws IOException
+   private ServerConnection(URI URI) throws IOException
    {
-      this.URL = URL;
-      reconnect();
-      start();
+      super(URI, new Draft_17());
+      connect();
    }
 
-   private void reconnect() throws IOException
+   @Override
+   public void onMessage(String key)
    {
-      connection = new URL(URL + "/listen").openConnection();
-      input = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+      System.out.println(">>>> " + key);
+      List<CodeChangeListener> listeners = allListeners.get(key);
+      if (listeners != null)
+      {
+         for (CodeChangeListener listener : listeners)
+            listener.handleCodeChange();
+      }
    }
-
-   public void run()
-   {
-      // FIXME: Handle disconnect
-      try
-      {
-         while (true)
-         {
-            String key = input.readLine();
-            List<CodeChangeListener> listeners = allListeners.get(key);
-            if (listeners != null)
-            {
-               for (CodeChangeListener listener : listeners)
-                  listener.handleCodeChange();
-            }
-         }
-         
-      }
-      catch(Exception e)
-      {
-         e.printStackTrace();
-      }
       
+   @Override
+   public void onOpen(ServerHandshake handshake)
+   {
+      System.out.println("opened connection");
    }
+   
+   @Override
+   public void onClose(int code, String reason, boolean remote)
+   {
+      System.out.println("closed connection");
+   }
+      
+   @Override
+   public void onError(Exception ex)
+   {
+      ex.printStackTrace();
+      // FIXME: Should reconnect here
+   }           
 
    private Map<String, List<CodeChangeListener>> allListeners = new HashMap<String, List<CodeChangeListener>>();
    public  void addCodeChangeListener(String element, CodeChangeListener listener)

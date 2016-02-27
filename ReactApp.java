@@ -2,6 +2,7 @@ import java.awt.Component;
 import java.awt.BorderLayout;
 import javax.swing.*;
 import java.util.*;
+import java.net.URI;
 
 
 public class ReactApp extends ReactComponent implements CodeChangeListener
@@ -17,7 +18,7 @@ public class ReactApp extends ReactComponent implements CodeChangeListener
       engine = new Engine(URL, rootElementId);
       this.URL = URL;
       this.rootElementId = rootElementId;
-      React.addCodeChangeListener(URL, rootElementId, this);
+      React.addCodeChangeListener(new URI(URL + "/listen"), rootElementId, this);
       
       // This is a bit finicky. First we have to set up the state as 'empty'.
       // The empty state is not as empty as you might think. It contains 2 nodes:

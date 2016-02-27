@@ -3,6 +3,8 @@
 import java.util.*;
 import javax.swing.*;
 import java.awt.BorderLayout;
+import java.net.URI;
+
 
 public class React
 {
@@ -11,8 +13,12 @@ public class React
    
    static PrologDocument nextDocument = null;
    public static void main(String[] args) throws Exception
-   {     
-      ReactApp app = new ReactApp("http://localhost:8080/react", "App");
+   {
+      if (args.length != 2)
+      {
+         System.err.println("Usage: React <URI> <Component>");
+      }
+      ReactApp app = new ReactApp(args[0], args[1]);
       JFrame frame = app.getAWTComponent();
       frame.setSize(800, 600);
       frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);      
@@ -86,9 +92,9 @@ public class React
    }
     
 
-   public static void addCodeChangeListener(String url, String rootElementId, CodeChangeListener listener) throws Exception
+   public static void addCodeChangeListener(URI uri, String rootElementId, CodeChangeListener listener) throws Exception
    {
-      ServerConnection connection = ServerConnection.getServerConnection(url);
+      ServerConnection connection = ServerConnection.getServerConnection(uri);
       connection.addCodeChangeListener(rootElementId, listener);
    }
 
