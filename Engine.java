@@ -34,7 +34,7 @@ public class Engine
       env.installBuiltin("java_println", 1);
       env.installBuiltin("on_server", 1);
       env.installBuiltin("module", 2);
-      env.installBuiltin(":", 2);
+      //env.installBuiltin(":", 2);
       env.ensureLoaded(AtomTerm.get("boilerplate.pl"));
       interpreter = env.createInterpreter();      
       env.ensureLoaded(componentURL, rootElementId);

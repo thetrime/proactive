@@ -12,10 +12,10 @@ public class Predicate_colon extends ExecuteOnlyCode
    {
       ReactEnvironment environment = (ReactEnvironment)interpreter.getEnvironment();
       AtomTerm moduleName = (AtomTerm)args[0];
+      
       environment.pushModule(moduleName.value);
-      ReactModule module = environment.getModule();
       RC rc = Predicate_call.staticExecute(interpreter, false, args[1]);
-      // Actually we need a backtrack point here to recover it...
+      // FIXME: Actually we need a backtrack point here to reset the module if rc is SUCCESS
       environment.popModule();
       return rc;
    }

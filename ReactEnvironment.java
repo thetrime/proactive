@@ -18,6 +18,14 @@ public class ReactEnvironment extends Environment
       ReactModule userModule = ((ReactLoaderState)prologTextLoaderState).getModule();
       modules.put("user", userModule);
       moduleStack.push("user");
+      try
+      {
+         installBuiltin(":", 2);
+      }
+      catch(Exception e)
+      {
+         e.printStackTrace();
+      }
       ((ReactLoaderState)prologTextLoaderState).setModule(userModule);
       this.engine = engine;
    }
@@ -63,7 +71,7 @@ public class ReactEnvironment extends Environment
       try
       {
          // Enable us to get out later!
-         installBuiltin("with_module", 2);
+         installBuiltin(":", 2);
       }
       catch(Exception surelyNot)
       {

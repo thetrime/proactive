@@ -75,7 +75,7 @@ public class ReactLoaderState extends PrologTextLoaderState
       }
    }
 
-   // Yuck :(
+   // Yuck. This all had to be copied from PrologTextLoaderState because module is cached :(
    @Override
    public ReactModule getModule()
    {

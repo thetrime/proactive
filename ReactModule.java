@@ -40,7 +40,7 @@ public class ReactModule extends Module
          for (int i = 0; i < args.length; i++)
             args[i] = new VariableTerm();
          Term head = new CompoundTerm(export, args);
-         Term body = new CompoundTerm(CompoundTermTag.get("with_module", 2), new Term[]{AtomTerm.get(exportModule.name), head});
+         Term body = crossModuleCall(exportModule.name, head);
          Term linkClause = new CompoundTerm(CompoundTermTag.get(":-", 2), new Term[]{head, body});
          p.setType(Predicate.TYPE.USER_DEFINED);
          p.addClauseLast(linkClause);
