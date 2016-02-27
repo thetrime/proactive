@@ -69,12 +69,16 @@ execute_react_ws(WebSocket):-
         read_term_from_atom(Data, Goal, []),
         execute_react_ws(WebSocket, Goal, Goal).
 
+check:string_predicate(react:check_data/1).
+check_data(";").
+
 :-meta_predicate(execute_react_ws(+, +, 0)).
+:-multifile(check:string_predicate/1).
 execute_react_ws(WebSocket, ReplyGoal, Goal):-
         ws_receive(WebSocket, Message, []),
         Message.opcode == text,
         Data = Message.data,
-        Data == ";",
+        check_data(Data),
         execute_react_goal(Goal, ReplyGoal, WebSocket).
 
 :-meta_predicate(execute_react_goal(0, +, +)).
@@ -90,8 +94,9 @@ execute_react_goal(Goal, ReplyGoal, WebSocket):-
         ),
         % Wait for the next request
         ws_receive(WebSocket, Message, []),
+        Data = Message.data,
         \+(( Message.opcode == text,
-             Message.data == ";")),
+             check_data(Data))),
         !.
         
 
@@ -117,3 +122,6 @@ send_reply(WebSocket, Term):-
 trigger_react_recompile(Module):-
         forall(react_listener(Queue),
                thread_send_message(Queue, Module)).
+
+:-meta_predicate(user:on_server(0)).
+user:on_server(X):- X.
