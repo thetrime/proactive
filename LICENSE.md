@@ -1,13 +1,19 @@
----+ Licensing information
+Licensing information
+=====================
 
----++ Proactive
+Proactive
+---------
+
 Proactive is provided under GPLv3 (see GPLv3.txt).
 This distribution includes other packages, distributed under their own licenses:
 
----++ GNU Prolog for Java
+GNU Prolog for Java
+-------------------
+
 gpj.jar is from https://github.com/drt24/gnuprologjava and is licensed under the LGPLv3. See GPLv3.txt for a copy.
 
----++ Java-WebSocket
+Java-WebSocket
+--------------
 The websocket implementation is from https://github.com/TooTallNate/Java-WebSocket under the following license:
 Copyright (c) 2010-2012 Nathan Rajlich
 
