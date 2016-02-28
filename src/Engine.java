@@ -33,17 +33,11 @@ public class Engine
       env = new ReactEnvironment(this);
       env.installBuiltin("java_println", 1);
       env.installBuiltin("on_server", 1);
-      env.installBuiltin("module", 2);
-      //env.installBuiltin(":", 2);
-      env.ensureLoaded(AtomTerm.get("boilerplate.pl"));
+      env.ensureLoaded(new CompoundTerm(CompoundTermTag.get("resource", 1), AtomTerm.get("/boilerplate.pl")));
       interpreter = env.createInterpreter();      
       env.ensureLoaded(componentURL, rootElementId);
-      // FIXME: hard-coded
       env.runInitialization(interpreter);
-//      env.ensureLoaded(componentURL, "Splunge");
-//      env.runInitialization(interpreter);
       env.linkModules();
-      //env.installBuiltin("with_module", 2);
       System.out.println("Checking for load errors...");
       List<PrologTextLoaderError> errors = env.getLoadingErrors();
       for (PrologTextLoaderError error : errors)

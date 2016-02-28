@@ -48,11 +48,15 @@ all:	client
 build:
 	mkdir build
 
-client:	.src build
-	javac -cp dist/gpj.jar:dist/java_websocket.jar -Xlint:unchecked @.src -d build
-	jar cvf dist/react.jar -C build/ . 
+.PHONY: client
 
-run:	client
+client: dist/react.jar
+
+dist/react.jar:	.src build
+	javac -cp dist/gpj.jar:dist/java_websocket.jar -Xlint:unchecked @.src -d build
+	jar cvf dist/react.jar -C build/ . -C src boilerplate.pl
+
+run-client:	client
 	java -cp dist/gpj.jar:dist/java_websocket.jar:dist/react.jar React "http://localhost:${PORT}/react" "App"
 
 run-server:
