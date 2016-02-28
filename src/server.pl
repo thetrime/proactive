@@ -11,9 +11,13 @@
 :-multifile
         user:end_of_file_hook/0.
 
+
 user:term_expansion(end_of_file, _) :-
         prolog_load_context(module, Module),
         trigger_react_recompile(Module),
+        forall(clause(Module:requires(Submodule), _),
+               ensure_loaded(user:Submodule)),
+
         fail.
 
 start_react_server(Port):-

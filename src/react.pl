@@ -35,10 +35,10 @@ react_clause(Module, Head:-Body):-
         clause(Module:Head, Body, _).
 
 react_clause(Module, SubmoduleClause):-
-        current_predicate(_, Module:require(_)),
-        predicate_property(Module:require(_), interpreted),
-        \+predicate_property(Module:require(_), imported_from(_)),
-        clause(Module:require(SubModule), _, _),
+        current_predicate(_, Module:requires(_)),
+        predicate_property(Module:requires(_), interpreted),
+        \+predicate_property(Module:requires(_), imported_from(_)),
+        clause(Module:requires(SubModule), _, _),
         react_clause(SubModule, SubmoduleClause).
 
 
@@ -122,6 +122,7 @@ send_reply(WebSocket, Term):-
 trigger_react_recompile(Module):-
         forall(react_listener(Queue),
                thread_send_message(Queue, Module)).
+              
 
 :-meta_predicate(user:on_server(0)).
 user:on_server(X):- X.

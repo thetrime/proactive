@@ -2,7 +2,7 @@
 
 :- quasi_quotation_syntax(jsx).
 
-require('Splunge').
+requires('Splunge').
 
 render(State, _Props, Form):-
         get_some_fields(Fields),
