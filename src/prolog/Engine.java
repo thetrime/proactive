@@ -153,6 +153,44 @@ public class Engine
       return new PrologState(CompoundTerm.getList(elements));
    }
 
+   public PrologState fluxEvent(String componentName, Term key, Term value, PrologState stateWrapper, PrologState propsWrapper)
+   {
+      Term state;
+      Term props;
+      if (stateWrapper == null)
+         state = TermConstants.emptyListAtom;
+      else
+         state = stateWrapper.getValue();
+      if (propsWrapper == null)
+         props = TermConstants.emptyListAtom;
+      else
+         props = propsWrapper.getValue();
+      VariableTerm newState = new VariableTerm("NewState");
+      // FIXME: make sure that key and value are not instantiated by this for the next handler (including for recursive calls via waitFor()).
+      //        Maybe we need to copy the term here somehow?
+      Term goal = ReactModule.crossModuleCall(componentName, new CompoundTerm(AtomTerm.get("handle_event"), new Term[]{key, value, state, props, newState}));
+      interpreter.undo(0);
+      Interpreter.Goal g = interpreter.prepareGoal(goal);
+      try
+      {
+         PrologCode.RC rc = interpreter.execute(g);
+         if (rc == PrologCode.RC.SUCCESS)
+            interpreter.stop(g);
+         if (rc == PrologCode.RC.SUCCESS || rc == PrologCode.RC.SUCCESS_LAST)
+         {
+            return new PrologState(newState.dereference());
+         }
+      }
+      catch (PrologException notDefined)         
+      {
+          // FIXME: There are two possible exceptions here. One is that there is no such predicate - that is OK. The other is there is no such module - that is bad.
+          // Really we should be checking for the predicates existence first, somehow...
+         notDefined.printStackTrace();
+         System.exit(-1);
+      }
+      return null;
+   }
+   
    public PrologState triggerEvent(String componentName, Object handler, PrologState stateWrapper, PrologState propsWrapper) throws Exception
    {
       Term state;

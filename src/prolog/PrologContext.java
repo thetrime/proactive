@@ -37,7 +37,18 @@ public class PrologContext
    {
       this.root = root;
    }
-   
+
+   public void fluxEvent(Term key, Term value) throws Exception
+   {
+      PrologState proposedState = engine.fluxEvent(componentName, key, value, state, props);
+      if (proposedState != null)
+      {
+         // We get null if the handler failed
+         state = proposedState;
+         reRender();
+      }
+   }
+
    public void triggerEvent(Object handler) throws Exception
    {
       PrologState proposedState = engine.triggerEvent(componentName, handler, state, props);

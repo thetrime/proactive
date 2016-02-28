@@ -21,9 +21,13 @@ SRC= src/React.java                                        \
      src/prolog/ReactLoaderState.java                      \
      src/prolog/ReactModule.java                           \
      src/prolog/ReactUserModule.java                       \
+     src/prolog/FluxDispatcher.java                        \
+     src/prolog/FluxEventListener.java                     \
      src/prolog/Predicate_java_println.java                \
      src/prolog/Predicate_on_server.java                   \
      src/prolog/Predicate_colon.java                       \
+     src/prolog/Predicate_raise_event.java                 \
+     src/prolog/Predicate_wait_for.java                    \
      src/vdom/PatchSet.java                                \
      src/vdom/ReactDiff.java                               \
      src/vdom/ReactEdit.java                               \
