@@ -1,6 +1,13 @@
-import javax.swing.*;
+package org.proactive;
+
+import org.proactive.vdom.PrologNode;
+import org.proactive.prolog.PrologContext;
+import org.proactive.prolog.Engine;
+
+import javax.swing.JButton;
 import java.util.List;
-import java.awt.event.*;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
 import java.awt.Component;
 
 public class Button extends ReactLeafComponent 

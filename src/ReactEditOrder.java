@@ -1,4 +1,10 @@
-import java.util.*;
+package org.proactive.vdom;
+import org.proactive.ReactComponent;
+
+import java.util.Iterator;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.List;
 
 public class ReactEditOrder extends ReactEdit
 {

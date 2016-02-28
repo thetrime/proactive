@@ -1,3 +1,5 @@
+package org.proactive.prolog;
+
 import gnu.prolog.term.Term;
 import gnu.prolog.vm.TermConstants;
 

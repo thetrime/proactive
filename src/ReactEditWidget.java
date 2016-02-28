@@ -1,3 +1,6 @@
+package org.proactive.vdom;
+import org.proactive.ReactComponent;
+
 public class ReactEditWidget extends ReactEdit
 {
    PrologNode patch;

@@ -1,3 +1,6 @@
+package org.proactive.vdom;
+
+import org.proactive.ReactComponent;
 import java.util.Set;
 import java.util.Map;
 import java.util.Iterator;

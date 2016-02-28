@@ -1,6 +1,11 @@
-import javax.swing.*;
+package org.proactive;
+
+import javax.swing.JLabel;
 import java.util.List;
 import java.awt.Component;
+import org.proactive.vdom.PrologNode;
+import org.proactive.prolog.PrologContext;
+import org.proactive.prolog.Engine;
 
 public class Title extends ReactLeafComponent 
 {

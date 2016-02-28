@@ -1,3 +1,5 @@
+package org.proactive.prolog;
+
 import gnu.prolog.database.*;
 import gnu.prolog.io.*;
 import gnu.prolog.term.*;
@@ -35,8 +37,10 @@ public class ReactEnvironment extends Environment
       return engine;
    }
 
-   public void pushModule(String moduleName)
+   public void pushModule(String moduleName) throws PrologException
    {
+      if (modules.get(moduleName) == null)
+         PrologException.existenceError(AtomTerm.get("module"), AtomTerm.get(moduleName));
       moduleStack.push(moduleName);
    }
 
@@ -116,10 +120,10 @@ public class ReactEnvironment extends Environment
       if (functor.equals(":"))
       {
          System.out.println("Loading :/2");
-         p.setJavaClassName("Predicate_colon");
+         p.setJavaClassName("org.proactive.prolog.Predicate_colon");
       }
       else
-         p.setJavaClassName("Predicate_" + functor);
+         p.setJavaClassName("org.proactive.prolog.Predicate_" + functor);
       PrologCode q = loadPrologCode(head);
    }
 

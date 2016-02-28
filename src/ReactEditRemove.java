@@ -1,3 +1,6 @@
+package org.proactive.vdom;
+import org.proactive.ReactComponent;
+
 public class ReactEditRemove extends ReactEdit
 {
    public ReactEditRemove(PrologNode node, PrologNode ignored)

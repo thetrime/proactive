@@ -1,3 +1,7 @@
+package org.proactive.vdom;
+import org.proactive.ReactComponent;
+import org.proactive.ReactComponentFactory;
+
 public class ReactEditInsert extends ReactEdit
 {
    public ReactEditInsert(PrologNode node)

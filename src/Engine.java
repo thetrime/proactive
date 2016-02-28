@@ -1,3 +1,8 @@
+package org.proactive.prolog;
+
+import org.proactive.vdom.PrologNode;
+import org.proactive.vdom.PrologDocument;
+
 import gnu.prolog.database.*;
 import gnu.prolog.io.*;
 import gnu.prolog.term.*;
@@ -8,7 +13,6 @@ import java.net.*;
 import java.lang.reflect.*;
 import java.util.concurrent.*;
 
-// See https://github.com/TooTallNate/Java-WebSocket
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.drafts.Draft_17;
 import org.java_websocket.handshake.ServerHandshake;
@@ -94,6 +98,8 @@ public class Engine
       }
       catch (PrologException notDefined)         
       {
+          // FIXME: There are two possible exceptions here. One is that there is no such predicate - that is OK. The other is there is no such module - that is bad.
+          // Really we should be checking for the predicates existence first, somehow...
          notDefined.printStackTrace();
          System.exit(-1);
       }      

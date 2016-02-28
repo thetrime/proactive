@@ -1,9 +1,12 @@
+package org.proactive;
+
 import java.awt.Component;
 import java.awt.BorderLayout;
-import javax.swing.*;
-import java.util.*;
+import javax.swing.JFrame;
+import java.util.List;
+import java.util.LinkedList;
 import java.net.URI;
-
+import org.proactive.prolog.Engine;
 
 public class ReactApp extends ReactComponent implements CodeChangeListener
 {

@@ -1,4 +1,8 @@
+package org.proactive;
+
 import java.util.List;
+import org.proactive.vdom.PrologNode;
+import org.proactive.prolog.PrologContext;
 
 public abstract class ReactLeafComponent extends ReactComponent
 {

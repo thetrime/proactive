@@ -1,5 +1,8 @@
-import javax.swing.*;
-import java.awt.*;
+package org.proactive;
+
+import org.proactive.vdom.PrologNode;
+import org.proactive.prolog.Engine;
+import org.proactive.prolog.PrologContext;
 
 public class RootPanel extends Panel
 {

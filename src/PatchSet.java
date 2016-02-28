@@ -1,3 +1,7 @@
+package org.proactive.vdom;
+
+import org.proactive.ReactComponent;
+
 import java.util.*;
 
 public class PatchSet extends HashMap<Integer, List<ReactEdit>>

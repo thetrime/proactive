@@ -1,3 +1,5 @@
+package org.proactive.vdom;
+
 import gnu.prolog.term.*;
 import gnu.prolog.vm.*;
 import java.util.*;

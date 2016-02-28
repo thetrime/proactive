@@ -1,6 +1,10 @@
-import javax.swing.*;
+package org.proactive;
+
+import javax.swing.JTextField;
 import java.util.List;
 import java.awt.Component;
+import org.proactive.vdom.PrologNode;
+import org.proactive.prolog.PrologContext;
 
 public class Field extends ReactLeafComponent 
 {

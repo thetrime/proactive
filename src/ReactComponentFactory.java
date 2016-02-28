@@ -1,8 +1,13 @@
-import java.io.*;
-import java.util.*;
-import javax.swing.*;
-import java.awt.event.*;
-import java.lang.reflect.*;
+package org.proactive;
+
+import java.util.Map;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.lang.reflect.Constructor;
+import org.proactive.vdom.PrologNode;
+import org.proactive.vdom.PrologDocument;
+import org.proactive.prolog.PrologContext;
+import org.proactive.prolog.PrologState;
 
 public class ReactComponentFactory
 {

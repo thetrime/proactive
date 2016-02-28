@@ -1,3 +1,6 @@
+package org.proactive;
+
+import org.proactive.prolog.PrologContext;
 import java.util.List;
 import java.awt.Component;
 import java.awt.GridBagConstraints;

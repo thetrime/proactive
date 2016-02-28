@@ -1,5 +1,9 @@
+package org.proactive.vdom;
+
 import gnu.prolog.term.*;
 import java.util.List;
+import org.proactive.prolog.PrologContext;
+import org.proactive.prolog.Engine;
 
 public class PrologDocument extends PrologElement
 {

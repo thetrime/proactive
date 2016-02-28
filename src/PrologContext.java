@@ -1,3 +1,9 @@
+package org.proactive.prolog;
+import org.proactive.vdom.PrologDocument;
+import org.proactive.vdom.PatchSet;
+import org.proactive.vdom.ReactDiff;
+import org.proactive.ReactComponent;
+import org.proactive.React;
 import gnu.prolog.term.*;
 
 public class PrologContext

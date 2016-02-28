@@ -1,10 +1,14 @@
+package org.proactive;
+
 //https://github.com/Matt-Esch/virtual-dom
 
 import java.util.*;
 import javax.swing.*;
 import java.awt.BorderLayout;
 import java.net.URI;
-
+import org.proactive.vdom.PrologDocument;
+import org.proactive.vdom.PatchSet;
+import org.proactive.prolog.PrologContext;
 
 public class React
 {

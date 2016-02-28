@@ -1,4 +1,5 @@
-import java.io.*;
+package org.proactive.vdom;
+
 import java.util.List;
 import java.util.LinkedList;
 import java.util.Iterator;

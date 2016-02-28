@@ -1,3 +1,5 @@
+package org.proactive.prolog;
+
 import gnu.prolog.database.*;
 import gnu.prolog.io.*;
 import gnu.prolog.term.*;

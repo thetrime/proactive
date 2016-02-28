@@ -1,3 +1,7 @@
+package org.proactive.vdom;
+import org.proactive.ReactComponent;
+import org.proactive.ReactComponentFactory;
+
 public class ReactEditText extends ReactEdit
 {
    PrologNode patch;

@@ -57,7 +57,7 @@ dist/react.jar:	.src build
 	jar cvf dist/react.jar -C build/ . -C src boilerplate.pl
 
 run-client:	client
-	java -cp dist/gpj.jar:dist/java_websocket.jar:dist/react.jar React "http://localhost:${PORT}/react" "App"
+	java -cp dist/gpj.jar:dist/java_websocket.jar:dist/react.jar org.proactive.React "http://localhost:${PORT}/react" "App"
 
 run-server:
 	swipl -f src/server.pl -g "start_react_server(${PORT})"

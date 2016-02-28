@@ -1,3 +1,8 @@
+package org.proactive;
+
+import org.proactive.vdom.PrologNode;
+import org.proactive.prolog.PrologContext;
+
 import javax.swing.*;
 import java.awt.*;
 import java.util.List;
