@@ -11,7 +11,7 @@ import org.proactive.prolog.PrologState;
 
 public class ReactComponentFactory
 {
-    private static ReactComponentFactoryConfiguration configuration;
+    private static ReactComponentFactoryConfiguration configuration = new org.proactive.ui.DefaultReactComponentFactoryConfiguration();
     public static void setUIConfiguration(ReactComponentFactoryConfiguration c)
     {
         configuration = c;

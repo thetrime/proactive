@@ -22,7 +22,6 @@ public class React
       {
          System.err.println("Usage: React <URI> <Component>");
       }
-      ReactComponentFactory.setUIConfiguration(new org.proactive.ui.DefaultReactComponentFactoryConfiguration());
       new org.proactive.ui.ReactApp(args[0], args[1]);
    }
 
