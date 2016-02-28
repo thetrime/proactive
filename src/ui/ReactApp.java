@@ -1,4 +1,4 @@
-package org.proactive;
+package org.proactive.ui;
 
 import java.awt.Component;
 import java.awt.BorderLayout;
@@ -7,6 +7,9 @@ import java.util.List;
 import java.util.LinkedList;
 import java.net.URI;
 import org.proactive.prolog.Engine;
+import org.proactive.ReactComponent;
+import org.proactive.CodeChangeListener;
+import org.proactive.React;
 
 public class ReactApp extends ReactComponent implements CodeChangeListener
 {
@@ -37,6 +40,9 @@ public class ReactApp extends ReactComponent implements CodeChangeListener
       ReactComponent contentPane = new RootPanel(rootElementId, engine);
       insertChildBefore(contentPane, null);
       contentPane.getContext().reRender();
+      frame.setSize(800, 600);
+      frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+      frame.setVisible(true);
    }
 
    public void handleCodeChange() 

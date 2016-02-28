@@ -1,4 +1,4 @@
-package org.proactive;
+package org.proactive.ui;
 
 import org.proactive.vdom.PrologNode;
 import org.proactive.prolog.Engine;

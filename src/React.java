@@ -22,11 +22,8 @@ public class React
       {
          System.err.println("Usage: React <URI> <Component>");
       }
-      ReactApp app = new ReactApp(args[0], args[1]);
-      JFrame frame = app.getAWTComponent();
-      frame.setSize(800, 600);
-      frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);      
-      frame.setVisible(true);
+      ReactComponentFactory.setUIConfiguration(new org.proactive.ui.DefaultReactComponentFactoryConfiguration());
+      new org.proactive.ui.ReactApp(args[0], args[1]);
    }
 
    

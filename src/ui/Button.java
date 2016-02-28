@@ -1,8 +1,9 @@
-package org.proactive;
+package org.proactive.ui;
 
 import org.proactive.vdom.PrologNode;
 import org.proactive.prolog.PrologContext;
 import org.proactive.prolog.Engine;
+import org.proactive.ReactLeafComponent;
 
 import javax.swing.JButton;
 import java.util.List;

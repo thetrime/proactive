@@ -11,27 +11,17 @@ import org.proactive.prolog.PrologState;
 
 public class ReactComponentFactory
 {
-   private static HashMap<String, Constructor<? extends ReactComponent>> constructorHash = new HashMap<String, Constructor<? extends ReactComponent>>();
-   static
-   {
-      try
-      {
-         constructorHash.put("Panel", Panel.class.getConstructor(PrologNode.class, PrologContext.class));
-         constructorHash.put("Field", Field.class.getConstructor(PrologNode.class, PrologContext.class));
-         constructorHash.put("Button", Button.class.getConstructor(PrologNode.class, PrologContext.class));
-         constructorHash.put("Title", Title.class.getConstructor(PrologNode.class, PrologContext.class));
-      }
-      catch(Exception e)
-      {
-         e.printStackTrace();
-      }
-   }
+    private static ReactComponentFactoryConfiguration configuration;
+    public static void setUIConfiguration(ReactComponentFactoryConfiguration c)
+    {
+        configuration = c;
+    }   
 
    public static ReactComponent instantiateNode(PrologNode n, PrologContext context) throws Exception
    {
       try
       {
-         Constructor<? extends ReactComponent> c = constructorHash.get(n.getNodeName());
+         Constructor<? extends ReactComponent> c = configuration.getImplementingClass(n.getNodeName());
          if (c != null)
          {
             ReactComponent instance = c.newInstance(n, context);

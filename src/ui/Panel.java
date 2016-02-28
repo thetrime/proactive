@@ -1,7 +1,9 @@
-package org.proactive;
+package org.proactive.ui;
 
 import org.proactive.vdom.PrologNode;
 import org.proactive.prolog.PrologContext;
+import org.proactive.ReactComponent;
+import org.proactive.ReactComponentFactory;
 
 import javax.swing.*;
 import java.awt.*;
