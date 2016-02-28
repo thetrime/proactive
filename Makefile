@@ -1,7 +1,5 @@
 PORT=10080
 
-
-<<<<<<< HEAD
 SRC= src/React.java                     \
      src/ReactDiff.java                 \
      src/ReactEdit.java                 \
@@ -42,19 +40,24 @@ SRC= src/React.java                     \
      src/Predicate_colon.java           \
      src/ReactUserModule.java
 
+all:	client
+
 .src:	$(SRC)
 	echo $(SRC) > $@
-
 
 build:
 	mkdir build
 
 client:	.src build
-	javac -cp gpj.jar:java_websocket.jar -Xlint:unchecked @.src -d build
-	jar cvf react.jar -C build/ . 
+	javac -cp dist/gpj.jar:dist/java_websocket.jar -Xlint:unchecked @.src -d build
+	jar cvf dist/react.jar -C build/ . 
 
 run:	client
-	java -cp gpj.jar:java_websocket.jar:react.jar React "http://localhost:${PORT}/react" "App"
+	java -cp dist/gpj.jar:dist/java_websocket.jar:dist/react.jar React "http://localhost:${PORT}/react" "App"
 
 run-server:
 	swipl -f src/server.pl -g "start_react_server(${PORT})"
+
+clean:
+	rm -rf build
+	rm dist/react.jar
