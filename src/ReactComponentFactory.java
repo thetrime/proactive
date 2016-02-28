@@ -36,8 +36,9 @@ public class ReactComponentFactory
          e.printStackTrace();
       }
       // User-defined component
-      PrologState initialState = context.getEngine().getInitialState(n.getNodeName());
-      PrologDocument userComponent = context.getEngine().render(n.getNodeName(), initialState, context.getEngine().instantiateProps(n.getAttributes()));
+      PrologState props = context.getEngine().instantiateProps(n.getAttributes());
+      PrologState initialState = context.getEngine().getInitialState(n.getNodeName(), props);
+      PrologDocument userComponent = context.getEngine().render(n.getNodeName(), initialState, props);
       if (userComponent == null)
       {
          System.out.println("Unhandled type: " + n);

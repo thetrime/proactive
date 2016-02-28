@@ -22,7 +22,7 @@ get_some_fields(Fields):-
                 member(Label, [foo, bar, qux, baz]),
                 Fields).
 
-getInitialState([label=boing]).
+getInitialState(_, [label=boing]).
 
 
 some_exported_goal:-

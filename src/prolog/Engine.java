@@ -80,10 +80,10 @@ public class Engine
       return null;
    }
 
-   public PrologState getInitialState(String component)
+   public PrologState getInitialState(String component, PrologState props)
    {
       VariableTerm replyTerm = new VariableTerm("Result");
-      Term goal = ReactModule.crossModuleCall(component, new CompoundTerm(AtomTerm.get("getInitialState"), new Term[]{replyTerm}));
+      Term goal = ReactModule.crossModuleCall(component, new CompoundTerm(AtomTerm.get("getInitialState"), new Term[]{props.getValue(), replyTerm}));
       interpreter.undo(0);
       Interpreter.Goal g = interpreter.prepareGoal(goal);
       try

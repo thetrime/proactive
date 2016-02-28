@@ -18,8 +18,8 @@ public class PrologContext
    public PrologContext(String componentName, Engine engine)
    {
       this.engine = engine;
-      this.state = engine.getInitialState(componentName);
-      this.props = null;
+      this.props = PrologState.emptyState();
+      this.state = engine.getInitialState(componentName, props);
       this.componentName = componentName;
       this.document = null;
    }

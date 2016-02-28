@@ -77,7 +77,7 @@ render(State, _, App):-
 Note that it is forbidden to call on_server/1 in render/3.
 
 ##### State
-You MAY declare a predicate `getInitialState(-State)` in your module. This will be called before the component is first instantiated. State can is expected to be a list of `=/2` terms, where each term has an atom for the first argument. This is not currently checked, but I plan to add a check to ensure this is the case, since failing to do so leads to surprising and unexpected problems in event handlers when we try and 'merge' states.
+You MAY declare a predicate `getInitialState(+Props, -State)` in your module. This will be called before the component is first instantiated. State can is expected to be a list of `=/2` terms, where each term has an atom for the first argument. This is not currently checked, but I plan to add a check to ensure this is the case, since failing to do so leads to surprising and unexpected problems in event handlers when we try and 'merge' states.
 
 ##### Event Handlers
 You MAY declare event handlers in the Javascript way: For example,
@@ -109,8 +109,6 @@ A component can ONLY provide props to child components. These props may be hard 
 You can either use the widgets in the existing ui package, or provide your own. To provide your own, call ReactComponentFactory.setUIConfiguration() passing in an instance of a class that implements ReactComponentFactoryConfiguration, which maps tag names in the vdom to constructors for classes that implement those.
 
 The java client will load /boilerplate.pl into module(user) when it starts. If you need extra predicates to appear in here, you can replace the file in the jar.
-
-
 
 
 How it works

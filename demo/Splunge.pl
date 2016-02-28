@@ -22,7 +22,7 @@ render(State, _Props, Form):-
                <Button key={Key2} label={Label2} onClick={swap_labels}/>
                </Panel>|}.
 
-getInitialState([order=default]).
+getInitialState(_, [order=default]).
 
 swap_labels(State, _, [order=swapped]):-
         memberchk(order=default, State),
