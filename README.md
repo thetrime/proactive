@@ -65,6 +65,7 @@ A list/1 term has the following args:
 The JSX syntax uses quasiquotation in SWI-Prolog (with the domain jsx) to expand XML-like structures into these element/3 terms. You can escape to Prolog using {}. Maps are supported indirectly: You can write {State.foo} to mean 'the value that foo would have in the state'. The client unpacks this and binds the argument to the correct value just before execution - it is not an actual map (GNU Prolog for Java does not support them).
 
 Example:
+```
 render(State, _, App):-
    App = {|jsx||
           <Panel>
@@ -72,7 +73,7 @@ render(State, _, App):-
             <Field value={Value}/>
           </Panel>|},
    Value = 'This is a value'.
-
+```
 Note that it is forbidden to call on_server/1 in render/3.
 
 ##### State
