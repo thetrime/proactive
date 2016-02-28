@@ -1,6 +1,7 @@
 PORT=10080
 
 
+<<<<<<< HEAD
 SRC= src/React.java                     \
      src/ReactDiff.java                 \
      src/ReactEdit.java                 \
