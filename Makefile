@@ -1,44 +1,44 @@
 PORT=10080
 
-SRC= src/React.java                     \
-     src/ReactDiff.java                 \
-     src/ReactEdit.java                 \
-     src/ReactComponent.java            \
-     src/Panel.java                     \
-     src/Button.java                    \
-     src/Field.java                     \
-     src/PatchSet.java                  \
-     src/Title.java                     \
-     src/Engine.java                    \
-     src/PrologDocument.java            \
-     src/PrologNode.java                \
-     src/PrologElement.java             \
-     src/PrologText.java                \
-     src/Predicate_java_println.java    \
-     src/PrologState.java               \
-     src/PrologContext.java             \
-     src/ReactComponentFactory.java     \
-     src/RootPanel.java                 \
-     src/ReactApp.java                  \
-     src/ReactEditNode.java             \
-     src/ReactEditProps.java            \
-     src/ReactEditRemove.java           \
-     src/ReactEditInsert.java           \
-     src/ReactEditOrder.java            \
-     src/ReactEditInsert.java           \
-     src/ReactEditWidget.java           \
-     src/ReactEditText.java             \
-     src/CodeChangeListener.java        \
-     src/ServerConnection.java          \
-     src/PrologThunk.java               \
-     src/ReactEditThunk.java            \
-     src/Predicate_on_server.java       \
-     src/ReactLeafComponent.java        \
-     src/ReactEnvironment.java          \
-     src/ReactLoaderState.java          \
-     src/ReactModule.java               \
-     src/Predicate_colon.java           \
-     src/ReactUserModule.java
+SRC= src/React.java                            \
+     src/ReactComponent.java                   \
+     src/Panel.java                            \
+     src/Button.java                           \
+     src/Field.java                            \
+     src/Title.java                            \
+     src/ReactComponentFactory.java            \
+     src/RootPanel.java                        \
+     src/ReactApp.java                         \
+     src/CodeChangeListener.java               \
+     src/ServerConnection.java                 \
+     src/ReactLeafComponent.java               \
+     src/prolog/Engine.java                    \
+     src/prolog/PrologState.java               \
+     src/prolog/PrologContext.java             \
+     src/prolog/ReactEnvironment.java          \
+     src/prolog/ReactLoaderState.java          \
+     src/prolog/ReactModule.java               \
+     src/prolog/ReactUserModule.java           \
+     src/prolog/Predicate_java_println.java    \
+     src/prolog/Predicate_on_server.java       \
+     src/prolog/Predicate_colon.java           \
+     src/vdom/PatchSet.java                    \
+     src/vdom/ReactDiff.java                   \
+     src/vdom/ReactEdit.java                   \
+     src/vdom/PrologDocument.java              \
+     src/vdom/PrologNode.java                  \
+     src/vdom/PrologElement.java               \
+     src/vdom/PrologText.java                  \
+     src/vdom/PrologThunk.java                 \
+     src/vdom/ReactEditNode.java               \
+     src/vdom/ReactEditProps.java              \
+     src/vdom/ReactEditRemove.java             \
+     src/vdom/ReactEditInsert.java             \
+     src/vdom/ReactEditOrder.java              \
+     src/vdom/ReactEditInsert.java             \
+     src/vdom/ReactEditWidget.java             \
+     src/vdom/ReactEditText.java               \
+     src/vdom/ReactEditThunk.java
 
 all:	client
 
@@ -65,3 +65,4 @@ run-server:
 clean:
 	rm -rf build
 	rm dist/react.jar
+:.*

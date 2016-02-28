@@ -1,4 +1,4 @@
-package org.proactive;
+package org.proactive.prolog;
 
 import gnu.prolog.database.*;
 import gnu.prolog.io.*;
