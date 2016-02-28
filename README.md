@@ -18,7 +18,7 @@ Currently this is just a toy, but the skeleton is almost complete and ready for 
 ### Major tasks
    * I need to implement some equivalent of Flux. Currently there is absolutely no way to get data up the tree.
    * I would like to be able to handle HTML natively. That is, tags which are not otherwise overloaded, but also valid HTML will become PrologHTML nodes in the tree. Components can then do with those what they want.
-   * I had to suck quite a bit of code from GPJ into ReactEnvironment and ReactModule
+   * I had to suck quite a bit of code from GPJ into ReactEnvironment and ReactModule. I need to talk to the GPJ people to see if I can make some tiny modifications in their code to allow me to just override the methods I want
    * A lot of documentation needs to be written.
    
 ### Boring tasks
@@ -28,3 +28,4 @@ Currently this is just a toy, but the skeleton is almost complete and ready for 
 ### Minor tasks
    * Tidy up the import statements. Many are unnecessary.
    * I would like to investigate a JSX (PLX?) mode for emacs
+
