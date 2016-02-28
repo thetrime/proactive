@@ -23,3 +23,5 @@ user:term_expansion(end_of_file, _) :-
 start_react_server(Port):-
         http_server(http_dispatch, [port(Port)]).
 
+:-multifile(react:goal_is_safe/1).
+react:goal_is_safe(_).

@@ -1,6 +1,10 @@
 :-module(react,
          [trigger_react_recompile/1]).
 
+%       You MUST provide an implementation of react:goal_is_safe/1 or on_server/1 will always fail on the client.
+%       This is because an unscrupulous user could easily execute on_server with whatever goal they want! 
+
+
 :- use_module(library(http/websocket)).
 :- use_module(library(http/thread_httpd)).
 :- use_module(library(http/http_dispatch)).
@@ -62,12 +66,16 @@ notify_react_loop_1(Websocket):-
 execute_react(Request):-
         http_upgrade_to_websocket(execute_react_ws, [], Request).
 
+:-multifile(react:goal_is_safe/1).
 execute_react_ws(WebSocket):-
         ws_receive(WebSocket, Message, []),
         Message.opcode == text,
         Data = Message.data,
         read_term_from_atom(Data, Goal, []),
-        execute_react_ws(WebSocket, Goal, Goal).
+        ( goal_is_safe(Goal)->
+            execute_react_ws(WebSocket, Goal, Goal)
+        ; permission_error(execute, goal, Goal)
+        ).
 
 check:string_predicate(react:check_data/1).
 check_data(";").
