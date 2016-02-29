@@ -37,6 +37,8 @@ public class Engine
       env = new ReactEnvironment(this);
       env.installBuiltin("java_println", 1);
       env.installBuiltin("on_server", 1);
+      env.installBuiltin("raise_event", 2);
+      env.installBuiltin("wait_for", 1);
       env.ensureLoaded(new CompoundTerm(CompoundTermTag.get("resource", 1), AtomTerm.get("/boilerplate.pl")));
       interpreter = env.createInterpreter();      
       env.ensureLoaded(componentURL, rootElementId);
@@ -66,7 +68,8 @@ public class Engine
       VariableTerm replyTerm = new VariableTerm("Result");
       Term goal = ReactModule.crossModuleCall(component, new CompoundTerm(AtomTerm.get("render"), new Term[]{state, props, replyTerm}));
       System.out.println("Execute: " + goal);
-      interpreter.undo(0);
+      // FIXME: Why is this unsafe?
+      //interpreter.undo(0);
       Interpreter.Goal g = interpreter.prepareGoal(goal);
       PrologCode.RC rc = interpreter.execute(g);
       if (rc == PrologCode.RC.SUCCESS)
@@ -74,7 +77,8 @@ public class Engine
       if (rc == PrologCode.RC.SUCCESS || rc == PrologCode.RC.SUCCESS_LAST)
       {
          Term result = replyTerm.dereference();
-         return new PrologDocument(result, state, props, component, this);
+         PrologDocument doc = new PrologDocument(result, state, props, component, this);
+         return doc;
       }
       System.out.println("Failed to render");
       return null;
@@ -153,7 +157,7 @@ public class Engine
       return new PrologState(CompoundTerm.getList(elements));
    }
 
-   public PrologState fluxEvent(String componentName, Term key, Term value, PrologState stateWrapper, PrologState propsWrapper)
+   public PrologState fluxEvent(String componentName, Term key, Term value, PrologState stateWrapper, PrologState propsWrapper) throws Exception
    {
       Term state;
       Term props;
@@ -169,7 +173,8 @@ public class Engine
       // FIXME: make sure that key and value are not instantiated by this for the next handler (including for recursive calls via waitFor()).
       //        Maybe we need to copy the term here somehow?
       Term goal = ReactModule.crossModuleCall(componentName, new CompoundTerm(AtomTerm.get("handle_event"), new Term[]{key, value, state, props, newState}));
-      interpreter.undo(0);
+      // FIXME: Why is this unsafe?
+      //interpreter.undo(0);
       Interpreter.Goal g = interpreter.prepareGoal(goal);
       try
       {
@@ -178,7 +183,9 @@ public class Engine
             interpreter.stop(g);
          if (rc == PrologCode.RC.SUCCESS || rc == PrologCode.RC.SUCCESS_LAST)
          {
-            return new PrologState(newState.dereference());
+            PrologState adjustedState = applyState(state, newState.dereference());
+            System.out.println("flux handler set state to: " + adjustedState);
+            return adjustedState;
          }
       }
       catch (PrologException notDefined)         

@@ -32,7 +32,9 @@ public class React
    {
       synchronized(dispatchQueue)
       {
-         //System.out.println("Received patch: " + p);
+         System.out.println("Received patch: " + p + " for root " + root);
+         if (root == null)
+            throw new NullPointerException();
          dispatchQueue.offer(new TreePatch(p, root, context));
       }
       flushQueue();

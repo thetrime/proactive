@@ -66,7 +66,7 @@ run-client:	client
 	java -cp dist/gpj.jar:dist/java_websocket.jar:dist/react.jar org.proactive.React "http://localhost:${PORT}/react" "App"
 
 run-server:
-	swipl -f src/server.pl -g "start_react_server(${PORT})"
+	swipl -f src/server.pl -g "start_react_server(${PORT}), ['demo/App']"
 
 clean:
 	rm -rf build

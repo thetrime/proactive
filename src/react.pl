@@ -50,16 +50,31 @@ notify_react(Request):-
         http_upgrade_to_websocket(notify_react_loop, [], Request).
 
 notify_react_loop(Websocket):-
-        thread_self(Self),                
+        thread_self(Self),
+        thread_create(ws_notify_slave(Websocket, Self), Slave, [detached(false)]),
         setup_call_cleanup(assert(react_listener(Self)),
-                           notify_react_loop_1(Websocket),
+                           notify_react_loop_1(Websocket, Slave),
                            retractall(react_listener(Self))).
 
-notify_react_loop_1(Websocket):-
+ws_notify_slave(Websocket, Owner):-
+        ws_receive(Websocket, Message),
+        ( Message.opcode == close->
+            thread_send_message(Owner, close)
+        ; otherwise->
+            ws_notify_slave(Websocket, Owner)
+        ).
+
+notify_react_loop_1(Websocket, Slave):-
         thread_get_message(Message),
-        ws_send(Websocket, text(Message)),
+        ( Message == close->
+            thread_join(Slave, _),
+            ws_close(Websocket, 1000, goodbye),
+            throw(terminated)
+        ; Message = text(Message)->
+            ws_send(Websocket, text(Message))
+        ),
         !,
-        notify_react_loop_1(Websocket).
+        notify_react_loop_1(Websocket, Slave).
 
 :-dynamic(react_listener/1).
 
@@ -69,12 +84,15 @@ execute_react(Request):-
 :-multifile(react:goal_is_safe/1).
 execute_react_ws(WebSocket):-
         ws_receive(WebSocket, Message, []),
-        Message.opcode == text,
-        Data = Message.data,
-        read_term_from_atom(Data, Goal, []),
-        ( goal_is_safe(Goal)->
-            execute_react_ws(WebSocket, Goal, Goal)
-        ; permission_error(execute, goal, Goal)
+        ( Message.opcode == text->
+            Data = Message.data,
+            read_term_from_atom(Data, Goal, []),
+            ( goal_is_safe(Goal)->
+                execute_react_ws(WebSocket, Goal, Goal)
+            ; permission_error(execute, goal, Goal)
+            )
+        ; Message.opcode == close->
+            !
         ).
 
 check:string_predicate(react:check_data/1).
@@ -84,10 +102,13 @@ check_data(";").
 :-multifile(check:string_predicate/1).
 execute_react_ws(WebSocket, ReplyGoal, Goal):-
         ws_receive(WebSocket, Message, []),
-        Message.opcode == text,
-        Data = Message.data,
-        check_data(Data),
-        execute_react_goal(Goal, ReplyGoal, WebSocket).
+        ( Message.opcode == text->
+            Data = Message.data,
+            check_data(Data),
+            execute_react_goal(Goal, ReplyGoal, WebSocket)
+        ; Message.opcode == close->
+            !
+        ).
 
 :-meta_predicate(execute_react_goal(0, +, +)).
 execute_react_goal(Goal, ReplyGoal, WebSocket):-
@@ -103,8 +124,11 @@ execute_react_goal(Goal, ReplyGoal, WebSocket):-
         % Wait for the next request
         ws_receive(WebSocket, Message, []),
         Data = Message.data,
-        \+(( Message.opcode == text,
-             check_data(Data))),
+        ( Message.opcode == text->
+            \+check_data(Data)
+        ; Message.opcode == close->
+            true
+        ),
         !.
         
 
@@ -129,7 +153,7 @@ send_reply(WebSocket, Term):-
 
 trigger_react_recompile(Module):-
         forall(react_listener(Queue),
-               thread_send_message(Queue, Module)).
+               thread_send_message(Queue, text(Module))).
               
 
 :-meta_predicate(user:on_server(0)).

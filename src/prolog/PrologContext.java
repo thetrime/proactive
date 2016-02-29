@@ -35,6 +35,8 @@ public class PrologContext
 
    public void setRoot(ReactComponent root)
    {
+      if (root == null)
+         throw new NullPointerException();
       this.root = root;
    }
 
@@ -42,7 +44,7 @@ public class PrologContext
    {
       PrologState proposedState = engine.fluxEvent(componentName, key, value, state, props);
       if (proposedState != null)
-      {
+      {      
          // We get null if the handler failed
          state = proposedState;
          reRender();
@@ -62,6 +64,7 @@ public class PrologContext
 
    public void reRender() throws Exception
    {
+      System.out.println("+++++++ Rerendering " + componentName);
       PrologDocument newDocument = engine.render(componentName, state, props);
       PatchSet editScript = ReactDiff.diff(document, newDocument);
       React.queuePatch(editScript, root, this);

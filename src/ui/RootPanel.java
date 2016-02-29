@@ -10,7 +10,7 @@ public class RootPanel extends Panel
     {
         super();
         context = new PrologContext(componentId, engine);
-        context.setRoot(this);        
+        context.setRoot(this);
     }
 
 }

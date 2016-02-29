@@ -3,6 +3,7 @@ package org.proactive.prolog;
 import gnu.prolog.term.Term;
 import gnu.prolog.vm.TermConstants;
 import gnu.prolog.term.AtomTerm;
+import gnu.prolog.term.CompoundTermTag;
 import gnu.prolog.vm.PrologException;
 import java.util.Queue;
 import java.util.LinkedList;
@@ -12,7 +13,8 @@ import java.util.HashMap;
 
 public class FluxDispatcher
 {
-   private static Map<String, List<PrologContext>> eventListeners = new HashMap<String, List<PrologContext>>();
+   public static final CompoundTermTag handlerTag = CompoundTermTag.get("handle_event", 5);
+   private static Map<String, LinkedList<PrologContext>> eventListeners = new HashMap<String, LinkedList<PrologContext>>();
 
    private static boolean isProcessing = false;
    private static Queue<String> unprocessed = null;
@@ -20,9 +22,20 @@ public class FluxDispatcher
    private static Term currentKey = null;
    private static Term currentValue = null;
 
+   private static List<String> listenerModules = new LinkedList<String>();
+
+   public static void registerHandlerModule(String name)
+   {
+      listenerModules.add(name);
+   }
+
    public static void registerFluxListener(String componentName, PrologContext context)
    {
-      List<PrologContext> existing = eventListeners.get(componentName);
+      System.out.println("Checking " + componentName + " for fluxion");
+      if (!listenerModules.contains(componentName))
+         return;
+      System.out.println("fluxion located. Linking...");
+      LinkedList<PrologContext> existing = eventListeners.get(componentName);
       if (existing == null)
       {
          existing = new LinkedList<PrologContext>();
@@ -55,12 +68,16 @@ public class FluxDispatcher
 
    public static void dispatchEvents()
    {
+      System.out.println("Dispatching flux events. " + unprocessed.size() + " modules pending");
       while (unprocessed.size() > 0)
       {
          String componentName = unprocessed.remove();
-         List<PrologContext> tasks = eventListeners.get(componentName);
-         for (PrologContext context : tasks)
+         LinkedList<PrologContext> tasks = new LinkedList<PrologContext>();
+         tasks.addAll(eventListeners.get(componentName));
+         PrologContext context;
+         while((context = tasks.poll()) != null)
          {
+            System.out.println(" Dispatching an event. " + tasks.size() + " tasks remaining in " + componentName);
             try
             {
                context.fluxEvent(currentKey, currentValue);
@@ -69,7 +86,9 @@ public class FluxDispatcher
             {
                e.printStackTrace();
             }
+            System.out.println(" Dispatched an event. Remaining: " + tasks.size());
          }
+         System.out.println("Flux finished dispatching events to instances of " + componentName);
          processed.add(componentName);
       }
       isProcessing = false;

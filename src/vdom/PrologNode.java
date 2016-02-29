@@ -10,6 +10,16 @@ public class PrologNode
    Map<String, Object> attributes = new HashMap<String, Object>();
    List<PrologNode> children = new LinkedList<PrologNode>();
 
+   public PrologNode()
+   {
+   }
+   
+   // This is only really intended for use by the root component!
+   public PrologNode(String nodeName)
+   {
+      this.nodeName = nodeName;
+   }
+
    public String getKey()
    {
       return null;

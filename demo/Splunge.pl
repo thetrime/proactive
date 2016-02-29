@@ -32,6 +32,9 @@ swap_labels(State, _, [order=default]):- memberchk(order=swapped, State).
 
 
 some_local_goal:-
+        writeln(about_to_raise),
+        raise_event(set_buttons, [cat, dog, gnu, ant]),
+        writeln(raised),
         some_exported_goal,
         fail.
 

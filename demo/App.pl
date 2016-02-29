@@ -5,7 +5,8 @@
 requires('Splunge').
 
 render(State, _Props, Form):-
-        get_some_fields(Fields),
+        memberchk(buttons=Buttons, State),
+        get_some_fields(Buttons, Fields),
         Form = {|jsx||
                <Panel>
                <Title label={Label}/>
@@ -16,13 +17,13 @@ render(State, _Props, Form):-
         Label = 'This is my title'.
 
 
-get_some_fields(Fields):-
+get_some_fields(Buttons, Fields):-
         findall({|jsx||
                 <Button label={Label}/>|},
-                member(Label, [foo, bar, qux, baz]),
+                member(Label, Buttons),
                 Fields).
 
-getInitialState(_, [label=boing]).
+getInitialState(_, [buttons=[foo, bar, qux, baz], label='Label defined in state']).
 
 
 some_exported_goal:-
@@ -33,3 +34,5 @@ some_exported_goal:-
 some_local_goal(cat).
 some_local_goal(dog).
 some_local_goal(mouse).
+
+handle_event(set_buttons, Term, _State, _Props, [buttons=Term]).

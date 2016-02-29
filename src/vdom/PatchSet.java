@@ -21,7 +21,7 @@ public class PatchSet extends HashMap<Integer, List<ReactEdit>>
    {
       Set<Integer> indices = new TreeSet<Integer>(keySet());
       if (indices.size() == 0)
-         return rootNode;
+         return rootNode;               
       Map<Integer, ReactComponent> index = domIndex(rootNode, a, indices);
       ReactComponent ownerDocument = rootNode.getOwnerDocument();
 
