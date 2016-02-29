@@ -137,9 +137,12 @@ public class Engine
       else
          props = propsWrapper.getValue();
       VariableTerm newState = new VariableTerm("NewState");
-      // FIXME: make sure that key and value are not instantiated by this for the next handler (including for recursive calls via waitFor()).
-      //        Maybe we need to copy the term here somehow?
-      Term goal = ReactModule.crossModuleCall(componentName, new CompoundTerm(AtomTerm.get("handle_event"), new Term[]{key, value, state, props, newState}));
+      // We need to make sure that handlers dont (further) instantiate the key or value
+      Term goal = ReactModule.crossModuleCall(componentName, new CompoundTerm(AtomTerm.get("handle_event"), new Term[]{key.clone(new TermCloneContext()),
+                                                                                                                       value.clone(new TermCloneContext()),
+                                                                                                                       state,
+                                                                                                                       props,
+                                                                                                                       newState}));
       // We cannot call undo(0) here because we might be processing recursive events
       Interpreter.Goal g = interpreter.prepareGoal(goal);
       try
