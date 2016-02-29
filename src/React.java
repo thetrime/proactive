@@ -96,8 +96,7 @@ public class React
 
    public static void addCodeChangeListener(URI uri, String rootElementId, CodeChangeListener listener) throws Exception
    {
-      ServerConnection connection = ServerConnection.getServerConnection(uri);
-      connection.addCodeChangeListener(rootElementId, listener);
+      ServerConnection.addCodeChangeListener(uri, rootElementId, listener);
    }
 
 }

@@ -10,28 +10,24 @@ import org.java_websocket.handshake.ServerHandshake;
 
 public class ServerConnection extends WebSocketClient
 {
-   private static Map<URI, ServerConnection> connections = new HashMap<URI, ServerConnection>();
-   public static synchronized ServerConnection getServerConnection(URI uri) throws IOException
-   {
-      ServerConnection connection = connections.get(uri);
-      if (connection == null)
-      {
-         connection = new ServerConnection(uri);
-         connections.put(uri, connection);
-      }
-      return connection;
-   }
+   private static List<URI> activeConnections = new LinkedList<URI>();
+   private static Map<URI, Map<String, List<CodeChangeListener>>> allListeners = new HashMap<URI, Map<String, List<CodeChangeListener>>>();   
 
-   private ServerConnection(URI URI) throws IOException
+   private URI uri;
+   private boolean isReplacement;
+   private ServerConnection(URI URI, boolean isReplacement) throws IOException
    {
       super(URI, new Draft_17());
+      this.isReplacement = isReplacement;
+      this.uri = URI;
       connect();
    }
 
    @Override
    public void onMessage(String key)
    {
-      List<CodeChangeListener> listeners = allListeners.get(key);
+      Map<String, List<CodeChangeListener>> listenersForURI = allListeners.get(uri);
+      List<CodeChangeListener> listeners = listenersForURI.get(key);
       if (listeners != null)
       {
          for (CodeChangeListener listener : listeners)
@@ -43,30 +39,66 @@ public class ServerConnection extends WebSocketClient
    public void onOpen(ServerHandshake handshake)
    {
       System.out.println("opened connection");
+      if (isReplacement)
+      {
+         // This should also trigger a change for ALL components if successful!
+         for (List<CodeChangeListener> entry : allListeners.get(uri).values())
+            for (CodeChangeListener listener : entry)
+               listener.handleCodeChange();
+      }
    }
    
    @Override
    public void onClose(int code, String reason, boolean remote)
    {
-      System.out.println("closed connection");
+      System.out.println("closed connection: " + remote);      
+      boolean restarted = false;
+      while (!restarted)
+      {
+         try
+         {
+            Thread.sleep(3000);
+         }
+         catch (Exception e)
+         {
+            
+         }
+         try
+         {
+            new ServerConnection(uri, true);
+            restarted = true;
+         }
+         catch(Exception f)
+         {
+         }
+      }
    }
       
    @Override
    public void onError(Exception ex)
    {
       ex.printStackTrace();
-      // FIXME: Should reconnect here
    }           
 
-   private Map<String, List<CodeChangeListener>> allListeners = new HashMap<String, List<CodeChangeListener>>();
-   public  void addCodeChangeListener(String element, CodeChangeListener listener)
+   public static synchronized void addCodeChangeListener(URI uri, String element, CodeChangeListener listener) throws IOException
    {
-      List<CodeChangeListener> listeners = allListeners.get(element);
-      if (listeners == null)
+      Map<String, List<CodeChangeListener>> class2Listeners = allListeners.get(uri);
+      if (class2Listeners == null)
       {
-         listeners = new LinkedList<CodeChangeListener>();
-         allListeners.put(element, listeners);
+         class2Listeners = new HashMap<String, List<CodeChangeListener>>();
+         allListeners.put(uri, class2Listeners);
       }
-      listeners.add(listener);
+      List<CodeChangeListener> listOfListeners = class2Listeners.get(element);
+      if (listOfListeners == null)
+      {
+         listOfListeners = new LinkedList<CodeChangeListener>();
+         class2Listeners.put(element, listOfListeners);
+      }
+      listOfListeners.add(listener);
+      if (!activeConnections.contains(uri))
+      {
+         ServerConnection connection = new ServerConnection(uri, false);
+         activeConnections.add(uri);
+      }
    }
 }
