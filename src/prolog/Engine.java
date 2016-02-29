@@ -68,8 +68,7 @@ public class Engine
       VariableTerm replyTerm = new VariableTerm("Result");
       Term goal = ReactModule.crossModuleCall(component, new CompoundTerm(AtomTerm.get("render"), new Term[]{state, props, replyTerm}));
       System.out.println("Execute: " + goal);
-      // FIXME: Why is this unsafe?
-      //interpreter.undo(0);
+      // We cannot undo(0) here because we might be in the middle of processing a flux event, and that would muck up the stack
       Interpreter.Goal g = interpreter.prepareGoal(goal);
       PrologCode.RC rc = interpreter.execute(g);
       if (rc == PrologCode.RC.SUCCESS)
@@ -88,7 +87,7 @@ public class Engine
    {
       VariableTerm replyTerm = new VariableTerm("Result");
       Term goal = ReactModule.crossModuleCall(component, new CompoundTerm(AtomTerm.get("getInitialState"), new Term[]{props.getValue(), replyTerm}));
-      interpreter.undo(0);
+      // We cannot undo(0) here because we might be in the middle of processing a flux event, and that would muck up the stack
       Interpreter.Goal g = interpreter.prepareGoal(goal);
       try
       {
@@ -108,38 +107,6 @@ public class Engine
          System.exit(-1);
       }      
       return PrologState.emptyState();
-   }
-
-   public void componentWillMount(String component)
-   {
-      Term goal = AtomTerm.get("componentWillMount_" + component);      
-      interpreter.undo(0);
-      Interpreter.Goal g = interpreter.prepareGoal(goal);
-      try
-      {
-         PrologCode.RC rc = interpreter.execute(g);
-         if (rc == PrologCode.RC.SUCCESS)
-            interpreter.stop(g);
-      }
-      catch (PrologException notDefined)
-      {
-      }
-   }
-
-   public void componentWillUnmount(String component)
-   {
-      Term goal = AtomTerm.get("componentWillUnmount_" + component);      
-      interpreter.undo(0);
-      Interpreter.Goal g = interpreter.prepareGoal(goal);
-      try
-      {
-         PrologCode.RC rc = interpreter.execute(g);
-         if (rc == PrologCode.RC.SUCCESS)
-            interpreter.stop(g);
-      }
-      catch (PrologException notDefined)
-      {
-      }
    }
 
    public PrologState instantiateProps(Map<String, Object> properties)
@@ -173,8 +140,7 @@ public class Engine
       // FIXME: make sure that key and value are not instantiated by this for the next handler (including for recursive calls via waitFor()).
       //        Maybe we need to copy the term here somehow?
       Term goal = ReactModule.crossModuleCall(componentName, new CompoundTerm(AtomTerm.get("handle_event"), new Term[]{key, value, state, props, newState}));
-      // FIXME: Why is this unsafe?
-      //interpreter.undo(0);
+      // We cannot call undo(0) here because we might be processing recursive events
       Interpreter.Goal g = interpreter.prepareGoal(goal);
       try
       {
@@ -230,7 +196,8 @@ public class Engine
       {
          System.out.println("Handler is not callable: " + handler);
          return null;
-      }      
+      }
+      // This SHOULD be safe since we SHOULD always be at the top-level when doing this, and if not, we want to go there!
       interpreter.undo(0);
       Interpreter.Goal g = interpreter.prepareGoal(goal);
       try
