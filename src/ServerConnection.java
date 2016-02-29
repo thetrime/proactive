@@ -31,7 +31,6 @@ public class ServerConnection extends WebSocketClient
    @Override
    public void onMessage(String key)
    {
-      System.out.println(">>>> " + key);
       List<CodeChangeListener> listeners = allListeners.get(key);
       if (listeners != null)
       {

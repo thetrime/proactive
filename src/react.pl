@@ -1,5 +1,7 @@
 :-module(react,
-         [trigger_react_recompile/1]).
+         [raise_event/2,
+          wait_for/1,         
+          trigger_react_recompile/1]).
 
 %       You MUST provide an implementation of react:goal_is_safe/1 or on_server/1 will always fail on the client.
 %       This is because an unscrupulous user could easily execute on_server with whatever goal they want! 
@@ -70,8 +72,10 @@ notify_react_loop_1(Websocket, Slave):-
             thread_join(Slave, _),
             ws_close(Websocket, 1000, goodbye),
             throw(terminated)
-        ; Message = text(Message)->
-            ws_send(Websocket, text(Message))
+        ; Message = text(Data)->
+            ws_send(Websocket, text(Data))
+        ; otherwise->
+            format(user_error, 'Unexpected message: ~q~n', [Message])
         ),
         !,
         notify_react_loop_1(Websocket, Slave).
@@ -158,3 +162,6 @@ trigger_react_recompile(Module):-
 
 :-meta_predicate(user:on_server(0)).
 user:on_server(X):- X.
+
+raise_event(Key, _):- permission_error(raise, server_side_event, Key).
+wait_for(List):- permission_error(wait_for, server_side_event, List).

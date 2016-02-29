@@ -233,7 +233,7 @@ public class ReactDiff
       int len = aLen > bLen ? aLen : bLen;
       for (int i = 0; i < len; i++)
       {
-         PrologNode leftNode = aChildren.get(i);
+         PrologNode leftNode = i >= aLen?null:aChildren.get(i);
          PrologNode rightNode = null;
          // We may have exhausted bChildren since len is max(aLen, bLen)
          if (bChildren.hasNext())

@@ -3,6 +3,7 @@ package org.proactive.ui;
 import java.awt.Component;
 import java.awt.BorderLayout;
 import javax.swing.JFrame;
+import javax.swing.SwingUtilities;
 import java.util.List;
 import java.util.LinkedList;
 import java.net.URI;
@@ -59,6 +60,15 @@ public class ReactApp extends ReactComponent implements CodeChangeListener
          {
             context.getEngine().make();
             context.reRender();
+            SwingUtilities.invokeLater(new Runnable()
+               {
+                  public void run()
+                  {
+                     frame.validate();
+                     frame.repaint();
+                     
+                  }
+               });      
          }
       }
       catch(Exception e)
@@ -75,9 +85,7 @@ public class ReactApp extends ReactComponent implements CodeChangeListener
          children.add(child);
          frame.getContentPane().add(child.getAWTComponent(), BorderLayout.CENTER);
          context = child.getContext();
-      }
-      frame.validate();
-      frame.repaint();
+      }      
    }
    public void removeChild(ReactComponent child)
    {
