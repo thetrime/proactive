@@ -7,8 +7,7 @@ Quick demo
 ----------
 If you want to just get stuck in, follow these steps:
    1. `make`
-   1. `make run-server` (this will start a server on port 10080)
-   1. In your server, `consult('demo/App').`
+   1. `make run-server` (this will start a server on port 10080 and consult demo/App.pl)
    1. In another console, make `run-client` (this will start a client for http://localhost:10080/react/App)
 
 Roadmap
