@@ -21,9 +21,15 @@
 
 serve_react(Request):-
         memberchk(path(Path), Request),
-        atomic_list_concat(['', react, component, Module], '/', Path),        
+        atomic_list_concat(['', react, component, Module], '/', Path),
+        findall(Candidate,
+                related_modules(Module, Candidate),
+                Modules),
+        sort(Modules, ModulesWithoutDuplicates),
         findall(Clause,
-                react_clause(Module, Clause),               
+                ( member(AModule, ModulesWithoutDuplicates),
+                  react_clause(AModule, Clause)
+                ),
                 Clauses),
         format(current_output, 'Content-Type: text/prolog~n~n', []),
         forall(member(Clause, Clauses),
@@ -40,12 +46,14 @@ react_clause(Module, Head:-Body):-
         \+predicate_property(Module:Head, imported_from(_)),
         clause(Module:Head, Body, _).
 
-react_clause(Module, SubmoduleClause):-
+related_modules(Root, Root).
+related_modules(Module, Related):-
         current_predicate(_, Module:requires(_)),
         predicate_property(Module:requires(_), interpreted),
         \+predicate_property(Module:requires(_), imported_from(_)),
         clause(Module:requires(SubModule), _, _),
-        react_clause(SubModule, SubmoduleClause).
+        related_modules(SubModule, Related).
+
 
 
 notify_react(Request):-
