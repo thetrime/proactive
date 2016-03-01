@@ -23,7 +23,15 @@ public class React
       {
          System.err.println("Usage: React <URI> <Component>");
       }
-      new org.proactive.ui.ReactApp(args[0], args[1]);
+      try
+      {
+         new org.proactive.ui.ReactApp(args[0], args[1]);
+      }
+      catch(Exception e)
+      {
+         e.printStackTrace();
+         System.exit(-1);
+      }
    }
 
    
