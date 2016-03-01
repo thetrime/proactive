@@ -71,13 +71,18 @@ public class ReactEnvironment extends Environment
    }
 
    public synchronized void ensureLoaded(String baseURI, String component)
-   {      
+   {
       prologTextLoaderState.ensureLoaded(new CompoundTerm(CompoundTermTag.get("url", 1), AtomTerm.get(baseURI + component)));
    }
 
    public ReactModule startNewModule(String name, List<CompoundTermTag> exports)
    {
-      System.out.println("Module: " + name + " with exports " + exports);
+      System.out.println("New module: " + name + " with exports " + exports);
+      if (modules.get(name) != null)
+      {
+         System.out.println("Module " + name + " already exists!");
+         System.exit(-1);
+      }
       ReactModule newModule = new ReactModule(name, exports);
       modules.put(name, newModule);
       moduleStack.push(name);
@@ -127,10 +132,7 @@ public class ReactEnvironment extends Environment
       Predicate p = module.createDefinedPredicate(head);
       p.setType(Predicate.TYPE.BUILD_IN);
       if (functor.equals(":"))
-      {
-         System.out.println("Loading :/2");
          p.setJavaClassName("org.proactive.prolog.Predicate_colon");
-      }
       else
          p.setJavaClassName("org.proactive.prolog.Predicate_" + functor);
       PrologCode q = loadPrologCode(head);
