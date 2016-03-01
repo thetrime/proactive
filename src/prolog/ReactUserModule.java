@@ -1,10 +1,8 @@
 package org.proactive.prolog;
 
-import gnu.prolog.database.*;
-import gnu.prolog.io.*;
-import gnu.prolog.term.*;
-import gnu.prolog.vm.*;
-import java.util.*;
+import gnu.prolog.database.Predicate;
+import java.util.LinkedList;
+import gnu.prolog.term.CompoundTermTag;
 
 public class ReactUserModule extends ReactModule
 {

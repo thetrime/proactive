@@ -1,12 +1,12 @@
 package org.proactive.prolog;
 
-import gnu.prolog.database.*;
-import gnu.prolog.io.*;
-import gnu.prolog.term.*;
-import gnu.prolog.vm.*;
-import java.io.*;
-import java.util.*;
-import gnu.prolog.vm.interpreter.*;
+import gnu.prolog.term.Term;
+import gnu.prolog.term.AtomTerm;
+import gnu.prolog.vm.Interpreter;
+import gnu.prolog.vm.ExecuteOnlyCode;
+import gnu.prolog.vm.PrologException;
+import gnu.prolog.vm.interpreter.Predicate_call;
+import gnu.prolog.vm.BacktrackInfo;
 
 public class Predicate_colon extends ExecuteOnlyCode
 {

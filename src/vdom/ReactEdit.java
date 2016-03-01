@@ -51,8 +51,8 @@ public class ReactEdit
    protected void destroyWidget(ReactComponent domNode, PrologNode w)
    {
       System.out.println("destroyWidget called on " + domNode + " from " + w.getClass().getName());
-      if (w instanceof PrologDocument && ((PrologDocument)w).lifecycleManager != null)
-         ((PrologDocument)w).lifecycleManager.destroy(domNode);
+      if (w instanceof PrologWidget)
+         ((PrologWidget)w).destroy(domNode);
    }
    
 }

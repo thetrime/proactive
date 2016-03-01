@@ -4,7 +4,7 @@ import org.proactive.vdom.PatchSet;
 import org.proactive.vdom.ReactDiff;
 import org.proactive.ReactComponent;
 import org.proactive.React;
-import gnu.prolog.term.*;
+import gnu.prolog.term.Term;
 
 public class PrologContext
 {

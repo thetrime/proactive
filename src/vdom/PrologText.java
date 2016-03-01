@@ -1,8 +1,7 @@
 package org.proactive.vdom;
 
-import gnu.prolog.term.*;
-import gnu.prolog.vm.*;
-import java.util.*;
+import gnu.prolog.term.Term;
+import gnu.prolog.term.AtomTerm;
 
 
 public class PrologText extends PrologNode

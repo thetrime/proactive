@@ -6,6 +6,7 @@ import java.util.Iterator;
 import java.lang.reflect.Constructor;
 import org.proactive.vdom.PrologNode;
 import org.proactive.vdom.PrologDocument;
+import org.proactive.vdom.PrologWidget;
 import org.proactive.prolog.PrologContext;
 import org.proactive.prolog.PrologState;
 import org.proactive.prolog.FluxDispatcher;
@@ -20,6 +21,10 @@ public class ReactComponentFactory
 
    public static ReactComponent instantiateNode(PrologNode n, PrologContext context) throws Exception
    {
+      if (n instanceof PrologWidget)
+      {
+         return ((PrologWidget)n).init(context);
+      }
       try
       {
          Constructor<? extends ReactComponent> c = configuration.getImplementingClass(n.getNodeName());
@@ -36,22 +41,9 @@ public class ReactComponentFactory
       {
          e.printStackTrace();
       }
-      // User-defined component
-      System.out.println(" ### Creating user-defined type " + n.getNodeName());
-      PrologState props = context.getEngine().instantiateProps(n.getAttributes());
-      PrologState initialState = context.getEngine().getInitialState(n.getNodeName(), props);
-      PrologDocument userComponent = context.getEngine().render(n.getNodeName(), initialState, props);
-      System.out.println("User component created the following document: " + userComponent);
-      if (userComponent == null)
-      {
-         System.out.println("Unhandled type: " + n);
-         System.exit(-1);
-      }
-      ReactComponent component = instantiateNode(userComponent, userComponent.getContext());
-      userComponent.getContext().setRoot(component);
-      System.out.println("Registering a new flux listener for " + n.getNodeName());
-      FluxDispatcher.registerFluxListener(n.getNodeName(), userComponent.getContext());               
-      return component;
+      System.out.println("Could not instantiate node from "+ n);
+      System.exit(-1);
+      return null;
    }
    
    private static void applyNodeAttributes(PrologNode n, ReactComponent target)
@@ -62,5 +54,10 @@ public class ReactComponentFactory
          Map.Entry<String, Object> entry = i.next();
          target.setProperty(entry.getKey(), entry.getValue());
       }
+   }
+
+   public static boolean isWidgetName(String name)
+   {
+      return (configuration.getImplementingClass(name) == null);
    }
 }

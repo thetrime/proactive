@@ -1,10 +1,19 @@
 package org.proactive.prolog;
 
-import gnu.prolog.database.*;
-import gnu.prolog.io.*;
-import gnu.prolog.term.*;
-import gnu.prolog.vm.*;
-import java.util.*;
+import gnu.prolog.database.PredicateUpdatedEvent;
+import gnu.prolog.database.Predicate;
+import gnu.prolog.database.Module;
+import gnu.prolog.term.AtomTerm;
+import gnu.prolog.term.CompoundTerm;
+import gnu.prolog.term.CompoundTermTag;
+import gnu.prolog.vm.Environment;
+import gnu.prolog.vm.PrologCodeListener;
+import gnu.prolog.vm.PrologException;
+import gnu.prolog.vm.PrologCode;
+import java.util.Stack;
+import java.util.Map;
+import java.util.List;
+import java.util.HashMap;
 import java.lang.ref.WeakReference;
 import java.lang.ref.ReferenceQueue;
 

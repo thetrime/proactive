@@ -2,8 +2,9 @@ package org.proactive;
 
 //https://github.com/Matt-Esch/virtual-dom
 
-import java.util.*;
-import javax.swing.*;
+import java.util.List;
+import java.util.LinkedList;
+import javax.swing.SwingUtilities;
 import java.awt.BorderLayout;
 import java.net.URI;
 import org.proactive.vdom.PrologDocument;

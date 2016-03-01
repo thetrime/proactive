@@ -5,8 +5,13 @@ import org.proactive.prolog.PrologContext;
 import org.proactive.ReactComponent;
 import org.proactive.ReactComponentFactory;
 
-import javax.swing.*;
-import java.awt.*;
+import javax.swing.JPanel;
+import java.awt.GridBagLayout;
+import java.awt.GridBagConstraints;
+import java.awt.Insets;
+import java.awt.Color;
+import javax.swing.BorderFactory;
+import java.awt.Component;
 import java.util.List;
 import java.util.Iterator;
 import java.util.LinkedList;

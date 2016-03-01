@@ -35,6 +35,7 @@ SRC= src/React.java                                        \
      src/vdom/PrologElement.java                           \
      src/vdom/PrologText.java                              \
      src/vdom/PrologThunk.java                             \
+     src/vdom/PrologWidget.java                            \
      src/vdom/ReactEditNode.java                           \
      src/vdom/ReactEditProps.java                          \
      src/vdom/ReactEditRemove.java                         \

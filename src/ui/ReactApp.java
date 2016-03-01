@@ -13,7 +13,7 @@ import org.proactive.ReactComponent;
 import org.proactive.CodeChangeListener;
 import org.proactive.React;
 import org.proactive.ReactComponentFactory;
-import org.proactive.vdom.PrologNode;
+import org.proactive.vdom.PrologWidget;
 
 public class ReactApp extends ReactComponent implements CodeChangeListener
 {
@@ -42,9 +42,9 @@ public class ReactApp extends ReactComponent implements CodeChangeListener
       frame.getContentPane().setLayout(new BorderLayout());
 
               
-      // we want to end up calling instantiateNode() with a prologDocument containing <rootElement>
+      // we want to end up calling instantiateNode() with a prologWidget containing <rootElement>
       context = new PrologContext(rootElementId, engine);
-      ReactComponent contentPane = ReactComponentFactory.instantiateNode(new PrologNode(rootElementId), context);
+      ReactComponent contentPane = ReactComponentFactory.instantiateNode(new PrologWidget(rootElementId), context);
       insertChildBefore(contentPane, null);      
       //      contentPane.getContext().reRender();
       frame.setSize(800, 600);

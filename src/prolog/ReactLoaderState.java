@@ -1,10 +1,17 @@
 package org.proactive.prolog;
 
-import gnu.prolog.database.*;
-import gnu.prolog.io.*;
-import gnu.prolog.term.*;
-import gnu.prolog.vm.*;
-import java.util.*;
+import gnu.prolog.database.PrologTextLoaderState;
+import gnu.prolog.database.Predicate;
+import gnu.prolog.database.PrologTextLoader;
+import gnu.prolog.term.Term;
+import gnu.prolog.term.CompoundTerm;
+import gnu.prolog.term.CompoundTermTag;
+import gnu.prolog.term.IntegerTerm;
+import gnu.prolog.term.AtomTerm;
+import gnu.prolog.vm.TermConstants;
+import gnu.prolog.vm.PrologException;
+import java.util.List;
+import java.util.LinkedList;
 
 public class ReactLoaderState extends PrologTextLoaderState
 {

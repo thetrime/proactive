@@ -1,8 +1,11 @@
 package org.proactive;
 
-import java.util.*;
-import java.net.*;
-import java.io.*;
+import java.util.List;
+import java.util.LinkedList;
+import java.util.HashMap;
+import java.util.Map;
+import java.net.URI;
+import java.io.IOException;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.drafts.Draft_17;
 import org.java_websocket.handshake.ServerHandshake;

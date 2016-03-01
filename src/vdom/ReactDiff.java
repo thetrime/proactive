@@ -41,7 +41,7 @@ public class ReactDiff
    }
    private static boolean isWidget(PrologNode n)
    {
-      return (n instanceof PrologDocument);
+      return (n instanceof PrologWidget);
    }
 
    private static void thunks(PrologNode a, PrologNode b, PatchSet patch, int index)
@@ -116,9 +116,7 @@ public class ReactDiff
    {
       if (isWidget(a))
       {
-         PrologDocument widget = (PrologDocument)a;
-         if (widget.lifecycleManager != null)
-            patch.put(index, appendPatch(patch.get(index), new ReactEditRemove(a, null)));
+         patch.put(index, appendPatch(patch.get(index), new ReactEditRemove(a, null)));
       }
       else if (a instanceof PrologElement && (((PrologElement)a).hasWidgets() || ((PrologElement)a).hasThunks()))
       {
