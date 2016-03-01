@@ -5,13 +5,16 @@
 requires('Splunge').
 
 render(State, _Props, Form):-
-        %memberchk(buttons=Buttons, State),
-        %get_some_fields(Buttons, Fields),
+        memberchk(buttons=Buttons, State),
+        get_some_fields(Buttons, Fields),
         Form = {|jsx||
                <Panel>
-                 <Splunge foo="bar"/>
-               </Panel>|}.
-        %Label = 'This is my title'.
+                 <Title label={Label}/>
+               {Fields}
+               <Splunge foo="bar"/>
+               <Button label={State.label}/>
+               </Panel>|},
+        Label = 'This is my title'.
 
 
 get_some_fields(Buttons, Fields):-
