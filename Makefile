@@ -11,7 +11,6 @@ SRC= src/React.java                                        \
      src/ui/Button.java                                    \
      src/ui/Field.java                                     \
      src/ui/Title.java                                     \
-     src/ui/RootPanel.java                                 \
      src/ui/ReactApp.java                                  \
      src/ui/DefaultReactComponentFactoryConfiguration.java \
      src/prolog/Engine.java                                \
@@ -71,4 +70,4 @@ run-server:
 clean:
 	rm -rf build
 	rm dist/react.jar
-:.*
+	rm .src
