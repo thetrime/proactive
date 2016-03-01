@@ -14,7 +14,8 @@ public class PrologNode
    String nodeName;
    Map<String, Object> attributes = new HashMap<String, Object>();
    List<PrologNode> children = new LinkedList<PrologNode>();
-
+   protected boolean hasWidgets = false;
+   protected boolean hasThunks = false;
    public PrologNode()
    {
    }
@@ -73,4 +74,16 @@ public class PrologNode
 
       }
    }
+
+   public boolean hasWidgets()
+   {
+      return hasWidgets;
+   }
+
+   public boolean hasThunks()
+   {
+      return hasThunks;
+   }
+
+
 }

@@ -51,4 +51,10 @@ public class PrologWidget extends PrologElement
       FluxDispatcher.deregisterFluxListener(componentName, widgetContext);
    }
    
+   @Override   
+   public boolean hasWidgets()
+   {
+      return true;
+   }   
+   
 }

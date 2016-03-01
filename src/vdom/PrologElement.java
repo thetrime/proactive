@@ -90,7 +90,12 @@ public class PrologElement extends PrologNode
                      list = (CompoundTerm)list.args[0];
                      while (list.tag.arity == 2)
                      {
-                        children.add(PrologNode.instantiateNode(list.args[0]));
+                        PrologNode newChild = PrologNode.instantiateNode(list.args[0]);
+                        if (newChild.hasWidgets())
+                           hasWidgets = true;
+                        if (newChild.hasThunks())
+                           hasThunks = true;
+                        children.add(newChild);
                         if (list.args[1] instanceof CompoundTerm)
                            list = (CompoundTerm)list.args[1];
                         else if (TermConstants.emptyListAtom.equals(list.args[1]))
@@ -101,7 +106,15 @@ public class PrologElement extends PrologNode
                   }                  
                }
                else
-                  children.add(PrologNode.instantiateNode(childTerm.args[0]));
+               {
+                  PrologNode newChild = PrologNode.instantiateNode(childTerm.args[0]);
+                  children.add(newChild);
+                  if (newChild.hasWidgets())
+                     hasWidgets = true;
+                  if (newChild.hasThunks())
+                     hasThunks = true;
+
+               }
                if (childTerm.args[1] instanceof CompoundTerm)
                   childTerm = (CompoundTerm)childTerm.args[1];
                else if (TermConstants.emptyListAtom.equals(childTerm.args[1]))
@@ -126,18 +139,6 @@ public class PrologElement extends PrologNode
       if (value == null)
          return "";
       return "???";
-   }
-
-   public boolean hasWidgets()
-   {
-      // FIXME: stub
-      return false;
-   }
-
-   public boolean hasThunks()
-   {
-      // FIXME: stub
-      return false;
    }
 
 }
