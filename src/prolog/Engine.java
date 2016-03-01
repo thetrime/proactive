@@ -116,8 +116,8 @@ public class Engine
       {
           // FIXME: There are two possible exceptions here. One is that there is no such predicate - that is OK. The other is there is no such module - that is bad.
           // Really we should be checking for the predicates existence first, somehow...
-         notDefined.printStackTrace();
-         System.exit(-1);
+         //notDefined.printStackTrace();
+         //System.exit(-1);
       }      
       return PrologState.emptyState();
    }
