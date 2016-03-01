@@ -47,7 +47,7 @@ SRC= src/React.java                                        \
 
 all:	client
 
-.src:	$(SRC)
+.src:	$(SRC) Makefile
 	echo $(SRC) > $@
 
 build:

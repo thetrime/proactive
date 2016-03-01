@@ -41,8 +41,7 @@ public class ReactDiff
    }
    private static boolean isWidget(PrologNode n)
    {
-      // FIXME: Stub
-      return false;
+      return (n instanceof PrologDocument);
    }
 
    private static void thunks(PrologNode a, PrologNode b, PatchSet patch, int index)
@@ -91,10 +90,55 @@ public class ReactDiff
       }
    }
 
+   
+   
+   // Execute hooks when two nodes are identical
+   private static void unhook(PrologNode a, PatchSet patch, int index)
+   {
+      if (a instanceof PrologElement)
+      {
+         PrologElement vnode = (PrologElement)a;
+         if (vnode.hooks != null)
+         {
+            Map<String,Object> nullKeys = new HashMap<String,Object>();
+            for (String key : vnode.hooks.keySet())
+               nullKeys.put(key, null);
+            patch.put(index, appendPatch(patch.get(index), new ReactEditProps(a, nullKeys)));
+         }
+      }
+      else if (isThunk(a))
+      {
+         thunks(a, null, patch, index);
+      }
+   }
+
+   private static void destroyWidgets(PrologNode a, PatchSet patch, int index)
+   {
+      if (isWidget(a))
+      {
+         PrologDocument widget = (PrologDocument)a;
+         if (widget.lifecycleManager != null)
+            patch.put(index, appendPatch(patch.get(index), new ReactEditRemove(a, null)));
+      }
+      else if (a instanceof PrologElement && (((PrologElement)a).hasWidgets() || ((PrologElement)a).hasThunks()))
+      {
+         List<PrologNode> children = a.getChildren();
+         for (PrologNode child: children)
+         {
+            index++;
+            destroyWidgets(child, patch, index);
+            if (child instanceof PrologElement && child.getChildren() != null)
+               index += child.getChildren().size();
+         }
+      }
+      else if (isThunk(a))
+         thunks(a, null, patch, index);
+   }
+
    private static void clearState(PrologNode a, PatchSet patch, int index)
    {
-      // FIXME: Stub
-      return;
+      unhook(a, patch, index);
+      destroyWidgets(a, patch, index);
    }
  
    private static List<ReactEdit> appendPatch(List<ReactEdit> apply, ReactEdit patch)

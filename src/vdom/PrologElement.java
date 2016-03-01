@@ -1,22 +1,21 @@
 package org.proactive.vdom;
 
-import gnu.prolog.term.*;
-import gnu.prolog.vm.*;
-import java.util.*;
+import gnu.prolog.term.Term;
+import gnu.prolog.term.AtomTerm;
+import gnu.prolog.term.CompoundTerm;
+import gnu.prolog.vm.TermConstants;
+import java.util.Map;
+import java.util.HashMap;
 
 public class PrologElement extends PrologNode
 {
    private String key = null;
+   public Map<String, Object> hooks = new HashMap<String, Object>();
    public PrologElement()
    {
-      nodeName = "<special-root>";
+      nodeName = "(special-root)";
    }
 
-   public String toString()
-   {
-      return "element(" + nodeName + "....)";
-   }
-   
    public PrologElement(Term element) throws Exception
    {
       if (!(element instanceof CompoundTerm))
@@ -128,4 +127,17 @@ public class PrologElement extends PrologNode
          return "";
       return "???";
    }
+
+   public boolean hasWidgets()
+   {
+      // FIXME: stub
+      return false;
+   }
+
+   public boolean hasThunks()
+   {
+      // FIXME: stub
+      return false;
+   }
+
 }

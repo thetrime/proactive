@@ -49,4 +49,18 @@ public class PrologNode
          result = new PrologElement(t);
       return result;
    }
+
+   public String toString()
+   {
+      if (getChildren() == null || getChildren().size() == 0)
+         return "<" + getClass().getName() + ":" + nodeName + "/>";
+      else
+      {
+         String tag = "<" + getClass().getName() + ":" + nodeName + ">";
+         for (PrologNode child : getChildren())
+            tag += child.toString();
+         return tag + "</" + getClass().getName() + ":" + nodeName + ">";
+
+      }
+   }
 }

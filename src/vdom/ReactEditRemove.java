@@ -13,6 +13,7 @@ public class ReactEditRemove extends ReactEdit
       ReactComponent parentNode = domNode.getParentNode();
       if (parentNode != null)
          parentNode.removeChild(domNode);
+      destroyWidget(domNode, node);
       return null;
    }
    public String toString()
