@@ -74,6 +74,7 @@ public class ReactLoaderState extends PrologTextLoaderState
                PrologException.typeError(AtomTerm.get("list"), args[1]);
             // Switch to a brand new module here
             module = environment.startNewModule(moduleName.value, exports);
+            currentPredicate = null;
          }
          else
             module.addInitialization(loader.getCurrentPartialLoaderError(), term);
