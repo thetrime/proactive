@@ -24,7 +24,7 @@ jsx_node(Vars, Dict, element(Tag, Attributes, Content)) -->
             {Content = []}
         ; `>` ->
             jsx_children(Vars, Dict, Content),
-            optional_spaces, 
+            optional_spaces,
             `</`, jsx_tag(Tag), `>`
         ; {otherwise}->
             garbage
@@ -38,12 +38,16 @@ jsx_tag(Tag)-->
         jsx_atom(Tag).
 
 jsx_atom(Atom)-->
+        jsx_atom_code(Code),
         jsx_atom_codes(Codes),
-        {atom_codes(Atom, Codes)}.
+        {atom_codes(Atom, [Code|Codes])}.
+
+jsx_atom_code(Code)-->
+        [Code],
+        {code_type(Code, csym) ; Code == 45}.
 
 jsx_atom_codes([Code|Codes])-->
-        [Code],
-        {code_type(Code, csymf)},
+        jsx_atom_code(Code),
         !,
         jsx_atom_codes(Codes).
 jsx_atom_codes([])--> [].
