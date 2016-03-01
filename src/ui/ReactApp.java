@@ -33,9 +33,9 @@ public class ReactApp extends ReactComponent implements CodeChangeListener
       // This is a bit finicky. First we have to set up the state as 'empty'.
       // The empty state is not as empty as you might think. It contains 2 nodes:
       //    * The global root. This is the representation of this JFrame
-      //    * Inside this is a RootPanel. This is like the contentPane in the frame
+      //    * Inside this is the main widget. This is like the contentPane in the frame
       // Unlike in Swing, we can change the contentPane to a new one by patching it
-      // but the global domRoot is immutable. In reality, we should only EVER have one
+      // but the global domRoot (ie this object) is immutable. In reality, we should only EVER have one
       // child here, otherwise Swing goes a bit... well, weird.
       
       frame.getContentPane().setBackground(java.awt.Color.GREEN);
@@ -46,7 +46,6 @@ public class ReactApp extends ReactComponent implements CodeChangeListener
       context = new PrologContext(rootElementId, engine);
       ReactComponent contentPane = ReactComponentFactory.instantiateNode(new PrologWidget(rootElementId), context);
       insertChildBefore(contentPane, null);      
-      //      contentPane.getContext().reRender();
       frame.setSize(800, 600);
       frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
       frame.setVisible(true);

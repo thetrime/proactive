@@ -14,6 +14,8 @@ public class PrologWidget extends PrologElement
    
    public PrologWidget(String componentName) throws Exception
    {
+      // constructs a widget out of JUST a componentName.
+      // Necessary to bootstrap the entire tree
       super();
       this.componentName = componentName;
    }
