@@ -15,6 +15,7 @@ SRC= src/React.java                                        \
      src/ui/DefaultReactComponentFactoryConfiguration.java \
      src/prolog/Engine.java                                \
      src/prolog/PrologState.java                           \
+     src/prolog/PrologObject.java                          \
      src/prolog/PrologContext.java                         \
      src/prolog/ReactEnvironment.java                      \
      src/prolog/ReactLoaderState.java                      \

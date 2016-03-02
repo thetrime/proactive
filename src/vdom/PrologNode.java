@@ -12,7 +12,7 @@ import org.proactive.ReactComponentFactory;
 public class PrologNode
 {
    String nodeName;
-   Map<String, Object> attributes = new HashMap<String, Object>();
+   Map<String, Term> attributes = new HashMap<String, Term>();
    List<PrologNode> children = new LinkedList<PrologNode>();
    protected boolean hasWidgets = false;
    protected boolean hasThunks = false;
@@ -26,7 +26,7 @@ public class PrologNode
       return nodeName;
    }
 
-   public Map<String, Object> getAttributes()
+   public Map<String, Term> getAttributes()
    {
       return attributes;
    }

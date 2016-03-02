@@ -9,7 +9,10 @@ import org.proactive.vdom.PrologDocument;
 import org.proactive.vdom.PrologWidget;
 import org.proactive.prolog.PrologContext;
 import org.proactive.prolog.PrologState;
+import org.proactive.prolog.PrologObject;
 import org.proactive.prolog.FluxDispatcher;
+
+import gnu.prolog.term.Term;
 
 public class ReactComponentFactory
 {
@@ -48,11 +51,11 @@ public class ReactComponentFactory
    
    private static void applyNodeAttributes(PrologNode n, ReactComponent target)
    {
-      Map<String, Object> attributes = n.getAttributes();
-      for (Iterator<Map.Entry<String, Object>> i = attributes.entrySet().iterator(); i.hasNext();)
+      Map<String, Term> attributes = n.getAttributes();
+      for (Iterator<Map.Entry<String, Term>> i = attributes.entrySet().iterator(); i.hasNext();)
       {
-         Map.Entry<String, Object> entry = i.next();
-         target.setProperty(entry.getKey(), entry.getValue());
+         Map.Entry<String, Term> entry = i.next();
+         target.setProperty(entry.getKey(), new PrologObject(entry.getValue()));
       }
    }
 

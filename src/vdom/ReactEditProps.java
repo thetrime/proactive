@@ -1,15 +1,17 @@
 package org.proactive.vdom;
 
 import org.proactive.ReactComponent;
+import org.proactive.prolog.PrologObject;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Set;
+import gnu.prolog.term.Term;
 
 public class ReactEditProps extends ReactEdit
 {
-   Map<String,Object> patch;
-   public ReactEditProps(PrologNode node, Map<String,Object> patch)
+   Map<String,Term> patch;
+   public ReactEditProps(PrologNode node, Map<String,Term> patch)
    {
       super(node);
       this.patch = patch;
@@ -17,13 +19,13 @@ public class ReactEditProps extends ReactEdit
 
    public ReactComponent apply(ReactComponent domNode) throws Exception
    {
-      Set<Map.Entry<String, Object>> entries = ((Map<String,Object>)patch).entrySet();
-      Map<String,Object> previous = node.getAttributes();
-      for (Iterator<Map.Entry<String, Object>> i = entries.iterator(); i.hasNext();)
+      Set<Map.Entry<String, Term>> entries = ((Map<String,Term>)patch).entrySet();
+      Map<String,Term> previous = node.getAttributes();
+      for (Iterator<Map.Entry<String, Term>> i = entries.iterator(); i.hasNext();)
       {
-         Map.Entry<String, Object> entry = i.next();
+         Map.Entry<String, Term> entry = i.next();
          String propName = entry.getKey();
-         Object propValue = entry.getValue();
+         Term propValue = entry.getValue();
          if (propValue == null)
          {
             removeProperty(domNode, propName, propValue, previous);
@@ -31,40 +33,39 @@ public class ReactEditProps extends ReactEdit
          else if (isHook(propValue))
          {
             removeProperty(domNode, propName, propValue, previous);
-            if (((Hook)propValue).hook != null)
-            {
-               ((Hook)propValue).hook.somethingChanged(domNode, propName, previous!=null?previous.get(propName) : null);
-            }
+            Hook hook = Hook.get(propValue);
+            if (hook != null)
+               hook.somethingChanged(domNode, propName, previous!=null?previous.get(propName) : null);
          }
          else
          {
             // setProperty expects an object and sorts that out itself, so we dont need the isObject() case
-            domNode.setProperty(propName, propValue);
+            domNode.setProperty(propName, new PrologObject(propValue));
          }
       }
       return null;
    }
 
-   private void removeProperty(ReactComponent domNode, String propName, Object propValue, Map<String, Object> previous)
+   private void removeProperty(ReactComponent domNode, String propName, Term propValue, Map<String, Term> previous)
    {
       if (previous != null)
       {
-         Object previousValue = previous.get(propName);
+         Term previousValue = previous.get(propName);
          if (!isHook(previousValue))
          {
             if (propName.equals("attributes"))
             {
+               // FIXME: Stub?
             }
             else if (propName.equals("style"))
             {
+               // FIXME: Stub?
             }
-            else if (previousValue instanceof String)
-               domNode.setProperty(propName, "");
             else
                domNode.setProperty(propName, null);
          }
          else
-            ((Hook)previousValue).unHook(domNode, propName, propValue);
+            Hook.get(previousValue).unHook(domNode, propName, propValue);
       }
    }
 
@@ -76,14 +77,11 @@ public class ReactEditProps extends ReactEdit
    // Hooks are not really implemented. See also widgets and thunks
    private static class Hook   
    {
-      public HookListener hook;
-      public void unHook(ReactComponent c, String name, Object value) {}
-      public abstract static class HookListener
-      {
-         public abstract void somethingChanged(ReactComponent c, String name, Object previous);
-      }
+      public static Hook get(Term t) { return null; }
+      public void unHook(ReactComponent c, String name, Term value) {}
+      public void somethingChanged(ReactComponent c, String name, Term previous) {}
    }
-   private static boolean isHook(Object anything)
+   private static boolean isHook(Term anything)
    {
       return false;
    }

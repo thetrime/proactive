@@ -2,6 +2,7 @@ package org.proactive.ui;
 
 import org.proactive.vdom.PrologNode;
 import org.proactive.prolog.PrologContext;
+import org.proactive.prolog.PrologObject;
 import org.proactive.ReactComponent;
 import org.proactive.ReactComponentFactory;
 
@@ -45,7 +46,7 @@ public class Panel extends ReactComponent
       }
       panel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
    }
-   public void setProperty(String name, Object value)
+   public void setProperty(String name, PrologObject value)
    {
       System.out.println("Setting " + name + " on " + this + " to " + value);
       if (name.equals("layout"))
@@ -53,15 +54,15 @@ public class Panel extends ReactComponent
          int oldOrientation = orientation;
          if (value == null)
             orientation = VERTICAL;
-         else if (value.equals("horizontal"))
-            orientation = HORIZONTAL;
-         else if (value.equals("vertical"))
-            orientation = VERTICAL;
+         else
+            orientation = value.asOrientation();
          if (orientation != oldOrientation)
             repackChildren();
       }
       else if (name.equals("fill"))
-         fill = context.getFill(value);
+      {
+         fill = value.asFill();
+      }
    }
    public void insertChildBefore(ReactComponent child, ReactComponent sibling)
    {
@@ -99,6 +100,7 @@ public class Panel extends ReactComponent
          xweight = 1;
       if (childFill == GridBagConstraints.VERTICAL || childFill == GridBagConstraints.BOTH)
          yweight = 1;
+      System.out.println(this + " is adding a child: " + child);
       panel.add(child.getAWTComponent(), new GridBagConstraints(x, y, 1, 1, xweight, yweight, GridBagConstraints.CENTER, childFill, new Insets(0,0,0,0), padx, pady));
    }
    

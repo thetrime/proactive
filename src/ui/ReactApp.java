@@ -3,12 +3,15 @@ package org.proactive.ui;
 import java.awt.Component;
 import java.awt.BorderLayout;
 import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.SwingUtilities;
 import java.util.List;
 import java.util.LinkedList;
 import java.net.URI;
 import org.proactive.prolog.Engine;
 import org.proactive.prolog.PrologContext;
+import org.proactive.prolog.PrologObject;
 import org.proactive.ReactComponent;
 import org.proactive.CodeChangeListener;
 import org.proactive.React;
@@ -21,6 +24,7 @@ public class ReactApp extends ReactComponent implements CodeChangeListener
    List<ReactComponent> children = new LinkedList<ReactComponent>();
    String URL = null;
    String rootElementId = null;
+   private JPanel scrollContent;
    JFrame frame = new JFrame("React Test");
    public ReactApp(String URL, String rootElementId) throws Exception
    {
@@ -37,10 +41,11 @@ public class ReactApp extends ReactComponent implements CodeChangeListener
       // Unlike in Swing, we can change the contentPane to a new one by patching it
       // but the global domRoot (ie this object) is immutable. In reality, we should only EVER have one
       // child here, otherwise Swing goes a bit... well, weird.
-      
-      frame.getContentPane().setBackground(java.awt.Color.GREEN);
+      scrollContent = new JPanel();
+      scrollContent.setLayout(new BorderLayout());
+      JScrollPane scrollPane = new JScrollPane(scrollContent);
       frame.getContentPane().setLayout(new BorderLayout());
-
+      frame.getContentPane().add(scrollPane, BorderLayout.CENTER);
               
       // we want to end up calling instantiateNode() with a prologWidget containing <rootElement>
       context = new PrologContext(rootElementId, engine);
@@ -82,7 +87,7 @@ public class ReactApp extends ReactComponent implements CodeChangeListener
       {
          child.setParentNode(this);
          children.add(child);
-         frame.getContentPane().add(child.getAWTComponent(), BorderLayout.CENTER);
+         scrollContent.add(child.getAWTComponent(), BorderLayout.CENTER);
          context = child.getContext();
       }      
    }
@@ -90,7 +95,7 @@ public class ReactApp extends ReactComponent implements CodeChangeListener
    {
       context = null;
       children.remove(child);
-      frame.getContentPane().remove(child.getAWTComponent());
+      scrollContent.remove(child.getAWTComponent());
    }  
    public void replaceChild(ReactComponent newNode, ReactComponent oldNode)
    {
@@ -101,7 +106,7 @@ public class ReactApp extends ReactComponent implements CodeChangeListener
    {
       return children;
    }
-   public void setProperty(String name, Object value)
+   public void setProperty(String name, PrologObject value)
    {
    }
 

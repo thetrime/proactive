@@ -5,6 +5,7 @@ import java.util.LinkedList;
 import java.util.Iterator;
 import java.util.HashMap;
 import java.util.Map;
+import gnu.prolog.term.Term;
 
 public class ReactDiff
 {
@@ -100,7 +101,7 @@ public class ReactDiff
          PrologElement vnode = (PrologElement)a;
          if (vnode.hooks != null)
          {
-            Map<String,Object> nullKeys = new HashMap<String,Object>();
+            Map<String,Term> nullKeys = new HashMap<String,Term>();
             for (String key : vnode.hooks.keySet())
                nullKeys.put(key, null);
             patch.put(index, appendPatch(patch.get(index), new ReactEditProps(a, nullKeys)));
@@ -154,21 +155,21 @@ public class ReactDiff
       }
    }
 
-   private static Map<String, Object> diffProps(Map<String, Object> a, Map<String, Object> b)
+   private static Map<String, Term> diffProps(Map<String, Term> a, Map<String, Term> b)
    {
-      Map<String, Object> diff = null;
-      for (Iterator<Map.Entry<String, Object>> i = a.entrySet().iterator(); i.hasNext(); )
+      Map<String, Term> diff = null;
+      for (Iterator<Map.Entry<String, Term>> i = a.entrySet().iterator(); i.hasNext(); )
       {
-         Map.Entry<String,Object> entry = i.next();
+         Map.Entry<String, Term> entry = i.next();
          String aKey = entry.getKey();
          if (!b.containsKey(aKey))
          {
             if (diff == null)
-               diff = new HashMap<String, Object>();
+               diff = new HashMap<String, Term>();
             diff.put(aKey, null);
          }
-         Object aValue = a.get(aKey);
-         Object bValue = b.get(aKey);
+         Term aValue = a.get(aKey);
+         Term bValue = b.get(aKey);
          if (objectsAreEqual(aValue, bValue))
             continue;
 //         else if (isObject(aValue) && isObject(bValue))
@@ -179,18 +180,18 @@ public class ReactDiff
          else 
          {
             if (diff == null)
-               diff = new HashMap<String, Object>();
+               diff = new HashMap<String, Term>();
             diff.put(aKey, bValue);
          }
       }
-      for (Iterator<Map.Entry<String, Object>> i = b.entrySet().iterator(); i.hasNext();)
+      for (Iterator<Map.Entry<String, Term>> i = b.entrySet().iterator(); i.hasNext();)
       {
-         Map.Entry<String,Object> entry = i.next();
+         Map.Entry<String, Term> entry = i.next();
          String bKey = entry.getKey();
          if (!a.containsKey(bKey))
          {
             if (diff == null)
-               diff = new HashMap<String, Object>();
+               diff = new HashMap<String, Term>();
             diff.put(bKey, entry.getValue());
          }
       }
@@ -222,7 +223,7 @@ public class ReactDiff
          {
             if (a.getNodeName().equals(b.getNodeName()) && ((PrologElement)a).getAttribute("key").equals(((PrologElement)b).getAttribute("key")))
             {
-               Map<String,Object> propsPatch = diffProps(((PrologElement)a).getAttributes(), ((PrologElement)b).getAttributes());
+               Map<String,Term> propsPatch = diffProps(((PrologElement)a).getAttributes(), ((PrologElement)b).getAttributes());
                if (propsPatch != null)
                {
                   apply = appendPatch(apply, new ReactEditProps(a, propsPatch));

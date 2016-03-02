@@ -1,6 +1,7 @@
 package org.proactive;
 
 import org.proactive.prolog.PrologContext;
+import org.proactive.prolog.PrologObject;
 import java.util.List;
 import java.awt.Component;
 import java.awt.GridBagConstraints;
@@ -18,7 +19,7 @@ public abstract class ReactComponent
    }
 
    public abstract Component getAWTComponent();
-   public abstract void setProperty(String name, Object value);
+   public abstract void setProperty(String name, PrologObject value);
    
    public abstract List<ReactComponent> getChildNodes();
    public abstract void insertChildBefore(ReactComponent child, ReactComponent sibling);   

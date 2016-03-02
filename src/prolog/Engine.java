@@ -122,13 +122,13 @@ public class Engine
       return PrologState.emptyState();
    }
 
-   public PrologState instantiateProps(Map<String, Object> properties)
+   public PrologState instantiateProps(Map<String, Term> properties)
    {
       Term[] elements = new Term[properties.size()];
       int j = 0;
-      for (Iterator<Map.Entry<String, Object>> i = properties.entrySet().iterator(); i.hasNext();)
+      for (Iterator<Map.Entry<String, Term>> i = properties.entrySet().iterator(); i.hasNext();)
       {
-         Map.Entry<String, Object> entry = i.next();
+         Map.Entry<String, Term> entry = i.next();
          elements[j] = new CompoundTerm(CompoundTermTag.get(AtomTerm.get("="), 2),
                                         AtomTerm.get(entry.getKey()),
                                         (Term)entry.getValue());
@@ -235,7 +235,7 @@ public class Engine
 
    private PrologState applyState(Term oldState, Term newState) throws Exception
    {
-      Map<String, Object> properties = new HashMap<String, Object>();
+      Map<String, Term> properties = new HashMap<String, Term>();
       addProperties(oldState, properties);
       addProperties(newState, properties);
       return instantiateProps(properties);
@@ -252,7 +252,7 @@ public class Engine
       return false;
    }
    
-   private void addProperties(Term state, Map<String, Object> props) throws Exception
+   private void addProperties(Term state, Map<String, Term> props) throws Exception
    {
       if (TermConstants.emptyListAtom.equals(state))
          return;

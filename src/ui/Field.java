@@ -5,6 +5,7 @@ import java.util.List;
 import java.awt.Component;
 import org.proactive.vdom.PrologNode;
 import org.proactive.prolog.PrologContext;
+import org.proactive.prolog.PrologObject;
 import org.proactive.ReactLeafComponent;
 
 public class Field extends ReactLeafComponent 
@@ -14,10 +15,13 @@ public class Field extends ReactLeafComponent
    {
       super(context);
    }
-   public void setProperty(String name, Object value)
+   public void setProperty(String name, PrologObject value)
    {
       if (name.equals("fill"))
-         fill = context.getFill(value);
+         fill = value.asFill();
+      if (name.equals("label"))
+         field.setText(value.asString());
+
    }
    public Component getAWTComponent()
    {
