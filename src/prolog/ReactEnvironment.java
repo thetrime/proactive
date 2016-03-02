@@ -77,7 +77,7 @@ public class ReactEnvironment extends Environment
 
    public ReactModule startNewModule(String name, List<CompoundTermTag> exports)
    {
-      System.out.println("New module: " + name + " with exports " + exports);
+      //System.out.println("New module: " + name + " with exports " + exports);
       if (modules.get(name) != null)
       {
          System.out.println("Module " + name + " already exists!");
@@ -108,7 +108,7 @@ public class ReactEnvironment extends Environment
                continue;
             if (importer.getKey().equals("user"))
                continue;
-            System.out.println("================== importing " + exporter.getValue() + " into " + importer.getValue());            
+            //System.out.println("================== importing " + exporter.getValue() + " into " + importer.getValue());
             importer.getValue().importPredicates(exporter.getValue(), this);
          }
       }

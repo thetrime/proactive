@@ -31,7 +31,7 @@ public class FluxDispatcher
 
    public static void registerFluxListener(String componentName, PrologContext context)
    {
-      System.out.println("Checking " + componentName + " for fluxion");
+      //System.out.println("Checking " + componentName + " for fluxion");
       if (!listenerModules.contains(componentName))
          return;
       System.out.println("fluxion located. Linking...");

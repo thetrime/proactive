@@ -44,7 +44,6 @@ public class Panel extends ReactComponent
    }
    public void setProperty(String name, PrologObject value)
    {
-      System.out.println("Setting " + name + " on " + this + " to " + value);
       if (name.equals("layout"))
       {
          int oldOrientation = orientation;

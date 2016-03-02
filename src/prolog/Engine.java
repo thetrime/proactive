@@ -67,7 +67,7 @@ public class Engine
    
    public PrologDocument render(String component, PrologState stateWrapper, PrologState propsWrapper) throws Exception
    {
-      System.out.println("Rendering " + component);
+      //System.out.println("Rendering " + component);
       Term state;
       Term props;
       if (stateWrapper == null) 
@@ -80,7 +80,7 @@ public class Engine
          props = propsWrapper.getValue();
       VariableTerm replyTerm = new VariableTerm("Result");
       Term goal = ReactModule.crossModuleCall(component, new CompoundTerm(AtomTerm.get("render"), new Term[]{state, props, replyTerm}));
-      System.out.println("Execute: " + goal);
+      //System.out.println("Execute: " + goal);
       // We cannot undo(0) here because we might be in the middle of processing a flux event, and that would muck up the stack
       Interpreter.Goal g = interpreter.prepareGoal(goal);
       PrologCode.RC rc = interpreter.execute(g);
