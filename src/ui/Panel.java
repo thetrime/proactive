@@ -37,7 +37,7 @@ public class Panel extends ReactComponent
       super(context);
       panel.setBackground(Color.GRAY);
       panel.setLayout(layoutManager);
-      //panel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+      panel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
    }
    public void setProperties(HashMap<String, PrologObject> properties)
    {
@@ -82,7 +82,7 @@ public class Panel extends ReactComponent
             repackChildren();
          }
       }
-      else if (properties.containsKey("fill"))
+      if (properties.containsKey("fill"))
       {
          fill = properties.get("fill").asFill();
       }
