@@ -96,6 +96,7 @@ public class PrologElement extends PrologNode
                         if (newChild.hasThunks())
                            hasThunks = true;
                         children.add(newChild);
+                        count += newChild.getCount() + 1;
                         if (list.args[1] instanceof CompoundTerm)
                            list = (CompoundTerm)list.args[1];
                         else if (TermConstants.emptyListAtom.equals(list.args[1]))
@@ -109,6 +110,7 @@ public class PrologElement extends PrologNode
                {
                   PrologNode newChild = PrologNode.instantiateNode(childTerm.args[0]);
                   children.add(newChild);
+                  count += newChild.getCount() + 1;
                   if (newChild.hasWidgets())
                      hasWidgets = true;
                   if (newChild.hasThunks())

@@ -14,13 +14,19 @@ public class PrologNode
    String nodeName;
    Map<String, Term> attributes = new HashMap<String, Term>();
    List<PrologNode> children = new LinkedList<PrologNode>();
+   protected int count = 0;
    protected boolean hasWidgets = false;
    protected boolean hasThunks = false;
    public String getKey()
    {
       return null;
    }
-   
+
+   public int getCount()
+   {
+      return count;
+   }
+
    public String getNodeName()
    {
       return nodeName;
