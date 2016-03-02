@@ -3,6 +3,7 @@ package org.proactive.ui;
 import javax.swing.JTree;
 import java.util.List;
 import java.awt.Component;
+import java.util.HashMap;
 import org.proactive.vdom.PrologNode;
 import org.proactive.prolog.PrologContext;
 import org.proactive.prolog.PrologObject;
@@ -21,10 +22,10 @@ public class Tree extends ReactLeafComponent
         setText(((Text)child).getWholeText());
       */
    }
-   public void setProperty(String name, PrologObject value)
+   public void setProperties(HashMap<String, PrologObject> properties)
    {
-      if (name.equals("fill"))
-         fill = value.asFill();
+      if (properties.containsKey("fill"))
+         fill = properties.get("fill").asFill();
    }
    public Component getAWTComponent()
    {

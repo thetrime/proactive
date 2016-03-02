@@ -2,6 +2,7 @@ package org.proactive.prolog;
 
 import gnu.prolog.term.Term;
 import gnu.prolog.term.AtomTerm;
+import gnu.prolog.term.IntegerTerm;
 import gnu.prolog.term.CompoundTerm;
 
 // This is a wrapper for Term with a number of methods for getting the data out in a standardized way
@@ -38,20 +39,31 @@ public class PrologObject
       return java.awt.GridBagConstraints.NONE;      
    }
 
-   public int asOrientation()
+   public String asOrientation()
    {
       Term t = Engine.unpack(term);
       if (t instanceof AtomTerm)
       {
          String orientation = ((AtomTerm)term).value;
+         return orientation;
+         /*
          if (orientation.equals("horizontal"))
-            return 0;
+            return ;
          else if (orientation.equals("vertical"))
             return 1;
          else
             System.out.println("Illegal orientation: " + t);
+         */
       }
-      return 1;
+      return "vertical";
+   }
+
+   public int asInteger()
+   {
+      Term t = Engine.unpack(term);
+      if (t instanceof IntegerTerm)
+         return ((IntegerTerm)t).value;
+      return 0;
    }
 
    public Term asTerm()

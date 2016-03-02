@@ -3,6 +3,7 @@ package org.proactive.ui;
 import javax.swing.JTabbedPane;
 import javax.swing.JFrame;
 import java.util.List;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.awt.Component;
 import org.proactive.vdom.PrologNode;
@@ -21,10 +22,10 @@ public class TabbedPane extends ReactComponent
    {
       super(context);
    }
-   public void setProperty(String name, PrologObject value)
+   public void setProperties(HashMap<String, PrologObject> properties)
    {
-      if (name.equals("fill"))
-         fill = value.asFill();
+      if (properties.containsKey("fill"))
+         fill = properties.get("fill").asFill();
    }
    public Component getAWTComponent()
    {

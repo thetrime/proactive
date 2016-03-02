@@ -8,6 +8,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.SwingUtilities;
 import java.util.List;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.net.URI;
 import org.proactive.prolog.Engine;
@@ -112,7 +113,7 @@ public class ReactApp extends ReactComponent implements CodeChangeListener
    {
       return children;
    }
-   public void setProperty(String name, PrologObject value)
+   public void setProperties(HashMap<String, PrologObject> properties)
    {
    }
 

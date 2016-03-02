@@ -2,6 +2,7 @@ package org.proactive.ui;
 
 import javax.swing.JTextArea;
 import java.util.List;
+import java.util.HashMap;
 import java.awt.Component;
 import org.proactive.vdom.PrologNode;
 import org.proactive.prolog.PrologContext;
@@ -21,11 +22,12 @@ public class TextArea extends ReactLeafComponent
         setText(((Text)child).getWholeText());
       */
    }
-   public void setProperty(String name, PrologObject value)
+   public void setProperties(HashMap<String, PrologObject> properties)
    {
-      if (name.equals("fill"))
-         fill = value.asFill();
+      if (properties.containsKey("fill"))
+         fill = properties.get("fill").asFill();
    }
+
    public Component getAWTComponent()
    {
       return textArea;

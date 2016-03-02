@@ -21,6 +21,7 @@ public class ReactEditProps extends ReactEdit
    {
       Set<Map.Entry<String, Term>> entries = ((Map<String,Term>)patch).entrySet();
       Map<String,Term> previous = node.getAttributes();
+      HashMap<String, PrologObject> newProperties = new HashMap<String, PrologObject>();
       for (Iterator<Map.Entry<String, Term>> i = entries.iterator(); i.hasNext();)
       {
          Map.Entry<String, Term> entry = i.next();
@@ -28,11 +29,11 @@ public class ReactEditProps extends ReactEdit
          Term propValue = entry.getValue();
          if (propValue == null)
          {
-            removeProperty(domNode, propName, propValue, previous);
+            removeProperty(domNode, propName, propValue, previous, newProperties);
          }
          else if (isHook(propValue))
          {
-            removeProperty(domNode, propName, propValue, previous);
+            removeProperty(domNode, propName, propValue, previous, newProperties);
             Hook hook = Hook.get(propValue);
             if (hook != null)
                hook.somethingChanged(domNode, propName, previous!=null?previous.get(propName) : null);
@@ -40,13 +41,14 @@ public class ReactEditProps extends ReactEdit
          else
          {
             // setProperty expects an object and sorts that out itself, so we dont need the isObject() case
-            domNode.setProperty(propName, new PrologObject(propValue));
+            newProperties.put(propName, new PrologObject(propValue));
          }
       }
+      domNode.setProperties(newProperties);
       return null;
    }
 
-   private void removeProperty(ReactComponent domNode, String propName, Term propValue, Map<String, Term> previous)
+   private void removeProperty(ReactComponent domNode, String propName, Term propValue, Map<String, Term> previous, HashMap<String, PrologObject> newProperties)
    {
       if (previous != null)
       {
@@ -62,7 +64,7 @@ public class ReactEditProps extends ReactEdit
                // FIXME: Stub?
             }
             else
-               domNode.setProperty(propName, null);
+               newProperties.put(propName, null);
          }
          else
             Hook.get(previousValue).unHook(domNode, propName, propValue);

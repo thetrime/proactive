@@ -4,6 +4,7 @@ import javax.swing.JTextField;
 import javax.swing.JPanel;
 import javax.swing.JLabel;
 import java.util.List;
+import java.util.HashMap;
 import java.awt.Component;
 import java.awt.BorderLayout;
 import org.proactive.vdom.PrologNode;
@@ -18,10 +19,10 @@ public class Field extends ReactLeafComponent
    {
       super(context);
    }
-   public void setProperty(String name, PrologObject value)
+   public void setProperties(HashMap<String, PrologObject> properties)
    {
-      if (name.equals("fill"))
-         fill = value.asFill();
+      if (properties.containsKey("fill"))
+         fill = properties.get("fill").asFill();
    }
    public Component getAWTComponent()
    {

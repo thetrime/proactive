@@ -62,12 +62,10 @@ public class ReactComponentFactory
 
    private static void applyNodeAttributes(PrologNode n, ReactComponent target)
    {
-      Map<String, Term> attributes = n.getAttributes();
-      for (Iterator<Map.Entry<String, Term>> i = attributes.entrySet().iterator(); i.hasNext();)
-      {
-         Map.Entry<String, Term> entry = i.next();
-         target.setProperty(entry.getKey(), new PrologObject(entry.getValue()));
-      }
+      HashMap<String, PrologObject> attributes = new HashMap<String, PrologObject>();
+      for (Map.Entry<String, Term> entry : n.getAttributes().entrySet())
+         attributes.put(entry.getKey(), new PrologObject(entry.getValue()));
+      target.setProperties(attributes);
    }
 
    public static boolean isWidgetName(String name)

@@ -8,6 +8,7 @@ import org.proactive.ReactLeafComponent;
 
 import javax.swing.JButton;
 import java.util.List;
+import java.util.HashMap;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import java.awt.Component;
@@ -46,14 +47,14 @@ public class Button extends ReactLeafComponent
       button.addActionListener(actionListener);
    }
    
-   public void setProperty(String name, PrologObject value)
+   public void setProperties(HashMap<String, PrologObject> properties)
    {
-      if (name.equals("label"))
-         button.setText(value.asString());
-      else if (name.equals("fill"))
-         fill = value.asFill();
-      else if (name.equals("onClick"))
-         setClickHandler(value);
+      if (properties.containsKey("label"))
+         button.setText(properties.get("label").asString());
+      if (properties.containsKey("fill"))
+         fill = properties.get("fill").asFill();
+      if (properties.containsKey("onClick"))
+         setClickHandler(properties.get("onClick"));
    }
 
    public Component getAWTComponent()

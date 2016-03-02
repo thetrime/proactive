@@ -2,6 +2,7 @@ package org.proactive.ui;
 
 import javax.swing.JFrame;
 import java.util.List;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.awt.Component;
 import org.proactive.vdom.PrologNode;
@@ -21,12 +22,12 @@ public class Tab extends ReactComponent
    {
       super(context);
    }
-   public void setProperty(String name, PrologObject value)
+   public void setProperties(HashMap<String, PrologObject> properties)
    {
-      if (name.equals("label"))
-         label = value.asString();
-      else if (name.equals("tooltip"))
-         tooltip = value.asString();
+      if (properties.containsKey("label"))
+         label = properties.get("label").asString();
+      if (properties.containsKey("tooltip"))
+         tooltip = properties.get("tooltip").asString();
    }
    public Component getAWTComponent()
    {
