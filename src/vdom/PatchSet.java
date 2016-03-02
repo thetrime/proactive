@@ -26,13 +26,13 @@ public class PatchSet extends HashMap<Integer, List<ReactEdit>>
    {
       Set<Integer> indices = new TreeSet<Integer>(keySet());
       if (indices.size() == 0)
-         return rootNode;               
+         return rootNode;
       Map<Integer, ReactComponent> index = domIndex(rootNode, a, indices);
       ReactComponent ownerDocument = rootNode.getOwnerDocument();
 
-      for (Iterator<Integer> i = indices.iterator(); i.hasNext();)
+      for (Integer i : indices)
       {
-         int nodeIndex = i.next().intValue();
+         int nodeIndex = i.intValue();
          rootNode = applyPatch(rootNode, index.get(nodeIndex), this.get(nodeIndex));
       }
       return rootNode;
@@ -42,11 +42,10 @@ public class PatchSet extends HashMap<Integer, List<ReactEdit>>
    {
       if (domNode == null)
          return rootNode;
-
       ReactComponent newNode;
-      for (Iterator<ReactEdit> i = patchList.iterator(); i.hasNext();)
+      for (ReactEdit edit : patchList)
       {
-         newNode = i.next().apply(domNode);
+         newNode = edit.apply(domNode);
          if (domNode == rootNode)
             rootNode = newNode;
       }
@@ -67,20 +66,20 @@ public class PatchSet extends HashMap<Integer, List<ReactEdit>>
       {
          if (indexInRange(indices, rootIndex, rootIndex))
             nodes.put(rootIndex, rootNode);
-      }
-      if (tree != null && tree.getChildren().size() > 0)
-      {
-         List<PrologNode> vChildren = tree.getChildren();
-         List<ReactComponent> childNodes = rootNode.getChildNodes();
-         for (int i = 0; i < tree.getChildren().size(); i++)
+         if (tree != null && tree.getChildren().size() > 0)
          {
-            rootIndex++;
-            PrologNode vChild = (i > vChildren.size())?null:vChildren.get(i);
-            String count = (vChild == null)?"":((PrologElement)vChild).getAttribute("count"); 
-            int nextIndex = rootIndex + ((count.length() == 0)?0:Integer.parseInt(count));
-            if (indexInRange(indices, rootIndex, nextIndex))
-               recurse(childNodes.get(i), vChild, indices, nodes, rootIndex);
-            rootIndex = nextIndex;
+            List<PrologNode> vChildren = tree.getChildren();
+            List<ReactComponent> childNodes = rootNode.getChildNodes();
+            for (int i = 0; i < tree.getChildren().size(); i++)
+            {
+               rootIndex++;
+               PrologNode vChild = (i > vChildren.size())?null:vChildren.get(i);
+               int count = vChild.getCount();
+               int nextIndex = rootIndex + count;
+               if (indexInRange(indices, rootIndex, nextIndex))
+                  recurse(childNodes.get(i), vChild, indices, nodes, rootIndex);
+               rootIndex = nextIndex;
+            }
          }
       }
       return nodes;
