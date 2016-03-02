@@ -22,21 +22,25 @@
 serve_react(Request):-
         memberchk(path(Path), Request),
         atomic_list_concat(['', react, component, Module], '/', Path),
-        findall(Candidate,
-                related_modules(Module, Candidate),
-                Modules),
-        sort(Modules, ModulesWithoutDuplicates),
-        findall(Clause,
-                ( member(AModule, ModulesWithoutDuplicates),
-                  react_clause(AModule, Clause)
-                ),
-                Clauses),
-        format(current_output, 'Content-Type: text/prolog~n~n', []),
-        forall(member(Clause, Clauses),
-               ( numbervars(Clause, 0, _, [singletons(true)]),
-                 write_term(current_output, Clause, [numbervars(true), quoted(true)]),
-                 writeln(current_output, '.')
-               )).
+        ( current_module(Module)->
+            findall(Candidate,
+                    related_modules(Module, Candidate),
+                    Modules),
+            sort(Modules, ModulesWithoutDuplicates),
+            findall(Clause,
+                    ( member(AModule, ModulesWithoutDuplicates),
+                      react_clause(AModule, Clause)
+                    ),
+                    Clauses),
+            format(current_output, 'Content-Type: text/prolog~n~n', []),
+            forall(member(Clause, Clauses),
+                   ( numbervars(Clause, 0, _, [singletons(true)]),
+                     write_term(current_output, Clause, [numbervars(true), quoted(true)]),
+                     writeln(current_output, '.')
+                   ))
+        ; otherwise->
+            format(current_output, 'Content-Type: text/prolog~n~n', [])
+        ).
 
 react_clause(Module, :-module(Module, Exports)):-
         module_property(Module, exports(Exports)).
@@ -48,10 +52,10 @@ react_clause(Module, Head:-Body):-
 
 related_modules(Root, Root).
 related_modules(Module, Related):-
-        current_predicate(_, Module:requires(_)),
-        predicate_property(Module:requires(_), interpreted),
-        \+predicate_property(Module:requires(_), imported_from(_)),
-        clause(Module:requires(SubModule), _, _),
+        current_predicate(_, Module:depends_on(_)),
+        predicate_property(Module:depends_on(_), interpreted),
+        \+predicate_property(Module:depends_on(_), imported_from(_)),
+        clause(Module:depends_on(SubModule), _, _),
         related_modules(SubModule, Related).
 
 
@@ -173,3 +177,5 @@ user:on_server(X):- X.
 
 raise_event(Key, _):- permission_error(raise, server_side_event, Key).
 wait_for(List):- permission_error(wait_for, server_side_event, List).
+
+user:term_expansion(requires(X), [depends_on(X), :-use_module(X)]).
