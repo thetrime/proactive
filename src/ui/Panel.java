@@ -40,7 +40,7 @@ public class Panel extends ReactComponent
       super(context);
       panel.setBackground(Color.GRAY);
       panel.setLayout(layoutManager);
-      panel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+      //panel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
    }
    public void setProperty(String name, PrologObject value)
    {
