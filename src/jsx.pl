@@ -31,8 +31,27 @@ jsx_node(Vars, Dict, element(Tag, Attributes, Content)) -->
         ),
         optional_spaces.
 
+comment --> `%`,
+        !,
+        single_line_comment.
+
+comment --> `/*`, % */
+        !,
+        multi_line_comment.
+
+single_line_comment-->
+        `\n`, !.
+single_line_comment-->
+        [_], single_line_comment.
+
+multi_line_comment-->
+        `*/`, !.
+multi_line_comment-->
+        [_], multi_line_comment.
+
+
 spaces --> [Code], {code_type(Code, space)}, optional_spaces.
-optional_spaces --> spaces ; [].
+optional_spaces --> spaces ; comment ; [].
 
 jsx_tag(Tag)-->
         jsx_atom(Tag).
