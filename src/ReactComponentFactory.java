@@ -37,6 +37,7 @@ public class ReactComponentFactory
             if (context != null)
                context.setRoot(instance);
             applyNodeAttributes(n, instance);
+            addNodeChildren(n, instance, context);
             return instance;
          }
       }
@@ -48,7 +49,17 @@ public class ReactComponentFactory
       System.exit(-1);
       return null;
    }
-   
+
+   private static void addNodeChildren(PrologNode n, ReactComponent target, PrologContext context) throws Exception
+   {
+      for (PrologNode child : n.getChildren())
+      {
+         ReactComponent component = instantiateNode(child, context);
+         target.insertChildBefore(component, null);
+      }
+
+   }
+
    private static void applyNodeAttributes(PrologNode n, ReactComponent target)
    {
       Map<String, Term> attributes = n.getAttributes();

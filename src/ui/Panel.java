@@ -39,11 +39,6 @@ public class Panel extends ReactComponent
       super(context);
       panel.setBackground(Color.GRAY);
       panel.setLayout(layoutManager);
-      for (Iterator<PrologNode> i = n.getChildren().iterator(); i.hasNext();)
-      {
-         ReactComponent component = ReactComponentFactory.instantiateNode(i.next(), context);
-         insertChildBefore(component, null);
-      }
       panel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
    }
    public void setProperty(String name, PrologObject value)
