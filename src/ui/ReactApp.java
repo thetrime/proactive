@@ -1,6 +1,7 @@
 package org.proactive.ui;
 
 import java.awt.Component;
+import java.awt.Container;
 import java.awt.BorderLayout;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -24,7 +25,7 @@ public class ReactApp extends ReactComponent implements CodeChangeListener
    List<ReactComponent> children = new LinkedList<ReactComponent>();
    String URL = null;
    String rootElementId = null;
-   private JPanel scrollContent;
+   private Container scrollContent;
    JFrame frame = new JFrame("React Test");
    public ReactApp(String URL, String rootElementId) throws Exception
    {
@@ -41,12 +42,17 @@ public class ReactApp extends ReactComponent implements CodeChangeListener
       // Unlike in Swing, we can change the contentPane to a new one by patching it
       // but the global domRoot (ie this object) is immutable. In reality, we should only EVER have one
       // child here, otherwise Swing goes a bit... well, weird.
+
+      // This is for no-scroll at the top level
+      frame.getContentPane().setLayout(new BorderLayout());
+
+      /* This is for scroll at the top level
       scrollContent = new JPanel();
       scrollContent.setLayout(new BorderLayout());
       JScrollPane scrollPane = new JScrollPane(scrollContent);
-      frame.getContentPane().setLayout(new BorderLayout());
       frame.getContentPane().add(scrollPane, BorderLayout.CENTER);
-              
+      */
+      scrollContent = frame.getContentPane();
       // we want to end up calling instantiateNode() with a prologWidget containing <rootElement>
       context = new PrologContext(rootElementId, engine);
       ReactComponent contentPane = ReactComponentFactory.instantiateNode(new PrologWidget(rootElementId), context);

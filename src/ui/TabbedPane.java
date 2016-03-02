@@ -1,0 +1,90 @@
+package org.proactive.ui;
+
+import javax.swing.JTabbedPane;
+import javax.swing.JFrame;
+import java.util.List;
+import java.util.LinkedList;
+import java.awt.Component;
+import org.proactive.vdom.PrologNode;
+import org.proactive.prolog.PrologContext;
+import org.proactive.prolog.PrologObject;
+import org.proactive.prolog.Engine;
+import org.proactive.ReactComponent;
+
+public class TabbedPane extends ReactComponent
+{
+   int nextIndex = 0;
+   JTabbedPane tabbedPane = new JTabbedPane();
+   private java.util.List<ReactComponent> children = new LinkedList<ReactComponent>();
+   public TabbedPane(PrologNode n, PrologContext context)
+   {
+      super(context);
+   }
+   public void setProperty(String name, PrologObject value)
+   {
+      if (name.equals("fill"))
+         fill = value.asFill();
+   }
+   public Component getAWTComponent()
+   {
+      return tabbedPane;
+   }
+
+   public void insertChildBefore(ReactComponent child, ReactComponent sibling)
+   {
+      // First rehome the child in the document
+      if (child.getParentNode() != null)
+         child.getParentNode().removeChild(child);
+      child.setParentNode(this);
+      child.setOwnerDocument(owner);
+      
+      // Now insert the visual component
+      int index = (sibling==null)?-1:children.indexOf(sibling);
+      if (index != -1)
+      {
+         children.add(index, child);
+         repackChildren();
+      }
+      else
+      {
+         children.add(child);
+         addChildToDOM(nextIndex, child);
+         nextIndex++;         
+      }
+   }
+
+   private void addChildToDOM(int index, ReactComponent child)
+   {
+      if (!(child.getAWTComponent() instanceof JFrame))
+         tabbedPane.insertTab("???", null, child.getAWTComponent(), "???", index);
+   }
+   
+   private void repackChildren()
+   {
+      tabbedPane.removeAll();
+      int index = 0;
+      for (ReactComponent i : children)
+         addChildToDOM(index++, i);
+   }   
+
+   public void removeChild(ReactComponent child)
+   {
+      children.remove(child);
+      tabbedPane.remove(child.getAWTComponent());
+   }
+
+   public void replaceChild(ReactComponent newChild, ReactComponent oldChild)
+   {
+      int i = children.indexOf(oldChild);
+      children.set(i, newChild);
+      tabbedPane.remove(oldChild.getAWTComponent());
+      newChild.setParentNode(this);
+      if (!(newChild.getAWTComponent() instanceof JFrame))
+         tabbedPane.insertTab("???", null, newChild.getAWTComponent(), "???", i);
+   }
+
+   public List<ReactComponent> getChildNodes()
+   {
+      return children;
+   }
+}

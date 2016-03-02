@@ -20,6 +20,14 @@ public class DefaultReactComponentFactoryConfiguration implements ReactComponent
          constructorHash.put("Field", Field.class.getConstructor(PrologNode.class, PrologContext.class));
          constructorHash.put("Button", Button.class.getConstructor(PrologNode.class, PrologContext.class));
          constructorHash.put("Title", Title.class.getConstructor(PrologNode.class, PrologContext.class));
+         constructorHash.put("Label", Label.class.getConstructor(PrologNode.class, PrologContext.class));
+         constructorHash.put("Table", Table.class.getConstructor(PrologNode.class, PrologContext.class));
+         constructorHash.put("List", List.class.getConstructor(PrologNode.class, PrologContext.class));
+         constructorHash.put("TextArea", TextArea.class.getConstructor(PrologNode.class, PrologContext.class));
+         constructorHash.put("Tree", Tree.class.getConstructor(PrologNode.class, PrologContext.class));
+         constructorHash.put("EditorPane", EditorPane.class.getConstructor(PrologNode.class, PrologContext.class));
+         constructorHash.put("TabbedPane", TabbedPane.class.getConstructor(PrologNode.class, PrologContext.class));
+         constructorHash.put("Frame", Frame.class.getConstructor(PrologNode.class, PrologContext.class));
       }
       catch(Exception e)
       {

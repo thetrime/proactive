@@ -11,6 +11,14 @@ SRC= src/React.java                                        \
      src/ui/Button.java                                    \
      src/ui/Field.java                                     \
      src/ui/Title.java                                     \
+     src/ui/Label.java                                     \
+     src/ui/Table.java                                     \
+     src/ui/TabbedPane.java                                \
+     src/ui/List.java                                      \
+     src/ui/TextArea.java                                  \
+     src/ui/Tree.java                                      \
+     src/ui/EditorPane.java                                \
+     src/ui/Frame.java                                     \
      src/ui/ReactApp.java                                  \
      src/ui/DefaultReactComponentFactoryConfiguration.java \
      src/prolog/Engine.java                                \

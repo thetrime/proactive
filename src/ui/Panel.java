@@ -7,6 +7,7 @@ import org.proactive.ReactComponent;
 import org.proactive.ReactComponentFactory;
 
 import javax.swing.JPanel;
+import javax.swing.JFrame;
 import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
 import java.awt.Insets;
@@ -95,8 +96,8 @@ public class Panel extends ReactComponent
          xweight = 1;
       if (childFill == GridBagConstraints.VERTICAL || childFill == GridBagConstraints.BOTH)
          yweight = 1;
-      System.out.println(this + " is adding a child: " + child);
-      panel.add(child.getAWTComponent(), new GridBagConstraints(x, y, 1, 1, xweight, yweight, GridBagConstraints.CENTER, childFill, new Insets(0,0,0,0), padx, pady));
+      if (!(child.getAWTComponent() instanceof JFrame))
+         panel.add(child.getAWTComponent(), new GridBagConstraints(x, y, 1, 1, xweight, yweight, GridBagConstraints.CENTER, childFill, new Insets(0,0,0,0), padx, pady));
    }
    
    private void repackChildren()
