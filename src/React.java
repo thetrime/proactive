@@ -15,7 +15,7 @@ public class React
 {
    // Prevent instantiation
    private React() {}
-   
+
    static PrologDocument nextDocument = null;
    public static void main(String[] args) throws Exception
    {
@@ -25,7 +25,9 @@ public class React
       }
       try
       {
+         long startTime = System.currentTimeMillis();
          new org.proactive.ui.ReactApp(args[0], args[1]);
+         System.out.println("Render time: " + (System.currentTimeMillis() - startTime ) + "ms");
       }
       catch(Exception e)
       {
