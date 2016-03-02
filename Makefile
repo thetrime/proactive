@@ -10,10 +10,10 @@ SRC= src/React.java                                        \
      src/ui/Panel.java                                     \
      src/ui/Button.java                                    \
      src/ui/Field.java                                     \
-     src/ui/Title.java                                     \
      src/ui/Label.java                                     \
      src/ui/Table.java                                     \
      src/ui/TabbedPane.java                                \
+     src/ui/Tab.java                                       \
      src/ui/List.java                                      \
      src/ui/TextArea.java                                  \
      src/ui/Tree.java                                      \

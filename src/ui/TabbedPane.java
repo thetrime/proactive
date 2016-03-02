@@ -10,6 +10,7 @@ import org.proactive.prolog.PrologContext;
 import org.proactive.prolog.PrologObject;
 import org.proactive.prolog.Engine;
 import org.proactive.ReactComponent;
+import org.proactive.ui.Tab;
 
 public class TabbedPane extends ReactComponent
 {
@@ -55,8 +56,11 @@ public class TabbedPane extends ReactComponent
 
    private void addChildToDOM(int index, ReactComponent child)
    {
-      if (!(child.getAWTComponent() instanceof JFrame))
-         tabbedPane.insertTab("???", null, child.getAWTComponent(), "???", index);
+      if (child instanceof Tab)
+      {
+         Tab childTab = (Tab)child;
+         tabbedPane.insertTab(childTab.getLabel(), null, child.getAWTComponent(), childTab.getTooltip(), index);
+      }
    }
    
    private void repackChildren()
@@ -79,8 +83,11 @@ public class TabbedPane extends ReactComponent
       children.set(i, newChild);
       tabbedPane.remove(oldChild.getAWTComponent());
       newChild.setParentNode(this);
-      if (!(newChild.getAWTComponent() instanceof JFrame))
-         tabbedPane.insertTab("???", null, newChild.getAWTComponent(), "???", i);
+      if (newChild instanceof Tab)
+      {
+         Tab childTab = (Tab)newChild;
+         tabbedPane.insertTab(childTab.getLabel(), null, newChild.getAWTComponent(), childTab.getTooltip(), i);
+      }
    }
 
    public List<ReactComponent> getChildNodes()
