@@ -99,7 +99,7 @@ public class ReactDiff
       if (a instanceof PrologElement)
       {
          PrologElement vnode = (PrologElement)a;
-         if (vnode.hooks != null)
+         if (vnode.hooks.size() > 0)
          {
             Map<String,Term> nullKeys = new HashMap<String,Term>();
             for (String key : vnode.hooks.keySet())
@@ -294,11 +294,8 @@ public class ReactDiff
          {
             walk(leftNode, rightNode, patch, index);
          }
-         // FIXME: What is THIS all about?
-         if ((leftNode instanceof PrologElement) && ((PrologElement)leftNode).getAttribute("count").length() > 0)
-         {
-            index += Integer.parseInt(((PrologElement)leftNode).getAttribute("count")); // ??
-         }
+         int count = (leftNode == null)?0:leftNode.getCount();
+         index += count;
       }
 
       Moves moves = orderedSet.moves;
