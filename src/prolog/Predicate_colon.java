@@ -21,9 +21,10 @@ public class Predicate_colon extends ExecuteOnlyCode
          bi = interpreter.popBacktrackInfo();
          bi.undo(interpreter);
       }
+      environment.pushModule(moduleName.value); // If this fails we want to let the exception bubble up. We DEFINITELY do not want to pop later!
       try
       {
-         environment.pushModule(moduleName.value);
+
          rc = Predicate_call.staticExecute(interpreter, backtrackMode, args[1]);
          if (rc == RC.SUCCESS)
          {
