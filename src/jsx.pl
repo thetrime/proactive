@@ -72,10 +72,11 @@ jsx_atom_codes([Code|Codes])-->
 jsx_atom_codes([])--> [].
 
 jsx_children(Vars, Dict, [list(List)|Tail])-->
-        `{`, 
-        !,
-        % Array of components. We have to have a pointer to the siblings, which is why we do it in jsx_children
-        % rather than jsx_node
+        optional_spaces,
+        `{`,
+          !,
+          % Array of components. We have to have a pointer to the siblings, which is why we do it in jsx_children
+          % rather than jsx_node
           variable_name(HeadName),
           optional_spaces,
           {memberchk(HeadName=List, Dict)},
