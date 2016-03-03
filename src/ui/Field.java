@@ -63,7 +63,6 @@ public class Field extends ReactLeafComponent
          fill = properties.get("fill").asFill();
       if (properties.containsKey("value"))
       {
-         System.out.println("Set value to " + properties.get("value").asTerm());
          if (properties.get("value") == null)
             field.setText("");
          else

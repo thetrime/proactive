@@ -44,8 +44,11 @@ public class PrologWidget extends PrologElement
       FluxDispatcher.registerFluxListener(componentName, widgetContext);
       return component;
    }
-   public void update()
+   public ReactComponent update(PrologNode vNode, ReactComponent oldComponent)
    {
+      // FIXME: stub
+      System.out.println("Warning: update() called on widget of type " + componentName);
+      return oldComponent;
    }
    public void destroy(ReactComponent domNode)
    {

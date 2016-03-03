@@ -217,9 +217,9 @@ public class ReactDiff
          }
          apply = appendPatch(apply, new ReactEditRemove(a, b));
       }
-      else if (b instanceof PrologElement)
+      else if (b instanceof PrologElement && !(b instanceof PrologWidget))
       {
-         if (a instanceof PrologElement)
+         if (a instanceof PrologElement && !(a instanceof PrologWidget))
          {
             if (a.getNodeName().equals(b.getNodeName()) && ((PrologElement)a).getAttribute("key").equals(((PrologElement)b).getAttribute("key")))
             {
@@ -258,7 +258,7 @@ public class ReactDiff
       {
          if (!isWidget(a))
             applyClear = true;
-         apply = appendPatch(apply, new ReactEditWidget(a, b));
+         apply = appendPatch(apply, new ReactEditWidget(a, (PrologWidget)b));
       }
       if (apply != null)
          patch.put(index, apply);
