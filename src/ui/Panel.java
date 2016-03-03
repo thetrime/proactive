@@ -309,6 +309,7 @@ public class Panel extends ReactComponent
       }
       else if (orientation == GRID)
       {
+         panel.remove(oldChild.getAWTComponent());
          panel.add(newChild.getAWTComponent(), i);
       }
    }
