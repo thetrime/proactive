@@ -61,5 +61,16 @@ public class PrologWidget extends PrologElement
    {
       return true;
    }   
-   
+
+   public boolean equals(Object o)
+   {
+      if (o instanceof PrologWidget)
+      {
+         PrologWidget other = (PrologWidget)o;
+         return componentName.equals(other.componentName) &&
+            attributes.equals(other.attributes);
+      }
+      return false;
+   }
+
 }
