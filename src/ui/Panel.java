@@ -10,6 +10,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JFrame;
 import java.awt.GridBagLayout;
+import java.awt.Dimension;
 import java.awt.LayoutManager;
 import java.awt.GridBagConstraints;
 import java.awt.GridLayout;
@@ -27,12 +28,23 @@ public class Panel extends ReactComponent
    private static final int HORIZONTAL = 0;
    private static final int VERTICAL = 1;
    private static final int GRID = 2;
+   private static final int START = 0;
+   private static final int CENTER = 1;
+   private static final int END = 2;
    int nextIndex = 0;
    int orientation = VERTICAL;
+   int alignment = START;
+   int total_x_weight = 0;
+   int total_y_weight = 0;
+
+   JPanel alignmentPanel = new JPanel();
+
    private java.util.List<ReactComponent> children = new LinkedList<ReactComponent>();
    private LayoutManager layoutManager = new GridBagLayout();
    private Component awtComponent;
    private JPanel panel = new JPanel();
+
+   private String id;
 
    public Panel(PrologNode n, PrologContext context) throws Exception
    {
@@ -40,10 +52,13 @@ public class Panel extends ReactComponent
       awtComponent = panel;
       panel.setBackground(new Color(150, 168, 200));
       panel.setLayout(layoutManager);
+      alignmentPanel.setPreferredSize(new Dimension(0,0));
       //panel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
    }
    public void setProperties(HashMap<String, PrologObject> properties)
    {
+      if (properties.containsKey("key"))
+         id = properties.get("key").asString();
       if (properties.containsKey("layout"))
       {
          int oldOrientation = orientation;
@@ -85,6 +100,26 @@ public class Panel extends ReactComponent
             repackChildren();
          }
       }
+      if (properties.containsKey("align-children"))
+      {
+         int oldAlignment = alignment;
+         if (properties.get("align-children") == null)
+         {
+            alignment = START;
+         }
+         else
+         {
+            String key = properties.get("align-children").asString();
+            if (key.equals("start"))
+                alignment = START;
+            else if (key.equals("center"))
+                alignment = CENTER;
+            if (key.equals("end"))
+               alignment = END;
+         }
+         if (oldAlignment != alignment)
+            repackChildren();
+      }
       if (properties.containsKey("scroll"))
       {
          // FIXME: Not this simple!
@@ -98,7 +133,6 @@ public class Panel extends ReactComponent
          else
          {
             String key = properties.get("scroll").asScroll();
-            System.out.println("key: " + key);
             JScrollPane scroll = new JScrollPane(panel);
             if (key.equals("vertical"))
             {
@@ -133,8 +167,11 @@ public class Panel extends ReactComponent
          child.getParentNode().removeChild(child);
       child.setParentNode(this);
       child.setOwnerDocument(owner);
-      
-      // Now insert the visual component
+      int childFill = child.getFill();
+      if (childFill == GridBagConstraints.HORIZONTAL || childFill == GridBagConstraints.BOTH)
+         total_x_weight++;
+      if (childFill == GridBagConstraints.VERTICAL || childFill == GridBagConstraints.BOTH)
+         total_y_weight++;
       int index = (sibling==null)?-1:children.indexOf(sibling);
       if (index != -1)
       {
@@ -144,6 +181,7 @@ public class Panel extends ReactComponent
       else
       {
          children.add(child);
+         checkAlignment();
          addChildToDOM(nextIndex, child);
          nextIndex++;         
       }
@@ -160,17 +198,20 @@ public class Panel extends ReactComponent
       {
          int padx = 0;
          int pady = 0;
-         int x = (orientation==VERTICAL)?0:index;
-         int y = (orientation==VERTICAL)?index:0;
+         int x = (orientation==VERTICAL)?0:(index+1);
+         int y = (orientation==VERTICAL)?(index+1):0;
          int childFill = child.getFill();
          double yweight = 0;
          double xweight = 0;
+         int position = GridBagConstraints.CENTER;
          if (childFill == GridBagConstraints.HORIZONTAL || childFill == GridBagConstraints.BOTH)
             xweight = 1;
          if (childFill == GridBagConstraints.VERTICAL || childFill == GridBagConstraints.BOTH)
             yweight = 1;
          if (!(child.getAWTComponent() instanceof JFrame))
-            panel.add(child.getAWTComponent(), new GridBagConstraints(x, y, 1, 1, xweight, yweight, GridBagConstraints.CENTER, childFill, new Insets(0,0,0,0), padx, pady));
+         {
+            panel.add(child.getAWTComponent(), new GridBagConstraints(x, y, 1, 1, xweight, yweight, position, childFill, new Insets(0,0,0,0), padx, pady));
+         }
       }
    }
    
@@ -178,13 +219,64 @@ public class Panel extends ReactComponent
    {
       panel.removeAll();
       int index = 0;
-      for (Iterator<ReactComponent> i = children.iterator(); i.hasNext();)
-         addChildToDOM(index++, i.next());
+      // This resets the alignment if the child can take over the job of gluing out the panel alignment
+      checkAlignment();
+      for (ReactComponent child: children)
+         addChildToDOM(index++, child);
    }   
+
+   public void checkAlignment()
+   {
+      if (alignment == END && fill != GridBagConstraints.NONE)
+      {
+         if (orientation == HORIZONTAL && total_x_weight == 0)
+         {
+            // Requires padding at left
+            panel.add(alignmentPanel, new GridBagConstraints(0, 0, 1, 1, 1, 0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, new Insets(0,0,0,0), 0, 0));
+         }
+         else if (orientation == VERTICAL && total_y_weight == 0)
+         {
+            // Requires padding at top
+            panel.add(alignmentPanel, new GridBagConstraints(0, 0, 1, 1, 0, 1, GridBagConstraints.CENTER, GridBagConstraints.VERTICAL, new Insets(0,0,0,0), 0, 0));
+         }
+         else
+         {
+            // Remove padding if present
+            panel.remove(alignmentPanel);
+         }
+      }
+      else if (alignment == START && fill != GridBagConstraints.NONE)
+      {
+         if (orientation == HORIZONTAL && total_x_weight == 0)
+         {
+            // Requires padding at right
+            panel.add(alignmentPanel, new GridBagConstraints(children.size()+1, 0, 1, 1, 1, 0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, new Insets(0,0,0,0), 0, 0));
+         }
+         else if (orientation == VERTICAL && total_y_weight == 0)
+         {
+            // Requires padding at bottom
+            panel.add(alignmentPanel, new GridBagConstraints(0, children.size()+1, 1, 1, 0, 1, GridBagConstraints.CENTER, GridBagConstraints.VERTICAL, new Insets(0,0,0,0), 0, 0));
+
+         }
+         else
+         {
+            // Remove padding if present
+            panel.remove(alignmentPanel);
+         }
+      }
+      else
+         panel.remove(alignmentPanel);
+   }
 
    public void removeChild(ReactComponent child)
    {
       children.remove(child);
+      int childFill = child.getFill();
+      if (childFill == GridBagConstraints.HORIZONTAL || childFill == GridBagConstraints.BOTH)
+         total_x_weight--;
+      if (childFill == GridBagConstraints.VERTICAL || childFill == GridBagConstraints.BOTH)
+         total_y_weight--;
+      checkAlignment();
       panel.remove(child.getAWTComponent());
    }
 
@@ -193,6 +285,17 @@ public class Panel extends ReactComponent
       int i = children.indexOf(oldChild);
       children.set(i, newChild);
       newChild.setParentNode(this);
+
+      int childFill = oldChild.getFill();
+      if (childFill == GridBagConstraints.HORIZONTAL || childFill == GridBagConstraints.BOTH)
+         total_x_weight--;
+      if (childFill == GridBagConstraints.VERTICAL || childFill == GridBagConstraints.BOTH)
+         total_y_weight--;
+      childFill = newChild.getFill();
+      if (childFill == GridBagConstraints.HORIZONTAL || childFill == GridBagConstraints.BOTH)
+         total_x_weight--;
+      if (childFill == GridBagConstraints.VERTICAL || childFill == GridBagConstraints.BOTH)
+         total_y_weight--;
       if (orientation == VERTICAL || orientation == HORIZONTAL)
       {
          GridBagConstraints constraints = ((GridBagLayout)layoutManager).getConstraints(oldChild.getAWTComponent());
@@ -202,6 +305,7 @@ public class Panel extends ReactComponent
          // We may have to edit the constraints if the child has a different fill
          constraints.fill = newChild.getFill();
          panel.add(newChild.getAWTComponent(), constraints);
+         checkAlignment();
       }
       else if (orientation == GRID)
       {
