@@ -7,6 +7,7 @@ import org.proactive.ReactComponent;
 import org.proactive.ReactComponentFactory;
 
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JFrame;
 import java.awt.GridBagLayout;
 import java.awt.LayoutManager;
@@ -30,14 +31,16 @@ public class Panel extends ReactComponent
    int orientation = VERTICAL;
    private java.util.List<ReactComponent> children = new LinkedList<ReactComponent>();
    private LayoutManager layoutManager = new GridBagLayout();
+   private Component awtComponent;
    private JPanel panel = new JPanel();
 
    public Panel(PrologNode n, PrologContext context) throws Exception
    {
       super(context);
-      panel.setBackground(Color.GRAY);
+      awtComponent = panel;
+      panel.setBackground(new Color(150, 168, 200));
       panel.setLayout(layoutManager);
-      panel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+      //panel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
    }
    public void setProperties(HashMap<String, PrologObject> properties)
    {
@@ -81,6 +84,42 @@ public class Panel extends ReactComponent
             }
             repackChildren();
          }
+      }
+      if (properties.containsKey("scroll"))
+      {
+         // FIXME: Not this simple!
+         //   * Check scroll modes
+         //   * Could be turning scroll OFF!
+         //   * Could be changing from scroll->different scroll
+         if (properties.get("scroll") == null)
+         {
+            awtComponent = panel;
+         }
+         else
+         {
+            String key = properties.get("scroll").asScroll();
+            System.out.println("key: " + key);
+            JScrollPane scroll = new JScrollPane(panel);
+            if (key.equals("vertical"))
+            {
+               scroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+               scroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+            }
+            else if (key.equals("horizontal"))
+            {
+               scroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+               scroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_NEVER);
+            }
+            else if (key.equals("both"))
+            {
+               scroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+               scroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+            }
+            awtComponent = scroll;
+         }
+         if (getParentNode() != null)
+            getParentNode().replaceChild(this, this);
+
       }
       if (properties.containsKey("fill"))
       {
@@ -177,6 +216,6 @@ public class Panel extends ReactComponent
 
    public Component getAWTComponent()
    {
-      return panel;
+      return awtComponent;
    }
 }

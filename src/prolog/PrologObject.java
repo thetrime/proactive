@@ -63,9 +63,18 @@ public class PrologObject
       Term t = Engine.unpack(term);
       if (t instanceof IntegerTerm)
          return ((IntegerTerm)t).value;
+      else if (t instanceof AtomTerm)
+         return Integer.parseInt(((AtomTerm)t).value);
       return 0;
    }
 
+   public String asScroll()
+   {
+      Term t = Engine.unpack(term);
+      if (t instanceof AtomTerm)
+         return((AtomTerm)term).value;
+      return "vertical";
+   }
    public Term asTerm()
    {
       return term;
