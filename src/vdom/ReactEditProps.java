@@ -44,6 +44,7 @@ public class ReactEditProps extends ReactEdit
             newProperties.put(propName, new PrologObject(propValue));
          }
       }
+      System.out.println("Setting properties on " + domNode + " to " + newProperties);
       domNode.setProperties(newProperties);
       return null;
    }

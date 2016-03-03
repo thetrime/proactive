@@ -20,7 +20,12 @@ public class Button extends ReactLeafComponent
    {
       super(context);
    }
-   
+
+   private PrologObject serializeObject()
+   {
+      return PrologObject.serialize(new HashMap<String, Object>());
+   }
+
    private ActionListener actionListener = null;
    public void setClickHandler(PrologObject value)
    {
@@ -36,7 +41,7 @@ public class Button extends ReactLeafComponent
             {
                try
                {
-                  context.triggerEvent(value.asTerm());
+                  context.triggerEvent(value.asTerm(), serializeObject());
                }
                catch (Exception e)
                {

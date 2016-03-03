@@ -180,7 +180,7 @@ public class Engine
       return null;
    }
    
-   public PrologState triggerEvent(String componentName, Object handler, PrologState stateWrapper, PrologState propsWrapper) throws Exception
+   public PrologState triggerEvent(String componentName, Object handler, PrologObject context, PrologState stateWrapper, PrologState propsWrapper) throws Exception
    {
       Term state;
       Term props;
@@ -196,16 +196,17 @@ public class Engine
       Term goal;
       System.out.println("Handler: " + handler);
       if (handler instanceof AtomTerm)
-         goal = ReactModule.crossModuleCall(componentName, new CompoundTerm((AtomTerm)handler, new Term[]{state, props, newState}));
+         goal = ReactModule.crossModuleCall(componentName, new CompoundTerm((AtomTerm)handler, new Term[]{context.asTerm(), state, props, newState}));
       else if (handler instanceof CompoundTerm)
       {
          CompoundTerm c_handler = (CompoundTerm)handler;
-         Term[] args = new Term[c_handler.tag.arity + 3];
+         Term[] args = new Term[c_handler.tag.arity + 4];
          for (int i = 0; i < c_handler.tag.arity; i++)
             args[i] = unpack_recursive(c_handler.args[i]);
-         args[c_handler.tag.arity+0] = state;
-         args[c_handler.tag.arity+1] = props;
-         args[c_handler.tag.arity+2] = newState;         
+         args[c_handler.tag.arity+0] = context.asTerm();
+         args[c_handler.tag.arity+1] = state;
+         args[c_handler.tag.arity+2] = props;
+         args[c_handler.tag.arity+3] = newState;
          goal = new CompoundTerm(c_handler.tag.functor, args);
       }
       else
@@ -315,10 +316,11 @@ public class Engine
             // Fake maps
             CompoundTerm c = (CompoundTerm)value;
             String key = ((AtomTerm)(c.args[0])).value;
+
             if (TermConstants.emptyListAtom.equals(c.args[1]))
                return value;
             else if (!(c.args[1] instanceof CompoundTerm))
-               return value;                      
+               return value;
             CompoundTerm list = (CompoundTerm)c.args[1];
             while (list.tag.arity == 2 && list.tag.functor.value.equals("."))
             {
@@ -327,7 +329,7 @@ public class Engine
                {
                   CompoundTerm pair = (CompoundTerm)head;
                   if (pair.args[0] instanceof AtomTerm && ((AtomTerm)pair.args[0]).value.equals(key))
-                     return pair.args[1];
+                     return unpack(pair.args[1].dereference());
                }
                if (list.args[1] instanceof CompoundTerm)
                   list = (CompoundTerm)list.args[1];
