@@ -203,14 +203,14 @@ public class Panel extends ReactComponent
          int childFill = child.getFill();
          double yweight = 0;
          double xweight = 0;
-         int position = GridBagConstraints.CENTER;
+         int anchor = GridBagConstraints.CENTER;
          if (childFill == GridBagConstraints.HORIZONTAL || childFill == GridBagConstraints.BOTH)
             xweight = 1;
          if (childFill == GridBagConstraints.VERTICAL || childFill == GridBagConstraints.BOTH)
             yweight = 1;
          if (!(child.getAWTComponent() instanceof JFrame))
          {
-            panel.add(child.getAWTComponent(), new GridBagConstraints(x, y, 1, 1, xweight, yweight, position, childFill, new Insets(0,0,0,0), padx, pady));
+            panel.add(child.getAWTComponent(), new GridBagConstraints(x, y, 1, 1, xweight, yweight, anchor, childFill, new Insets(0,0,0,0), padx, pady));
          }
       }
    }
