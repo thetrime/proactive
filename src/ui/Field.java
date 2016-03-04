@@ -73,15 +73,6 @@ public class Field extends ReactLeafComponent
    {
       if (properties.containsKey("fill"))
          fill = properties.get("fill").asFill();
-      if (properties.containsKey("value"))
-      {
-         if (properties.get("value") == null)
-            setValue(null);
-         else
-            setValue(properties.get("value"));
-      }
-      if (properties.containsKey("onBlur"))
-         setFocusListener(properties.get("onBlur"));
       if (properties.containsKey("type"))
       {
          int oldType = type;
@@ -117,10 +108,22 @@ public class Field extends ReactLeafComponent
                getParentNode().replaceChild(this, this);
          }
       }
+      if (properties.containsKey("value"))
+      {
+         if (properties.get("value") == null)
+            setValue(null);
+         else
+            setValue(properties.get("value"));
+      }
+      if (properties.containsKey("onBlur"))
+         setFocusListener(properties.get("onBlur"));
    }
 
    public void setValue(PrologObject value)
    {
+      if (type == RADIO)
+         System.out.println("setValue on widget: " + value);
+
       widget.setValue(value);
    }
 
