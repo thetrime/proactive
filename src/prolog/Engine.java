@@ -224,7 +224,7 @@ public class Engine
          args[c_handler.tag.arity+1] = state;
          args[c_handler.tag.arity+2] = props;
          args[c_handler.tag.arity+3] = newState;
-         goal = new CompoundTerm(c_handler.tag.functor, args);
+         goal = ReactModule.crossModuleCall(context.componentName, new CompoundTerm(c_handler.tag.functor, args));
       }
       else
       {
