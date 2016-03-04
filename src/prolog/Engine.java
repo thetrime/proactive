@@ -47,6 +47,7 @@ public class Engine
 
    public void make() throws Exception
    {
+      long t1 = System.currentTimeMillis();
       env = new ReactEnvironment(this);
       env.installBuiltin("java_println", 1);
       env.installBuiltin("on_server", 1);
@@ -63,6 +64,7 @@ public class Engine
       {
          error.printStackTrace();
       }
+      System.out.println("Compile time: " + (System.currentTimeMillis() - t1) + "ms");
    }   
    
    public PrologDocument render(String component, PrologState stateWrapper, PrologState propsWrapper) throws Exception
