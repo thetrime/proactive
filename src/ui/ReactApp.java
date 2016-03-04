@@ -31,11 +31,11 @@ public class ReactApp extends ReactComponent implements CodeChangeListener
    public ReactApp(String URL, String rootElementId) throws Exception
    {
       super(null);
+
       engine = new Engine(URL, rootElementId);
       this.URL = URL;
       this.rootElementId = rootElementId;
       React.addCodeChangeListener(new URI(URL + "/listen"), rootElementId, this);
-      
       // This is a bit finicky. First we have to set up the state as 'empty'.
       // The empty state is not as empty as you might think. It contains 2 nodes:
       //    * The global root. This is the representation of this JFrame
@@ -46,7 +46,6 @@ public class ReactApp extends ReactComponent implements CodeChangeListener
 
       // This is for no-scroll at the top level
       frame.getContentPane().setLayout(new BorderLayout());
-
       /* This is for scroll at the top level
       scrollContent = new JPanel();
       scrollContent.setLayout(new BorderLayout());
@@ -56,11 +55,14 @@ public class ReactApp extends ReactComponent implements CodeChangeListener
       scrollContent = frame.getContentPane();
       // we want to end up calling instantiateNode() with a prologWidget containing <rootElement>
       context = new PrologContext(rootElementId, engine);
+      long t1 = System.currentTimeMillis();
       ReactComponent contentPane = ReactComponentFactory.instantiateNode(new PrologWidget(rootElementId), context);
+      System.out.println("t1: " + (System.currentTimeMillis() - t1) + "ms");
       insertChildBefore(contentPane, null);      
       frame.setSize(800, 600);
       frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
       frame.setVisible(true);
+      System.out.println("Instantiation time: " + (System.currentTimeMillis() - t1) + "ms");
    }
 
    public void handleCodeChange() 

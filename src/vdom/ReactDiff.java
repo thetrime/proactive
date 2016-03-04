@@ -11,8 +11,9 @@ public class ReactDiff
 {
    public static PatchSet diff(PrologNode a, PrologNode b)
    {
+      long t1 = System.currentTimeMillis();
       PatchSet patchSet = new PatchSet(a);
-      walk(a, b, patchSet, 0);      
+      walk(a, b, patchSet, 0);
       return patchSet;
    }
 
