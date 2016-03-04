@@ -10,6 +10,11 @@ SRC= src/React.java                                        \
      src/ui/Panel.java                                     \
      src/ui/Button.java                                    \
      src/ui/Field.java                                     \
+     src/ui/InputWidget.java                               \
+     src/ui/RadioButton.java                               \
+     src/ui/TextField.java                                 \
+     src/ui/CheckBox.java                                  \
+     src/ui/PasswordField.java                             \
      src/ui/Label.java                                     \
      src/ui/Table.java                                     \
      src/ui/TabbedPane.java                                \

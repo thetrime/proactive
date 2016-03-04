@@ -74,6 +74,15 @@ public class PrologObject
       return 0;
    }
 
+   public boolean asBoolean()
+   {
+      Term t = Engine.unpack(term);
+      if (t instanceof AtomTerm)
+         return ((AtomTerm)t).value.equals("true");
+      return false;
+   }
+
+
    public String asScroll()
    {
       Term t = Engine.unpack(term);
@@ -110,7 +119,7 @@ public class PrologObject
       return CompoundTerm.getList(elements);
    }
 
-   private static Term serializeObject(Object value)
+   public static Term serializeObject(Object value)
    {
       if (value instanceof String)
          return AtomTerm.get((String)value);
@@ -121,4 +130,5 @@ public class PrologObject
    {
       return "PrologObject(" + term + ")";
    }
+
 }
