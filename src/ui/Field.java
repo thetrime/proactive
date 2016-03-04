@@ -45,7 +45,7 @@ public class Field extends ReactLeafComponent
    {
       if (focusListener != null)
          widget.getAWTComponent().removeFocusListener(focusListener);
-      if (value == null)
+      if (value == null || value.asTerm() == null)
          return;
       focusListener = new FocusListener()
          {
@@ -53,7 +53,6 @@ public class Field extends ReactLeafComponent
             {
                try
                {
-                  System.out.println("Serialized: " + serializeObject());
                   context.triggerEvent(value.asTerm(), serializeObject());
                }
                catch (Exception e)

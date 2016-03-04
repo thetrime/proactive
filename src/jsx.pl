@@ -122,6 +122,13 @@ jsx_term(Value, _Vars, Dict)-->
         ; {Variable = Value}
         ).
 
+% this pointer
+jsx_term('$this'(Value), Vars, Dict)-->
+        optional_spaces,
+        `this.`,
+        !,
+        jsx_term(Value, Vars, Dict).
+
 % Atom and compound
 jsx_term(Value, Vars, Dict)-->
         optional_spaces,

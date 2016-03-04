@@ -15,6 +15,7 @@ public class PrologContext
    PrologDocument document;
    ReactComponent root;
    Engine engine;
+   PrologContext parent;
    
    public PrologContext(String componentName, Engine engine)
    {
@@ -25,13 +26,14 @@ public class PrologContext
       this.document = null;
    }
    
-   public PrologContext(Term state, Term props, String componentName, PrologDocument document, Engine engine)
+   public PrologContext(Term state, Term props, String componentName, PrologDocument document, Engine engine, PrologContext parent)
    {
       this.engine = engine;
       this.state = new PrologState(state);
       this.props = new PrologState(props);
       this.componentName = componentName;
       this.document = document;
+      this.parent = parent;
    }
 
    public void setRoot(ReactComponent root)
@@ -54,19 +56,19 @@ public class PrologContext
 
    public void triggerEvent(Object handler, PrologObject context) throws Exception
    {
-      PrologState proposedState = engine.triggerEvent(componentName, handler, context, state, props);
-      if (proposedState != null)
-      {
-         // We get null if the handler failed
-         state = proposedState;
-         reRender();
-      }
+      engine.triggerEvent(handler, context, this);
+   }
+
+   public void setState(PrologState proposedState) throws Exception
+   {
+      state = proposedState;
+      reRender();
    }
 
    public void reRender() throws Exception
    {
       System.out.println("+++++++ Rerendering " + componentName);
-      PrologDocument newDocument = engine.render(componentName, state, props);
+      PrologDocument newDocument = engine.render(componentName, state, props, this);
       PatchSet editScript = ReactDiff.diff(document, newDocument);
       React.queuePatch(editScript, root, this);
       document = newDocument;
@@ -75,5 +77,10 @@ public class PrologContext
    public Engine getEngine()
    {
       return engine;
+   }
+
+   public PrologContext getParentContext()
+   {
+      return parent;
    }
 }

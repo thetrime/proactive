@@ -11,7 +11,7 @@ import org.proactive.prolog.PrologContext;
 import org.proactive.prolog.PrologState;
 import org.proactive.prolog.PrologObject;
 import org.proactive.prolog.FluxDispatcher;
-
+import org.proactive.prolog.Engine;
 import gnu.prolog.term.Term;
 
 public class ReactComponentFactory
@@ -36,7 +36,7 @@ public class ReactComponentFactory
             ReactComponent instance = c.newInstance(n, context);
             if (context != null)
                context.setRoot(instance);
-            applyNodeAttributes(n, instance);
+            applyNodeAttributes(n, instance, context);
             addNodeChildren(n, instance, context);
             return instance;
          }
@@ -60,11 +60,14 @@ public class ReactComponentFactory
 
    }
 
-   private static void applyNodeAttributes(PrologNode n, ReactComponent target)
+   private static void applyNodeAttributes(PrologNode n, ReactComponent target, PrologContext context)
    {
       HashMap<String, PrologObject> attributes = new HashMap<String, PrologObject>();
       for (Map.Entry<String, Term> entry : n.getAttributes().entrySet())
-         attributes.put(entry.getKey(), new PrologObject(entry.getValue()));
+      {
+         Term t = Engine.unpack(entry.getValue(), context.getParentContext());
+         attributes.put(entry.getKey(), new PrologObject(t));
+      }
       target.setProperties(attributes);
    }
 

@@ -11,11 +11,11 @@ public class PrologDocument extends PrologElement
    Term root;
    PrologContext context;
    String componentName;
-   public PrologDocument(Term term, Term state, Term props, String componentName, Engine engine) throws Exception
+   public PrologDocument(Term term, Term state, Term props, String componentName, Engine engine, PrologContext parentContext) throws Exception
    {
       super(term);
       this.componentName = componentName;
-      this.context = new PrologContext(state, props, componentName, this, engine);
+      this.context = new PrologContext(state, props, componentName, this, engine, parentContext);
    }
    public PrologContext getContext()
    {
