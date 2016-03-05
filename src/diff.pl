@@ -1,4 +1,4 @@
-diff(A, B, patchset(A, PatchSet)):-
+diff(A, B, [a-A|PatchSet]):-
         ( setof(Index-Patches,
                 setof(Patch,
                       walk(A, B, 0, Index-Patch),
@@ -9,7 +9,7 @@ diff(A, B, patchset(A, PatchSet)):-
             PatchSet = []
         ).
 
-walk(A, A, _, _, _):- !, fail.
+walk(A, A, _, _):- !, fail.
 
 walk(A, B, Index, Index-Patch):-
         ( is_thunk(A)
@@ -18,7 +18,7 @@ walk(A, B, Index, Index-Patch):-
         !,
         thunks(A, B, Index, Patch).
 
-walk(A, {null}, Index, Index-remove(A, {null})).
+walk(A, {null}, Index, Index-remove_patch(A, {null})).
 walk(A, {null}, Index, Index-Patch):-
         !,
         \+is_widget(A),
@@ -37,15 +37,21 @@ walk(A, B, Index, PatchIndex-Patch):-
               )->
                 ( diff_props(AProps, BProps, PropsPatch),
                   PatchIndex = Index,
-                  tch = props(A, PropsPatch)
+                  Patch = props_patch(A, PropsPatch)
                 ; diff_children(A, B, Index, PatchIndex-Patch)
                 )
             ; otherwise->
                 % Nodes are totally different
-                clear_state(A, Index, PatchIndex-Patch)
+                ( PatchIndex = Index,
+                  Patch = node_patch(A, B)
+                ; clear_state(A, Index, PatchIndex-Patch)
+                )
             )
         ; otherwise->
-            clear_state(A, Index, PatchIndex-Patch)
+            ( PatchIndex = Index,
+              Patch = node_patch(A, B)
+            ; clear_state(A, Index, PatchIndex-Patch)
+            )
         ).
 
 walk(A, B, Index, Index-text(A,B)):-
@@ -61,7 +67,7 @@ walk(A, B, Index, Patch):-
         \+is_widget(A),
         clear_state(A, Index, Patch).
 
-walk(A, B, Index, Index-widget(A, B)):-
+walk(A, B, Index, Index-widget_patch(A, B)):-
         is_widget(B).
 
 
@@ -92,14 +98,14 @@ diff_children(A, B, Index, Patch):-
         A = element(_, _, AChildren),
         B = element(_, _, BChildren),
         reorder(AChildren, BChildren, Ordered, Moves),
-        ( diff_children_1(AChildren, Ordered, Index, Patch)
+        ( diff_children_1(AChildren, Ordered, Index, Index, Patch)
         ; Moves \== {no_moves},
-          Patch = Index-order(A, Moves)
+          Patch = Index-order_patch(A, Moves)
         ).
 
 
-diff_children_1([], [], _, _):- !, fail.
-diff_children_1(A, B, Index, Patch):-
+diff_children_1([], [], _, _, _):- !, fail.
+diff_children_1(A, B, Index, ParentIndex, Patch):-
         ( A = [Left|ASiblings]->
             true
         ; otherwise->
@@ -113,29 +119,25 @@ diff_children_1(A, B, Index, Patch):-
         ),
         ( Left == {null},
           Right \== {null},
-          Patch = Index-insert(Right)
+          Patch = ParentIndex-insert_patch({null}, Right)
         ; II is Index+1,
           ( Left \== {null},
             walk(Left, Right, II, Patch)
           ; get_count(Left, Count),
             III is II + Count,
-            diff_children_1(ASiblings, BSiblings, III, Patch)
+            diff_children_1(ASiblings, BSiblings, III, ParentIndex, Patch)
           )
         ).
 
-
 get_count(element(_, _, Children), Count):-
         !,
-        aggregate_all(r(sum(N)),
+        aggregate_all(r(sum(N+1)),
                       ( member(Child, Children),
                         get_count(Child, N)
                       ),
                       r(Sum)),
-        Count is Sum+1.
-get_count(_, 1).
-
-is_widget(element(Tag, _, _)):-
-        \+memberchk(Tag, ['Button', 'EditorPane','Field', 'Frame', 'Label', 'List', 'Panel', 'Tab', 'TabbedPane', 'Table', 'TextArea', 'Tree']).
+        Count is Sum.
+get_count(_, 0).
 
 
 thunks(A, B, Index, Index-thunk({null}, PatchSet)):-
@@ -147,15 +149,15 @@ handle_thunk(A, B, ANodes, BNodes):-
         ( is_thunk(B)->
             render_thunk(B, A, BNodes)
         ; otherwise->
-            BNodes = {null}
+            BNodes = B
         ),
         ( is_thunk(A)->
             render_thunk(A, {null}, ANodes)
         ; otherwise->
-            ANodes = {null}
+            ANodes = A
         ).
 
-destroy_widgets(A, Index, Index-remove(A, {null})):-
+destroy_widgets(A, Index, Index-remove_patch(A, {null})):-
         is_widget(A), !.
 destroy_widgets(A, Index, Patch):-
         A = element(_, _, Children),
@@ -174,7 +176,7 @@ destroy_widgets_1([Child|Children], Index, Patch):-
           destroy_widgets_1(Children, III, Patch)
         ).
 
-unhook(A, Index, Index-props(A, UndefinedKeys)):-
+unhook(A, Index, Index-props_patch(A, UndefinedKeys)):-
         A = element(_, Attributes, _),
         has_hooks(A),
         findall(Key={null},
@@ -198,14 +200,6 @@ unhook_1([Child|Children], Index, Patch):-
           unhook_1(Children, III, Patch)
         ).
 
-
-
-render_thunk(_, _, _):- fail. % FIXME: Stub
-is_thunk(_):- fail. % FIXME: Stub
-has_widgets(_):- fail. % FIXME: Stub
-has_thunks(_):- fail. % FIXME: Stub
-has_hooks(_):- fail. % FIXME: Stub
-has_descendent_hooks(_):- fail. % FIXME: Stub
 reorder(AChildren, BChildren, Ordered, Moves):-
         key_index(BChildren, AChildren, 0, BKeys, BFree),
         key_index(AChildren, BChildren, 0, AKeys, AFree),
@@ -255,7 +249,7 @@ simulate([WantedItem|BChildren], K, BKeys, SimulateIndex, [SimulateItem|Simulati
             ( SimulateItem \== {null}, SimulateKey \== {null} ->
                 ( memberchk(SimulateKey=key(_, Index), BKeys),
                   Index =\= K+1->
-                    Removes = [remove(SimulateItem, SimulateIndex, SimulateKey)|MoreRemoves],
+                    Removes = [remove(SimulateIndex, SimulateKey)|MoreRemoves],
                     ( Simulations = [NextSimulateItem|MoreSimulations]->
                         true
                     ; otherwise->
@@ -291,7 +285,7 @@ simulate([WantedItem|BChildren], K, BKeys, SimulateIndex, [SimulateItem|Simulati
             SS = SimulateIndex,
             NextB = [WantedItem|BChildren],
             MoreInserts = Inserts,
-            Removes = [remove(SimulateItem, SimulateIndex, SimulateKey)|MoreRemoves]
+            Removes = [remove(SimulateIndex, SimulateKey)|MoreRemoves]
         ),
         simulate(NextB, KK, BKeys, SS, MoreSimulations, MoreRemoves, MoreInserts).
 
@@ -373,3 +367,412 @@ reorder_2([NewItem|BChildren], AKeys, BStillFree, NewChildren):-
             )
         ),
         reorder_2(BChildren, AKeys, MoreBFree, More).
+
+
+render_thunk(_, _, _):- fail. % FIXME: Stub
+is_thunk(_):- fail. % FIXME: Stub
+has_widgets(_):- fail. % FIXME: Stub
+has_thunks(_):- fail. % FIXME: Stub
+has_hooks(_):- fail. % FIXME: Stub
+has_descendent_hooks(_):- fail. % FIXME: Stub
+
+is_widget(element(Tag, _, _)):-
+        \+memberchk(Tag, ['Button', 'EditorPane','Field', 'Frame', 'Label', 'List', 'Panel', 'Tab', 'TabbedPane', 'Table', 'TextArea', 'Tree']).
+
+
+%----------------------------------------------------------------------------
+patch(RootNode, Patches, Options, NewRoot):-
+        patch_recursive(RootNode, Patches, Options, NewRoot).
+
+patch_recursive(RootNode, PatchSet, Options, NewRoot):-
+        ( setof(Index,
+                Value^( member(Index-Value, PatchSet),
+                        Index \== a
+                      ),
+                Indices)->
+            memberchk(a-A, PatchSet),
+            dom_index(RootNode, A, Indices, [], Index),
+            %owner_document(RootNode, OwnerDocument)
+            patch_recursive(Indices, RootNode, Index, PatchSet, Options, NewRoot)
+        ; otherwise->
+            NewRoot = RootNode
+        ).
+
+patch_recursive([], RootNode, _Index, _PatchSet, _Options, RootNode):- !.
+patch_recursive([NodeIndex|Indices], RootNode, Index, PatchSet, Options, NewRoot):-
+        ( memberchk(NodeIndex-DomNode, Index)->
+            true
+        ; otherwise->
+            DomNode = {null}
+        ),
+        memberchk(NodeIndex-Patches, PatchSet),
+        apply_patch(RootNode, DomNode, Patches, Options, R1),
+        patch_recursive(Indices, R1, Index, PatchSet, Options, NewRoot).
+
+
+apply_patch(RootNode, {null}, _Patches, _Options, RootNode):- !.
+apply_patch(RootNode, _DomNode, [], _Options, RootNode):- !.
+apply_patch(RootNode, DomNode, [Patch|Patches], Options, NewRoot):-
+        patch_op(Patch, DomNode, Options, NewNode),
+        ( DomNode == RootNode->
+            R1 = NewNode
+        ; otherwise->
+            R1 = RootNode
+        ),
+        apply_patch(R1, DomNode, Patches, Options, NewRoot).
+
+dom_index(_RootNode, _Tree, [], _Nodes, []):- !.
+dom_index(RootNode, Tree, Indices, Nodes, Index):-
+        % Indices is already sorted
+        recurse(RootNode, Tree, Indices, Nodes, 0, Index).
+
+recurse({null}, _Tree, _Indices, Nodes, _RootIndex, Nodes):- !.
+recurse(RootNode, Tree, Indices, Nodes, RootIndex, Index):-
+        ( index_in_range(Indices, RootIndex, RootIndex)->
+            N1 = [RootIndex-RootNode|Nodes]
+        ; otherwise->
+            N1 = Nodes
+        ),
+        ( Tree = element(_, _, VChildren)->
+            child_nodes(RootNode, ChildNodes),
+            recurse_1(ChildNodes, VChildren, RootIndex, Indices, N1, Index)
+        ; otherwise->
+            Index = N1
+        ).
+
+recurse_1([], _VChildren, _RootIndex, _, N, N):- !.
+recurse_1([ChildNode|Tree], VChildren, RootIndex, Indices, Nodes, FinalNodes):-
+        R1 is RootIndex+1,
+        ( VChildren = [VChild|VSiblings]->
+            get_count(VChild, Count)
+        ; otherwise->
+            VChild = {null},
+            VSiblings = [],
+            Count = 0
+        ),
+        NextIndex is R1 + Count,
+        ( index_in_range(Indices, R1, NextIndex)->
+            recurse(ChildNode, VChild, Indices, Nodes, R1, N1)
+        ; otherwise->
+            N1 = Nodes
+        ),
+        recurse_1(Tree, VSiblings, NextIndex, Indices, N1, FinalNodes).
+
+index_in_range([], _, _):- !, fail.
+index_in_range(Indices, Left, Right):-
+        MinIndex = 0,
+        length(Indices, L),
+        MaxIndex is L - 1,
+        index_in_range_1(MinIndex, MaxIndex, Indices, Left, Right).
+
+index_in_range_1(MinIndex, MaxIndex, Indices, Left, Right):-
+        MinIndex =< MaxIndex,
+        CurrentIndex is (MaxIndex + MinIndex)//2,
+        nth0(CurrentIndex, Indices, CurrentItem),
+        ( MinIndex == MaxIndex->
+            CurrentItem >= Left,
+            CurrentItem =< Right
+        ; CurrentItem < Left->
+            NewMin is CurrentIndex + 1,
+            index_in_range_1(NewMin, MaxIndex, Indices, Left, Right)
+        ; CurrentItem > Right ->
+            NewMax is CurrentIndex - 1,
+            index_in_range_1(MinIndex, NewMax, Indices, Left, Right)
+        ; otherwise->
+            true
+        ).
+
+patch_op(remove_patch(VNode, _), DomNode, _Options, NewNode):-
+        !,
+        parent_node(DomNode, ParentNode),
+        ( ParentNode \== {null} ->
+            remove_child(ParentNode, DomNode)
+        ; otherwise->
+            true
+        ),
+        destroy_widget(DomNode, VNode),
+        NewNode = {null}.
+
+patch_op(insert_patch(_ActualVNode, VNode), ParentNode, Options, ParentNode):-
+        render(Options, VNode, NewNode),
+        ( ParentNode \== {null}->
+            append_child(ParentNode, NewNode)
+        ; otherwise->
+            true
+        ).
+
+patch_op(text_patch(_LeftVNode, VText), DomNode, Options, NewNode):-
+        ( node_type(DomNode, text)->
+            replace_data(DomNode, VText),
+            NewNode = DomNode
+        ; otherwise->
+            parent_node(DomNode, ParentNode),
+            render(Options, VText, NewNode),
+            ( ParentNode \== {null},
+              NewNode \== DomNode->
+                replace_child(ParentNode, NewNode, DomNode)
+            ; otherwise->
+                true
+            )
+        ).
+
+%patch_op(widget_patch(LeftVNode, Patch), DomNode, Options, NewNode):-
+
+patch_op(node_patch(_LeftVNode, VNode), DomNode, Options, NewNode):-
+        parent_node(DomNode, ParentNode),
+        render(Options, VNode, NewNode),
+        ( ParentNode \== {null}, NewNode \== DomNode->
+            replace_child(ParentNode, NewNode, DomNode)
+        ; otherwise->
+            true
+        ).
+
+patch_op(order_patch(_VNode, Moves), DomNode, _Options, DomNode):-
+        child_nodes(DomNode, ChildNodes),
+        Moves = moves(inserts(Inserts),
+                      removes(Removes)),
+        reorder_removes(Removes, DomNode, ChildNodes, [], KeyMap),
+        reorder_inserts(Inserts, DomNode, ChildNodes, KeyMap).
+
+patch_op(props_patch(VNode, Patch), DomNode, _Options, DomNode):-
+        VNode = element(_, Properties, _),
+        apply_properties(DomNode, Patch, Properties).
+
+%patch_op(thunk_patch(VNode, Patch), DomNode, Options, ?)
+
+reorder_removes([], _DomNode, _ChildNodes, T, T):- !.
+reorder_removes([remove(From, Key)|Removes], DomNode, ChildNodes, KeyMap, FinalKeyMap):-
+        nth0(From, ChildNodes, Node),
+        ( Key \== {null}->
+            KeyMap = [Key-Node|T]
+        ; otherwise->
+            KeyMap = T
+        ),
+        remove_child(DomNode, Node),
+        reorder_removes(Removes, DomNode, ChildNodes, T, FinalKeyMap).
+
+reorder_inserts([], _DomNode, _ChildNodes, _KeyMap):- !.
+reorder_inserts([insert(Key, Position)|Inserts], DomNode, ChildNodes, KeyMap):-
+        memberchk(Key-Node, KeyMap),
+        ( nth0(Position, ChildNodes, Sibling)->
+            insert_before(DomNode, Node, Sibling)
+        ; otherwise->
+            insert_before(DomNode, Node, {null})
+        ),
+        reorder_inserts(Inserts, DomNode, ChildNodes, KeyMap).
+
+render(Options, VNodeIn, DomNode):-
+        handle_thunk(VNodeIn, {null}, VNode, _),
+        memberchk(document(Document), Options),
+        ( is_widget(VNode)->
+            init_widget(VNode, DomNode)
+        ; atom(VNode)->  % Text node
+            create_text_node(Document, VNode, DomNode)
+        ; VNode = element(Tag, Properties, Children)->
+            create_element(Document, Tag, DomNode),
+            apply_properties(DomNode, Properties, []),
+            render_children(Children, Options, DomNode)
+        ).
+
+render_children([], _, _):- !.
+render_children([Child|Children], Options, DomNode):-
+        render(Options, Child, ChildDomNode),
+        ( ChildDomNode \== {null}->
+            append_child(DomNode, ChildDomNode)
+        ; otherwise->
+            true
+        ),
+        render_children(Children, Options, DomNode).
+
+apply_properties(_Node, [], _Previous):- !.
+apply_properties(Node, [PropName=PropValue|Properties], Previous):-
+        ( PropValue == {null} ->
+            remove_property(Node, PropName, PropValue, Previous)
+        ; is_hook(PropValue)->
+            remove_property(Node, PropName, PropValue, Previous),
+            ( memberchk(PropName=PreviousValue, Previous)->
+                true
+            ; otherwise->
+                PreviousValue = {null}
+            ),
+            hook(PropValue, PropName, PreviousValue)
+        ; otherwise->
+            set_property(Node, PropName, PropValue)
+        ),
+        apply_properties(Node, Properties, Previous).
+
+remove_property(_Node, _PropName, _PropValue, []):- !.
+remove_property(Node, PropName, PropValue, Previous):-
+        ( memberchk(PropName=PreviousValue, Previous)->
+            true
+        ; otherwise->
+            PreviousValue = {null}
+        ),
+        ( \+is_hook(PreviousValue)->
+            set_property(Node, PropName, {null})
+        ; otherwise->
+            unhook(PreviousValue, Node, PropName, PropValue)
+        ).
+
+unhook(_, _, _, _):- fail. % FIXME: Stub
+is_hook(_):- fail. % FIXME: Stub
+hook(_, _, _):- fail. % FIXME: Stub
+init_widget(_, _):- fail. % FIXME: Stub
+
+
+% ----------------- the real DOM. Implemented in SWI by attributed variables
+
+remove_child(DomNode, Child):-
+        DomNode = dom_element(Attributes),
+        memberchk(children-ChildrenPtr, Attributes),
+        get_attr(ChildrenPtr, react, ChildNodes),
+        subtract(ChildNodes, [Child], NewChildNodes),
+        put_attr(ChildrenPtr, react, NewChildNodes).
+
+append_child(DomNode, Child):-
+        DomNode = dom_element(Attributes),
+        memberchk(children-ChildrenPtr, Attributes),
+        get_attr(ChildrenPtr, react, ChildNodes),
+        append(ChildNodes, [Child], NewChildNodes),
+        put_attr(ChildrenPtr, react, NewChildNodes).
+
+insert_before(DomNode, Child, Sibling):-
+        DomNode = dom_element(Attributes),
+        memberchk(children-ChildrenPtr, Attributes),
+        get_attr(ChildrenPtr, react, ChildNodes),
+        insert_child_ptr(ChildNodes, Child, Sibling, NewChildNodes),
+        put_attr(ChildrenPtr, react, NewChildNodes).
+
+
+replace_child(DomNode, New, Old):-
+        DomNode = dom_element(Attributes),
+        memberchk(children-ChildrenPtr, Attributes),
+        get_attr(ChildrenPtr, react, ChildNodes),
+        replace_child_ptr(ChildNodes, New, Old, NewChildNodes),
+        put_attr(ChildrenPtr, react, NewChildNodes).
+
+create_element(Document, TagName, DomNode):-
+        DomNode = dom_element([tag-TagName,
+                               type-node,
+                               children-ChildrenPtr,
+                               document-Document,
+                               properties-PropertiesPtr,
+                               parent-ParentPtr]),
+        put_attr(ChildrenPtr, react, []),
+        put_attr(PropertiesPtr, react, []),
+        put_attr(ParentPtr, react, {null}).
+
+set_property(DomNode, Name, Value):-
+        DomNode = dom_element(Attributes),
+        memberchk(properties-PropertiesPtr, Attributes),
+        get_attr(PropertiesPtr, react, Properties),
+        change_attributes(Properties, Name, Value, NewProperties),
+        put_attr(PropertiesPtr, react, NewProperties).
+
+create_text_node(Document, Data, DomNode):-
+        DomNode = dom_element([type-text,
+                               children-ChildrenPtr,
+                               parent-ParentPtr,
+                               document-Document,
+                               data-DataPtr]),
+        put_attr(ChildrenPtr, react, []),
+        put_attr(ParentPtr, react, {null}),
+        put_attr(DataPtr, react, Data).
+
+
+change_attributes([Name=_|Properties], Name, Value, [Name=Value|Properties]):- !.
+change_attributes([], Name, Value, [Name=Value]):- !.
+change_attributes([X|In], Name, Value, [X|Out]):-
+        change_attributes(In, Name, Value, Out).
+
+replace_child_ptr([], _, _, []):- !.
+replace_child_ptr([Old|X], New, Old, [New|X]):- !.
+replace_child_ptr([X|In], New, Old, [X|Out]):-
+        replace_child_ptr(In, New, Old, Out).
+
+insert_child_ptr([], Child, _, [Child]):- !.
+insert_child_ptr([Sibling|Tail], Child, Sibling, [Child,Sibling|Tail]):- !.
+insert_child_ptr([X|In], Child, Sibling, [X|Out]):-
+        insert_child_ptr(In, Child, Sibling, Out).
+
+child_nodes(DomNode, ChildNodes):-
+        DomNode = dom_element(Attributes),
+        memberchk(children-ChildrenPtr, Attributes),
+        get_attr(ChildrenPtr, react, ChildNodes).
+
+parent_node(DomNode, ParentNode):-
+        DomNode = dom_element(Attributes),
+        memberchk(parent-ParentPtr, Attributes),
+        ( get_attr(ParentPtr, react, ParentNode)->
+            true
+        ; otherwise->
+            ParentNode = {null}
+        ).
+
+replace_data(DomNode, NewData):-
+        DomNode = dom_element(Attributes),
+        memberchk(data-DataPtr, Attributes),
+        put_attr(DataPtr, react, NewData).
+
+
+destroy_widget(DomNode, Widget):-
+        ( memberchk(destroy-Destroy, Widget),
+          call(Destroy, Widget, DomNode)
+        ; otherwise->
+            true
+        ).
+
+node_type(DomNode, Type):-
+        DomNode = dom_element(Attributes),
+        memberchk(type-Type, Attributes).
+
+% DOM node is represented as dom_node(Attributes)
+%  Attributes must contain:
+%     * type-Atom
+%     * children-AttributedVar
+%     * parent-AttributedVar
+%     * document-DocumentVar
+% And MAY contain these depending on the type (they only need to appear in the right element type)
+%     * data-AttributedVar if type is text
+%     * tag-Atom if type is node
+%     * properties-AttributedVar if type is node
+
+
+
+test:-
+        Document = doc,
+        %Tree1 = element('Panel', [], [element('Field', [label=hello], []),
+        %                              element('Button', [label=submit], [])]),
+        Tree1 = element('Panel', [], []),
+        Tree2 = element('Panel', [], [element('Field', [label=hello], []),
+                                      element('Field', [label=second], []),
+                                      element('Button', [label=submit], [])]),
+        diff(Tree1, Tree2, Patches),
+        writeln(patch:Patches),
+        create_element(Document, 'Panel', RootNode),
+        patch(RootNode, Patches, [document(Document)], NewRoot),
+        crystalize([NewRoot]),
+        writeln(NewRoot).
+
+crystalize([]):- !.
+crystalize([DomNode|DomNodes]):-
+        DomNode = dom_element(Attributes),
+        crystalize_attributes(Attributes),
+        crystalize(DomNodes).
+
+crystalize_attributes([]):- !.
+crystalize_attributes([children-Ptr|Attributes]):-
+        !,
+        get_attr(Ptr, react, ChildNodes),
+        Ptr = ChildNodes,
+        crystalize(ChildNodes),
+        crystalize_attributes(Attributes).
+crystalize_attributes([_-Value|Attributes]):-
+        ( attvar(Value)->
+            get_attr(Value, react, Value)
+        ; otherwise->
+            true
+        ),
+        crystalize_attributes(Attributes).
+
+react:attr_unify_hook(X, X).
