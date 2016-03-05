@@ -1,6 +1,6 @@
 diff(A, B, [a-A|PatchSet]):-
         ( setof(Index-Patches,
-                setof(Patch,
+                bagof(Patch,
                       walk(A, B, 0, Index-Patch),
                       Patches),
                 PatchSet)->
