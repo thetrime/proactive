@@ -627,11 +627,13 @@ remove_child(DomNode, Child):-
         memberchk(children-ChildrenPtr, Attributes),
         get_attr(ChildrenPtr, react, ChildNodes),
         subtract(ChildNodes, [Child], NewChildNodes),
+        move_child_to(Child, {null}),
         put_attr(ChildrenPtr, react, NewChildNodes).
 
 append_child(DomNode, Child):-
         DomNode = dom_element(Attributes),
         memberchk(children-ChildrenPtr, Attributes),
+        move_child_to(Child, DomNode),
         get_attr(ChildrenPtr, react, ChildNodes),
         append(ChildNodes, [Child], NewChildNodes),
         put_attr(ChildrenPtr, react, NewChildNodes).
@@ -640,6 +642,7 @@ insert_before(DomNode, Child, Sibling):-
         DomNode = dom_element(Attributes),
         memberchk(children-ChildrenPtr, Attributes),
         get_attr(ChildrenPtr, react, ChildNodes),
+        move_child_to(Child, DomNode),
         insert_child_ptr(ChildNodes, Child, Sibling, NewChildNodes),
         put_attr(ChildrenPtr, react, NewChildNodes).
 
@@ -648,6 +651,7 @@ replace_child(DomNode, New, Old):-
         DomNode = dom_element(Attributes),
         memberchk(children-ChildrenPtr, Attributes),
         get_attr(ChildrenPtr, react, ChildNodes),
+        move_child_to(New, DomNode),
         replace_child_ptr(ChildNodes, New, Old, NewChildNodes),
         put_attr(ChildrenPtr, react, NewChildNodes).
 
@@ -679,6 +683,10 @@ create_text_node(Document, Data, DomNode):-
         put_attr(ParentPtr, react, {null}),
         put_attr(DataPtr, react, Data).
 
+move_child_to(Child, DomNode):-
+        Child = dom_element(ChildAttributes),
+        memberchk(parent-ParentPtr, ChildAttributes),
+        put_attr(ParentPtr, react, DomNode).
 
 change_attributes([Name=_|Properties], Name, Value, [Name=Value|Properties]):- !.
 change_attributes([], Name, Value, [Name=Value]):- !.
@@ -741,18 +749,21 @@ node_type(DomNode, Type):-
 
 test:-
         Document = doc,
-        %Tree1 = element('Panel', [], [element('Field', [label=hello], []),
-        %                              element('Button', [label=submit], [])]),
-        Tree1 = element('Panel', [], []),
+        InitialTree = element('Panel', [], []),
+        create_element(Document, 'Panel', InitialRoot),
+        Tree1 = element('Panel', [], [element('Field', [label=hello], []),
+                                      element('Button', [label=submit], [])]),
         Tree2 = element('Panel', [], [element('Field', [label=hello], []),
                                       element('Field', [label=second], []),
                                       element('Button', [label=submit], [])]),
-        diff(Tree1, Tree2, Patches),
-        writeln(patch:Patches),
-        create_element(Document, 'Panel', RootNode),
-        patch(RootNode, Patches, [document(Document)], NewRoot),
-        crystalize([NewRoot]),
-        writeln(NewRoot).
+        diff(InitialTree, Tree1, Patch1),
+        diff(Tree1, Tree2, Patch2),
+        writeln(patch:Patch1),
+        writeln(patch:Patch2),
+        patch(InitialRoot, Patch1, [document(Document)], IntermediateRoot),
+        patch(IntermediateRoot, Patch2, [document(Document)], FinalRoot),
+        crystalize([FinalRoot]),
+        writeln(FinalRoot).
 
 crystalize([]):- !.
 crystalize([DomNode|DomNodes]):-
@@ -761,6 +772,9 @@ crystalize([DomNode|DomNodes]):-
         crystalize(DomNodes).
 
 crystalize_attributes([]):- !.
+crystalize_attributes([parent-_|Attributes]):-
+        !,
+        crystalize_attributes(Attributes).
 crystalize_attributes([children-Ptr|Attributes]):-
         !,
         get_attr(Ptr, react, ChildNodes),
