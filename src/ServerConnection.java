@@ -41,7 +41,7 @@ public class ServerConnection extends WebSocketClient
    @Override
    public void onOpen(ServerHandshake handshake)
    {
-      System.out.println("opened connection");
+      System.out.println("opened connection for source listener");
       if (isReplacement)
       {
          // This should also trigger a change for ALL components if successful!

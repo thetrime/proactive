@@ -16,7 +16,7 @@ public class PrologObject
    Term term;
    public PrologObject(Term term)
    {
-      this.term = term;
+      this.term = Engine.unpack(term, null);
    }
 
    public String asString()

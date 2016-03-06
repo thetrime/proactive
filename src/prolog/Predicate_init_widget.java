@@ -17,13 +17,18 @@ public class Predicate_init_widget extends ExecuteOnlyCode
       // init_widget(Document, VNode, DomNode);
       try
       {
+         System.out.println("init_widget: " + args[1]);
          CompoundTerm element = (CompoundTerm)args[1];
-         return interpreter.simpleUnify(args[2], new JavaObjectTerm(new ReactWidget((Engine)(((JavaObjectTerm)args[0]).value),
-                                                                                    ((AtomTerm)element.args[0]).value,
-                                                                                    element.args[1])));
+         ReactWidget widget = new ReactWidget((Engine)(((JavaObjectTerm)args[0]).value),
+                                              ((AtomTerm)element.args[0]).value,
+                                              element.args[1]);
+         widget.initialize();
+
+         return interpreter.simpleUnify(args[2], new JavaObjectTerm(widget));
       }
       catch (Exception e)
       {
+         e.printStackTrace();
          return RC.FAIL;
       }
    }

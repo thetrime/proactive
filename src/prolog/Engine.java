@@ -68,6 +68,7 @@ public class Engine
       env.installBuiltin("set_property", 3);
       env.installBuiltin("replace_node_data", 2);
       env.installBuiltin("destroy_widget", 2);
+      env.installBuiltin("init_widget", 3);
 
 
       env.ensureLoaded(new CompoundTerm(CompoundTermTag.get("resource", 1), AtomTerm.get("/boilerplate.pl")));
@@ -520,10 +521,12 @@ public class Engine
 
    public ReactComponent applyPatch(Term patch, ReactComponent root) throws PrologException
    {
+      System.out.println("Patching tree from " + root);
       VariableTerm newRoot = new VariableTerm("NewRoot");
+      Term renderOptions = CompoundTerm.getList(new Term[]{new CompoundTerm("document", new Term[]{new JavaObjectTerm(this)})});
       Term goal = ReactModule.crossModuleCall("diff", new CompoundTerm(AtomTerm.get("patch"), new Term[]{new JavaObjectTerm(root),
                                                                                                          patch,
-                                                                                                         TermConstants.emptyListAtom,
+                                                                                                         renderOptions,
                                                                                                          newRoot}));
       // FIXME: Maybe...We cannot undo(0) here because we might be in the middle of processing a flux event, and that would muck up the stack
       Interpreter.Goal g = interpreter.prepareGoal(goal);
@@ -536,7 +539,7 @@ public class Engine
          System.out.println("Successfully updated");
          return ((ReactComponent)result.value);
       }
-      System.out.println("patch/4 failed");
+      System.out.println(" *********************** patch/4 failed: " + patch);
       return null;
    }
 

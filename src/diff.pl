@@ -579,7 +579,6 @@ reorder_inserts([insert(Key, Position)|Inserts], DomNode, ChildNodes, KeyMap):-
         ),
         reorder_inserts(Inserts, DomNode, ChildNodes, KeyMap).
 
-%FIXME: Handle list/1 here too. is list/1 maybe a thunk?!
 render(Options, VNodeIn, DomNode):-
         handle_thunk(VNodeIn, {null}, VNode, _),
         (memberchk(document(Document), Options)->

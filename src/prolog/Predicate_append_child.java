@@ -13,6 +13,7 @@ public class Predicate_append_child extends ExecuteOnlyCode
    {
       ReactComponent domNode = (ReactComponent)((JavaObjectTerm)args[0]).value;
       ReactComponent childNode = (ReactComponent)((JavaObjectTerm)args[1]).value;
+      System.out.println("Inserting " + childNode + " in " + domNode);
       domNode.insertChildBefore(childNode, null);
       return RC.SUCCESS_LAST;
    }

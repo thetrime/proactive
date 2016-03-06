@@ -13,18 +13,16 @@ import org.proactive.ReactLeafComponent;
 public class Label extends ReactLeafComponent 
 {
    JLabel label = new JLabel();
-   public void setProperties(HashMap<String, PrologObject> properties)
+   public void setProperty(String name, PrologObject value)
    {
-      if (properties.containsKey("label"))
+      super.setProperty(name, value);
+      if (name.equals("label"))
       {
-         PrologObject value = properties.get("label");
          if (value == null)
             label.setText("");
          else
             label.setText(value.asString());
       }
-      if (properties.containsKey("fill"))
-         fill = properties.get("fill").asFill();
    }
    public Component getAWTComponent()
    {

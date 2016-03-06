@@ -14,6 +14,7 @@ public class Predicate_insert_before extends ExecuteOnlyCode
       ReactComponent domNode = (ReactComponent)((JavaObjectTerm)args[0]).value;
       ReactComponent childNode = (ReactComponent)((JavaObjectTerm)args[1]).value;
       ReactComponent siblingNode = (ReactComponent)((JavaObjectTerm)args[2]).value;
+      System.out.println("Inserting " + childNode + " in " + domNode);
       domNode.insertChildBefore(childNode, siblingNode);
       return RC.SUCCESS_LAST;
    }
