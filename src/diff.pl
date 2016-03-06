@@ -97,9 +97,22 @@ diff_props(A, B, Diff):-
                 Diff),
         Diff \== [].
 
+expand_children(element(_, _, Children), AllChildren):-
+        findall(ChildElement,
+                child_element(Children, ChildElement),
+                AllChildren).
+
+child_element(Children, Element):-
+        member(Child, Children),
+        ( Child = list(List)->
+            child_element(List, Element)
+        ; Element = Child
+        ).
+
+
 diff_children(A, B, Index, Patch):-
-        A = element(_, _, AChildren),
-        B = element(_, _, BChildren),
+        expand_children(A, AChildren),
+        expand_children(B, BChildren),
         reorder(AChildren, BChildren, Ordered, Moves),
         ( diff_children_1(AChildren, Ordered, Index, Index, Patch)
         ; Moves \== {no_moves},
@@ -416,7 +429,9 @@ patch_recursive([NodeIndex|Indices], RootNode, Index, PatchSet, Options, NewRoot
 apply_patch(RootNode, {null}, _Patches, _Options, RootNode):- !.
 apply_patch(RootNode, _DomNode, [], _Options, RootNode):- !.
 apply_patch(RootNode, DomNode, [Patch|Patches], Options, NewRoot):-
+        writeln(applying(patch_op(Patch, DomNode, Options, NewNode))),
         patch_op(Patch, DomNode, Options, NewNode),
+        writeln(applied(patch_op(Patch, DomNode, Options, NewNode))),
         ( DomNode == RootNode->
             R1 = NewNode
         ; otherwise->
@@ -567,12 +582,11 @@ reorder_inserts([insert(Key, Position)|Inserts], DomNode, ChildNodes, KeyMap):-
 %FIXME: Handle list/1 here too. is list/1 maybe a thunk?!
 render(Options, VNodeIn, DomNode):-
         handle_thunk(VNodeIn, {null}, VNode, _),
-        ( memberchk(document(Document), Options)->
+        (memberchk(document(Document), Options)->
             true
         ; otherwise->
             Document = {root_document}
         ),
-        writeln(c(VNode)),
         ( is_widget(VNode)->
             init_widget(Document, VNode, DomNode)
         ; atom(VNode)->  % Text node
