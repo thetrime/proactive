@@ -18,10 +18,6 @@ public class TabbedPane extends ReactComponent
    int nextIndex = 0;
    JTabbedPane tabbedPane = new JTabbedPane();
    private java.util.List<ReactComponent> children = new LinkedList<ReactComponent>();
-   public TabbedPane(PrologNode n, PrologContext context)
-   {
-      super(context);
-   }
    public void setProperties(HashMap<String, PrologObject> properties)
    {
       if (properties.containsKey("fill"))

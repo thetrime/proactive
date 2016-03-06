@@ -12,15 +12,18 @@ public abstract class ReactComponent
    protected PrologContext context;
    protected ReactComponent parent;
    protected ReactComponent owner;
-
+   protected HashMap<String, PrologObject> properties = new HashMap<String, PrologObject>();
    protected int fill = GridBagConstraints.NONE;
-   public ReactComponent(PrologContext context)
+   public ReactComponent()
    {
-      this.context = context;
    }
 
    public abstract Component getAWTComponent();
    public abstract void setProperties(HashMap<String,PrologObject> properties);
+   public void setProperty(String key, PrologObject value)
+   {
+      properties.put(key, value);
+   }
    
    public abstract List<ReactComponent> getChildNodes();
    public abstract void insertChildBefore(ReactComponent child, ReactComponent sibling);   

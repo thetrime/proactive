@@ -26,6 +26,18 @@ SRC= src/React.java                                        \
      src/ui/Frame.java                                     \
      src/ui/ReactApp.java                                  \
      src/ui/DefaultReactComponentFactoryConfiguration.java \
+     src/prolog/Predicate_remove_child.java                \
+     src/prolog/Predicate_append_child.java                \
+     src/prolog/Predicate_insert_before.java               \
+     src/prolog/Predicate_replace_child.java               \
+     src/prolog/Predicate_child_nodes.java                 \
+     src/prolog/Predicate_create_element.java              \
+     src/prolog/Predicate_create_text_node.java            \
+     src/prolog/Predicate_parent_node.java                 \
+     src/prolog/Predicate_node_type.java                   \
+     src/prolog/Predicate_set_property.java                \
+     src/prolog/Predicate_replace_node_data.java           \
+     src/prolog/Predicate_destroy_widget.java              \
      src/prolog/Engine.java                                \
      src/prolog/PrologState.java                           \
      src/prolog/PrologObject.java                          \
@@ -73,7 +85,7 @@ client: dist/react.jar
 
 dist/react.jar:	.src build
 	javac -cp dist/gpj.jar:dist/java_websocket.jar -Xlint:unchecked @.src -d build
-	jar cvf dist/react.jar -C build/ . -C src boilerplate.pl
+	jar cvf dist/react.jar -C build/ . -C src boilerplate.pl -C src diff.pl
 
 run-client:	client
 	java -cp dist/gpj.jar:dist/java_websocket.jar:dist/react.jar org.proactive.React "http://localhost:${PORT}/react" "App"

@@ -29,7 +29,7 @@ public class PrologWidget extends PrologElement
    {
       //System.out.println("Creating a widget of type " + componentName);
       PrologState props = context.getEngine().instantiateProps(getAttributes());
-      PrologState initialState = context.getEngine().getInitialState(componentName, props);
+      PrologState initialState = new PrologState(context.getEngine().getInitialState(componentName, props.getValue()));
       PrologDocument userComponent = context.getEngine().render(componentName, initialState, props, context);
       //System.out.println("User component created the following document: " + userComponent);
       if (userComponent == null)

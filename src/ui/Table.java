@@ -13,15 +13,6 @@ import org.proactive.ReactLeafComponent;
 public class Table extends ReactLeafComponent 
 {
    JTable table = new JTable();
-   public Table(PrologNode n, PrologContext context)
-   {
-      super(context);
-      /* This is if the child is the Table.
-        Node child = n.getFirstChild();
-        if (child != null && child instanceof Text)
-        setText(((Text)child).getWholeText());
-      */
-   }
    public void setProperties(HashMap<String, PrologObject> properties)
    {
       if (properties.containsKey("fill"))

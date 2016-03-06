@@ -13,15 +13,6 @@ import org.proactive.ReactLeafComponent;
 public class TextArea extends ReactLeafComponent 
 {
    JTextArea textArea = new JTextArea();
-   public TextArea(PrologNode n, PrologContext context)
-   {
-      super(context);
-      /* This is if the child is the TextArea.
-        Node child = n.getFirstChild();
-        if (child != null && child instanceof Text)
-        setText(((Text)child).getWholeText());
-      */
-   }
    public void setProperties(HashMap<String, PrologObject> properties)
    {
       if (properties.containsKey("fill"))

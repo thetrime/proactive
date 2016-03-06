@@ -13,15 +13,6 @@ import org.proactive.ReactLeafComponent;
 public class EditorPane extends ReactLeafComponent 
 {
    JEditorPane editorPane = new JEditorPane();
-   public EditorPane(PrologNode n, PrologContext context)
-   {
-      super(context);
-      /* This is if the child is the label.
-        Node child = n.getFirstChild();
-        if (child != null && child instanceof Text)
-        setText(((Text)child).getWholeText());
-      */
-   }
    public void setProperties(HashMap<String, PrologObject> properties)
    {
       if (properties.containsKey("fill"))

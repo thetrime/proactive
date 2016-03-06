@@ -18,10 +18,6 @@ public class Tab extends ReactComponent
    private String tooltip = "???";
    List<ReactComponent> children = new LinkedList<ReactComponent>();
 
-   public Tab(PrologNode n, PrologContext context)
-   {
-      super(context);
-   }
    public void setProperties(HashMap<String, PrologObject> properties)
    {
       if (properties.containsKey("label"))

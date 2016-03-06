@@ -10,6 +10,8 @@ import java.net.URI;
 import org.proactive.vdom.PrologDocument;
 import org.proactive.vdom.PatchSet;
 import org.proactive.prolog.PrologContext;
+import org.proactive.prolog.Engine;
+import gnu.prolog.term.Term;
 
 public class React
 {
@@ -39,34 +41,32 @@ public class React
    
    private static LinkedList<TreePatch> dispatchQueue = new LinkedList<TreePatch>();   
 
-   public static void queuePatch(PatchSet p, ReactComponent root, PrologContext context)
+   public static void queuePatch(Term p, ReactComponent root, Engine engine)
    {
       synchronized(dispatchQueue)
       {
          System.out.println("Received patch: " + p + " for root " + root);
          if (root == null)
             throw new NullPointerException();
-         dispatchQueue.offer(new TreePatch(p, root, context));
+         dispatchQueue.offer(new TreePatch(p, root, engine));
       }
       flushQueue();
    }
 
    private static class TreePatch
    {
-      private PatchSet patch;
+      private Term patch;
       private ReactComponent root;
-      private PrologContext context;
-      public TreePatch(PatchSet patch, ReactComponent root, PrologContext context)
+      private Engine engine;
+      public TreePatch(Term patch, ReactComponent root, Engine engine)
       {
          this.patch = patch;
          this.root = root;
-         this.context = context;
+         this.engine = engine;
       }
       public void apply() throws Exception
       {
-         root = patch.apply(root);
-         if (context != null)
-            context.setRoot(root);
+         root = engine.applyPatch(patch, root);
       }
    }
 

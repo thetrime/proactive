@@ -27,9 +27,8 @@ public class Field extends ReactLeafComponent
 
    private InputWidget widget;
    private int type = TEXT;
-   public Field(PrologNode n, PrologContext context)
+   public Field()
    {
-      super(context);
       widget = new TextField();
    }
 

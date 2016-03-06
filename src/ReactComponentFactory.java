@@ -75,4 +75,17 @@ public class ReactComponentFactory
    {
       return (configuration.getImplementingClass(name) == null);
    }
+
+
+
+   // Redo
+   public static ReactComponent createElement(String tagName) throws Exception
+   {
+      Constructor<? extends ReactComponent> c = configuration.getImplementingClass(tagName);
+      if (c != null)
+         return c.newInstance();
+      return null;
+   }
+
+
 }

@@ -5,7 +5,6 @@ import java.awt.Container;
 import java.awt.BorderLayout;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
 import javax.swing.SwingUtilities;
 import java.util.List;
 import java.util.HashMap;
@@ -19,6 +18,12 @@ import org.proactive.CodeChangeListener;
 import org.proactive.React;
 import org.proactive.ReactComponentFactory;
 import org.proactive.vdom.PrologWidget;
+import org.proactive.prolog.PrologState;
+
+import gnu.prolog.term.Term;
+import gnu.prolog.term.CompoundTerm;
+import gnu.prolog.term.AtomTerm;
+import gnu.prolog.vm.TermConstants;
 
 public class ReactApp extends ReactComponent implements CodeChangeListener
 {
@@ -26,43 +31,52 @@ public class ReactApp extends ReactComponent implements CodeChangeListener
    List<ReactComponent> children = new LinkedList<ReactComponent>();
    String URL = null;
    String rootElementId = null;
-   private Container scrollContent;
+   private ReactComponent dom;
+   Term vDom = null;
    JFrame frame = new JFrame("React Test");
+   Term state = TermConstants.emptyListAtom;
+   Term props = TermConstants.emptyListAtom;
+
+
    public ReactApp(String URL, String rootElementId) throws Exception
    {
-      super(null);
-
       engine = new Engine(URL, rootElementId);
       this.URL = URL;
       this.rootElementId = rootElementId;
       React.addCodeChangeListener(new URI(URL + "/listen"), rootElementId, this);
-      // This is a bit finicky. First we have to set up the state as 'empty'.
-      // The empty state is not as empty as you might think. It contains 2 nodes:
-      //    * The global root. This is the representation of this JFrame
-      //    * Inside this is the main widget. This is like the contentPane in the frame
-      // Unlike in Swing, we can change the contentPane to a new one by patching it
-      // but the global domRoot (ie this object) is immutable. In reality, we should only EVER have one
-      // child here, otherwise Swing goes a bit... well, weird.
-
-      // This is for no-scroll at the top level
       frame.getContentPane().setLayout(new BorderLayout());
-      /* This is for scroll at the top level
-      scrollContent = new JPanel();
-      scrollContent.setLayout(new BorderLayout());
-      JScrollPane scrollPane = new JScrollPane(scrollContent);
-      frame.getContentPane().add(scrollPane, BorderLayout.CENTER);
-      */
-      scrollContent = frame.getContentPane();
-      // we want to end up calling instantiateNode() with a prologWidget containing <rootElement>
-      context = new PrologContext(rootElementId, engine);
-      long t1 = System.currentTimeMillis();
-      ReactComponent contentPane = ReactComponentFactory.instantiateNode(new PrologWidget(rootElementId), context);
-      System.out.println("t1: " + (System.currentTimeMillis() - t1) + "ms");
-      insertChildBefore(contentPane, null);      
+
+      // This is a bit tricky because there is no way to take a vDom and make a DOM out of it directly
+      // So instead, we make a DOM and a vDom ourselves, manually, that we know correspond
+      // Then, we create the vDOM we want, and compute the diffs between the two
+      // and apply that to the DOM we mocked up to generate the DOM we actually need.
+
+      // So, first create an initial vDOM of <Panel/>
+      vDom = new CompoundTerm("element", new Term[]{AtomTerm.get("Panel"), TermConstants.emptyListAtom, TermConstants.emptyListAtom});
+
+      // And manually create a real DOM which corresponds to that
+      dom = ReactComponentFactory.createElement("Panel");
+
+      // Put the document inside the contentPane so we can see it
+      insertChildBefore(dom, null);
+
+      // Now we have to initialize the widget manually too. First, get the initial state
+      state = engine.getInitialState(rootElementId, props);
+
+      // Now create a patch from that initial state to the output of render() on <RootElementId/>
+      Term newvDom = engine.render(rootElementId, state, props);
+      Term patches = engine.diff(vDom, newvDom);
+
+      // Update the vDom to be this new structure
+      vDom = newvDom;
+
+      // And apply the patches to mutate the real DOM
+      React.queuePatch(patches, dom, engine);
+
+      // Then make everything visible while we wait for Swing to apply the patches
       frame.setSize(800, 600);
       frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
       frame.setVisible(true);
-      System.out.println("Instantiation time: " + (System.currentTimeMillis() - t1) + "ms");
    }
 
    public void handleCodeChange() 
@@ -96,7 +110,7 @@ public class ReactApp extends ReactComponent implements CodeChangeListener
       {
          child.setParentNode(this);
          children.add(child);
-         scrollContent.add(child.getAWTComponent(), BorderLayout.CENTER);
+         frame.getContentPane().add(child.getAWTComponent(), BorderLayout.CENTER);
          context = child.getContext();
       }      
    }
@@ -104,7 +118,7 @@ public class ReactApp extends ReactComponent implements CodeChangeListener
    {
       context = null;
       children.remove(child);
-      scrollContent.remove(child.getAWTComponent());
+      frame.getContentPane().remove(child.getAWTComponent());
    }  
    public void replaceChild(ReactComponent newNode, ReactComponent oldNode)
    {

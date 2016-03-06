@@ -2,6 +2,7 @@ package org.proactive.prolog;
 
 import org.proactive.vdom.PrologNode;
 import org.proactive.vdom.PrologDocument;
+import org.proactive.ReactComponent;
 
 import gnu.prolog.database.PrologTextLoaderError;
 import gnu.prolog.io.ReadOptions;
@@ -54,7 +55,23 @@ public class Engine
       env.installBuiltin("on_server", 1);
       env.installBuiltin("raise_event", 2);
       env.installBuiltin("wait_for", 1);
+
+      env.installBuiltin("remove_child", 2);
+      env.installBuiltin("append_child", 2);
+      env.installBuiltin("insert_before", 3);
+      env.installBuiltin("replace_child", 3);
+      env.installBuiltin("child_nodes", 2);
+      env.installBuiltin("create_element", 3);
+      env.installBuiltin("create_text_node", 3);
+      env.installBuiltin("parent_node", 2);
+      env.installBuiltin("node_type", 2);
+      env.installBuiltin("set_property", 3);
+      env.installBuiltin("replace_node_data", 2);
+      env.installBuiltin("destroy_widget", 2);
+
+
       env.ensureLoaded(new CompoundTerm(CompoundTermTag.get("resource", 1), AtomTerm.get("/boilerplate.pl")));
+      env.ensureLoaded(new CompoundTerm(CompoundTermTag.get("resource", 1), AtomTerm.get("/diff.pl")));
       interpreter = env.createInterpreter();      
       env.ensureLoaded(componentURL, rootElementId);
       env.runInitialization(interpreter);
@@ -99,10 +116,10 @@ public class Engine
       return null;
    }
 
-   public PrologState getInitialState(String component, PrologState props)
+   public Term getInitialState(String component, Term props)
    {
       VariableTerm replyTerm = new VariableTerm("Result");
-      Term goal = ReactModule.crossModuleCall(component, new CompoundTerm(AtomTerm.get("getInitialState"), new Term[]{props.getValue(), replyTerm}));
+      Term goal = ReactModule.crossModuleCall(component, new CompoundTerm(AtomTerm.get("getInitialState"), new Term[]{props, replyTerm}));
       // We cannot undo(0) here because we might be in the middle of processing a flux event, and that would muck up the stack
       Interpreter.Goal g = interpreter.prepareGoal(goal);
       try
@@ -112,7 +129,7 @@ public class Engine
             interpreter.stop(g);
          if (rc == PrologCode.RC.SUCCESS || rc == PrologCode.RC.SUCCESS_LAST)
          {
-            return new PrologState(replyTerm.dereference());
+            return replyTerm.dereference();
          }
       }
       catch (PrologException notDefined)         
@@ -122,7 +139,7 @@ public class Engine
          //notDefined.printStackTrace();
          //System.exit(-1);
       }      
-      return PrologState.emptyState();
+      return TermConstants.emptyListAtom;
    }
 
    public PrologState instantiateProps(Map<String, Term> properties)
@@ -483,6 +500,60 @@ public class Engine
       System.out.println(goalURI);
       return new ExecutionState(goalURI, t, e);
    }
-    
+
+
+   public Term diff(Term a, Term b) throws PrologException
+   {
+      VariableTerm patchTerm = new VariableTerm("Patch");
+      Term goal = ReactModule.crossModuleCall("diff", new CompoundTerm(AtomTerm.get("diff"), new Term[]{a, b, patchTerm}));
+      // FIXME: Maybe...We cannot undo(0) here because we might be in the middle of processing a flux event, and that would muck up the stack
+      Interpreter.Goal g = interpreter.prepareGoal(goal);
+      PrologCode.RC rc = interpreter.execute(g);
+      if (rc == PrologCode.RC.SUCCESS)
+         interpreter.stop(g);
+      if (rc == PrologCode.RC.SUCCESS || rc == PrologCode.RC.SUCCESS_LAST)
+      {
+         return patchTerm.dereference();
+      }
+      return TermConstants.emptyListAtom;
+   }
+
+   public ReactComponent applyPatch(Term patch, ReactComponent root) throws PrologException
+   {
+      VariableTerm newRoot = new VariableTerm("NewRoot");
+      Term goal = ReactModule.crossModuleCall("diff", new CompoundTerm(AtomTerm.get("patch"), new Term[]{new JavaObjectTerm(root),
+                                                                                                         patch,
+                                                                                                         TermConstants.emptyListAtom,
+                                                                                                         newRoot}));
+      // FIXME: Maybe...We cannot undo(0) here because we might be in the middle of processing a flux event, and that would muck up the stack
+      Interpreter.Goal g = interpreter.prepareGoal(goal);
+      PrologCode.RC rc = interpreter.execute(g);
+      if (rc == PrologCode.RC.SUCCESS)
+         interpreter.stop(g);
+      if (rc == PrologCode.RC.SUCCESS || rc == PrologCode.RC.SUCCESS_LAST)
+      {
+         JavaObjectTerm result = (JavaObjectTerm)(newRoot.dereference());
+         return ((ReactComponent)result.value);
+      }
+      return null;
+   }
+
+   public Term render(String component, Term state, Term props) throws Exception
+   {
+      VariableTerm vDom = new VariableTerm("VDom");
+      Term goal = ReactModule.crossModuleCall(component, new CompoundTerm(AtomTerm.get("render"), new Term[]{state,
+                                                                                                             props,
+                                                                                                             vDom}));
+      // FIXME: Maybe...We cannot undo(0) here because we might be in the middle of processing a flux event, and that would muck up the stack
+      Interpreter.Goal g = interpreter.prepareGoal(goal);
+      PrologCode.RC rc = interpreter.execute(g);
+      if (rc == PrologCode.RC.SUCCESS)
+         interpreter.stop(g);
+      if (rc == PrologCode.RC.SUCCESS || rc == PrologCode.RC.SUCCESS_LAST)
+      {
+         return vDom.dereference();
+      }
+      return null;
+   }
 
 }

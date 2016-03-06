@@ -16,10 +16,6 @@ import java.awt.Component;
 public class Button extends ReactLeafComponent 
 {
    private JButton button = new JButton();
-   public Button(PrologNode n, PrologContext context)
-   {
-      super(context);
-   }
 
    private PrologObject serializeObject()
    {

@@ -13,15 +13,6 @@ import org.proactive.ReactLeafComponent;
 public class Tree extends ReactLeafComponent 
 {
    JTree tree = new JTree();
-   public Tree(PrologNode n, PrologContext context)
-   {
-      super(context);
-      /* This is if the child is the tree.
-        Node child = n.getFirstChild();
-        if (child != null && child instanceof Text)
-        setText(((Text)child).getWholeText());
-      */
-   }
    public void setProperties(HashMap<String, PrologObject> properties)
    {
       if (properties.containsKey("fill"))

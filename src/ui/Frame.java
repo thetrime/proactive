@@ -13,15 +13,6 @@ import org.proactive.ReactLeafComponent;
 public class Frame extends ReactLeafComponent 
 {
    JFrame frame = new JFrame();
-   public Frame(PrologNode n, PrologContext context)
-   {
-      super(context);
-      /* This is if the child is the frame.
-        Node child = n.getFirstChild();
-        if (child != null && child instanceof Text)
-        setText(((Text)child).getWholeText());
-      */
-   }
    public void setProperties(HashMap<String, PrologObject> properties)
    {
    }

@@ -46,9 +46,9 @@ public class Panel extends ReactComponent
 
    private String id;
 
-   public Panel(PrologNode n, PrologContext context) throws Exception
+   public Panel() throws Exception
    {
-      super(context);
+      super();
       awtComponent = panel;
       panel.setBackground(new Color(150, 168, 200));
       panel.setLayout(layoutManager);

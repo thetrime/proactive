@@ -21,7 +21,7 @@ public class PrologContext
    {
       this.engine = engine;
       this.props = PrologState.emptyState();
-      this.state = engine.getInitialState(componentName, props);
+      this.state = new PrologState(engine.getInitialState(componentName, props.getValue()));
       this.componentName = componentName;
       this.document = null;
    }
@@ -70,7 +70,8 @@ public class PrologContext
       System.out.println("+++++++ Rerendering " + componentName);
       PrologDocument newDocument = engine.render(componentName, state, props, this);
       PatchSet editScript = ReactDiff.diff(document, newDocument);
-      React.queuePatch(editScript, root, this);
+      System.out.println("+++++++ WRONG " + componentName);
+      //React.queuePatch(editScript, root, this);
       document = newDocument;
    }
    
