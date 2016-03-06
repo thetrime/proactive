@@ -65,7 +65,7 @@ public class Engine
       env.installBuiltin("create_text_node", 3);
       env.installBuiltin("parent_node", 2);
       env.installBuiltin("node_type", 2);
-      env.installBuiltin("set_property", 3);
+      env.installBuiltin("set_properties", 2);
       env.installBuiltin("replace_node_data", 2);
       env.installBuiltin("destroy_widget", 2);
       env.installBuiltin("init_widget", 3);
@@ -379,7 +379,7 @@ public class Engine
          }
          else if (((CompoundTerm)value).tag.functor.value.equals("$this"))
          {
-            System.out.println("Unpacking a this pointer in " + context.componentName);
+            //System.out.println("Unpacking a this pointer in " + context.componentName);
             System.out.println("Handler is " +unpack(((CompoundTerm)value).args[0], context));
             return new JavaObjectTerm(new BoundHandler(unpack(((CompoundTerm)value).args[0], context), context));
          }
@@ -508,6 +508,8 @@ public class Engine
       VariableTerm patchTerm = new VariableTerm("Patch");
       Term goal = ReactModule.crossModuleCall("diff", new CompoundTerm(AtomTerm.get("diff"), new Term[]{a, b, patchTerm}));
       // FIXME: Maybe...We cannot undo(0) here because we might be in the middle of processing a flux event, and that would muck up the stack
+      // FIXME: Creating new interpreters all the time sounds expensive
+      Interpreter interpreter = env.createInterpreter();
       Interpreter.Goal g = interpreter.prepareGoal(goal);
       PrologCode.RC rc = interpreter.execute(g);
       if (rc == PrologCode.RC.SUCCESS)
@@ -521,7 +523,7 @@ public class Engine
 
    public ReactComponent applyPatch(Term patch, ReactComponent root) throws PrologException
    {
-      System.out.println("Patching tree from " + root);
+      System.out.println("Patching tree from " + root + " AWT: " + javax.swing.SwingUtilities.isEventDispatchThread());
       VariableTerm newRoot = new VariableTerm("NewRoot");
       Term renderOptions = CompoundTerm.getList(new Term[]{new CompoundTerm("document", new Term[]{new JavaObjectTerm(this)})});
       Term goal = ReactModule.crossModuleCall("diff", new CompoundTerm(AtomTerm.get("patch"), new Term[]{new JavaObjectTerm(root),
@@ -529,6 +531,8 @@ public class Engine
                                                                                                          renderOptions,
                                                                                                          newRoot}));
       // FIXME: Maybe...We cannot undo(0) here because we might be in the middle of processing a flux event, and that would muck up the stack
+      // FIXME: Creating new interpreters all the time sounds expensive
+      Interpreter interpreter = env.createInterpreter();
       Interpreter.Goal g = interpreter.prepareGoal(goal);
       PrologCode.RC rc = interpreter.execute(g);
       if (rc == PrologCode.RC.SUCCESS)
@@ -536,10 +540,10 @@ public class Engine
       if (rc == PrologCode.RC.SUCCESS || rc == PrologCode.RC.SUCCESS_LAST)
       {
          JavaObjectTerm result = (JavaObjectTerm)(newRoot.dereference());
-         System.out.println("Successfully updated");
          return ((ReactComponent)result.value);
       }
       System.out.println(" *********************** patch/4 failed: " + patch);
+      System.exit(-1);
       return null;
    }
 
@@ -550,6 +554,9 @@ public class Engine
                                                                                                              props,
                                                                                                              vDom}));
       // FIXME: Maybe...We cannot undo(0) here because we might be in the middle of processing a flux event, and that would muck up the stack
+      // FIXME: Creating new interpreters all the time sounds expensive
+      Interpreter interpreter = env.createInterpreter();
+
       Interpreter.Goal g = interpreter.prepareGoal(goal);
       PrologCode.RC rc = interpreter.execute(g);
       if (rc == PrologCode.RC.SUCCESS)
@@ -559,6 +566,40 @@ public class Engine
          return vDom.dereference();
       }
       return null;
+   }
+
+   public static HashMap<String, PrologObject> termToProperties(Term t) throws PrologException
+   {
+      HashMap<String, PrologObject> properties = new HashMap<String,PrologObject>();
+      if (!TermConstants.emptyListAtom.equals(t))
+      {
+         if (t instanceof CompoundTerm)
+         {
+            CompoundTerm list = (CompoundTerm)t;
+            while (list.tag == TermConstants.listTag && list.tag.arity == 2)
+            {
+               if (list.args[0] instanceof CompoundTerm)
+               {
+                  CompoundTerm attr = (CompoundTerm)list.args[0];
+                  if (attr.tag.arity != 2 || !attr.tag.functor.value.equals("="))
+                     PrologException.typeError(AtomTerm.get("attribute"), attr);
+                  Term attrName = attr.args[0];
+                  Term attrValue = attr.args[1];
+                  if (attrName instanceof AtomTerm)
+                     properties.put(((AtomTerm)attrName).value, new PrologObject(attrValue));
+                  else
+                     PrologException.typeError(AtomTerm.get("atom"), attrName);
+                  if (TermConstants.emptyListAtom.equals(list.args[1]))
+                     break;
+                  else if (list.args[1] instanceof CompoundTerm)
+                     list = (CompoundTerm)list.args[1];
+                  else
+                     PrologException.typeError(AtomTerm.get("list"), t);
+               }
+            }
+         }
+      }
+      return properties;
    }
 
 }

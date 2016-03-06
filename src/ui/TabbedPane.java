@@ -20,8 +20,7 @@ public class TabbedPane extends ReactComponent
    private java.util.List<ReactComponent> children = new LinkedList<ReactComponent>();
    public void setProperties(HashMap<String, PrologObject> properties)
    {
-      if (properties.containsKey("fill"))
-         fill = properties.get("fill").asFill();
+      super.setProperties(properties);
    }
    public Component getAWTComponent()
    {

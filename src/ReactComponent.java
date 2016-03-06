@@ -3,6 +3,7 @@ package org.proactive;
 import org.proactive.prolog.PrologContext;
 import org.proactive.prolog.PrologObject;
 import java.util.List;
+import java.util.Map;
 import java.util.HashMap;
 import java.awt.Component;
 import java.awt.GridBagConstraints;
@@ -19,12 +20,17 @@ public abstract class ReactComponent
    }
 
    public abstract Component getAWTComponent();
-   public void setProperty(String key, PrologObject value)
+   public void setProperties(HashMap<String, PrologObject> properties)
    {
-      properties.put(key, value);
-      if (key.equals("fill"))
-         fill = value.asFill();
-
+      for (Map.Entry<String, PrologObject> property : properties.entrySet())
+         properties.put(property.getKey(), property.getValue());
+      if (properties.containsKey("fill"))
+      {
+         if (properties.get("fill") == null)
+            fill = GridBagConstraints.NONE;
+         else
+            fill = properties.get("fill").asFill();
+      }
    }
    
    public abstract List<ReactComponent> getChildNodes();

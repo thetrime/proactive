@@ -429,9 +429,7 @@ patch_recursive([NodeIndex|Indices], RootNode, Index, PatchSet, Options, NewRoot
 apply_patch(RootNode, {null}, _Patches, _Options, RootNode):- !.
 apply_patch(RootNode, _DomNode, [], _Options, RootNode):- !.
 apply_patch(RootNode, DomNode, [Patch|Patches], Options, NewRoot):-
-        writeln(applying(patch_op(Patch, DomNode, Options, NewNode))),
         patch_op(Patch, DomNode, Options, NewNode),
-        writeln(applied(patch_op(Patch, DomNode, Options, NewNode))),
         ( DomNode == RootNode->
             R1 = NewNode
         ; otherwise->
@@ -597,6 +595,11 @@ render(Options, VNodeIn, DomNode):-
         ).
 
 render_children([], _, _):- !.
+render_children([list(List)|Children], Options, DomNode):-
+        !,
+        render_children(List, Options, DomNode),
+        render_children(Children, Options, DomNode).
+
 render_children([Child|Children], Options, DomNode):-
         render(Options, Child, ChildDomNode),
         ( ChildDomNode \== {null}->
@@ -606,6 +609,10 @@ render_children([Child|Children], Options, DomNode):-
         ),
         render_children(Children, Options, DomNode).
 
+apply_properties(Node, Attributes, _Previous):-
+        set_properties(Node, Attributes).
+
+/*
 apply_properties(_Node, [], _Previous):- !.
 apply_properties(Node, [PropName=PropValue|Properties], Previous):-
         ( PropValue == {null} ->
@@ -635,6 +642,7 @@ remove_property(Node, PropName, PropValue, Previous):-
         ; otherwise->
             unhook(PreviousValue, Node, PropName, PropValue)
         ).
+*/
 
 unhook(_, _, _, _):- fail. % FIXME: Stub
 is_hook(_):- fail. % FIXME: Stub

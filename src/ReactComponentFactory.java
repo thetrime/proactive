@@ -81,7 +81,6 @@ public class ReactComponentFactory
    // Redo
    public static ReactComponent createElement(String tagName) throws Exception
    {
-      System.out.println("Creating component of type " + tagName);
       Constructor<? extends ReactComponent> c = configuration.getImplementingClass(tagName);
       if (c != null)
          return c.newInstance();

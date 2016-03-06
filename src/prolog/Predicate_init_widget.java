@@ -22,8 +22,6 @@ public class Predicate_init_widget extends ExecuteOnlyCode
          ReactWidget widget = new ReactWidget((Engine)(((JavaObjectTerm)args[0]).value),
                                               ((AtomTerm)element.args[0]).value,
                                               element.args[1]);
-         widget.initialize();
-
          return interpreter.simpleUnify(args[2], new JavaObjectTerm(widget));
       }
       catch (Exception e)

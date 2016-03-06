@@ -12,6 +12,8 @@ import java.util.LinkedList;
 import java.util.HashMap;
 import java.awt.Component;
 import java.awt.GridBagConstraints;
+import javax.swing.JPanel;
+import java.awt.BorderLayout;
 
 public class ReactWidget extends ReactComponent
 {
@@ -20,19 +22,18 @@ public class ReactWidget extends ReactComponent
    protected Term state;
    protected Term props;
    protected Term vDom = null;
+   private JPanel panel = new JPanel();
    // The widget always has 0 or 1 children. The list is just here for efficiency
    List<ReactComponent> children = new LinkedList<ReactComponent>();
    ReactComponent child = null;
 
-   public ReactWidget(Engine engine, String elementId, Term props)
+   public ReactWidget(Engine engine, String elementId, Term props) throws Exception
    {
       this.engine = engine;
       this.elementId = elementId;
       this.props = props;
-   }
+      panel.setLayout(new BorderLayout());
 
-   public void initialize() throws Exception
-   {
       // First, get the state
       this.state = engine.getInitialState(elementId, props);
 
@@ -42,20 +43,22 @@ public class ReactWidget extends ReactComponent
       // But we cannot just realize the vDOM->DOM directly. Instead, we must compute diffs from a known state and apply those to a known DOM
       // Start by creating an initial contentPane.
       // FIXME: Can we come up with something that does not need ui.Panel? Like ReactComponent(); ?
-      ReactComponent initialDom = ReactComponentFactory.createElement("Panel");
+      ReactComponent child = new org.proactive.ui.Panel("root panel for " + this);
+
+      setProperties(Engine.termToProperties(props));
       // Then we add the contentPane to the widget. This means the parent of the contentPane is the widget itself
-      insertChildBefore(initialDom, null);
+      insertChildBefore(child, null);
       // Now we make an equivalent VDOM for the empty widget
-      Term emptyVDom = new CompoundTerm("element", new Term[]{AtomTerm.get("Panel"), TermConstants.emptyListAtom, TermConstants.emptyListAtom});
+      Term emptyVDom = new CompoundTerm("element", new Term[]{AtomTerm.get("Panel"), props, TermConstants.emptyListAtom});
       // Compute the diffs
       Term patches = engine.diff(emptyVDom, vDom);
       // And ask for them to be realized
-      React.queuePatch(patches, initialDom, engine);
+      React.queuePatch(patches, child, engine);
    }
 
    public Component getAWTComponent()
    {
-      return child.getAWTComponent();
+      return panel;
    }
    public List<ReactComponent> getChildNodes()
    {
@@ -63,25 +66,42 @@ public class ReactWidget extends ReactComponent
    }
    public void insertChildBefore(ReactComponent child, ReactComponent sibling)
    {
+      System.out.println(this + " insertChildBefore: " + child);
+      panel.removeAll();
+      panel.add(child.getAWTComponent(), BorderLayout.CENTER);
       children.clear();
       this.child = child;
       children.add(child);
       child.setParentNode(this);
+      if (getParentNode() != null)
+         getParentNode().replaceChild(this, this);
+
    }
    public void removeChild(ReactComponent child)
    {
+      System.out.println(this + " removeChild: " + child);
+      panel.remove(child.getAWTComponent());
       children.clear();
       this.child = null;
+      if (getParentNode() != null)
+         getParentNode().replaceChild(this, this);
+
    }
    public void replaceChild(ReactComponent newNode, ReactComponent oldNode)
    {
+      System.out.println(this + " replaceChild: " + oldNode + " -> " + newNode);
+      panel.remove(oldNode.getAWTComponent());
+      panel.add(newNode.getAWTComponent(), BorderLayout.CENTER);
       children.clear();
       this.child = newNode;
       children.add(newNode);
+      if (getParentNode() != null)
+         getParentNode().replaceChild(this, this);
+
    }
 
    public String toString()
    {
-      return "<Widget:" + elementId + ">";
+      return "<Widget:" + elementId + " " + props+ ">";
    }
 }

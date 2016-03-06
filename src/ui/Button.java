@@ -48,13 +48,13 @@ public class Button extends ReactLeafComponent
       button.addActionListener(actionListener);
    }
    
-   public void setProperty(String key, PrologObject value)
+   public void setProperties(HashMap<String, PrologObject> properties)
    {
-      super.setProperty(key, value);
-      if (key.equals("label"))
-         button.setText(value.asString());
-      if (key.equals("onClick"))
-         setClickHandler(value);
+      super.setProperties(properties);
+      if (properties.containsKey("label"))
+         button.setText(properties.get("label").asString());
+      if (properties.containsKey("onClick"))
+         setClickHandler(properties.get("onClick"));
    }
 
    public Component getAWTComponent()

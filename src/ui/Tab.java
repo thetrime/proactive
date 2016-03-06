@@ -18,13 +18,13 @@ public class Tab extends ReactComponent
    private String tooltip = "???";
    List<ReactComponent> children = new LinkedList<ReactComponent>();
 
-   public void setProperty(String name, PrologObject value)
+   public void setProperties(HashMap<String, PrologObject> properties)
    {
-      super.setProperty(name, value);
-      if (name.equals("label"))
-         label = value.asString();
-      else if (name.equals("tooltip"))
-         tooltip = value.asString();
+      super.setProperties(properties);
+      if (properties.containsKey("label"))
+         label = properties.get("label").asString();
+      else if (properties.containsKey("tooltip"))
+         tooltip = properties.get("tooltip").asString();
    }
    public Component getAWTComponent()
    {

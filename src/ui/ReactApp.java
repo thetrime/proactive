@@ -26,72 +26,43 @@ import gnu.prolog.term.CompoundTerm;
 import gnu.prolog.term.AtomTerm;
 import gnu.prolog.vm.TermConstants;
 
-public class ReactApp extends ReactWidget implements CodeChangeListener
+public class ReactApp extends JFrame implements CodeChangeListener
 {
    String URL = null;
-   JFrame frame = new JFrame("React Test");
-   List<ReactComponent> children = new LinkedList<ReactComponent>();
-   ReactComponent contentPane;
-
+   ReactWidget widget;
+   private Engine engine;
    public ReactApp(String URL, String rootElementId) throws Exception
    {
-      super(new Engine(URL, rootElementId), rootElementId, TermConstants.emptyListAtom);
+      super("React Test");
+      engine = new Engine(URL, rootElementId);
+      widget = new ReactWidget(engine, rootElementId, TermConstants.emptyListAtom);
       React.addCodeChangeListener(new URI(URL + "/listen"), rootElementId, this);
-      contentPane = ReactComponentFactory.createElement("Panel");
-      children.add(contentPane);
-      initialize();
-      frame.getContentPane().setLayout(new BorderLayout());
-      contentPane.setParentNode(this);
-      frame.getContentPane().add(contentPane.getAWTComponent(), BorderLayout.CENTER);
-      frame.setSize(800, 600);
-      frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-      frame.setVisible(true);
+      getContentPane().setLayout(new BorderLayout());
+      getContentPane().add(widget.getAWTComponent(), BorderLayout.CENTER);
+      setSize(800, 600);
+      setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+      setVisible(true);
    }
 
    public void handleCodeChange() 
    {
       try
       {
-         if (context != null)
-         {
-            context.getEngine().make();
-            context.reRender();
-            SwingUtilities.invokeLater(new Runnable()
+         engine.make();
+         //context.reRender();
+         SwingUtilities.invokeLater(new Runnable()
+            {
+               public void run()
                {
-                  public void run()
-                  {
-                     frame.validate();
-                     frame.repaint();
-                     
-                  }
-               });      
-         }
+                  validate();
+                  repaint();
+
+               }
+            });
       }
       catch(Exception e)
       {
          e.printStackTrace();
       }
-   }
-
-   public void insertChildBefore(ReactComponent child, ReactComponent sibling)
-   {
-      contentPane.insertChildBefore(child, sibling);
-   }
-   public void removeChild(ReactComponent child)
-   {
-      contentPane.removeChild(child);
-   }
-   public void replaceChild(ReactComponent newNode, ReactComponent oldNode)
-   {
-      contentPane.replaceChild(newNode, oldNode);
-   }
-   public List<ReactComponent> getChildNodes()
-   {
-      return children;
-   }
-
-   public JFrame getAWTComponent()
-   {
-      return frame;
    }
 }

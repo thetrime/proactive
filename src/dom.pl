@@ -8,7 +8,7 @@
           create_text_node/3,
           parent_node/2,
           node_type/2,
-          set_property/3,
+          set_properties/2,
           replace_node_data/2,
           init_widget/3,
           destroy_widget/2]).
@@ -59,11 +59,11 @@ create_element(Document, TagName, DomNode):-
         put_attr(PropertiesPtr, react, []),
         put_attr(ParentPtr, react, {null}).
 
-set_property(DomNode, Name, Value):-
+set_properties(DomNode, NewProperties):-
         DomNode = dom_element(Attributes),
         memberchk(properties-PropertiesPtr, Attributes),
-        get_attr(PropertiesPtr, react, Properties),
-        change_attributes(Properties, Name, Value, NewProperties),
+        %get_attr(PropertiesPtr, react, Properties),
+        %change_attributes(Properties, Name, Value, NewProperties),
         put_attr(PropertiesPtr, react, NewProperties).
 
 create_text_node(Document, Data, DomNode):-
@@ -121,7 +121,7 @@ destroy_widget(_DomNode, _Widget).
 init_widget(_, VNode, DomNode):-
         VNode = element(Tag, Attributes, _),
         Tag:getInitialState(Attributes, State),
-        Tag:render(State, Props, VDom),
+        Tag:render(State, Attributes, VDom),
         diff(VNode, VDom, Patches),
         create_element(Document, div, FakeDom),
         patch(FakeDom, Patches, [document(Document)], DomNode).

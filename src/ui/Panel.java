@@ -45,6 +45,12 @@ public class Panel extends ReactComponent
    private JPanel panel = new JPanel();
    private String id;
 
+   public Panel(String q) throws Exception
+   {
+      this();
+      this.id = q;
+   }
+
    public Panel() throws Exception
    {
       super();
@@ -54,21 +60,21 @@ public class Panel extends ReactComponent
       alignmentPanel.setPreferredSize(new Dimension(0,0));
       //panel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
    }
-   public void setProperty(String name, PrologObject value)
+   public void setProperties(HashMap<String, PrologObject> properties)
    {
-      super.setProperty(name, value);
-      if (name.equals("key"))
-         id = value.asString();
-      else if (name.equals("layout"))
+      super.setProperties(properties);
+      if (properties.containsKey("key"))
+         id = properties.get("key").asString();
+      else if (properties.containsKey("layout"))
       {
          int oldOrientation = orientation;
-         if (value == null)
+         if (properties.get("layout") == null)
          {
             orientation = VERTICAL;
          }
          else
          {
-            String key = value.asOrientation();
+            String key = properties.get("layout").asOrientation();
             if (key.equals("vertical"))
                orientation = VERTICAL;
             else if (key.equals("horizontal"))
@@ -87,10 +93,12 @@ public class Panel extends ReactComponent
             }
             else if (oldOrientation != GRID && orientation == GRID)
             {
-               int rows = 1;
-               int cols = 1;
-               if (name.equals("cols"))
-                  cols = value.asInteger();
+               int rows = 0;
+               int cols = 0;
+               if (properties.containsKey("cols"))
+                  cols = properties.get("cols").asInteger();
+               if (properties.containsKey("rows"))
+                  rows = properties.get("rows").asInteger();
                layoutManager = new GridLayout(rows, cols);
                panel.setLayout(layoutManager);
 
@@ -98,16 +106,16 @@ public class Panel extends ReactComponent
             repackChildren();
          }
       }
-      if (name.equals("align-children"))
+      if (properties.containsKey("align-children"))
       {
          int oldAlignment = alignment;
-         if (value == null)
+         if (properties.get("align-children") == null)
          {
             alignment = START;
          }
          else
          {
-            String key = value.asString();
+            String key = properties.get("align-children").asString();
             if (key.equals("start"))
                 alignment = START;
             else if (key.equals("center"))
@@ -118,19 +126,19 @@ public class Panel extends ReactComponent
          if (oldAlignment != alignment)
             repackChildren();
       }
-      if (name.equals("scroll"))
+      if (properties.containsKey("scroll"))
       {
          // FIXME: Not this simple!
          //   * Check scroll modes
          //   * Could be turning scroll OFF!
          //   * Could be changing from scroll->different scroll
-         if (value == null)
+         if (properties.get("scroll") == null)
          {
             awtComponent = panel;
          }
          else
          {
-            String key = value.asScroll();
+            String key = properties.get("scroll").asScroll();
             JScrollPane scroll = new JScrollPane(panel);
             if (key.equals("vertical"))
             {
@@ -156,7 +164,7 @@ public class Panel extends ReactComponent
    }
    public void insertChildBefore(ReactComponent child, ReactComponent sibling)
    {
-      System.out.println("Panel adding " + child);
+      System.out.println("insertChildBefore in " + this +  ": " + child + ", " + sibling);
       // First rehome the child in the document
       if (child.getParentNode() != null)
          child.getParentNode().removeChild(child);
@@ -205,6 +213,7 @@ public class Panel extends ReactComponent
             yweight = 1;
          if (!(child.getAWTComponent() instanceof JFrame))
          {
+            System.out.println("+++ " + this + " is now adding " + child + " at " + index);
             panel.add(child.getAWTComponent(), new GridBagConstraints(x, y, 1, 1, xweight, yweight, anchor, childFill, new Insets(0,0,0,0), padx, pady));
          }
       }
@@ -271,13 +280,17 @@ public class Panel extends ReactComponent
          total_x_weight--;
       if (childFill == GridBagConstraints.VERTICAL || childFill == GridBagConstraints.BOTH)
          total_y_weight--;
+      nextIndex--;
       checkAlignment();
       panel.remove(child.getAWTComponent());
    }
 
    public void replaceChild(ReactComponent newChild, ReactComponent oldChild)
    {
+      System.out.println(this + " is Replacing " + oldChild + " with " + newChild);
+      System.out.println((((GridBagLayout)layoutManager).getConstraints(oldChild.getAWTComponent())).gridy);
       int i = children.indexOf(oldChild);
+      System.out.println("Index was at " + i);
       children.set(i, newChild);
       newChild.setParentNode(this);
 
@@ -296,9 +309,16 @@ public class Panel extends ReactComponent
          GridBagConstraints constraints = ((GridBagLayout)layoutManager).getConstraints(oldChild.getAWTComponent());
          // We cannot call removeChild here since the list of children will get truncated
          // and we want to swap in-place
+         System.out.println("gridy was at " + constraints.gridy);
          panel.remove(oldChild.getAWTComponent());
          // We may have to edit the constraints if the child has a different fill
          constraints.fill = newChild.getFill();
+         System.out.println("gridy was at " + constraints.gridy);
+         System.out.println(this + " is Adding " + newChild + " at " +constraints.gridy);
+         System.out.println(newChild.getAWTComponent());
+         java.awt.Container q = (java.awt.Container)newChild.getAWTComponent();
+         java.awt.Container qq = (java.awt.Container)q.getComponents()[0];
+         System.out.println("Length: " + qq.getComponents().length);
          panel.add(newChild.getAWTComponent(), constraints);
          checkAlignment();
       }
@@ -317,5 +337,10 @@ public class Panel extends ReactComponent
    public Component getAWTComponent()
    {
       return awtComponent;
+   }
+
+   public String toString()
+   {
+      return "(Panel: " + id + ")";
    }
 }
