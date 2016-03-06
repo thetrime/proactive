@@ -68,7 +68,7 @@ public class ReactComponentFactory
          Term t = Engine.unpack(entry.getValue(), context.getParentContext());
          attributes.put(entry.getKey(), new PrologObject(t));
       }
-      target.setProperties(attributes);
+      //target.setProperties(attributes);
    }
 
    public static boolean isWidgetName(String name)
@@ -81,6 +81,7 @@ public class ReactComponentFactory
    // Redo
    public static ReactComponent createElement(String tagName) throws Exception
    {
+      System.out.println("Creating component of type " + tagName);
       Constructor<? extends ReactComponent> c = configuration.getImplementingClass(tagName);
       if (c != null)
          return c.newInstance();

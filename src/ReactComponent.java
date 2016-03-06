@@ -19,10 +19,12 @@ public abstract class ReactComponent
    }
 
    public abstract Component getAWTComponent();
-   public abstract void setProperties(HashMap<String,PrologObject> properties);
    public void setProperty(String key, PrologObject value)
    {
       properties.put(key, value);
+      if (key.equals("fill"))
+         fill = value.asFill();
+
    }
    
    public abstract List<ReactComponent> getChildNodes();

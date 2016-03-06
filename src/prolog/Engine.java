@@ -533,8 +533,10 @@ public class Engine
       if (rc == PrologCode.RC.SUCCESS || rc == PrologCode.RC.SUCCESS_LAST)
       {
          JavaObjectTerm result = (JavaObjectTerm)(newRoot.dereference());
+         System.out.println("Successfully updated");
          return ((ReactComponent)result.value);
       }
+      System.out.println("patch/4 failed");
       return null;
    }
 

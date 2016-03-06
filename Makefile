@@ -6,6 +6,7 @@ SRC= src/React.java                                        \
      src/CodeChangeListener.java                           \
      src/ServerConnection.java                             \
      src/ReactLeafComponent.java                           \
+     src/ReactWidget.java                                  \
      src/ReactComponentFactoryConfiguration.java           \
      src/ui/Panel.java                                     \
      src/ui/Button.java                                    \
@@ -38,6 +39,7 @@ SRC= src/React.java                                        \
      src/prolog/Predicate_set_property.java                \
      src/prolog/Predicate_replace_node_data.java           \
      src/prolog/Predicate_destroy_widget.java              \
+     src/prolog/Predicate_init_widget.java                 \
      src/prolog/Engine.java                                \
      src/prolog/PrologState.java                           \
      src/prolog/PrologObject.java                          \
@@ -71,6 +73,9 @@ SRC= src/React.java                                        \
      src/vdom/ReactEditText.java                           \
      src/vdom/ReactEditThunk.java
 
+BOILERPLATE = src/boilerplate.pl                           \
+	      src/diff.pl
+
 all:	client
 
 .src:	$(SRC) Makefile
@@ -83,7 +88,7 @@ build:
 
 client: dist/react.jar
 
-dist/react.jar:	.src build
+dist/react.jar:	.src build $(BOILERPLATE)
 	javac -cp dist/gpj.jar:dist/java_websocket.jar -Xlint:unchecked @.src -d build
 	jar cvf dist/react.jar -C build/ . -C src boilerplate.pl -C src diff.pl
 

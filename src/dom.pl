@@ -10,6 +10,7 @@
           node_type/2,
           set_property/3,
           replace_node_data/2,
+          init_widget/3,
           destroy_widget/2]).
 
 % ----------------- the real DOM. Implemented in SWI by attributed variables
@@ -115,12 +116,16 @@ replace_node_data(DomNode, NewData):-
         put_attr(DataPtr, react, NewData).
 
 
-destroy_widget(DomNode, Widget):-
-        ( memberchk(destroy-Destroy, Widget),
-          call(Destroy, Widget, DomNode)
-        ; otherwise->
-            true
-        ).
+destroy_widget(_DomNode, _Widget).
+
+init_widget(_, VNode, DomNode):-
+        VNode = element(Tag, Attributes, _),
+        Tag:getInitialState(Attributes, State),
+        Tag:render(State, Props, VDom),
+        diff(VNode, VDom, Patches),
+        create_element(Document, div, FakeDom),
+        patch(FakeDom, Patches, [document(Document)], DomNode).
+
 
 node_type(DomNode, Type):-
         DomNode = dom_element(Attributes),
