@@ -17,7 +17,7 @@ public class Predicate_init_widget extends ExecuteOnlyCode
       // init_widget(Document, VNode, DomNode);
       try
       {
-         System.out.println("init_widget: " + args[1]);
+         //System.out.println("init_widget: " + args[1]);
          CompoundTerm element = (CompoundTerm)args[1];
          ReactWidget widget = new ReactWidget((Engine)(((JavaObjectTerm)args[0]).value),
                                               ((AtomTerm)element.args[0]).value,

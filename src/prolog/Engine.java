@@ -523,7 +523,7 @@ public class Engine
 
    public ReactComponent applyPatch(Term patch, ReactComponent root) throws PrologException
    {
-      System.out.println("Patching tree from " + root + " AWT: " + javax.swing.SwingUtilities.isEventDispatchThread());
+      //System.out.println("Patching tree from " + root + " AWT: " + javax.swing.SwingUtilities.isEventDispatchThread());
       VariableTerm newRoot = new VariableTerm("NewRoot");
       Term renderOptions = CompoundTerm.getList(new Term[]{new CompoundTerm("document", new Term[]{new JavaObjectTerm(this)})});
       Term goal = ReactModule.crossModuleCall("diff", new CompoundTerm(AtomTerm.get("patch"), new Term[]{new JavaObjectTerm(root),

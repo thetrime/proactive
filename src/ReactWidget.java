@@ -66,7 +66,6 @@ public class ReactWidget extends ReactComponent
    }
    public void insertChildBefore(ReactComponent child, ReactComponent sibling)
    {
-      System.out.println(this + " insertChildBefore: " + child);
       panel.removeAll();
       panel.add(child.getAWTComponent(), BorderLayout.CENTER);
       children.clear();
@@ -79,7 +78,6 @@ public class ReactWidget extends ReactComponent
    }
    public void removeChild(ReactComponent child)
    {
-      System.out.println(this + " removeChild: " + child);
       panel.remove(child.getAWTComponent());
       children.clear();
       this.child = null;
@@ -89,7 +87,6 @@ public class ReactWidget extends ReactComponent
    }
    public void replaceChild(ReactComponent newNode, ReactComponent oldNode)
    {
-      System.out.println(this + " replaceChild: " + oldNode + " -> " + newNode);
       panel.remove(oldNode.getAWTComponent());
       panel.add(newNode.getAWTComponent(), BorderLayout.CENTER);
       children.clear();

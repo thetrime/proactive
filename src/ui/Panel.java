@@ -65,7 +65,7 @@ public class Panel extends ReactComponent
       super.setProperties(properties);
       if (properties.containsKey("key"))
          id = properties.get("key").asString();
-      else if (properties.containsKey("layout"))
+      if (properties.containsKey("layout"))
       {
          int oldOrientation = orientation;
          if (properties.get("layout") == null)
@@ -164,7 +164,6 @@ public class Panel extends ReactComponent
    }
    public void insertChildBefore(ReactComponent child, ReactComponent sibling)
    {
-      System.out.println("insertChildBefore in " + this +  ": " + child + ", " + sibling);
       // First rehome the child in the document
       if (child.getParentNode() != null)
          child.getParentNode().removeChild(child);
@@ -213,7 +212,6 @@ public class Panel extends ReactComponent
             yweight = 1;
          if (!(child.getAWTComponent() instanceof JFrame))
          {
-            System.out.println("+++ " + this + " is now adding " + child + " at " + index);
             panel.add(child.getAWTComponent(), new GridBagConstraints(x, y, 1, 1, xweight, yweight, anchor, childFill, new Insets(0,0,0,0), padx, pady));
          }
       }
@@ -287,10 +285,7 @@ public class Panel extends ReactComponent
 
    public void replaceChild(ReactComponent newChild, ReactComponent oldChild)
    {
-      System.out.println(this + " is Replacing " + oldChild + " with " + newChild);
-      System.out.println((((GridBagLayout)layoutManager).getConstraints(oldChild.getAWTComponent())).gridy);
       int i = children.indexOf(oldChild);
-      System.out.println("Index was at " + i);
       children.set(i, newChild);
       newChild.setParentNode(this);
 
@@ -309,16 +304,9 @@ public class Panel extends ReactComponent
          GridBagConstraints constraints = ((GridBagLayout)layoutManager).getConstraints(oldChild.getAWTComponent());
          // We cannot call removeChild here since the list of children will get truncated
          // and we want to swap in-place
-         System.out.println("gridy was at " + constraints.gridy);
          panel.remove(oldChild.getAWTComponent());
          // We may have to edit the constraints if the child has a different fill
          constraints.fill = newChild.getFill();
-         System.out.println("gridy was at " + constraints.gridy);
-         System.out.println(this + " is Adding " + newChild + " at " +constraints.gridy);
-         System.out.println(newChild.getAWTComponent());
-         java.awt.Container q = (java.awt.Container)newChild.getAWTComponent();
-         java.awt.Container qq = (java.awt.Container)q.getComponents()[0];
-         System.out.println("Length: " + qq.getComponents().length);
          panel.add(newChild.getAWTComponent(), constraints);
          checkAlignment();
       }
