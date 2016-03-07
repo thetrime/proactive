@@ -11,14 +11,12 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.net.URI;
 import org.proactive.prolog.Engine;
-import org.proactive.prolog.PrologContext;
 import org.proactive.prolog.PrologObject;
 import org.proactive.ReactComponent;
 import org.proactive.CodeChangeListener;
 import org.proactive.React;
 import org.proactive.ReactWidget;
 import org.proactive.ReactComponentFactory;
-import org.proactive.vdom.PrologWidget;
 import org.proactive.prolog.PrologState;
 
 import gnu.prolog.term.Term;
@@ -46,23 +44,22 @@ public class ReactApp extends JFrame implements CodeChangeListener
 
    public void handleCodeChange() 
    {
-      try
-      {
-         engine.make();
-         //context.reRender();
-         SwingUtilities.invokeLater(new Runnable()
+      SwingUtilities.invokeLater(new Runnable()
+         {
+            public void run()
             {
-               public void run()
+               try
                {
+                  engine.make();
+                  widget.reRender();
                   validate();
                   repaint();
-
                }
-            });
-      }
-      catch(Exception e)
-      {
-         e.printStackTrace();
-      }
+               catch(Exception e)
+               {
+                  e.printStackTrace();
+               }
+            }
+         });
    }
 }

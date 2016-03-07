@@ -13,8 +13,6 @@ import java.awt.Component;
 import java.awt.BorderLayout;
 import java.awt.event.FocusListener;
 import java.awt.event.FocusEvent;
-import org.proactive.vdom.PrologNode;
-import org.proactive.prolog.PrologContext;
 import org.proactive.prolog.PrologObject;
 import org.proactive.ReactLeafComponent;
 
@@ -120,9 +118,7 @@ public class Field extends ReactLeafComponent
 
    public void setValue(PrologObject value)
    {
-      if (type == RADIO)
-         System.out.println("setValue on widget: " + value);
-
+      System.out.println("setValue on widget: " + value);
       widget.setValue(value);
    }
 

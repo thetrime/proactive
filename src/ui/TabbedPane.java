@@ -6,8 +6,6 @@ import java.util.List;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.awt.Component;
-import org.proactive.vdom.PrologNode;
-import org.proactive.prolog.PrologContext;
 import org.proactive.prolog.PrologObject;
 import org.proactive.prolog.Engine;
 import org.proactive.ReactComponent;
@@ -17,7 +15,6 @@ public class TabbedPane extends ReactComponent
 {
    int nextIndex = 0;
    JTabbedPane tabbedPane = new JTabbedPane();
-   private java.util.List<ReactComponent> children = new LinkedList<ReactComponent>();
    public void setProperties(HashMap<String, PrologObject> properties)
    {
       super.setProperties(properties);
@@ -29,22 +26,15 @@ public class TabbedPane extends ReactComponent
 
    public void insertChildBefore(ReactComponent child, ReactComponent sibling)
    {
-      // First rehome the child in the document
-      if (child.getParentNode() != null)
-         child.getParentNode().removeChild(child);
-      child.setParentNode(this);
-      child.setOwnerDocument(owner);
-      
-      // Now insert the visual component
+      // First insert the visual component
       int index = (sibling==null)?-1:children.indexOf(sibling);
+      super.insertChildBefore(child, sibling);
       if (index != -1)
       {
-         children.add(index, child);
          repackChildren();
       }
       else
       {
-         children.add(child);
          addChildToDOM(nextIndex, child);
          nextIndex++;         
       }
@@ -62,15 +52,15 @@ public class TabbedPane extends ReactComponent
    private void repackChildren()
    {
       tabbedPane.removeAll();
-      int index = 0;
+      nextIndex = 0;
       for (ReactComponent i : children)
-         addChildToDOM(index++, i);
+         addChildToDOM(nextIndex++, i);
    }   
 
    public void removeChild(ReactComponent child)
    {
-      children.remove(child);
-      tabbedPane.remove(child.getAWTComponent());
+      tabbedPane.remove(awtMap.get(child));
+      super.removeChild(child);
    }
 
    public void replaceChild(ReactComponent newChild, ReactComponent oldChild)

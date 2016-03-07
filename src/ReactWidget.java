@@ -1,6 +1,5 @@
 package org.proactive;
 
-import org.proactive.prolog.PrologContext;
 import org.proactive.prolog.PrologObject;
 import org.proactive.prolog.Engine;
 import gnu.prolog.term.Term;
@@ -22,17 +21,15 @@ public class ReactWidget extends ReactComponent
    protected Term state;
    protected Term props;
    protected Term vDom = null;
-   private JPanel panel = new JPanel();
-   // The widget always has 0 or 1 children. The list is just here for efficiency
-   List<ReactComponent> children = new LinkedList<ReactComponent>();
-   ReactComponent child = null;
+
+   private List<ReactComponent> children = new LinkedList<ReactComponent>();
+   private ReactComponent child;
 
    public ReactWidget(Engine engine, String elementId, Term props) throws Exception
    {
       this.engine = engine;
       this.elementId = elementId;
       this.props = props;
-      panel.setLayout(new BorderLayout());
 
       // First, get the state
       this.state = engine.getInitialState(elementId, props);
@@ -43,7 +40,7 @@ public class ReactWidget extends ReactComponent
       // But we cannot just realize the vDOM->DOM directly. Instead, we must compute diffs from a known state and apply those to a known DOM
       // Start by creating an initial contentPane.
       // FIXME: Can we come up with something that does not need ui.Panel? Like ReactComponent(); ?
-      ReactComponent child = new org.proactive.ui.Panel("root panel for " + this);
+      child = new org.proactive.ui.Panel("root panel for " + this);
 
       setProperties(Engine.termToProperties(props, this));
       // Then we add the contentPane to the widget. This means the parent of the contentPane is the widget itself
@@ -54,50 +51,46 @@ public class ReactWidget extends ReactComponent
       Term patches = engine.diff(emptyVDom, vDom);
       // And ask for them to be realized
       React.queuePatch(patches, child, engine);
+//      engine.applyPatch(patches, child);
    }
 
    public Component getAWTComponent()
    {
-      return panel;
-   }
-   public List<ReactComponent> getChildNodes()
-   {
-      return children;
+      return child.getAWTComponent();
    }
    public void insertChildBefore(ReactComponent child, ReactComponent sibling)
    {
-      panel.removeAll();
-      panel.add(child.getAWTComponent(), BorderLayout.CENTER);
-      children.clear();
       this.child = child;
-      children.add(child);
-      child.setParentNode(this);
       child.setOwnerDocument(this);
+      child.setParentNode(this);
       if (getParentNode() != null)
          getParentNode().replaceChild(this, this);
 
    }
    public void removeChild(ReactComponent child)
    {
-      panel.remove(child.getAWTComponent());
-      children.clear();
       this.child = null;
+      child.setOwnerDocument(null);
       if (getParentNode() != null)
          getParentNode().replaceChild(this, this);
 
    }
    public void replaceChild(ReactComponent newNode, ReactComponent oldNode)
    {
-      panel.remove(oldNode.getAWTComponent());
-      panel.add(newNode.getAWTComponent(), BorderLayout.CENTER);
-      children.clear();
+      if (elementId.equals("foo"))
+         System.out.println("Replacing child " + oldNode + " --> " + newNode + " of " + this);
       this.child = newNode;
-      children.add(newNode);
-      newNode.setParentNode(this);
-      newNode.setOwnerDocument(this);
+      child.setOwnerDocument(this);
+      child.setParentNode(this);
       if (getParentNode() != null)
          getParentNode().replaceChild(this, this);
-
+   }
+   public List<ReactComponent> getChildNodes()
+   {
+      List<ReactComponent> list = new LinkedList<ReactComponent>();
+      if (child != null)
+         list.add(child);
+      return list;
    }
 
    public String toString()
@@ -137,6 +130,7 @@ public class ReactWidget extends ReactComponent
    public void setState(Term newState) throws Exception
    {
       state = newState;
+      System.out.println("State is now " + newState);
       reRender();
    }
 
@@ -144,7 +138,27 @@ public class ReactWidget extends ReactComponent
    {
       Term newvDom = engine.render(elementId, state, props);
       Term patches = engine.diff(vDom, newvDom);
+      System.out.println("Patch: " + patches);
       React.queuePatch(patches, child, engine);
       vDom = newvDom;
+   }
+
+   public void updateWidget(Term newvDom) throws Exception
+   {
+      Term patches = engine.diff(vDom, newvDom);
+      System.out.println("update widget with: " + patches);
+      React.queuePatch(patches, child, engine);
+      vDom = newvDom;
+   }
+
+   public void fluxEvent(Term key, Term value) throws Exception
+   {
+      Term proposedState = engine.fluxEvent(elementId, key, value, state, props);
+      if (proposedState != null)
+      {      
+         state = proposedState;
+         reRender();
+      }
+
    }
 }

@@ -1,7 +1,5 @@
 package org.proactive.prolog;
 
-import org.proactive.vdom.PrologNode;
-import org.proactive.vdom.PrologDocument;
 import org.proactive.ReactComponent;
 import org.proactive.ReactWidget;
 
@@ -70,6 +68,7 @@ public class Engine
       env.installBuiltin("replace_node_data", 2);
       env.installBuiltin("destroy_widget", 2);
       env.installBuiltin("init_widget", 3);
+      env.installBuiltin("update_widget", 4);
 
 
       env.ensureLoaded(new CompoundTerm(CompoundTermTag.get("resource", 1), AtomTerm.get("/boilerplate.pl")));
@@ -85,37 +84,6 @@ public class Engine
          error.printStackTrace();
       }
       System.out.println("Compile time: " + (System.currentTimeMillis() - t1) + "ms");
-   }   
-   
-   public PrologDocument render(String component, PrologState stateWrapper, PrologState propsWrapper, PrologContext parentContext) throws Exception
-   {
-      //System.out.println("Rendering " + component);
-      Term state;
-      Term props;
-      if (stateWrapper == null) 
-         state = TermConstants.emptyListAtom;
-      else
-         state = stateWrapper.getValue();
-      if (propsWrapper == null)
-         props = TermConstants.emptyListAtom;
-      else
-         props = propsWrapper.getValue();
-      VariableTerm replyTerm = new VariableTerm("Result");
-      Term goal = ReactModule.crossModuleCall(component, new CompoundTerm(AtomTerm.get("render"), new Term[]{state, props, replyTerm}));
-      //System.out.println("Execute: " + goal);
-      // We cannot undo(0) here because we might be in the middle of processing a flux event, and that would muck up the stack
-      Interpreter.Goal g = interpreter.prepareGoal(goal);
-      PrologCode.RC rc = interpreter.execute(g);
-      if (rc == PrologCode.RC.SUCCESS)
-         interpreter.stop(g);
-      if (rc == PrologCode.RC.SUCCESS || rc == PrologCode.RC.SUCCESS_LAST)
-      {
-         Term result = replyTerm.dereference();
-         PrologDocument doc = new PrologDocument(result, state, props, component, this, parentContext);
-         return doc;
-      }
-      System.out.println("Failed to render");
-      return null;
    }
 
    public Term getInitialState(String component, Term props)
@@ -159,18 +127,8 @@ public class Engine
       return CompoundTerm.getList(elements);
    }
 
-   public PrologState fluxEvent(String componentName, Term key, Term value, PrologState stateWrapper, PrologState propsWrapper) throws Exception
+   public Term fluxEvent(String componentName, Term key, Term value, Term state, Term props) throws Exception
    {
-      Term state;
-      Term props;
-      if (stateWrapper == null)
-         state = TermConstants.emptyListAtom;
-      else
-         state = stateWrapper.getValue();
-      if (propsWrapper == null)
-         props = TermConstants.emptyListAtom;
-      else
-         props = propsWrapper.getValue();
       VariableTerm newState = new VariableTerm("NewState");
       // We need to make sure that handlers dont (further) instantiate the key or value
       Term goal = ReactModule.crossModuleCall(componentName, new CompoundTerm(AtomTerm.get("handle_event"), new Term[]{key.clone(new TermCloneContext()),
@@ -187,9 +145,9 @@ public class Engine
             interpreter.stop(g);
          if (rc == PrologCode.RC.SUCCESS || rc == PrologCode.RC.SUCCESS_LAST)
          {
-            //PrologState adjustedState = applyState(state, newState.dereference());
-            //System.out.println("flux handler set state to: " + adjustedState);
-            return null;
+            Term adjustedState = applyState(state, newState.dereference());
+            System.out.println("flux handler set state to: " + adjustedState);
+            return adjustedState;
          }
       }
       catch (PrologException notDefined)         

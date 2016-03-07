@@ -1,7 +1,5 @@
 package org.proactive.ui;
 
-import org.proactive.vdom.PrologNode;
-import org.proactive.prolog.PrologContext;
 import org.proactive.prolog.PrologObject;
 import org.proactive.ReactComponent;
 import org.proactive.ReactComponentFactory;
@@ -39,7 +37,8 @@ public class Panel extends ReactComponent
 
    JPanel alignmentPanel = new JPanel();
 
-   private java.util.List<ReactComponent> children = new LinkedList<ReactComponent>();
+   private List<ReactComponent> children = new LinkedList<ReactComponent>();
+   private HashMap<ReactComponent, Component> awtMap = new HashMap<ReactComponent, Component>();
    private LayoutManager layoutManager = new GridBagLayout();
    private Component awtComponent;
    private JPanel panel = new JPanel();
@@ -169,6 +168,7 @@ public class Panel extends ReactComponent
          child.getParentNode().removeChild(child);
       child.setParentNode(this);
       child.setOwnerDocument(owner);
+      awtMap.put(child, child.getAWTComponent());
       int childFill = child.getFill();
       if (childFill == GridBagConstraints.HORIZONTAL || childFill == GridBagConstraints.BOTH)
          total_x_weight++;
@@ -273,6 +273,7 @@ public class Panel extends ReactComponent
    public void removeChild(ReactComponent child)
    {
       children.remove(child);
+      awtMap.remove(child);
       int childFill = child.getFill();
       if (childFill == GridBagConstraints.HORIZONTAL || childFill == GridBagConstraints.BOTH)
          total_x_weight--;
@@ -286,9 +287,8 @@ public class Panel extends ReactComponent
    public void replaceChild(ReactComponent newChild, ReactComponent oldChild)
    {
       int i = children.indexOf(oldChild);
-      children.set(i, newChild);
-      newChild.setParentNode(this);
-      newChild.setOwnerDocument(owner);
+      Component oldComponent = awtMap.get(oldChild);
+      super.replaceChild(newChild, oldChild);
       int childFill = oldChild.getFill();
       if (childFill == GridBagConstraints.HORIZONTAL || childFill == GridBagConstraints.BOTH)
          total_x_weight--;
@@ -301,10 +301,10 @@ public class Panel extends ReactComponent
          total_y_weight--;
       if (orientation == VERTICAL || orientation == HORIZONTAL)
       {
-         GridBagConstraints constraints = ((GridBagLayout)layoutManager).getConstraints(oldChild.getAWTComponent());
+         GridBagConstraints constraints = ((GridBagLayout)layoutManager).getConstraints(oldComponent);
          // We cannot call removeChild here since the list of children will get truncated
          // and we want to swap in-place
-         panel.remove(oldChild.getAWTComponent());
+         panel.remove(oldComponent);
          // We may have to edit the constraints if the child has a different fill
          constraints.fill = newChild.getFill();
          panel.add(newChild.getAWTComponent(), constraints);
@@ -312,7 +312,7 @@ public class Panel extends ReactComponent
       }
       else if (orientation == GRID)
       {
-         panel.remove(oldChild.getAWTComponent());
+         panel.remove(oldComponent);
          panel.add(newChild.getAWTComponent(), i);
       }
    }

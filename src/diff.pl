@@ -147,6 +147,18 @@ diff_children_1(A, B, Index, ParentIndex, Patch):-
 
 get_count(element(_, _, Children), Count):-
         !,
+        get_count_1(Children, Count).
+get_count(_, 0).
+
+get_count_1([], 1):- !.
+get_count_1([Child|Children], Count):-
+        get_count(Child, C),
+        get_count_1(Children, CC),
+        Count is CC + C.
+
+/*
+get_count(element(_, _, Children), Count):-
+        !,
         aggregate_all(r(sum(N+1)),
                       ( member(Child, Children),
                         get_count(Child, N)
@@ -154,6 +166,7 @@ get_count(element(_, _, Children), Count):-
                       r(Sum)),
         Count is Sum.
 get_count(_, 0).
+*/
 
 
 thunks(A, B, Index, Index-thunk({null}, PatchSet)):-
@@ -532,7 +545,30 @@ patch_op(text_patch(_LeftVNode, VText), DomNode, Options, NewNode):-
             )
         ).
 
-%patch_op(widget_patch(LeftVNode, Patch), DomNode, Options, NewNode):- % FIXME: Implement
+patch_op(widget_patch(LeftVNode, Widget), DomNode, Options, NewNode):-
+        ( is_widget(LeftVNode), is_widget(Widget),
+          LeftVNode = element(WidgetName, _, _),
+          Widget = element(WidgetName, _, _)->
+            Updating = true,
+            update_widget(Widget, LeftVNode, DomNode, NewNode)
+        ; otherwise->
+            Updating = false,
+            render(Options, Widget, NewNode)
+        ),
+        parent_node(DomNode, ParentNode),
+        ( ParentNode \== {null},
+          NewNode \== DomNode->
+            writeln(widget_updated_replacing_in_dom(ParentNode, NewNode, DomNode)),
+            replace_child(ParentNode, NewNode, DomNode)
+        ; otherwise->
+            true
+        ),
+        ( Updating == true ->
+            true
+        ; otherwise->
+            destroy_widget(DomNode, LeftVNode)
+        ).
+
 
 patch_op(node_patch(_LeftVNode, VNode), DomNode, Options, NewNode):-
         parent_node(DomNode, ParentNode),

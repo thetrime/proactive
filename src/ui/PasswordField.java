@@ -18,7 +18,7 @@ public class PasswordField implements InputWidget
 
    public Object getValue()
    {
-      return field.getText();
+      return field.getPassword();
    }
 
    public void setValue(PrologObject value)

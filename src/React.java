@@ -7,9 +7,6 @@ import java.util.LinkedList;
 import javax.swing.SwingUtilities;
 import java.awt.BorderLayout;
 import java.net.URI;
-import org.proactive.vdom.PrologDocument;
-import org.proactive.vdom.PatchSet;
-import org.proactive.prolog.PrologContext;
 import org.proactive.prolog.Engine;
 import gnu.prolog.term.Term;
 
@@ -18,24 +15,30 @@ public class React
    // Prevent instantiation
    private React() {}
 
-   static PrologDocument nextDocument = null;
    public static void main(String[] args) throws Exception
    {
       if (args.length != 2)
       {
          System.err.println("Usage: React <URI> <Component>");
       }
-      try
-      {
-         long startTime = System.currentTimeMillis();
-         new org.proactive.ui.ReactApp(args[0], args[1]);
-         System.out.println("Render time: " + (System.currentTimeMillis() - startTime ) + "ms");
-      }
-      catch(Exception e)
-      {
-         e.printStackTrace();
-         System.exit(-1);
-      }
+      SwingUtilities.invokeLater(new Runnable()
+         {
+            public void run()
+            {
+               long startTime = System.currentTimeMillis();
+               try
+               {
+
+                  new org.proactive.ui.ReactApp(args[0], args[1]);
+                  System.out.println("Render time: " + (System.currentTimeMillis() - startTime ) + "ms");
+               }
+               catch(Exception e)
+               {
+                  e.printStackTrace();
+                  System.exit(-1);
+               }
+            }
+         });
    }
 
    
@@ -43,6 +46,17 @@ public class React
 
    public static void queuePatch(Term p, ReactComponent root, Engine engine)
    {
+      // FIXME: What ARE we trying to achieve here?
+      try
+      {
+         engine.applyPatch(p, root);
+      }
+      catch(Exception e)
+      {
+         e.printStackTrace();
+         System.exit(-1);
+      }
+/*
       synchronized(dispatchQueue)
       {
          //System.out.println("Received patch: " + p + " for root " + root);
@@ -51,6 +65,7 @@ public class React
          dispatchQueue.offer(new TreePatch(p, root, engine));
       }
       flushQueue();
+*/
    }
 
    private static class TreePatch

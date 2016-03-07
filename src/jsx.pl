@@ -15,6 +15,9 @@ garbage(X,_):-
             throw(garbage)
         ).
 
+qq(X, X):-
+        writeln(X).
+
 jsx_node(Vars, Dict, element(Tag, Attributes, Content)) -->
         optional_spaces,
         `<`,
@@ -33,11 +36,11 @@ jsx_node(Vars, Dict, element(Tag, Attributes, Content)) -->
 
 comment --> `%`,
         !,
-        single_line_comment.
+        single_line_comment, optional_spaces.
 
 comment --> `/*`, % */
         !,
-        multi_line_comment.
+        multi_line_comment, optional_spaces.
 
 single_line_comment-->
         `\n`, !.

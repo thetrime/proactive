@@ -11,6 +11,7 @@
           set_properties/2,
           replace_node_data/2,
           init_widget/3,
+          update_widget/4,
           destroy_widget/2]).
 
 % ----------------- the real DOM. Implemented in SWI by attributed variables
@@ -126,6 +127,12 @@ init_widget(_, VNode, DomNode):-
         create_element(Document, div, FakeDom),
         patch(FakeDom, Patches, [document(Document)], DomNode).
 
+update_widget(_Widget, VNode, DomNode, NewNode):-
+        VNode = element(Tag, Attributes, _),
+        State = ?, % FIXME: Need to recover this from DomNode, I guess
+        Tag:render(State, Attributes, VDom),
+        diff(VNode, VDom, Patches),
+        patch(DomNode, Patches, [document(_Document)], NewNode).
 
 node_type(DomNode, Type):-
         DomNode = dom_element(Attributes),
