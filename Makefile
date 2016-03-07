@@ -2,11 +2,11 @@ PORT=10080
 
 BASE=src/React.java                                           \
      src/ReactComponent.java                                  \
+     src/ReactWidget.java                                     \
      src/ReactComponentFactory.java                           \
      src/CodeChangeListener.java                              \
      src/ServerConnection.java                                \
      src/ReactLeafComponent.java                              \
-     src/WidgetContext.java                                   \
      src/ReactComponentFactoryConfiguration.java
 
 UI=  src/ui/Panel.java                                        \
