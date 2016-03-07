@@ -1,7 +1,7 @@
 package org.proactive.prolog;
 
 import org.proactive.ReactComponent;
-import org.proactive.ReactWidget;
+import org.proactive.WidgetContext;
 
 import gnu.prolog.database.PrologTextLoaderError;
 import gnu.prolog.io.ReadOptions;
@@ -160,7 +160,7 @@ public class Engine
       return null;
    }
    
-   public void triggerEvent(Object handler, PrologObject event, ReactWidget context) throws Exception
+   public void triggerEvent(Object handler, PrologObject event, WidgetContext context) throws Exception
    {
       Term state;
       Term props;
@@ -169,8 +169,8 @@ public class Engine
       while (handler instanceof CompoundTerm && ((CompoundTerm)handler).tag.functor.value.equals("$this"))
       {
          // Context switch to parent.
-         System.out.println("Context switch from " + context + " -> " + context.getOwnerDocument());
-         context = context.getOwnerDocument();
+         System.out.println("Context switch from " + context + " -> " + context.getParentContext());
+         context = context.getParentContext();
          handler = ((CompoundTerm)handler).args[0];
       }
       /*
@@ -286,7 +286,7 @@ public class Engine
    }
 
    // This adds quite a bit of overhead
-   public static Term unpack_recursive(Term value, ReactWidget context)
+   public static Term unpack_recursive(Term value, WidgetContext context)
    {
       if (value instanceof CompoundTerm)
       {
@@ -303,7 +303,7 @@ public class Engine
       return value;
    }
 
-   public static Term unpack(Term value, ReactWidget context)
+   public static Term unpack(Term value, WidgetContext context)
    {
       if (value instanceof CompoundTerm)
       {
@@ -351,8 +351,8 @@ public class Engine
    public static class BoundHandler
    {
       public Term handler;
-      public ReactWidget context;
-      public BoundHandler(Term handler, ReactWidget context)
+      public WidgetContext context;
+      public BoundHandler(Term handler, WidgetContext context)
       {
          this.handler = handler;
          this.context = context;
@@ -486,7 +486,7 @@ public class Engine
    {
       //System.out.println("Patching tree from " + root + " AWT: " + javax.swing.SwingUtilities.isEventDispatchThread());
       VariableTerm newRoot = new VariableTerm("NewRoot");
-      Term renderOptions = CompoundTerm.getList(new Term[]{new CompoundTerm("document", new Term[]{new JavaObjectTerm(this)})});
+      Term renderOptions = CompoundTerm.getList(new Term[]{new CompoundTerm("document", new Term[]{new JavaObjectTerm(root.getOwnerDocument())})});
       Term goal = ReactModule.crossModuleCall("diff", new CompoundTerm(AtomTerm.get("patch"), new Term[]{new JavaObjectTerm(root),
                                                                                                          patch,
                                                                                                          renderOptions,
@@ -529,7 +529,7 @@ public class Engine
       return null;
    }
 
-   public static HashMap<String, PrologObject> termToProperties(Term t, ReactComponent ignored) throws PrologException
+   public static HashMap<String, PrologObject> termToProperties(Term t) throws PrologException
    {
       HashMap<String, PrologObject> properties = new HashMap<String,PrologObject>();
       if (!TermConstants.emptyListAtom.equals(t))

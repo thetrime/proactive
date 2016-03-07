@@ -7,7 +7,8 @@ import gnu.prolog.term.Term;
 import gnu.prolog.term.AtomTerm;
 import gnu.prolog.term.CompoundTerm;
 import gnu.prolog.term.JavaObjectTerm;
-import org.proactive.ReactWidget;
+import org.proactive.WidgetContext;
+import org.proactive.ReactComponent;
 import org.proactive.prolog.Engine;
 
 public class Predicate_update_widget extends ExecuteOnlyCode
@@ -19,9 +20,9 @@ public class Predicate_update_widget extends ExecuteOnlyCode
       {
          CompoundTerm widget = (CompoundTerm)args[0];
          CompoundTerm vnode = (CompoundTerm)args[1];
-         ReactWidget domNode = (ReactWidget)((JavaObjectTerm)args[2]).value;
+         ReactComponent domNode = (ReactComponent)((JavaObjectTerm)args[2]).value;
          System.out.println("update_widget(" + args[0] + ", " + args[1] + ", " + args[2] + ", _)");
-         domNode.updateWidget(widget);
+         domNode.getOwnerDocument().updateWidget(widget, domNode);
          return interpreter.simpleUnify(args[3], new JavaObjectTerm(domNode));
       }
       catch (Exception e)

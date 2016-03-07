@@ -10,12 +10,12 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
-import org.proactive.ReactWidget;
+import org.proactive.WidgetContext;
 
 public class FluxDispatcher
 {
    public static final CompoundTermTag handlerTag = CompoundTermTag.get("handle_event", 5);
-   private static Map<String, LinkedList<ReactWidget>> eventListeners = new HashMap<String, LinkedList<ReactWidget>>();
+   private static Map<String, LinkedList<WidgetContext>> eventListeners = new HashMap<String, LinkedList<WidgetContext>>();
 
    private static boolean isProcessing = false;
    private static Queue<String> unprocessed = null;
@@ -30,27 +30,27 @@ public class FluxDispatcher
       listenerModules.add(name);
    }
 
-   public static void registerFluxListener(String componentName, ReactWidget context)
+   public static void registerFluxListener(String componentName, WidgetContext context)
    {
       //System.out.println("Checking " + componentName + " for fluxion");
       if (!listenerModules.contains(componentName))
          return;
       System.out.println("fluxion located. Linking...");
-      LinkedList<ReactWidget> existing = eventListeners.get(componentName);
+      LinkedList<WidgetContext> existing = eventListeners.get(componentName);
       if (existing == null)
       {
-         existing = new LinkedList<ReactWidget>();
+         existing = new LinkedList<WidgetContext>();
          eventListeners.put(componentName, existing);
       }
       existing.add(context);
    }
 
    // Does this happen every time a component is destroyed, or only if a module gets unloaded somehow?
-   // The critical thing is: If we have created a new ReactWidget, we must need a new listener...
+   // The critical thing is: If we have created a new WidgetContext, we must need a new listener...
    // In particular one module can result in TWO listeners if it is used twice, like <Foo><Bar x=1/><Bar x=2/></Foo>
-   public static void deregisterFluxListener(String componentName, ReactWidget context)
+   public static void deregisterFluxListener(String componentName, WidgetContext context)
    {
-      List<ReactWidget> existing = eventListeners.get(componentName);
+      List<WidgetContext> existing = eventListeners.get(componentName);
       if (existing != null)         
          existing.remove(context);
    }
@@ -73,9 +73,9 @@ public class FluxDispatcher
       while (unprocessed.size() > 0)
       {
          String componentName = unprocessed.remove();
-         LinkedList<ReactWidget> tasks = new LinkedList<ReactWidget>();
+         LinkedList<WidgetContext> tasks = new LinkedList<WidgetContext>();
          tasks.addAll(eventListeners.get(componentName));
-         ReactWidget context;
+         WidgetContext context;
          while((context = tasks.poll()) != null)
          {
             System.out.println(" Dispatching an event. " + tasks.size() + " tasks remaining in " + componentName);

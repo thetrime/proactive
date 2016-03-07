@@ -1,6 +1,7 @@
 package org.proactive;
 
 import org.proactive.prolog.PrologObject;
+import org.proactive.WidgetContext;
 import java.util.List;
 import java.util.LinkedList;
 import java.util.Map;
@@ -11,7 +12,7 @@ import java.awt.GridBagConstraints;
 public abstract class ReactComponent
 {
    protected ReactComponent parent;
-   protected ReactWidget owner;
+   protected WidgetContext owner;
    protected HashMap<String, PrologObject> properties = new HashMap<String, PrologObject>();
    protected List<ReactComponent> children = new LinkedList<ReactComponent>();
    protected HashMap<ReactComponent, Component> awtMap = new HashMap<ReactComponent, Component>();
@@ -45,7 +46,6 @@ public abstract class ReactComponent
       if (child.getParentNode() != null)
          child.getParentNode().removeChild(child);
       child.setParentNode(this);
-      child.setOwnerDocument(owner);
       awtMap.put(child, child.getAWTComponent());
 
       // Now put it in the right place in the list
@@ -59,7 +59,6 @@ public abstract class ReactComponent
    {
       awtMap.remove(child);
       child.setParentNode(null);
-      child.setOwnerDocument(null);
       children.remove(child);
    }
    public void replaceChild(ReactComponent newChild, ReactComponent oldChild)
@@ -73,7 +72,6 @@ public abstract class ReactComponent
       }
       children.set(i, newChild);
       newChild.setParentNode(this);
-      newChild.setOwnerDocument(owner);
       awtMap.remove(oldChild);
       awtMap.put(newChild, newChild.getAWTComponent());
 
@@ -88,15 +86,21 @@ public abstract class ReactComponent
    {
       this.parent = parent;
    }
-   public ReactWidget getOwnerDocument()
+   public WidgetContext getOwnerDocument()
    {
-      return owner;
+      WidgetContext c = this.owner;
+      ReactComponent n = this;
+      while (c == null)
+      {
+         if (n == null)
+            return null;
+         n = n.getParentNode();
+         c = n.getOwnerDocument();
+      }
+      return c;
    }
-   public void setOwnerDocument(ReactWidget owner)
+   public void setOwnerDocument(WidgetContext owner)
    {
-      if (getChildNodes() != null)
-         for (ReactComponent child: getChildNodes())
-            child.setOwnerDocument(owner);
       this.owner = owner;
    }
    public int getFill()

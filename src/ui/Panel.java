@@ -37,8 +37,6 @@ public class Panel extends ReactComponent
 
    JPanel alignmentPanel = new JPanel();
 
-   private List<ReactComponent> children = new LinkedList<ReactComponent>();
-   private HashMap<ReactComponent, Component> awtMap = new HashMap<ReactComponent, Component>();
    private LayoutManager layoutManager = new GridBagLayout();
    private Component awtComponent;
    private JPanel panel = new JPanel();
@@ -167,7 +165,6 @@ public class Panel extends ReactComponent
       if (child.getParentNode() != null)
          child.getParentNode().removeChild(child);
       child.setParentNode(this);
-      child.setOwnerDocument(owner);
       awtMap.put(child, child.getAWTComponent());
       int childFill = child.getFill();
       if (childFill == GridBagConstraints.HORIZONTAL || childFill == GridBagConstraints.BOTH)
@@ -286,6 +283,7 @@ public class Panel extends ReactComponent
 
    public void replaceChild(ReactComponent newChild, ReactComponent oldChild)
    {
+      System.out.println(this + " replaceChild: " + children);
       int i = children.indexOf(oldChild);
       Component oldComponent = awtMap.get(oldChild);
       super.replaceChild(newChild, oldChild);
@@ -329,6 +327,8 @@ public class Panel extends ReactComponent
 
    public String toString()
    {
-      return "(Panel: " + id + ")";
+      if (id != null)
+         return "(Panel: " + id + ")";
+      return "(Panel " + children + ")";
    }
 }

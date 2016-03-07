@@ -35,7 +35,7 @@ public class Button extends ReactLeafComponent
             {
                try
                {
-                  owner.triggerEvent(value.asTerm(), serializeObject());
+                  getOwnerDocument().triggerEvent(value.asTerm(), serializeObject());
                }
                catch (Exception e)
                {

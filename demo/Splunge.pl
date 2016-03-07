@@ -17,7 +17,7 @@ render(State, _Props, Form):-
         ),
         Form = {|jsx||
                <Panel layout="horizontal" fill="horizontal">
-               <Title label={State.order}/>
+               <Label label={State.order}/>
                <Button key={Key1} label={Label1} onClick={swap_labels}/>
                <Button key={Key2} label={Label2} onClick={swap_labels}/>
                </Panel>|}.

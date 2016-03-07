@@ -6,7 +6,7 @@ BASE=src/React.java                                           \
      src/CodeChangeListener.java                              \
      src/ServerConnection.java                                \
      src/ReactLeafComponent.java                              \
-     src/ReactWidget.java                                     \
+     src/WidgetContext.java                                   \
      src/ReactComponentFactoryConfiguration.java
 
 UI=  src/ui/Panel.java                                        \
@@ -43,7 +43,7 @@ ENGINE= src/prolog/Predicate_remove_child.java                \
         src/prolog/Predicate_destroy_widget.java              \
         src/prolog/Predicate_update_widget.java               \
         src/prolog/Predicate_init_widget.java                 \
-        src/prolog/Engine.java                                \
+	src/prolog/Engine.java                                \
         src/prolog/PrologState.java                           \
         src/prolog/PrologObject.java                          \
         src/prolog/ReactEnvironment.java                      \

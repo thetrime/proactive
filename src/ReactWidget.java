@@ -42,7 +42,7 @@ public class ReactWidget extends ReactComponent
       // FIXME: Can we come up with something that does not need ui.Panel? Like ReactComponent(); ?
       child = new org.proactive.ui.Panel("root panel for " + this);
 
-      setProperties(Engine.termToProperties(props, this));
+      setProperties(Engine.termToProperties(props));
       // Then we add the contentPane to the widget. This means the parent of the contentPane is the widget itself
       insertChildBefore(child, null);
       // Now we make an equivalent VDOM for the empty widget
@@ -98,10 +98,6 @@ public class ReactWidget extends ReactComponent
       return "<Widget:" + elementId + " " + props+ ">";
    }
 
-   public void triggerEvent(Term handler, PrologObject context) throws Exception
-   {
-      engine.triggerEvent(handler, context, this);
-   }
 
    public void setOwnerDocument(ReactWidget owner)
    {
@@ -159,6 +155,5 @@ public class ReactWidget extends ReactComponent
          state = proposedState;
          reRender();
       }
-
    }
 }
