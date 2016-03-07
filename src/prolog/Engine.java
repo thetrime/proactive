@@ -1,7 +1,7 @@
 package org.proactive.prolog;
 
 import org.proactive.ReactComponent;
-import org.proactive.WidgetContext;
+import org.proactive.ReactWidget;
 
 import gnu.prolog.database.PrologTextLoaderError;
 import gnu.prolog.io.ReadOptions;
@@ -160,7 +160,7 @@ public class Engine
       return null;
    }
    
-   public void triggerEvent(Object handler, PrologObject event, WidgetContext context) throws Exception
+   public void triggerEvent(Object handler, PrologObject event, ReactWidget context) throws Exception
    {
       Term state;
       Term props;
@@ -286,7 +286,7 @@ public class Engine
    }
 
    // This adds quite a bit of overhead
-   public static Term unpack_recursive(Term value, WidgetContext context)
+   public static Term unpack_recursive(Term value, ReactWidget context)
    {
       if (value instanceof CompoundTerm)
       {
@@ -303,7 +303,7 @@ public class Engine
       return value;
    }
 
-   public static Term unpack(Term value, WidgetContext context)
+   public static Term unpack(Term value, ReactWidget context)
    {
       if (value instanceof CompoundTerm)
       {
@@ -313,7 +313,7 @@ public class Engine
             CompoundTerm c = (CompoundTerm)value;
             String key = ((AtomTerm)(c.args[0])).value;
 
-            if (TermConstants.emptyListAtom.equals(c.args[1]))
+             if (TermConstants.emptyListAtom.equals(c.args[1]))
                return value;
             else if (!(c.args[1] instanceof CompoundTerm))
                return value;
@@ -351,8 +351,8 @@ public class Engine
    public static class BoundHandler
    {
       public Term handler;
-      public WidgetContext context;
-      public BoundHandler(Term handler, WidgetContext context)
+      public ReactWidget context;
+      public BoundHandler(Term handler, ReactWidget context)
       {
          this.handler = handler;
          this.context = context;
@@ -510,6 +510,7 @@ public class Engine
 
    public Term render(String component, Term state, Term props) throws Exception
    {
+      System.out.println("Rendering " + component + " with props " + props);
       VariableTerm vDom = new VariableTerm("VDom");
       Term goal = ReactModule.crossModuleCall(component, new CompoundTerm(AtomTerm.get("render"), new Term[]{state,
                                                                                                              props,
@@ -524,6 +525,7 @@ public class Engine
          interpreter.stop(g);
       if (rc == PrologCode.RC.SUCCESS || rc == PrologCode.RC.SUCCESS_LAST)
       {
+         System.out.println("    --> " + vDom.dereference());
          return vDom.dereference();
       }
       return null;

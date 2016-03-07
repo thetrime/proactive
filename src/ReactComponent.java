@@ -1,7 +1,7 @@
 package org.proactive;
 
 import org.proactive.prolog.PrologObject;
-import org.proactive.WidgetContext;
+import org.proactive.ReactWidget;
 import java.util.List;
 import java.util.LinkedList;
 import java.util.Map;
@@ -12,7 +12,7 @@ import java.awt.GridBagConstraints;
 public abstract class ReactComponent
 {
    protected ReactComponent parent;
-   protected WidgetContext owner;
+   protected ReactWidget owner;
    protected HashMap<String, PrologObject> properties = new HashMap<String, PrologObject>();
    protected List<ReactComponent> children = new LinkedList<ReactComponent>();
    protected HashMap<ReactComponent, Component> awtMap = new HashMap<ReactComponent, Component>();
@@ -86,9 +86,9 @@ public abstract class ReactComponent
    {
       this.parent = parent;
    }
-   public WidgetContext getOwnerDocument()
+   public ReactWidget getOwnerDocument()
    {
-      WidgetContext c = this.owner;
+      ReactWidget c = this.owner;
       ReactComponent n = this;
       while (c == null)
       {
@@ -99,7 +99,7 @@ public abstract class ReactComponent
       }
       return c;
    }
-   public void setOwnerDocument(WidgetContext owner)
+   public void setOwnerDocument(ReactWidget owner)
    {
       this.owner = owner;
    }

@@ -15,7 +15,7 @@ import org.proactive.prolog.PrologObject;
 import org.proactive.ReactComponent;
 import org.proactive.CodeChangeListener;
 import org.proactive.React;
-import org.proactive.WidgetContext;
+import org.proactive.ReactWidget;
 import org.proactive.ReactComponentFactory;
 import org.proactive.prolog.PrologState;
 
@@ -28,16 +28,15 @@ public class ReactApp extends JFrame implements CodeChangeListener
 {
    String URL = null;
    private Engine engine;
-   private WidgetContext context;
+   private ReactWidget context;
    public ReactApp(String URL, String rootElementId) throws Exception
    {
       super("React Test");
       engine = new Engine(URL, rootElementId);
-      context = new WidgetContext(null, engine, rootElementId, TermConstants.emptyListAtom);
+      context = new ReactWidget(null, engine, rootElementId, TermConstants.emptyListAtom);
       React.addCodeChangeListener(new URI(URL + "/listen"), rootElementId, this);
       getContentPane().setLayout(new BorderLayout());
-      ReactComponent component = context.init();
-      getContentPane().add(context.init().getAWTComponent(), BorderLayout.CENTER);
+      getContentPane().add(context.getAWTComponent(), BorderLayout.CENTER);
       setSize(800, 600);
       setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
       setVisible(true);

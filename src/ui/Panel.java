@@ -41,6 +41,7 @@ public class Panel extends ReactComponent
    private Component awtComponent;
    private JPanel panel = new JPanel();
    private String id;
+   private static int global_id = 0;
 
    public Panel(String q) throws Exception
    {
@@ -51,6 +52,7 @@ public class Panel extends ReactComponent
    public Panel() throws Exception
    {
       super();
+      this.id = "{" + (global_id++) + "}";
       awtComponent = panel;
       panel.setBackground(new Color(150, 168, 200));
       panel.setLayout(layoutManager);
@@ -283,7 +285,8 @@ public class Panel extends ReactComponent
 
    public void replaceChild(ReactComponent newChild, ReactComponent oldChild)
    {
-      System.out.println(this + " replaceChild: " + children);
+      System.out.println(this + " replaceChild: " + oldChild + " -> " + newChild);
+      System.out.println("     Children: " + children);
       int i = children.indexOf(oldChild);
       Component oldComponent = awtMap.get(oldChild);
       super.replaceChild(newChild, oldChild);

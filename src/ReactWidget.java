@@ -25,11 +25,12 @@ public class ReactWidget extends ReactComponent
    private List<ReactComponent> children = new LinkedList<ReactComponent>();
    private ReactComponent child;
 
-   public ReactWidget(Engine engine, String elementId, Term props) throws Exception
+   public ReactWidget(ReactWidget parentContext, Engine engine, String elementId, Term props) throws Exception
    {
       this.engine = engine;
       this.elementId = elementId;
       this.props = props;
+      this.owner = parentContext;
 
       // First, get the state
       this.state = engine.getInitialState(elementId, props);
@@ -134,18 +135,30 @@ public class ReactWidget extends ReactComponent
    {
       Term newvDom = engine.render(elementId, state, props);
       Term patches = engine.diff(vDom, newvDom);
+      System.out.println("Rerendering: " +elementId + ":" + vDom + " ----> " + newvDom);
       System.out.println("Patch: " + patches);
-      React.queuePatch(patches, child, engine);
+      child.setOwnerDocument(this);
+      System.out.println("Applying patches from: " + child);
+      child = engine.applyPatch(patches, child);
+      child.setOwnerDocument(this);
+      children.clear();
+      children.add(child);
       vDom = newvDom;
    }
 
-   public void updateWidget(Term newvDom) throws Exception
+   public ReactWidget updateWidget(Term newProps) throws Exception
    {
-      Term patches = engine.diff(vDom, newvDom);
-      System.out.println("update widget with: " + patches);
-      React.queuePatch(patches, child, engine);
-      vDom = newvDom;
+      System.out.println("UpdateWidget called on " + elementId + " with props: " + newProps);
+      props = newProps;
+      reRender();
+      return this;
    }
+
+   public void triggerEvent(Term handler, PrologObject context) throws Exception
+   {
+      engine.triggerEvent(handler, context, this);
+   }
+
 
    public void fluxEvent(Term key, Term value) throws Exception
    {
@@ -155,5 +168,15 @@ public class ReactWidget extends ReactComponent
          state = proposedState;
          reRender();
       }
+   }
+
+   public Engine getEngine()
+   {
+      return engine;
+   }
+
+   public ReactWidget getParentContext()
+   {
+      return owner;
    }
 }

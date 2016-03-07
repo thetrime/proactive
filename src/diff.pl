@@ -145,16 +145,17 @@ diff_children_1(A, B, Index, ParentIndex, Patch):-
           )
         ).
 
+
 get_count(element(_, _, Children), Count):-
         !,
         get_count_1(Children, Count).
 get_count(_, 0).
 
-get_count_1([], 1):- !.
+get_count_1([], 0):- !.
 get_count_1([Child|Children], Count):-
         get_count(Child, C),
         get_count_1(Children, CC),
-        Count is CC + C.
+        Count is CC + C + 1.
 
 /*
 get_count(element(_, _, Children), Count):-
@@ -167,7 +168,6 @@ get_count(element(_, _, Children), Count):-
         Count is Sum.
 get_count(_, 0).
 */
-
 
 thunks(A, B, Index, Index-thunk({null}, PatchSet)):-
         handle_thunk(A, B, ANodes, BNodes),
@@ -421,6 +421,7 @@ patch_recursive(RootNode, PatchSet, Options, NewRoot):-
                 Indices)->
             memberchk(a-A, PatchSet),
             dom_index(RootNode, A, Indices, [], Index),
+            writeln(dom_index(RootNode, A, Indices, Index)),
             %owner_document(RootNode, OwnerDocument)
             patch_recursive(Indices, RootNode, Index, PatchSet, Options, NewRoot)
         ; otherwise->
@@ -552,13 +553,13 @@ patch_op(widget_patch(LeftVNode, Widget), DomNode, Options, NewNode):-
             Updating = true,
             update_widget(Widget, LeftVNode, DomNode, NewNode)
         ; otherwise->
+            writeln(cannot_update_widget(LeftVNode)),
             Updating = false,
             render(Options, Widget, NewNode)
         ),
         parent_node(DomNode, ParentNode),
         ( ParentNode \== {null},
           NewNode \== DomNode->
-            writeln(widget_updated_replacing_in_dom(ParentNode, NewNode, DomNode)),
             replace_child(ParentNode, NewNode, DomNode)
         ; otherwise->
             true
@@ -587,6 +588,7 @@ patch_op(order_patch(_VNode, Moves), DomNode, _Options, DomNode):-
         reorder_inserts(Inserts, DomNode, ChildNodes, KeyMap).
 
 patch_op(props_patch(VNode, Patch), DomNode, _Options, DomNode):-
+        writeln('-----------------------props_patch'),
         VNode = element(_, Properties, _),
         apply_properties(DomNode, Patch, Properties).
 

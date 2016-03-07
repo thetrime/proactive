@@ -62,14 +62,9 @@ public class WidgetContext
       return dom;
    }
 
-   public ReactComponent updateWidget(Term newvDom, ReactComponent domNode) throws Exception
+   public ReactComponent updateWidget(Term oldvDom, Term newvDom, ReactComponent domNode) throws Exception
    {
-      Term patches = engine.diff(vDom, newvDom);
-      vDom = newvDom;
-      System.out.println("update widget with: " + patches);
-      dom = domNode;
-      dom = engine.applyPatch(patches, dom);
-      dom.setOwnerDocument(this);
+      setState(???)
       return dom;
    }
 
@@ -135,7 +130,7 @@ public class WidgetContext
 
    public Engine getEngine()
    {
-      return engine;
+      return owner;
    }
 }
 

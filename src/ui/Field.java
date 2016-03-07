@@ -107,6 +107,7 @@ public class Field extends ReactLeafComponent
       }
       if (properties.containsKey("value"))
       {
+         System.out.println("!!!!!!!!!!!!!!!!!!!!! Field setValue: " + properties.get("value"));
          if (properties.get("value") == null)
             setValue(null);
          else
