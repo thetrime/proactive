@@ -60,6 +60,8 @@ public class Tab extends ReactComponent
          children.clear();
          children.add(newChild);
       }
+      newChild.setOwnerDocument(owner);
+      newChild.setParentNode(this);
    }
 
    public List<ReactComponent> getChildNodes()

@@ -3,6 +3,7 @@ package org.proactive.prolog;
 import org.proactive.vdom.PrologNode;
 import org.proactive.vdom.PrologDocument;
 import org.proactive.ReactComponent;
+import org.proactive.ReactWidget;
 
 import gnu.prolog.database.PrologTextLoaderError;
 import gnu.prolog.io.ReadOptions;
@@ -143,7 +144,7 @@ public class Engine
       return TermConstants.emptyListAtom;
    }
 
-   public PrologState instantiateProps(Map<String, Term> properties)
+   public Term instantiateProps(Map<String, Term> properties)
    {
       Term[] elements = new Term[properties.size()];
       int j = 0;
@@ -155,7 +156,7 @@ public class Engine
                                         (Term)entry.getValue());
          j++;
       }
-      return new PrologState(CompoundTerm.getList(elements));
+      return CompoundTerm.getList(elements);
    }
 
    public PrologState fluxEvent(String componentName, Term key, Term value, PrologState stateWrapper, PrologState propsWrapper) throws Exception
@@ -186,9 +187,9 @@ public class Engine
             interpreter.stop(g);
          if (rc == PrologCode.RC.SUCCESS || rc == PrologCode.RC.SUCCESS_LAST)
          {
-            PrologState adjustedState = applyState(state, newState.dereference());
-            System.out.println("flux handler set state to: " + adjustedState);
-            return adjustedState;
+            //PrologState adjustedState = applyState(state, newState.dereference());
+            //System.out.println("flux handler set state to: " + adjustedState);
+            return null;
          }
       }
       catch (PrologException notDefined)         
@@ -201,36 +202,36 @@ public class Engine
       return null;
    }
    
-   public void triggerEvent(Object handler, PrologObject event, PrologContext context) throws Exception
+   public void triggerEvent(Object handler, PrologObject event, ReactWidget context) throws Exception
    {
       Term state;
       Term props;
 
       System.out.println("Handler: " + handler);
+      while (handler instanceof CompoundTerm && ((CompoundTerm)handler).tag.functor.value.equals("$this"))
+      {
+         // Context switch to parent.
+         System.out.println("Context switch from " + context + " -> " + context.getOwnerDocument());
+         context = context.getOwnerDocument();
+         handler = ((CompoundTerm)handler).args[0];
+      }
+      /*
       if (handler instanceof JavaObjectTerm && (((JavaObjectTerm)handler).value instanceof BoundHandler))
       {
          BoundHandler boundHandler = (BoundHandler)((JavaObjectTerm)handler).value;
          // Context switch!
+         System.out.println("Context switch to " +boundHandler.context);
          context = boundHandler.context;
          handler = boundHandler.handler;
       }
+      */
+      state = context.getState();
+      props = context.getProps();
 
-      PrologState stateWrapper = context.state;
-      PrologState propsWrapper = context.props;
-
-
-      if (stateWrapper == null)
-         state = TermConstants.emptyListAtom;
-      else
-         state = stateWrapper.getValue();
-      if (propsWrapper == null)
-         props = TermConstants.emptyListAtom;
-      else
-         props = propsWrapper.getValue();
       VariableTerm newState = new VariableTerm("NewState");
       Term goal;
       if (handler instanceof AtomTerm)
-         goal = ReactModule.crossModuleCall(context.componentName, new CompoundTerm((AtomTerm)handler, new Term[]{event.asTerm(), state, props, newState}));
+         goal = ReactModule.crossModuleCall(context.getComponentName(), new CompoundTerm((AtomTerm)handler, new Term[]{event.asTerm(), state, props, newState}));
       else if (handler instanceof CompoundTerm)
       {
          CompoundTerm c_handler = (CompoundTerm)handler;
@@ -242,7 +243,7 @@ public class Engine
          args[c_handler.tag.arity+1] = state;
          args[c_handler.tag.arity+2] = props;
          args[c_handler.tag.arity+3] = newState;
-         goal = ReactModule.crossModuleCall(context.componentName, new CompoundTerm(c_handler.tag.functor, args));
+         goal = ReactModule.crossModuleCall(context.getComponentName(), new CompoundTerm(c_handler.tag.functor, args));
       }
       else
       {
@@ -271,7 +272,7 @@ public class Engine
       // State is not updated if we get to here
    }
 
-   private PrologState applyState(Term oldState, Term newState) throws Exception
+   private Term applyState(Term oldState, Term newState) throws Exception
    {
       Map<String, Term> properties = new HashMap<String, Term>();
       addProperties(oldState, properties);
@@ -327,7 +328,7 @@ public class Engine
    }
 
    // This adds quite a bit of overhead
-   public static Term unpack_recursive(Term value, PrologContext context)
+   public static Term unpack_recursive(Term value, ReactWidget context)
    {
       if (value instanceof CompoundTerm)
       {
@@ -344,7 +345,7 @@ public class Engine
       return value;
    }
 
-   public static Term unpack(Term value, PrologContext context)
+   public static Term unpack(Term value, ReactWidget context)
    {
       if (value instanceof CompoundTerm)
       {
@@ -377,12 +378,14 @@ public class Engine
                }
             }
          }
+         /*
          else if (((CompoundTerm)value).tag.functor.value.equals("$this"))
          {
-            //System.out.println("Unpacking a this pointer in " + context.componentName);
+            System.out.println("Unpacking a this pointer in " + context.getComponentName());
             System.out.println("Handler is " +unpack(((CompoundTerm)value).args[0], context));
             return new JavaObjectTerm(new BoundHandler(unpack(((CompoundTerm)value).args[0], context), context));
          }
+         */
       }
       return value;
    }
@@ -390,8 +393,8 @@ public class Engine
    public static class BoundHandler
    {
       public Term handler;
-      public PrologContext context;
-      public BoundHandler(Term handler, PrologContext context)
+      public ReactWidget context;
+      public BoundHandler(Term handler, ReactWidget context)
       {
          this.handler = handler;
          this.context = context;
@@ -568,7 +571,7 @@ public class Engine
       return null;
    }
 
-   public static HashMap<String, PrologObject> termToProperties(Term t) throws PrologException
+   public static HashMap<String, PrologObject> termToProperties(Term t, ReactComponent ignored) throws PrologException
    {
       HashMap<String, PrologObject> properties = new HashMap<String,PrologObject>();
       if (!TermConstants.emptyListAtom.equals(t))
@@ -586,7 +589,7 @@ public class Engine
                   Term attrName = attr.args[0];
                   Term attrValue = attr.args[1];
                   if (attrName instanceof AtomTerm)
-                     properties.put(((AtomTerm)attrName).value, new PrologObject(attrValue));
+                     properties.put(((AtomTerm)attrName).value, new PrologObject(unpack(attrValue, null)));
                   else
                      PrologException.typeError(AtomTerm.get("atom"), attrName);
                   if (TermConstants.emptyListAtom.equals(list.args[1]))

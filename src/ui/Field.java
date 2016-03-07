@@ -52,7 +52,8 @@ public class Field extends ReactLeafComponent
             {
                try
                {
-                  context.triggerEvent(value.asTerm(), serializeObject());
+                  System.out.println("Field owner: " + owner);
+                  owner.triggerEvent(value.asTerm(), serializeObject());
                }
                catch (Exception e)
                {

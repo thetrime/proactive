@@ -27,22 +27,7 @@ public class PrologWidget extends PrologElement
    }
    public ReactComponent init(PrologContext context) throws Exception
    {
-      //System.out.println("Creating a widget of type " + componentName);
-      PrologState props = context.getEngine().instantiateProps(getAttributes());
-      PrologState initialState = new PrologState(context.getEngine().getInitialState(componentName, props.getValue()));
-      PrologDocument userComponent = context.getEngine().render(componentName, initialState, props, context);
-      //System.out.println("User component created the following document: " + userComponent);
-      if (userComponent == null)
-      {
-         System.out.println("Unhandled type: " + this);
-         System.exit(-1);
-      }
-      ReactComponent component = ReactComponentFactory.instantiateNode(userComponent, userComponent.getContext());
-      widgetContext = userComponent.getContext();
-      widgetContext.setRoot(component);
-      //System.out.println("Registering a new flux listener for " + componentName);
-      FluxDispatcher.registerFluxListener(componentName, widgetContext);
-      return component;
+      return null;
    }
    public ReactComponent update(PrologNode vNode, ReactComponent oldComponent)
    {

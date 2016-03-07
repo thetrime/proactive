@@ -20,6 +20,7 @@ public class ReactEditText extends ReactEdit
          return domNode;
       }
       */
+      /*
       ReactComponent parentNode = domNode.getParentNode();
       if (parentNode != null)
       {
@@ -29,6 +30,8 @@ public class ReactEditText extends ReactEdit
          return newNode;
       }
       return domNode;
+      */
+      return null;
    }
    
    public String toString()

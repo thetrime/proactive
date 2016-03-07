@@ -12,7 +12,7 @@ public abstract class ReactComponent
 {
    protected PrologContext context;
    protected ReactComponent parent;
-   protected ReactComponent owner;
+   protected ReactWidget owner;
    protected HashMap<String, PrologObject> properties = new HashMap<String, PrologObject>();
    protected int fill = GridBagConstraints.NONE;
    public ReactComponent()
@@ -47,11 +47,11 @@ public abstract class ReactComponent
    {
       this.parent = parent;
    }
-   public ReactComponent getOwnerDocument()
+   public ReactWidget getOwnerDocument()
    {
       return owner;
    }
-   public void setOwnerDocument(ReactComponent owner)
+   public void setOwnerDocument(ReactWidget owner)
    {
       if (getChildNodes() != null)
          for (ReactComponent child: getChildNodes())

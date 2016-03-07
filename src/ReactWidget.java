@@ -45,7 +45,7 @@ public class ReactWidget extends ReactComponent
       // FIXME: Can we come up with something that does not need ui.Panel? Like ReactComponent(); ?
       ReactComponent child = new org.proactive.ui.Panel("root panel for " + this);
 
-      setProperties(Engine.termToProperties(props));
+      setProperties(Engine.termToProperties(props, this));
       // Then we add the contentPane to the widget. This means the parent of the contentPane is the widget itself
       insertChildBefore(child, null);
       // Now we make an equivalent VDOM for the empty widget
@@ -72,6 +72,7 @@ public class ReactWidget extends ReactComponent
       this.child = child;
       children.add(child);
       child.setParentNode(this);
+      child.setOwnerDocument(this);
       if (getParentNode() != null)
          getParentNode().replaceChild(this, this);
 
@@ -92,6 +93,8 @@ public class ReactWidget extends ReactComponent
       children.clear();
       this.child = newNode;
       children.add(newNode);
+      newNode.setParentNode(this);
+      newNode.setOwnerDocument(this);
       if (getParentNode() != null)
          getParentNode().replaceChild(this, this);
 
@@ -100,5 +103,48 @@ public class ReactWidget extends ReactComponent
    public String toString()
    {
       return "<Widget:" + elementId + " " + props+ ">";
+   }
+
+   public void triggerEvent(Term handler, PrologObject context) throws Exception
+   {
+      engine.triggerEvent(handler, context, this);
+   }
+
+   public void setOwnerDocument(ReactWidget owner)
+   {
+      if (getChildNodes() != null)
+         for (ReactComponent child: getChildNodes())
+            child.setOwnerDocument(this);
+      this.owner = owner;
+   }
+
+
+   public Term getState()
+   {
+      return state;
+   }
+
+   public Term getProps()
+   {
+      return props;
+   }
+
+   public String getComponentName()
+   {
+      return elementId;
+   }
+
+   public void setState(Term newState) throws Exception
+   {
+      state = newState;
+      reRender();
+   }
+
+   public void reRender() throws Exception
+   {
+      Term newvDom = engine.render(elementId, state, props);
+      Term patches = engine.diff(vDom, newvDom);
+      React.queuePatch(patches, child, engine);
+      vDom = newvDom;
    }
 }

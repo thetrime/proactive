@@ -79,6 +79,7 @@ public class TabbedPane extends ReactComponent
       children.set(i, newChild);
       tabbedPane.remove(oldChild.getAWTComponent());
       newChild.setParentNode(this);
+      newChild.setOwnerDocument(owner);
       if (newChild instanceof Tab)
       {
          Tab childTab = (Tab)newChild;

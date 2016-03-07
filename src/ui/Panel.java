@@ -288,7 +288,7 @@ public class Panel extends ReactComponent
       int i = children.indexOf(oldChild);
       children.set(i, newChild);
       newChild.setParentNode(this);
-
+      newChild.setOwnerDocument(owner);
       int childFill = oldChild.getFill();
       if (childFill == GridBagConstraints.HORIZONTAL || childFill == GridBagConstraints.BOTH)
          total_x_weight--;

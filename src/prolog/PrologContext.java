@@ -56,7 +56,7 @@ public class PrologContext
 
    public void triggerEvent(Object handler, PrologObject context) throws Exception
    {
-      engine.triggerEvent(handler, context, this);
+      engine.triggerEvent(handler, context, null);
    }
 
    public void setState(PrologState proposedState) throws Exception
