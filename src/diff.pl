@@ -230,8 +230,8 @@ unhook_1([Child|Children], Index, Patch):-
         ).
 
 reorder(AChildren, BChildren, Ordered, Moves):-
-        key_index(BChildren, AChildren, 0, BKeys, BFree),
-        key_index(AChildren, BChildren, 0, AKeys, AFree),
+        key_index(AChildren, BChildren, 0, BKeys, BFree),
+        key_index(BChildren, AChildren, 0, AKeys, AFree),
         ( length(BChildren, Length),
           length(BFree, Length)->
             Ordered = BChildren,
@@ -367,8 +367,7 @@ reorder_1([AItem|Children], BKeys, BFree, BStillFree, NewChildren, Tail):-
             ),
             MoreBFree = BFree
         ; otherwise->
-            ( BFree = [BChild|MoreBFree]->
-                BFree = [BChild|MoreBFree],
+            ( BFree = [free(BChild, _)|MoreBFree]->
                 NewChildren = [BChild|More]
             ; otherwise->
                 BFree = MoreBFree,
@@ -588,7 +587,6 @@ patch_op(order_patch(_VNode, Moves), DomNode, _Options, DomNode):-
         reorder_inserts(Inserts, DomNode, ChildNodes, KeyMap).
 
 patch_op(props_patch(VNode, Patch), DomNode, _Options, DomNode):-
-        writeln('-----------------------props_patch'),
         VNode = element(_, Properties, _),
         apply_properties(DomNode, Patch, Properties).
 
