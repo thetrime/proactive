@@ -130,8 +130,9 @@ diff_children_1(A, B, Index, ParentIndex, Patch):-
         ),
         ( B = [Right|BSiblings]->
             true
-        ; BSiblings = B,
-          Right = {null}
+        ; otherwise->
+            BSiblings = B,
+            Right = {null}
         ),
         ( Left == {null},
           Right \== {null},
@@ -230,8 +231,8 @@ unhook_1([Child|Children], Index, Patch):-
         ).
 
 reorder(AChildren, BChildren, Ordered, Moves):-
-        key_index(AChildren, BChildren, 0, BKeys, BFree),
-        key_index(BChildren, AChildren, 0, AKeys, AFree),
+        key_index(BChildren, AChildren, 0, BKeys, BFree),
+        key_index(AChildren, BChildren, 0, AKeys, AFree),
         ( length(BChildren, Length),
           length(BFree, Length)->
             Ordered = BChildren,
@@ -349,7 +350,7 @@ key_index([Child|Children], Objects, Index, Keys, Free):-
             ( Object == {null}->
                 Free = MoreFree
             ; otherwise->
-                Free = [free(Object, Index)|MoreFree]
+                Free = [free(Child, Index)|MoreFree]
             )
         ),
         II is Index + 1,
