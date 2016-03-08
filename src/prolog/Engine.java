@@ -173,16 +173,6 @@ public class Engine
          context = context.getParentContext();
          handler = ((CompoundTerm)handler).args[0];
       }
-      /*
-      if (handler instanceof JavaObjectTerm && (((JavaObjectTerm)handler).value instanceof BoundHandler))
-      {
-         BoundHandler boundHandler = (BoundHandler)((JavaObjectTerm)handler).value;
-         // Context switch!
-         System.out.println("Context switch to " +boundHandler.context);
-         context = boundHandler.context;
-         handler = boundHandler.handler;
-      }
-      */
       state = context.getState();
       props = context.getProps();
 
@@ -336,27 +326,8 @@ public class Engine
                }
             }
          }
-         /*
-         else if (((CompoundTerm)value).tag.functor.value.equals("$this"))
-         {
-            System.out.println("Unpacking a this pointer in " + context.getComponentName());
-            System.out.println("Handler is " +unpack(((CompoundTerm)value).args[0], context));
-            return new JavaObjectTerm(new BoundHandler(unpack(((CompoundTerm)value).args[0], context), context));
-         }
-         */
       }
       return value;
-   }
-
-   public static class BoundHandler
-   {
-      public Term handler;
-      public ReactWidget context;
-      public BoundHandler(Term handler, ReactWidget context)
-      {
-         this.handler = handler;
-         this.context = context;
-      }
    }
 
    public static class ExecutionState extends WebSocketClient
@@ -510,7 +481,7 @@ public class Engine
 
    public Term render(String component, Term state, Term props) throws Exception
    {
-      System.out.println("Rendering " + component + " with props " + props);
+      //System.out.println("Rendering " + component + " with props " + props + " and state " + state);
       VariableTerm vDom = new VariableTerm("VDom");
       Term goal = ReactModule.crossModuleCall(component, new CompoundTerm(AtomTerm.get("render"), new Term[]{state,
                                                                                                              props,
@@ -525,7 +496,7 @@ public class Engine
          interpreter.stop(g);
       if (rc == PrologCode.RC.SUCCESS || rc == PrologCode.RC.SUCCESS_LAST)
       {
-         System.out.println("    --> " + vDom.dereference());
+         //System.out.println("    --> " + vDom.dereference());
          return vDom.dereference();
       }
       return null;

@@ -421,7 +421,6 @@ patch_recursive(RootNode, PatchSet, Options, NewRoot):-
                 Indices)->
             memberchk(a-A, PatchSet),
             dom_index(RootNode, A, Indices, [], Index),
-            writeln(dom_index(RootNode, A, Indices, Index)),
             %owner_document(RootNode, OwnerDocument)
             patch_recursive(Indices, RootNode, Index, PatchSet, Options, NewRoot)
         ; otherwise->

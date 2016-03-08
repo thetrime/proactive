@@ -78,8 +78,6 @@ public class ReactWidget extends ReactComponent
    }
    public void replaceChild(ReactComponent newNode, ReactComponent oldNode)
    {
-      if (elementId.equals("foo"))
-         System.out.println("Replacing child " + oldNode + " --> " + newNode + " of " + this);
       this.child = newNode;
       child.setOwnerDocument(this);
       child.setParentNode(this);
@@ -135,10 +133,10 @@ public class ReactWidget extends ReactComponent
    {
       Term newvDom = engine.render(elementId, state, props);
       Term patches = engine.diff(vDom, newvDom);
-      System.out.println("Rerendering: " +elementId + ":" + vDom + " ----> " + newvDom);
-      System.out.println("Patch: " + patches);
+      //System.out.println("Rerendering: " +elementId + ":" + vDom + " ----> " + newvDom);
+      //System.out.println("Patch: " + patches);
       child.setOwnerDocument(this);
-      System.out.println("Applying patches from: " + child);
+      //System.out.println("Applying patches from: " + child);
       child = engine.applyPatch(patches, child);
       child.setOwnerDocument(this);
       children.clear();
@@ -148,7 +146,7 @@ public class ReactWidget extends ReactComponent
 
    public ReactWidget updateWidget(Term newProps) throws Exception
    {
-      System.out.println("UpdateWidget called on " + elementId + " with props: " + newProps);
+      //System.out.println("UpdateWidget called on " + elementId + " with props: " + newProps);
       props = newProps;
       reRender();
       return this;

@@ -285,8 +285,6 @@ public class Panel extends ReactComponent
 
    public void replaceChild(ReactComponent newChild, ReactComponent oldChild)
    {
-      System.out.println(this + " replaceChild: " + oldChild + " -> " + newChild);
-      System.out.println("     Children: " + children);
       int i = children.indexOf(oldChild);
       Component oldComponent = awtMap.get(oldChild);
       super.replaceChild(newChild, oldChild);

@@ -107,7 +107,6 @@ public class Field extends ReactLeafComponent
       }
       if (properties.containsKey("value"))
       {
-         System.out.println("!!!!!!!!!!!!!!!!!!!!! Field setValue: " + properties.get("value"));
          if (properties.get("value") == null)
             setValue(null);
          else
@@ -119,7 +118,6 @@ public class Field extends ReactLeafComponent
 
    public void setValue(PrologObject value)
    {
-      System.out.println("setValue on widget: " + value);
       widget.setValue(value);
    }
 

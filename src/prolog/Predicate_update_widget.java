@@ -22,7 +22,7 @@ public class Predicate_update_widget extends ExecuteOnlyCode
          CompoundTerm oldvDom = (CompoundTerm)args[1];
          ReactComponent domNode = (ReactComponent)((JavaObjectTerm)args[2]).value;
          ReactWidget widget = ((ReactWidget)domNode);
-         System.out.println("update_widget(" + args[0] + ", " + args[1] + ", " + args[2] + ", _)");
+         //System.out.println("update_widget(" + args[0] + ", " + args[1] + ", " + args[2] + ", _)");
          widget.updateWidget(newvDom.args[1]);
          return interpreter.simpleUnify(args[3], new JavaObjectTerm(domNode));
       }
