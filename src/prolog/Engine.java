@@ -54,6 +54,8 @@ public class Engine
       env.installBuiltin("on_server", 1);
       env.installBuiltin("raise_event", 2);
       env.installBuiltin("wait_for", 1);
+      env.installBuiltin("get_this", 1);
+      env.installBuiltin("react_handler", 6);
 
       env.installBuiltin("remove_child", 2);
       env.installBuiltin("append_child", 2);
@@ -163,7 +165,7 @@ public class Engine
       return null;
    }
    
-   public void triggerEvent(Object handler, PrologObject event, ReactWidget context) throws Exception
+   public void triggerEvent(Object handler, Term event, ReactWidget context) throws PrologException
    {
       Term state;
       Term props;
@@ -172,20 +174,13 @@ public class Engine
  
         //Print free m
       System.out.println("Handler: " + handler);
-      while (handler instanceof CompoundTerm && ((CompoundTerm)handler).tag.functor.value.equals("$this"))
-      {
-         // Context switch to parent.
-         System.out.println("Context switch from " + context + " -> " + context.getParentContext());
-         context = context.getParentContext();
-         handler = ((CompoundTerm)handler).args[0];
-      }
       state = context.getState();
       props = context.getProps();
 
       VariableTerm newState = new VariableTerm("NewState");
       Term goal;
       if (handler instanceof AtomTerm)
-         goal = ReactModule.crossModuleCall(context.getComponentName(), new CompoundTerm((AtomTerm)handler, new Term[]{event.asTerm(), state, props, newState}));
+         goal = ReactModule.crossModuleCall(context.getComponentName(), new CompoundTerm((AtomTerm)handler, new Term[]{event, state, props, newState}));
       else if (handler instanceof CompoundTerm)
       {
          CompoundTerm c_handler = (CompoundTerm)handler;
@@ -193,7 +188,7 @@ public class Engine
          for (int i = 0; i < c_handler.tag.arity; i++)
             args[i] = c_handler.args[i];
             //args[i] = unpack_recursive(c_handler.args[i]);
-         args[c_handler.tag.arity+0] = event.asTerm();
+         args[c_handler.tag.arity+0] = event;
          args[c_handler.tag.arity+1] = state;
          args[c_handler.tag.arity+2] = props;
          args[c_handler.tag.arity+3] = newState;
@@ -228,7 +223,7 @@ public class Engine
       // State is not updated if we get to here
    }
 
-   private Term applyState(Term oldState, Term newState) throws Exception
+   private Term applyState(Term oldState, Term newState) throws PrologException
    {
       Map<String, Term> properties = new HashMap<String, Term>();
       addProperties(oldState, properties);
@@ -247,7 +242,7 @@ public class Engine
       return false;
    }
    
-   private void addProperties(Term state, Map<String, Term> props) throws Exception
+   private void addProperties(Term state, Map<String, Term> props) throws PrologException
    {
       if (TermConstants.emptyListAtom.equals(state))
          return;
@@ -259,12 +254,12 @@ public class Engine
             if (c.args[0] instanceof CompoundTerm)
             {
                CompoundTerm attr = (CompoundTerm)c.args[0];
-               if (attr.tag.arity != 2 || !attr.tag.functor.value.equals("="))                     
-                  throw new RuntimeException("Invalid state: element is not =/2: " + attr);
+               if (attr.tag.arity != 2 || !attr.tag.functor.value.equals("="))
+                  PrologException.typeError(AtomTerm.get("=/2"), attr);
                Term attrName = attr.args[0];
                Term attrValue = attr.args[1];
                if (!(attrName instanceof AtomTerm))
-                  throw new RuntimeException("Invalid state: element name is not an atom: " + attrName);
+                  PrologException.typeError(AtomTerm.get("atom"), attrName);
                attrValue = attrValue.dereference();
                if (isNull(attrValue))
                   props.remove(((AtomTerm)attrName).value);
@@ -272,71 +267,17 @@ public class Engine
                   props.put(((AtomTerm)attrName).value, attrValue.dereference());
             }
             else
-               throw new RuntimeException("Invalid state element: " + c);
+               PrologException.typeError(AtomTerm.get("=/2"), c);
             if (c.args[1] instanceof CompoundTerm)
                c = (CompoundTerm)c.args[1];
             else if (TermConstants.emptyListAtom.equals(c.args[1]))
                break;
             else
-               throw new RuntimeException("Invalid state. Not a list: " + c);
+               PrologException.typeError(AtomTerm.get("list"), c);
          }
       }
    }
 
-   // This adds quite a bit of overhead
-   public static Term unpack_recursive(Term value, ReactWidget context)
-   {
-      if (value instanceof CompoundTerm)
-      {
-         CompoundTerm c = (CompoundTerm)value;
-         if (c.tag.functor.value.equals("$state"))
-            return unpack(c, context);
-         
-         Term[] args = new Term[c.args.length];
-         for (int i = 0; i < c.args.length; i++)
-            args[i] = unpack_recursive(c.args[i], context);
-         CompoundTerm replacement = new CompoundTerm(c.tag.functor.value, args);
-         return replacement;
-      }
-      return value;
-   }
-
-   public static Term unpack(Term value, ReactWidget context)
-   {
-      if (value instanceof CompoundTerm)
-      {
-         if (((CompoundTerm)value).tag.functor.value.equals("$state"))
-         {
-            // Fake maps
-            CompoundTerm c = (CompoundTerm)value;
-            String key = ((AtomTerm)(c.args[0])).value;
-
-             if (TermConstants.emptyListAtom.equals(c.args[1]))
-               return value;
-            else if (!(c.args[1] instanceof CompoundTerm))
-               return value;
-            CompoundTerm list = (CompoundTerm)c.args[1];
-            while (list.tag.arity == 2 && list.tag.functor.value.equals("."))
-            {
-               Term head = list.args[0];
-               if (head instanceof CompoundTerm && ((CompoundTerm)head).tag.functor.value.equals("=") && ((CompoundTerm)head).tag.arity == 2)
-               {
-                  CompoundTerm pair = (CompoundTerm)head;
-                  if (pair.args[0] instanceof AtomTerm && ((AtomTerm)pair.args[0]).value.equals(key))
-                     return unpack(pair.args[1].dereference(), context);
-               }
-               if (list.args[1] instanceof CompoundTerm)
-                  list = (CompoundTerm)list.args[1];
-               else
-               {
-                  // Entry is not found.
-                  return null;
-               }
-            }
-         }
-      }
-      return value;
-   }
 
    public static class ExecutionState extends WebSocketClient
    {
@@ -487,7 +428,7 @@ public class Engine
       return null;
    }
 
-   public Term render(String component, Term state, Term props) throws Exception
+   public Term render(ReactWidget widget, String component, Term state, Term props) throws PrologException
    {
       //System.out.println("Rendering " + component + " with props " + props + " and state " + state);
       VariableTerm vDom = new VariableTerm("VDom");
@@ -496,7 +437,16 @@ public class Engine
                                                                                                              vDom}));
       int undoPosition = interpreter.getUndoPosition();
       Interpreter.Goal g = interpreter.prepareGoal(goal);
-      PrologCode.RC rc = interpreter.execute(g);
+      env.pushContext(interpreter, widget);
+      PrologCode.RC rc;
+      try
+      {
+         rc = interpreter.execute(g);
+      }
+      finally
+      {
+         env.popContext(interpreter);
+      }
       if (rc == PrologCode.RC.SUCCESS)
          interpreter.stop(g);
       if (rc == PrologCode.RC.SUCCESS || rc == PrologCode.RC.SUCCESS_LAST)
@@ -526,7 +476,7 @@ public class Engine
                   Term attrName = attr.args[0];
                   Term attrValue = attr.args[1];
                   if (attrName instanceof AtomTerm)
-                     properties.put(((AtomTerm)attrName).value, new PrologObject(unpack(attrValue, null)));
+                     properties.put(((AtomTerm)attrName).value, new PrologObject(attrValue));
                   else
                      PrologException.typeError(AtomTerm.get("atom"), attrName);
                   if (TermConstants.emptyListAtom.equals(list.args[1]))

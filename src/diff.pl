@@ -623,6 +623,7 @@ render(Options, VNodeIn, DomNode):-
         ( is_widget(VNode)->
             init_widget(Document, VNode, DomNode)
         ; atom(VNode)->  % Text node
+            writeln(text_node(VNode)),
             create_text_node(Document, VNode, DomNode)
         ; VNode = element(Tag, Properties, Children)->
             create_element(Document, Tag, DomNode),

@@ -10,6 +10,7 @@ import gnu.prolog.vm.Environment;
 import gnu.prolog.vm.PrologCodeListener;
 import gnu.prolog.vm.PrologException;
 import gnu.prolog.vm.PrologCode;
+import gnu.prolog.vm.Interpreter;
 import java.util.Stack;
 import java.util.Map;
 import java.util.List;
@@ -22,6 +23,7 @@ public class ReactEnvironment extends Environment
    private Engine engine;
    public Stack<String> moduleStack = new Stack<String>();
    private Map<String, ReactModule> modules;
+   private HashMap<Interpreter, Stack<Object>> contextStack = new HashMap<Interpreter, Stack<Object>>();
    public ReactEnvironment(Engine engine)
    {
       modules = new HashMap<String, ReactModule>();
@@ -40,7 +42,35 @@ public class ReactEnvironment extends Environment
       ((ReactLoaderState)prologTextLoaderState).setModule(userModule);
       this.engine = engine;
    }
-   
+
+   public void pushContext(Interpreter i, Object o)
+   {
+      Stack<Object> stack = contextStack.get(i);
+      if (stack == null)
+      {
+         stack = new Stack<Object>();
+         contextStack.put(i, stack);
+      }
+      stack.push(o);
+   }
+
+   public void popContext(Interpreter i)
+   {
+      Stack<Object> stack = contextStack.get(i);
+      if (stack != null)
+         stack.pop();
+   }
+
+   public Object getCurrentContext(Interpreter i)
+   {
+      Stack<Object> stack = contextStack.get(i);
+      if (stack != null)
+         return stack.peek();
+      // This should be a warning!
+      return null;
+
+   }
+
    public Engine getEngine()
    {
       return engine;

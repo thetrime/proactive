@@ -6,6 +6,7 @@ import gnu.prolog.term.Term;
 import gnu.prolog.term.CompoundTerm;
 import gnu.prolog.term.AtomTerm;
 import gnu.prolog.vm.TermConstants;
+import gnu.prolog.vm.PrologException;
 import java.util.List;
 import java.util.LinkedList;
 import java.util.HashMap;
@@ -36,7 +37,7 @@ public class ReactWidget extends ReactComponent
       this.state = engine.getInitialState(elementId, props);
 
       // Then render the initial vDOM
-      vDom = engine.render(elementId, state, props);
+      vDom = engine.render(this, elementId, state, props);
 
       // But we cannot just realize the vDOM->DOM directly. Instead, we must compute diffs from a known state and apply those to a known DOM
       // Start by creating an initial contentPane.
@@ -122,16 +123,16 @@ public class ReactWidget extends ReactComponent
       return elementId;
    }
 
-   public void setState(Term newState) throws Exception
+   public void setState(Term newState) throws PrologException
    {
       state = newState;
       System.out.println("State is now " + newState);
       reRender();
    }
 
-   public void reRender() throws Exception
+   public void reRender() throws PrologException
    {
-      Term newvDom = engine.render(elementId, state, props);
+      Term newvDom = engine.render(this, elementId, state, props);
       Term patches = engine.diff(vDom, newvDom);
       //System.out.println("Rerendering: " +elementId + ":" + vDom + " ----> " + newvDom);
       //System.out.println("Patch: " + patches);
@@ -152,9 +153,9 @@ public class ReactWidget extends ReactComponent
       return this;
    }
 
-   public void triggerEvent(Term handler, PrologObject context) throws Exception
+   public void triggerEvent(Term handler, Term event) throws PrologException
    {
-      engine.triggerEvent(handler, context, this);
+      engine.triggerEvent(handler, event, this);
    }
 
 

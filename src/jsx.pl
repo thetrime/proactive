@@ -2,8 +2,13 @@
 
 :- quasi_quotation_syntax(jsx).
 
-jsx(Content, Vars, Dict, DOM):-
-        phrase_from_quasi_quotation(jsx_children(Vars, Dict, [DOM]), Content).
+jsx(Content, Vars, Dict, Term):-
+        phrase_from_quasi_quotation(jsx_children(Vars, Dict, [DOM], Goals, true), Content),
+        ( Goals == true->
+            Term = jsx(DOM)
+        ; otherwise->
+            Term = jsx(DOM, Goals)
+        ).
 
 garbage(X,_):-
         append(X, [], Codes),
@@ -24,15 +29,16 @@ tag_mismatch(Close, Tag, X, _):-
 qq(X, X):-
         writeln(X).
 
-jsx_node(Vars, Dict, element(Tag, Attributes, Content)) -->
+jsx_node(Vars, Dict, element(Tag, Attributes, Content), Goals, GoalsTail) -->
         optional_spaces,
         `<`,
-        jsx_tag(Tag), optional_spaces, jsx_attributes(Vars, Dict, Attributes),
+        jsx_tag(Tag), optional_spaces, jsx_attributes(Vars, Dict, Attributes, Goals, G1),
         % {compile_aux_clauses([jsx_require(Tag)])}, This causes swipl to crash :(
         ( `/>` ->
-            {Content = []}
+            {Content = [],
+             G1 = GoalsTail}
         ; `>` ->
-            jsx_children(Vars, Dict, Content),
+            jsx_children(Vars, Dict, Content, G1, GoalsTail),
             optional_spaces,
             `</`, jsx_tag(Close), `>`,
             ( {Close == Tag}->
@@ -84,7 +90,8 @@ jsx_atom_codes([Code|Codes])-->
         jsx_atom_codes(Codes).
 jsx_atom_codes([])--> [].
 
-jsx_children(Vars, Dict, [list(List)|Tail])-->
+jsx_children(Vars, Dict, Children, Goal, GoalTail)-->
+        % {Foo}. Note that {[Foo, Bar]} is not supported (yet)
         optional_spaces,
         `{`,
           !,
@@ -94,36 +101,43 @@ jsx_children(Vars, Dict, [list(List)|Tail])-->
           optional_spaces,
           {memberchk(HeadName=List, Dict)},
           optional_spaces,
+          {Goal = ((List == [] ->
+                     Children = Tail
+                  ; is_list(List)->
+                     append(List, Tail, Children)
+                  ; Children = [List|Tail]
+                  ), G1)},
         `}`,
-        jsx_children(Vars, Dict, Tail).
+        jsx_children(Vars, Dict, Tail, G1, GoalTail).
 
-jsx_children(Vars, Dict, [Element|Elements])-->
-        jsx_node(Vars, Dict, Element),
+jsx_children(Vars, Dict, [Element|Elements], Goal, GoalTail)-->
+        jsx_node(Vars, Dict, Element, Goal, G1),
         !,
-        jsx_children(Vars, Dict, Elements).
+        jsx_children(Vars, Dict, Elements, G1, GoalTail).
 
-jsx_children(_Vars, _Dict, [])--> [].
+jsx_children(_Vars, _Dict, [], G, G)--> [].
 
 
-jsx_attributes(Vars, Dict, [Name=Value|Attributes])-->
-        jsx_atom(Name), `=`, jsx_value(Value, Vars, Dict),
+jsx_attributes(Vars, Dict, [Name=Value|Attributes], Goals, GoalsTail)-->
+        jsx_atom(Name), `=`, jsx_value(Value, Vars, Dict, Goals, G1),
         ( spaces,
-          jsx_attributes(Vars, Dict, Attributes)->
+          jsx_attributes(Vars, Dict, Attributes, G1, GoalsTail)->
             !
-        ; {Attributes = []}
+        ; {Attributes = [],
+           G1 = GoalsTail}
         ).
-jsx_attributes(_, _, [])--> [].
+jsx_attributes(_, _, [], G, G)--> [].
 
-jsx_value(Value, Vars, Dict)-->
+jsx_value(Value, Vars, Dict, Goals, GoalsTail)-->
         `{`, !,
-          jsx_term(Value, Vars, Dict),
+          jsx_term(Value, Vars, Dict, Goals, GoalsTail),
          `}`.
 
-jsx_value(Value, _Vars, _Dict)-->
+jsx_value(Value, _Vars, _Dict, G, G)-->
         quoted_string(Value).
 
 % Variable
-jsx_term(Value, _Vars, Dict)-->
+jsx_term(Value, _Vars, Dict, Goals, GoalsTail)-->
         optional_spaces,
         variable_name(VarName),
         {memberchk(VarName=Variable, Dict)},
@@ -131,40 +145,42 @@ jsx_term(Value, _Vars, Dict)-->
         ( `.` ->
             % Fake maps
             jsx_atom(Key),
-            {Value = '$state'(Key, Variable)}
-        ; {Variable = Value}
+            {Goals = ((memberchk(Key=Value, Variable)->true ; otherwise->Value = {null}), GoalsTail)}
+        ; {Variable = Value, Goals = GoalsTail}
         ).
 
 % this pointer
-jsx_term('$this'(Value), Vars, Dict)-->
+jsx_term(react_handler(This, Value), Vars, Dict, Goals, GoalsTail)-->
         optional_spaces,
         `this.`,
+        {Goals = (get_this(This), G1)},
         !,
-        jsx_term(Value, Vars, Dict).
+        jsx_term(Value, Vars, Dict, G1, GoalsTail).
 
 % Atom and compound
-jsx_term(Value, Vars, Dict)-->
+jsx_term(Value, Vars, Dict, Goals, GoalsTail)-->
         optional_spaces,
         jsx_atom(Atom),
         ( `(` ->
             % compound
             optional_spaces,
-            jsx_term_args(Args, Vars, Dict),
+            jsx_term_args(Args, Vars, Dict, Goals, GoalsTail),
             `)`,
             {Value =.. [Atom|Args]}
-        ; {Value = Atom}
+        ; {Value = Atom,
+           GoalsTail = Goals}
         ).
 
-jsx_term_args([Value|Args], Vars, Dict)-->
+jsx_term_args([Value|Args], Vars, Dict, Goals, GoalsTail)-->
         optional_spaces,
-        jsx_term(Value, Vars, Dict),
+        jsx_term(Value, Vars, Dict, Goals, G1),
         !,
         optional_spaces,
         ( `,` ->
-            jsx_term_args(Args, Vars, Dict)
-        ; {Args = []}
+            jsx_term_args(Args, Vars, Dict, G1, GoalsTail)
+        ; {Args = [], G1 = GoalsTail}
         ).
-jsx_term_args([], _, _)--> [].
+jsx_term_args([], _, _, G, G)--> [].
         
         
 

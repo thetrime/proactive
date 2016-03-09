@@ -5,3 +5,6 @@ writeln(X):-
         java_println(X).
 
 otherwise.
+
+jsx(Form, jsx(Form)):- !.
+jsx(Form, jsx(Form, Goals)):- Goals.

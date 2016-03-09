@@ -12,7 +12,10 @@
           replace_node_data/2,
           init_widget/3,
           update_widget/4,
-          destroy_widget/2]).
+          destroy_widget/2,
+
+          get_this/1
+         ]).
 
 % ----------------- the real DOM. Implemented in SWI by attributed variables
 
@@ -139,7 +142,7 @@ node_type(DomNode, Type):-
         memberchk(type-Type, Attributes).
 
 
-
+get_this({this}).
 
 
 % DOM node is represented as dom_node(Attributes)

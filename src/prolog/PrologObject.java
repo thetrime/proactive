@@ -19,11 +19,11 @@ public class PrologObject
       this.term = term; // Engine.unpack(term, null);
    }
 
-   public static boolean isNull(Term t)
+   public boolean isNull()
    {
-      if (t instanceof CompoundTerm)
+      if (term instanceof CompoundTerm)
       {
-         CompoundTerm c = (CompoundTerm)t;
+         CompoundTerm c = (CompoundTerm)term;
          return (c.tag == CompoundTermTag.curly1 && c.args[0] instanceof AtomTerm && "null".equals(((AtomTerm)c.args[0]).value));
       }
       return false;
@@ -35,7 +35,7 @@ public class PrologObject
       Term t = term; //Engine.unpack(term);
       if (t instanceof AtomTerm)
          return ((AtomTerm)t).value;
-      else if (isNull(t))
+      else if (isNull())
          return null;
          System.out.println("Warning: asString called on " + term + " of type " + term.getClass() + " which unpacks something which is not a string: " + t + " of type " + t.getClass());
       return t.toString();

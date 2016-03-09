@@ -26,7 +26,7 @@ public class Button extends ReactLeafComponent
       if (actionListener != null)
          button.removeActionListener(actionListener);
 
-      if (value == null)
+      if (value == null || value.isNull())
          return;
       
       actionListener = new ActionListener()
@@ -35,7 +35,7 @@ public class Button extends ReactLeafComponent
             {
                try
                {
-                  getOwnerDocument().triggerEvent(value.asTerm(), serializeObject());
+                  getOwnerDocument().triggerEvent(value.asTerm(), serializeObject().asTerm());
                }
                catch (Exception e)
                {

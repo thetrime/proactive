@@ -42,7 +42,7 @@ public class Field extends ReactLeafComponent
    {
       if (focusListener != null)
          widget.getAWTComponent().removeFocusListener(focusListener);
-      if (value == null || value.asTerm() == null)
+      if (value == null || value.isNull())
          return;
       focusListener = new FocusListener()
          {
@@ -51,7 +51,7 @@ public class Field extends ReactLeafComponent
                try
                {
                   System.out.println("Field owner: " + owner);
-                  getOwnerDocument().triggerEvent(value.asTerm(), serializeObject());
+                  getOwnerDocument().triggerEvent(value.asTerm(), serializeObject().asTerm());
                }
                catch (Exception e)
                {
