@@ -25,10 +25,32 @@ public class React
          {
             public void run()
             {
-               long startTime = System.currentTimeMillis();
+               /*
+               javax.swing.JButton button = new javax.swing.JButton("ohai");
+               javax.swing.JFrame frame = new javax.swing.JFrame();
+               frame.getContentPane().add(button);
+               frame.setVisible(true);
+               button.addActionListener(new java.awt.event.ActionListener()
+                  {
+                     public void actionPerformed(java.awt.event.ActionEvent ae)
+                     {
+                        try
+                        {
+                           long startTime = System.currentTimeMillis();
+                           new org.proactive.ui.ReactApp(args[0], args[1]);
+                           System.out.println("Render time: " + (System.currentTimeMillis() - startTime ) + "ms");
+                        }
+                        catch(Exception e)
+                        {
+                           e.printStackTrace();
+                           System.exit(-1);
+                        }
+                     }
+                  });
+               */
                try
                {
-
+                  long startTime = System.currentTimeMillis();
                   new org.proactive.ui.ReactApp(args[0], args[1]);
                   System.out.println("Render time: " + (System.currentTimeMillis() - startTime ) + "ms");
                }
@@ -37,7 +59,9 @@ public class React
                   e.printStackTrace();
                   System.exit(-1);
                }
+
             }
+
          });
    }
 
