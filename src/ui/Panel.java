@@ -306,13 +306,19 @@ public class Panel extends ReactComponent
          panel.remove(oldComponent);
          // We may have to edit the constraints if the child has a different fill
          constraints.fill = newChild.getFill();
-         panel.add(newChild.getAWTComponent(), constraints);
-         checkAlignment();
+         if (!(newChild.getAWTComponent() instanceof JFrame))
+         {
+            panel.add(newChild.getAWTComponent(), constraints);
+            checkAlignment();
+         }
       }
       else if (orientation == GRID)
       {
          panel.remove(oldComponent);
-         panel.add(newChild.getAWTComponent(), i);
+         if (!(newChild.getAWTComponent() instanceof JFrame))
+         {
+            panel.add(newChild.getAWTComponent(), i);
+         }
       }
    }
 
