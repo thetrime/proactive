@@ -55,7 +55,7 @@ public class Engine
       env.installBuiltin("raise_event", 2);
       env.installBuiltin("wait_for", 1);
       env.installBuiltin("get_this", 1);
-      env.installBuiltin("react_handler", 6);
+      env.installBuiltin("react_handler", 3);
 
       env.installBuiltin("remove_child", 2);
       env.installBuiltin("append_child", 2);
@@ -164,7 +164,7 @@ public class Engine
       }
       return null;
    }
-   
+
    public void triggerEvent(Object handler, Term event, ReactWidget context) throws PrologException
    {
       Term state;
@@ -172,12 +172,36 @@ public class Engine
       Runtime runtime = Runtime.getRuntime();
       System.out.println("Used Memory:" + (runtime.totalMemory() - runtime.freeMemory()) / (1024*1024));
  
-        //Print free m
+      //Print free memory
       System.out.println("Handler: " + handler);
+
+      if (handler instanceof CompoundTerm && ((CompoundTerm)handler).tag.functor.value.equals("react_handler"))
+      {
+         // Just call the handler directly and return
+         Term goal;
+         CompoundTerm c_handler = (CompoundTerm)handler;
+         goal = ReactModule.crossModuleCall(context.getComponentName(), new CompoundTerm(c_handler.tag.functor, new Term[]{c_handler.args[0], c_handler.args[1], event}));
+         System.out.println("Executing " + goal);
+         int undoPosition = interpreter.getUndoPosition();
+         Interpreter.Goal g = interpreter.prepareGoal(goal);
+         try
+         {
+            PrologCode.RC rc = interpreter.execute(g);
+            if (rc == PrologCode.RC.SUCCESS)
+               interpreter.stop(g);
+            return;
+         }
+         catch (PrologException notDefined)
+         {
+            notDefined.printStackTrace();
+         }
+         return;
+      }
+
+
       state = context.getState();
       props = context.getProps();
 
-      VariableTerm newState = new VariableTerm("NewState");
       Term goal;
       if (handler instanceof AtomTerm)
          goal = ReactModule.crossModuleCall(context.getComponentName(), new CompoundTerm((AtomTerm)handler, new Term[]{event, state, props, newState}));
@@ -210,7 +234,7 @@ public class Engine
             interpreter.stop(g);
          if (rc == PrologCode.RC.SUCCESS || rc == PrologCode.RC.SUCCESS_LAST)
          {
-            System.out.println("Stopped triggerEvent");
+            System.out.println("Goal " + goal + " has set the state to " + newState.dereference());
             context.setState(applyState(state, newState.dereference()));
             interpreter.undo(undoPosition);
             return;

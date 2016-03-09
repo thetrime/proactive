@@ -15,14 +15,15 @@ public class Predicate_react_handler extends ExecuteOnlyCode
    public RC execute(Interpreter interpreter, boolean backtrackMode, gnu.prolog.term.Term args[]) throws PrologException
    {
       // NB: This is actually called with 4 extra arguments, so really it is
-      // react_handler(+TargetWidget, +ChainedHandler, +Event, +State, +Props, -NewState)
+      // react_handler(+TargetWidget, +ChainedHandler, +Event)
       // Chaining like this means we set NewState to [] - no change.
       // (Note that this means we do not actually have to re-render the component!
 
-      System.out.println("react_handler(" + args[0] + ", " + args[1] + ", " + args[2] + ", " + args[3] + ", " + args[4] + ", " + args[5] + ")");
+      System.out.println("react_handler(" + args[0] + ", " + args[1] + ", " + args[2] + ")");
 
       ReactWidget widget = (ReactWidget)((JavaObjectTerm)(args[0])).value;
+      System.out.println("Triggering event on " + widget.getComponentName());
       widget.triggerEvent(args[1], args[2]);
-      return interpreter.simpleUnify(args[5], TermConstants.emptyListAtom);
+      return RC.SUCCESS_LAST;
    }
 }
