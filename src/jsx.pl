@@ -6,14 +6,20 @@ jsx(Content, Vars, Dict, DOM):-
         phrase_from_quasi_quotation(jsx_children(Vars, Dict, [DOM]), Content).
 
 garbage(X,_):-
-        length(Codes, 10),
-        append(Codes, _, X),
+        append(X, [], Codes),
+        %length(Codes, 10)
+        %append(Codes, _, X),
         ( ground(Codes)->
             atom_codes(Atom, Codes),
             throw(garbage(Atom))
         ; otherwise->
             throw(garbage)
         ).
+
+tag_mismatch(Close, Tag, X, _):-
+        append(X, [], Codes),
+        atom_codes(Atom, Codes),
+        throw(tag_mismatch(Close, Tag, Atom)).
 
 qq(X, X):-
         writeln(X).
@@ -28,7 +34,11 @@ jsx_node(Vars, Dict, element(Tag, Attributes, Content)) -->
         ; `>` ->
             jsx_children(Vars, Dict, Content),
             optional_spaces,
-            `</`, jsx_tag(Tag), `>`
+            `</`, jsx_tag(Close), `>`,
+            ( {Close == Tag}->
+                {true}
+            ; tag_mismatch(Close, Tag)
+            )
         ; {otherwise}->
             garbage
         ),
