@@ -90,7 +90,7 @@ public class Engine
    {
       VariableTerm replyTerm = new VariableTerm("Result");
       Term goal = ReactModule.crossModuleCall(component, new CompoundTerm(AtomTerm.get("getInitialState"), new Term[]{props, replyTerm}));
-      // We cannot undo(0) here because we might be in the middle of processing a flux event, and that would muck up the stack
+      int undoPosition = interpreter.getUndoPosition();
       Interpreter.Goal g = interpreter.prepareGoal(goal);
       try
       {
@@ -99,7 +99,9 @@ public class Engine
             interpreter.stop(g);
          if (rc == PrologCode.RC.SUCCESS || rc == PrologCode.RC.SUCCESS_LAST)
          {
-            return replyTerm.dereference();
+            Term result = replyTerm.dereference().clone(new TermCloneContext());
+            interpreter.undo(undoPosition);
+            return result;
          }
       }
       catch (PrologException notDefined)         
@@ -136,7 +138,7 @@ public class Engine
                                                                                                                        state,
                                                                                                                        props,
                                                                                                                        newState}));
-      // We cannot call undo(0) here because we might be processing recursive events
+      int undoPosition = interpreter.getUndoPosition();
       Interpreter.Goal g = interpreter.prepareGoal(goal);
       try
       {
@@ -145,8 +147,9 @@ public class Engine
             interpreter.stop(g);
          if (rc == PrologCode.RC.SUCCESS || rc == PrologCode.RC.SUCCESS_LAST)
          {
-            Term adjustedState = applyState(state, newState.dereference());
+            Term adjustedState = applyState(state, newState.dereference()).clone(new TermCloneContext());
             System.out.println("flux handler set state to: " + adjustedState);
+            interpreter.undo(undoPosition);
             return adjustedState;
          }
       }
@@ -164,7 +167,10 @@ public class Engine
    {
       Term state;
       Term props;
-
+      Runtime runtime = Runtime.getRuntime();
+      System.out.println("Used Memory:" + (runtime.totalMemory() - runtime.freeMemory()) / (1024*1024));
+ 
+        //Print free m
       System.out.println("Handler: " + handler);
       while (handler instanceof CompoundTerm && ((CompoundTerm)handler).tag.functor.value.equals("$this"))
       {
@@ -199,8 +205,8 @@ public class Engine
          return;
       }
       // This SHOULD be safe since we SHOULD always be at the top-level when doing this, and if not, we want to go there!
-      interpreter.undo(0);
       System.out.println("Executing " + goal);
+      int undoPosition = interpreter.getUndoPosition();
       Interpreter.Goal g = interpreter.prepareGoal(goal);
       try
       {
@@ -209,7 +215,9 @@ public class Engine
             interpreter.stop(g);
          if (rc == PrologCode.RC.SUCCESS || rc == PrologCode.RC.SUCCESS_LAST)
          {
+            System.out.println("Stopped triggerEvent");
             context.setState(applyState(state, newState.dereference()));
+            interpreter.undo(undoPosition);
             return;
          }
       }
@@ -439,16 +447,16 @@ public class Engine
    {
       VariableTerm patchTerm = new VariableTerm("Patch");
       Term goal = ReactModule.crossModuleCall("diff", new CompoundTerm(AtomTerm.get("diff"), new Term[]{a, b, patchTerm}));
-      // FIXME: Maybe...We cannot undo(0) here because we might be in the middle of processing a flux event, and that would muck up the stack
-      // FIXME: Creating new interpreters all the time sounds expensive
-      Interpreter interpreter = env.createInterpreter();
+      int undoPosition = interpreter.getUndoPosition();
       Interpreter.Goal g = interpreter.prepareGoal(goal);
       PrologCode.RC rc = interpreter.execute(g);
       if (rc == PrologCode.RC.SUCCESS)
          interpreter.stop(g);
       if (rc == PrologCode.RC.SUCCESS || rc == PrologCode.RC.SUCCESS_LAST)
       {
-         return patchTerm.dereference();
+         Term result = patchTerm.dereference().clone(new TermCloneContext());
+         interpreter.undo(undoPosition);
+         return result;
       }
       return TermConstants.emptyListAtom;
    }
@@ -462,9 +470,7 @@ public class Engine
                                                                                                          patch,
                                                                                                          renderOptions,
                                                                                                          newRoot}));
-      // FIXME: Maybe...We cannot undo(0) here because we might be in the middle of processing a flux event, and that would muck up the stack
-      // FIXME: Creating new interpreters all the time sounds expensive
-      Interpreter interpreter = env.createInterpreter();
+      int undoPosition = interpreter.getUndoPosition();
       Interpreter.Goal g = interpreter.prepareGoal(goal);
       PrologCode.RC rc = interpreter.execute(g);
       if (rc == PrologCode.RC.SUCCESS)
@@ -472,7 +478,9 @@ public class Engine
       if (rc == PrologCode.RC.SUCCESS || rc == PrologCode.RC.SUCCESS_LAST)
       {
          JavaObjectTerm result = (JavaObjectTerm)(newRoot.dereference());
-         return ((ReactComponent)result.value);
+         ReactComponent returnValue = ((ReactComponent)result.value);
+         interpreter.undo(undoPosition);
+         return returnValue;
       }
       System.out.println(" *********************** patch/4 failed: " + patch);
       System.exit(-1);
@@ -486,18 +494,16 @@ public class Engine
       Term goal = ReactModule.crossModuleCall(component, new CompoundTerm(AtomTerm.get("render"), new Term[]{state,
                                                                                                              props,
                                                                                                              vDom}));
-      // FIXME: Maybe...We cannot undo(0) here because we might be in the middle of processing a flux event, and that would muck up the stack
-      // FIXME: Creating new interpreters all the time sounds expensive
-      Interpreter interpreter = env.createInterpreter();
-
+      int undoPosition = interpreter.getUndoPosition();
       Interpreter.Goal g = interpreter.prepareGoal(goal);
       PrologCode.RC rc = interpreter.execute(g);
       if (rc == PrologCode.RC.SUCCESS)
          interpreter.stop(g);
       if (rc == PrologCode.RC.SUCCESS || rc == PrologCode.RC.SUCCESS_LAST)
       {
-         //System.out.println("    --> " + vDom.dereference());
-         return vDom.dereference();
+         Term result = vDom.dereference().clone(new TermCloneContext());
+         interpreter.undo(undoPosition);
+         return result;
       }
       return null;
    }
