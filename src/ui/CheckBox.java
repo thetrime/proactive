@@ -34,4 +34,6 @@ public class CheckBox implements InputWidget
       else
          field.setSelected(value.asBoolean());
    }
+
+   public void setChangeListener(InputWidgetListener value) {}
 }

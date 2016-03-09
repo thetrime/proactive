@@ -8,4 +8,5 @@ public interface InputWidget
    public Component getAWTComponent();
    public void setValue(PrologObject value);
    public Object getValue();
+   public void setChangeListener(InputWidgetListener listener);
 }

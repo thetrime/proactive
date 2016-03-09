@@ -16,7 +16,7 @@ import java.awt.event.FocusEvent;
 import org.proactive.prolog.PrologObject;
 import org.proactive.ReactLeafComponent;
 
-public class Field extends ReactLeafComponent 
+public class Field extends ReactLeafComponent
 {
    private static final int TEXT = 0;
    private static final int RADIO = 1;
@@ -113,6 +113,28 @@ public class Field extends ReactLeafComponent
       }
       if (properties.containsKey("onBlur"))
          setFocusListener(properties.get("onBlur"));
+      if (properties.containsKey("onChange"))
+      {
+         PrologObject handler = properties.get("onChange");
+         if (handler == null || handler.isNull())
+            widget.setChangeListener(null);
+         else
+            widget.setChangeListener(new InputWidgetListener()
+               {
+                  public void valueWouldChange(PrologObject newValue)
+                  {
+                     try
+                     {
+                        getOwnerDocument().triggerEvent(handler.asTerm(), newValue.asTerm());
+                     }
+                     catch(Exception e)
+                     {
+                        e.printStackTrace();
+                     }
+                  }
+               });
+      }
+
    }
 
    public void setValue(PrologObject value)

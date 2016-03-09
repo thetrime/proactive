@@ -203,6 +203,7 @@ public class Engine
       props = context.getProps();
 
       Term goal;
+      VariableTerm newState = new VariableTerm("NewState");
       if (handler instanceof AtomTerm)
          goal = ReactModule.crossModuleCall(context.getComponentName(), new CompoundTerm((AtomTerm)handler, new Term[]{event, state, props, newState}));
       else if (handler instanceof CompoundTerm)

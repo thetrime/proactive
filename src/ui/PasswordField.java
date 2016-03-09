@@ -28,4 +28,6 @@ public class PasswordField implements InputWidget
       else
          field.setText(value.asString());
    }
+
+   public void setChangeListener(InputWidgetListener value) {}
 }
