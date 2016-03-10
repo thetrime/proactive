@@ -51,6 +51,9 @@ public class Engine
       long t1 = System.currentTimeMillis();
       env = new ReactEnvironment(this);
       env.installBuiltin("java_println", 1);
+      env.installBuiltin("upcase_atom", 2);
+
+
       env.installBuiltin("on_server", 1);
       env.installBuiltin("raise_event", 2);
       env.installBuiltin("wait_for", 1);
