@@ -3,6 +3,22 @@ Proactive
 
 A Prolog and Java implementation of the React concept
 
+## TL;DR
+Write UI applications in Prolog using an XML-like syntax:
+```
+render(State, Props, MyApp):-
+    findall(Field,
+            render_some_field(State, Props, Field),
+            SeveralFields),
+    jsx(MyApp,
+        {|jsx||
+        <Panel>
+          <Label label="Hello from Prolog!"/>
+          {SeveralFields}
+          <Button label="Submit"/>
+        </Panel>|}.
+```
+
 Quick demo
 ----------
 If you want to just get stuck in, follow these steps:
