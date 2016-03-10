@@ -133,6 +133,8 @@ public class PrologObject
 
    public static Term serializeObject(Object value)
    {
+      if (value == null)
+         return new CompoundTerm(CompoundTermTag.curly1, AtomTerm.get("null"));
       if (value instanceof String)
          return AtomTerm.get((String)value);
       return new CompoundTerm(CompoundTermTag.curly1, AtomTerm.get("null"));

@@ -28,7 +28,10 @@ public class TextField implements InputWidget
 
    public Object getValue()
    {
-      return field.getText();
+      String text = field.getText();
+      if (text.length() == 0)
+         return null;
+      return text;
    }
 
    private boolean isSystemOriginatedEvent = false;
@@ -81,6 +84,8 @@ public class TextField implements InputWidget
                             {
                                String newValue = field.getText();
                                HashMap<String, Object> properties = new HashMap<String, Object>();
+                               if (newValue.length() == 0)
+                                  newValue = null;
                                properties.put("value", newValue);
                                return listener.verifyValue(PrologObject.serialize(properties));
                             }
