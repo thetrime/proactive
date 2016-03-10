@@ -20,3 +20,11 @@ call(A,B):-
           Goal =.. [Name|NewArgs],
           call(Goal)
         ).
+
+bubble_event(List, Key, Event):-
+        ( memberchk(Key=Handler, List),
+          Handler \== {null}->
+            call(Handler, Event)
+        ; otherwise->
+            true
+        ).
