@@ -22,6 +22,7 @@ public class Field extends ReactLeafComponent
    private static final int RADIO = 1;
    private static final int CHECKBOX = 2;
    private static final int PASSWORD = 3;
+   private static final int SELECT = 4;
 
    private InputWidget widget;
    private int type = TEXT;
@@ -85,6 +86,8 @@ public class Field extends ReactLeafComponent
             type = CHECKBOX;
          else if (key.equals("password"))
             type = PASSWORD;
+         else if (key.equals("select"))
+            type = SELECT;
          if (oldType != type)
          {
             switch(type)
@@ -101,10 +104,18 @@ public class Field extends ReactLeafComponent
                case CHECKBOX:
                   widget = new CheckBox();
                   break;
+               case SELECT:
+                  widget = new ComboBox();
+                  break;
             }
             if (getParentNode() != null)
                getParentNode().replaceChild(this, this);
          }
+      }
+      if (properties.containsKey("allowedValues"))
+      {
+         if (type == SELECT)
+            ((ComboBox)widget).setAllowedValues(properties.get("allowedValues"));
       }
       if (properties.containsKey("value"))
       {

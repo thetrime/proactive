@@ -184,7 +184,7 @@ raise_event(Key, _):- permission_error(raise, server_side_event, Key).
 wait_for(List):- permission_error(wait_for, server_side_event, List).
 
 bubble_event(List, Key, Event):-
-        ( memberchk(Key=Handler, Props),
+        ( memberchk(Key=Handler, List),
           Handler \== {null}->
             call(Handler, Event)
         ; otherwise->

@@ -128,13 +128,55 @@ jsx_attributes(Vars, Dict, [Name=Value|Attributes], Goals, GoalsTail)-->
         ).
 jsx_attributes(_, _, [], G, G)--> [].
 
-jsx_value(Value, Vars, Dict, Goals, GoalsTail)-->
+read_until_close_brace([], 1, [125|C], [125|C]):- !.
+read_until_close_brace([123|Codes], N)-->
         `{`, !,
-          jsx_term(Value, Vars, Dict, Goals, GoalsTail),
+        {NN is N+1},
+        read_until_close_brace(Codes, NN).
+
+read_until_close_brace([125|Codes], N)-->
+        `}`, !,
+        {NN is N-1},
+        read_until_close_brace(Codes, NN).
+
+read_until_close_brace([Code|Codes], N)-->
+        [Code],
+        read_until_close_brace(Codes, N).
+
+
+unify_variables([], _):- !.
+unify_variables([Name=Value|Vars], Dict):-
+        ignore(memberchk(Name=Value, Dict)),
+        unify_variables(Vars, Dict).
+
+jsx_value(Value, _Vars, Dict, Goals, GoalsTail)-->
+        `{`, !,
+          read_until_close_brace(Codes, 1),
+          {read_term_from_atom(Codes, Term, [variable_names(TermVariableNames)]),
+           unify_variables(TermVariableNames, Dict),
+           expand_goals(Term, Value, Goals, GoalsTail)},
+          %jsx_term(Value, Vars, Dict, Goals, GoalsTail),
          `}`.
 
 jsx_value(Value, _Vars, _Dict, G, G)-->
         quoted_string(Value).
+
+expand_goals(Variable, Variable, Tail, Tail):- var(Variable), !.
+expand_goals(Map, react_handler(This, Value), (get_this(This), Tail), Tail):-
+        functor(Map, '.', 2),
+        Map =.. ['.', Key, Value],
+        Key == this, !.
+expand_goals(Map, Value, ((memberchk(Key=Value, Object)->true ; otherwise->Value = {null}), Tail), Tail):-
+        functor(Map, '.', 2), !,
+        Map =.. ['.', Object, Key].
+expand_goals([], [], Tail, Tail):- !.
+expand_goals([Head|Tail], [NewHead|NewTail], Goals, GoalTail):-
+        !,
+        expand_goals(Head, NewHead, Goals, G1),
+        expand_goals(Tail, NewTail, G1, GoalTail).
+expand_goals(X, X, Tail, Tail).
+
+
 
 % Variable
 jsx_term(Value, _Vars, Dict, Goals, GoalsTail)-->
@@ -170,6 +212,15 @@ jsx_term(Value, Vars, Dict, Goals, GoalsTail)-->
         ; {Value = Atom,
            GoalsTail = Goals}
         ).
+
+% List
+jsx_term(Value, Vars, Dict, Goals, GoalsTail)-->
+        optional_spaces,
+        `[`, !,
+          optional_spaces,
+          jsx_term_args(Value, Vars, Dict, Goals, GoalsTail),
+          `]`.
+
 
 jsx_term_args([Value|Args], Vars, Dict, Goals, GoalsTail)-->
         optional_spaces,

@@ -4,9 +4,10 @@
 :- use_module(library(http/thread_httpd)).
 :- use_module(library(http/http_dispatch)).
 
-
+:-ensure_loaded(user:testing).
 :-ensure_loaded(user:react).
 :-ensure_loaded(user:jsx).
+:-ensure_loaded(user:diff).
         
 :-multifile
         user:end_of_file_hook/0.
