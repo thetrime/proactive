@@ -165,16 +165,10 @@ public class Engine
       return null;
    }
 
-   public void triggerEvent(Object handler, Term event, ReactWidget context) throws PrologException
+   public boolean triggerEvent(Object handler, Term event, ReactWidget context) throws PrologException
    {
       Term state;
       Term props;
-      Runtime runtime = Runtime.getRuntime();
-      //System.out.println("Used Memory:" + (runtime.totalMemory() - runtime.freeMemory()) / (1024*1024));
- 
-      //Print free memory
-      //System.out.println("Handler: " + handler);
-
       if (handler instanceof CompoundTerm && ((CompoundTerm)handler).tag.functor.value.equals("react_handler"))
       {
          // Just call the handler directly and return
@@ -189,13 +183,13 @@ public class Engine
             PrologCode.RC rc = interpreter.execute(g);
             if (rc == PrologCode.RC.SUCCESS)
                interpreter.stop(g);
-            return;
+            return (rc == PrologCode.RC.SUCCESS || rc == PrologCode.RC.SUCCESS_LAST);
          }
          catch (PrologException notDefined)
          {
             notDefined.printStackTrace();
          }
-         return;
+         return false;
       }
 
 
@@ -222,7 +216,7 @@ public class Engine
       else
       {
          System.out.println("Handler is not callable: " + handler);
-         return;
+         return false;
       }
       // This SHOULD be safe since we SHOULD always be at the top-level when doing this, and if not, we want to go there!
       //System.out.println("Executing " + goal);
@@ -238,13 +232,14 @@ public class Engine
             //System.out.println("Goal " + goal + " has set the state to " + newState.dereference());
             context.setState(applyState(state, newState.dereference()));
             interpreter.undo(undoPosition);
-            return;
+            return (rc == PrologCode.RC.SUCCESS || rc == PrologCode.RC.SUCCESS_LAST);
          }
       }
       catch (PrologException notDefined)
       {
          notDefined.printStackTrace();
       }
+      return false;
       // State is not updated if we get to here
    }
 

@@ -9,4 +9,5 @@ public interface InputWidget
    public void setValue(PrologObject value);
    public Object getValue();
    public void setChangeListener(InputWidgetListener listener);
+   public void setVerifier(InputWidgetVerifier verifier);
 }

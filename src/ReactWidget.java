@@ -153,9 +153,9 @@ public class ReactWidget extends ReactComponent
       return this;
    }
 
-   public void triggerEvent(Term handler, Term event) throws PrologException
+   public boolean triggerEvent(Term handler, Term event) throws PrologException
    {
-      engine.triggerEvent(handler, event, this);
+      return engine.triggerEvent(handler, event, this);
    }
 
 

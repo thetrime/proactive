@@ -23,7 +23,8 @@ public class Predicate_react_handler extends ExecuteOnlyCode
 
       ReactWidget widget = (ReactWidget)((JavaObjectTerm)(args[0])).value;
       //System.out.println("Triggering event on " + widget.getComponentName());
-      widget.triggerEvent(args[1], args[2]);
-      return RC.SUCCESS_LAST;
+      if (widget.triggerEvent(args[1], args[2]))
+         return RC.SUCCESS_LAST;
+      return RC.FAIL;
    }
 }

@@ -9,6 +9,8 @@ import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 import java.util.HashMap;
+import javax.swing.InputVerifier;
+import javax.swing.JComponent;
 
 public class TextField implements InputWidget
 {
@@ -34,7 +36,6 @@ public class TextField implements InputWidget
    {
       if (bypass != null)
       {
-         System.out.println("SetValue through bypass: " + value.asString() + " from " + field.getText());
          // This setValue is happening because the user edited the field, an onChange was fired, and now is setting the
          // field to contain some new computed value. We must use bypass to set it
          String text = value.asString();
@@ -44,7 +45,6 @@ public class TextField implements InputWidget
       try
       {
          isSystemOriginatedEvent = true;
-         System.out.println("Request to set existing field value to  " + value.asString() + " from " + field.getText());
          if (value == null)
             field.setText("");
          else
@@ -67,6 +67,25 @@ public class TextField implements InputWidget
       {
          e.printStackTrace();
       }
+   }
+
+   InputVerifier inputVerifier = null;
+   public void setVerifier(InputWidgetVerifier listener)
+   {
+      if (listener == null)
+         inputVerifier = null;
+      else
+         inputVerifier = new InputVerifier()
+                         {
+                            public boolean verify(JComponent ignored)
+                            {
+                               String newValue = field.getText();
+                               HashMap<String, Object> properties = new HashMap<String, Object>();
+                               properties.put("value", newValue);
+                               return listener.verifyValue(PrologObject.serialize(properties));
+                            }
+            };
+      field.setInputVerifier(inputVerifier);
    }
 
    public void setChangeListener(InputWidgetListener listener)

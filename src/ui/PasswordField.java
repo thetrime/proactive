@@ -30,4 +30,5 @@ public class PasswordField implements InputWidget
    }
 
    public void setChangeListener(InputWidgetListener value) {}
+   public void setVerifier(InputWidgetVerifier value) {}
 }

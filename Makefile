@@ -14,6 +14,7 @@ UI=  src/ui/Panel.java                                        \
      src/ui/Field.java                                        \
      src/ui/InputWidget.java                                  \
      src/ui/InputWidgetListener.java                          \
+     src/ui/InputWidgetVerifier.java                          \
      src/ui/RadioButton.java                                  \
      src/ui/TextField.java                                    \
      src/ui/CheckBox.java                                     \

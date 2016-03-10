@@ -27,7 +27,6 @@ public class Field extends ReactLeafComponent
    private int type = TEXT;
    public Field()
    {
-      System.out.println("New field created");
       widget = new TextField();
    }
 
@@ -64,6 +63,8 @@ public class Field extends ReactLeafComponent
          };
       widget.getAWTComponent().addFocusListener(focusListener);
    }
+
+
 
 
    public void setProperties(HashMap<String, PrologObject> properties)
@@ -114,6 +115,30 @@ public class Field extends ReactLeafComponent
       }
       if (properties.containsKey("onBlur"))
          setFocusListener(properties.get("onBlur"));
+      if (properties.containsKey("verifyValue"))
+      {
+         PrologObject handler = properties.get("verifyValue");
+         if (handler == null || handler.isNull())
+            widget.setVerifier(null);
+         else
+            widget.setVerifier(new InputWidgetVerifier()
+               {
+                  public boolean verifyValue(PrologObject newValue)
+                  {
+                     try
+                     {
+                        return getOwnerDocument().triggerEvent(handler.asTerm(), newValue.asTerm());
+                     }
+                     catch(Exception e)
+                     {
+                        e.printStackTrace();
+                     }
+                     return false;
+                  }
+               });
+      }
+
+
       if (properties.containsKey("onChange"))
       {
          PrologObject handler = properties.get("onChange");
