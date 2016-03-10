@@ -27,6 +27,7 @@ public class Field extends ReactLeafComponent
    private int type = TEXT;
    public Field()
    {
+      System.out.println("New field created");
       widget = new TextField();
    }
 

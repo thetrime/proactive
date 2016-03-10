@@ -14,6 +14,7 @@ public class TextField implements InputWidget
 {
    JTextField field = new JTextField();
    private DocumentFilter documentFilter = null;
+   private DocumentFilter.FilterBypass bypass = null;
    public TextField()
    {
    }
@@ -31,9 +32,19 @@ public class TextField implements InputWidget
    private boolean isSystemOriginatedEvent = false;
    public void setValue(PrologObject value)
    {
+      if (bypass != null)
+      {
+         System.out.println("SetValue through bypass: " + value.asString() + " from " + field.getText());
+         // This setValue is happening because the user edited the field, an onChange was fired, and now is setting the
+         // field to contain some new computed value. We must use bypass to set it
+         String text = value.asString();
+         applyText(text, bypass);
+         return;
+      }
       try
       {
          isSystemOriginatedEvent = true;
+         System.out.println("Request to set existing field value to  " + value.asString() + " from " + field.getText());
          if (value == null)
             field.setText("");
          else
@@ -44,6 +55,18 @@ public class TextField implements InputWidget
          isSystemOriginatedEvent = false;
       }
       setDocumentFilter();
+   }
+
+   private void applyText(String text, DocumentFilter.FilterBypass bypass)
+   {
+      try
+      {
+         bypass.replace(0, field.getText().length(), text, null);
+      }
+      catch(Exception e)
+      {
+         e.printStackTrace();
+      }
    }
 
    public void setChangeListener(InputWidgetListener listener)
@@ -59,10 +82,18 @@ public class TextField implements InputWidget
                                    fb.insertString(offs, str, a);
                                 else
                                 {
-                                   String newValue = new StringBuilder(field.getText()).insert(offs, str).toString();
-                                   HashMap<String, Object> properties = new HashMap<String, Object>();
-                                   properties.put("value", newValue);
-                                   listener.valueWouldChange(PrologObject.serialize(properties));
+                                   bypass = fb;
+                                   try
+                                   {
+                                      String newValue = new StringBuilder(field.getText()).insert(offs, str).toString();
+                                      HashMap<String, Object> properties = new HashMap<String, Object>();
+                                      properties.put("value", newValue);
+                                      listener.valueWouldChange(PrologObject.serialize(properties));
+                                   }
+                                   finally
+                                   {
+                                      bypass = null;
+                                   }
                                 }
                              }
                              public void remove(DocumentFilter.FilterBypass fb, int offset, int length)  throws BadLocationException
@@ -71,10 +102,19 @@ public class TextField implements InputWidget
                                    fb.remove(offset, length);
                                 else
                                 {
-                                   String newValue = new StringBuilder(field.getText()).replace(offset, offset+length, "").toString();
-                                   HashMap<String, Object> properties = new HashMap<String, Object>();
-                                   properties.put("value", newValue);
-                                   listener.valueWouldChange(PrologObject.serialize(properties));
+                                   bypass = fb;
+                                   try
+                                   {
+                                      String newValue = new StringBuilder(field.getText()).replace(offset, offset+length, "").toString();
+                                      HashMap<String, Object> properties = new HashMap<String, Object>();
+                                      properties.put("value", newValue);
+                                      listener.valueWouldChange(PrologObject.serialize(properties));
+                                   }
+                                   finally
+                                   {
+                                      bypass = null;
+                                   }
+
                                 }
                              }
                              public void replace(DocumentFilter.FilterBypass fb, int offset, int length, String text, AttributeSet attrs)  throws BadLocationException
@@ -83,10 +123,19 @@ public class TextField implements InputWidget
                                    fb.replace(offset, length, text, attrs);
                                 else
                                 {
-                                   String newValue = new StringBuilder(field.getText()).replace(offset, offset+length, text).toString();
-                                   HashMap<String, Object> properties = new HashMap<String, Object>();
-                                   properties.put("value", newValue);
-                                   listener.valueWouldChange(PrologObject.serialize(properties));
+                                   bypass = fb;
+                                   try
+                                   {
+                                      String newValue = new StringBuilder(field.getText()).replace(offset, offset+length, text).toString();
+                                      HashMap<String, Object> properties = new HashMap<String, Object>();
+                                      properties.put("value", newValue);
+                                      listener.valueWouldChange(PrologObject.serialize(properties));
+                                   }
+                                   finally
+                                   {
+                                      bypass = null;
+                                   }
+
                                 }
                              }
             };

@@ -170,10 +170,10 @@ public class Engine
       Term state;
       Term props;
       Runtime runtime = Runtime.getRuntime();
-      System.out.println("Used Memory:" + (runtime.totalMemory() - runtime.freeMemory()) / (1024*1024));
+      //System.out.println("Used Memory:" + (runtime.totalMemory() - runtime.freeMemory()) / (1024*1024));
  
       //Print free memory
-      System.out.println("Handler: " + handler);
+      //System.out.println("Handler: " + handler);
 
       if (handler instanceof CompoundTerm && ((CompoundTerm)handler).tag.functor.value.equals("react_handler"))
       {
@@ -181,7 +181,7 @@ public class Engine
          Term goal;
          CompoundTerm c_handler = (CompoundTerm)handler;
          goal = ReactModule.crossModuleCall(context.getComponentName(), new CompoundTerm(c_handler.tag.functor, new Term[]{c_handler.args[0], c_handler.args[1], event}));
-         System.out.println("Executing " + goal);
+         //System.out.println("Executing " + goal);
          int undoPosition = interpreter.getUndoPosition();
          Interpreter.Goal g = interpreter.prepareGoal(goal);
          try
@@ -225,7 +225,7 @@ public class Engine
          return;
       }
       // This SHOULD be safe since we SHOULD always be at the top-level when doing this, and if not, we want to go there!
-      System.out.println("Executing " + goal);
+      //System.out.println("Executing " + goal);
       int undoPosition = interpreter.getUndoPosition();
       Interpreter.Goal g = interpreter.prepareGoal(goal);
       try
@@ -235,7 +235,7 @@ public class Engine
             interpreter.stop(g);
          if (rc == PrologCode.RC.SUCCESS || rc == PrologCode.RC.SUCCESS_LAST)
          {
-            System.out.println("Goal " + goal + " has set the state to " + newState.dereference());
+            //System.out.println("Goal " + goal + " has set the state to " + newState.dereference());
             context.setState(applyState(state, newState.dereference()));
             interpreter.undo(undoPosition);
             return;
@@ -363,7 +363,7 @@ public class Engine
                else
                   state = RC.SUCCESS;
                response = c.args[0];
-               System.out.println("Got: " + response);
+               //System.out.println("Got: " + response);
             }
          }
          return state;
@@ -404,7 +404,6 @@ public class Engine
    
    public ExecutionState prepareGoal(Term t, Environment e) throws IOException, InterruptedException
    {
-      System.out.println(goalURI);
       return new ExecutionState(goalURI, t, e);
    }
 

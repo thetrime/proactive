@@ -285,6 +285,11 @@ public class Panel extends ReactComponent
 
    public void replaceChild(ReactComponent newChild, ReactComponent oldChild)
    {
+      // If the component is the same, do not remove and replace it; doing so will only
+      // cause it to lose focus for no reason
+      if (newChild.getAWTComponent().equals(oldChild.getAWTComponent()))
+         return;
+
       int i = children.indexOf(oldChild);
       Component oldComponent = awtMap.get(oldChild);
       super.replaceChild(newChild, oldChild);

@@ -126,7 +126,7 @@ public class ReactWidget extends ReactComponent
    public void setState(Term newState) throws PrologException
    {
       state = newState;
-      System.out.println("State of " + elementId + " is now " + newState);
+      //System.out.println("State of " + elementId + " is now " + newState);
       reRender();
    }
 
@@ -134,8 +134,8 @@ public class ReactWidget extends ReactComponent
    {
       Term newvDom = engine.render(this, elementId, state, props);
       Term patches = engine.diff(vDom, newvDom);
-      System.out.println("Rerendering: " +elementId + ":" + vDom + " ----> " + newvDom);
-      System.out.println("Patch: " + patches);
+      //System.out.println("Rerendering: " +elementId + ":" + vDom + " ----> " + newvDom);
+      //System.out.println("Patch: " + patches);
       child.setOwnerDocument(this);
       //System.out.println("Applying patches from: " + child);
       child = engine.applyPatch(patches, child);

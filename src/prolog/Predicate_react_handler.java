@@ -19,10 +19,10 @@ public class Predicate_react_handler extends ExecuteOnlyCode
       // Chaining like this means we set NewState to [] - no change.
       // (Note that this means we do not actually have to re-render the component!
 
-      System.out.println("react_handler(" + args[0] + ", " + args[1] + ", " + args[2] + ")");
+      //System.out.println("react_handler(" + args[0] + ", " + args[1] + ", " + args[2] + ")");
 
       ReactWidget widget = (ReactWidget)((JavaObjectTerm)(args[0])).value;
-      System.out.println("Triggering event on " + widget.getComponentName());
+      //System.out.println("Triggering event on " + widget.getComponentName());
       widget.triggerEvent(args[1], args[2]);
       return RC.SUCCESS_LAST;
    }
