@@ -15,8 +15,12 @@ render(State, Props, MyApp):-
         <Panel>
           <Label label="Hello from Prolog!"/>
           {SeveralFields}
-          <Button label="Submit"/>
+          <Button label="Submit" onClick={click_handler}/>
         </Panel>|}.
+
+on_click(Event, State, Props, NewState):-
+   ...
+
 ```
 
 Quick demo
