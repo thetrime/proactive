@@ -155,7 +155,6 @@ jsx_value(Value, _Vars, Dict, Goals, GoalsTail)-->
           {read_term_from_atom(Codes, Term, [variable_names(TermVariableNames)]),
            unify_variables(TermVariableNames, Dict),
            expand_goals(Term, Value, Goals, GoalsTail)},
-          %jsx_term(Value, Vars, Dict, Goals, GoalsTail),
          `}`.
 
 jsx_value(Value, _Vars, _Dict, G, G)-->
@@ -176,64 +175,6 @@ expand_goals([Head|Tail], [NewHead|NewTail], Goals, GoalTail):-
         expand_goals(Tail, NewTail, G1, GoalTail).
 expand_goals(X, X, Tail, Tail).
 
-
-
-% Variable
-jsx_term(Value, _Vars, Dict, Goals, GoalsTail)-->
-        optional_spaces,
-        variable_name(VarName),
-        {memberchk(VarName=Variable, Dict)},
-        !,
-        ( `.` ->
-            % Fake maps
-            jsx_atom(Key),
-            {Goals = ((memberchk(Key=Value, Variable)->true ; otherwise->Value = {null}), GoalsTail)}
-        ; {Variable = Value, Goals = GoalsTail}
-        ).
-
-% this pointer
-jsx_term(react_handler(This, Value), Vars, Dict, Goals, GoalsTail)-->
-        optional_spaces,
-        `this.`,
-        {Goals = (get_this(This), G1)},
-        !,
-        jsx_term(Value, Vars, Dict, G1, GoalsTail).
-
-% Atom and compound
-jsx_term(Value, Vars, Dict, Goals, GoalsTail)-->
-        optional_spaces,
-        jsx_atom(Atom),
-        ( `(` ->
-            % compound
-            optional_spaces,
-            jsx_term_args(Args, Vars, Dict, Goals, GoalsTail),
-            `)`,
-            {Value =.. [Atom|Args]}
-        ; {Value = Atom,
-           GoalsTail = Goals}
-        ).
-
-% List
-jsx_term(Value, Vars, Dict, Goals, GoalsTail)-->
-        optional_spaces,
-        `[`, !,
-          optional_spaces,
-          jsx_term_args(Value, Vars, Dict, Goals, GoalsTail),
-          `]`.
-
-
-jsx_term_args([Value|Args], Vars, Dict, Goals, GoalsTail)-->
-        optional_spaces,
-        jsx_term(Value, Vars, Dict, Goals, G1),
-        !,
-        optional_spaces,
-        ( `,` ->
-            jsx_term_args(Args, Vars, Dict, G1, GoalsTail)
-        ; {Args = [], G1 = GoalsTail}
-        ).
-jsx_term_args([], _, _, G, G)--> [].
-        
-        
 
 variable_name(VarName)-->
         optional_spaces, 
