@@ -61,16 +61,17 @@ An `element/3` term has the following args:
 A `list/1` term has the following args:
    * A list of children, where each child is a Document.
 
-The JSX syntax uses quasiquotation in SWI-Prolog (with the domain jsx) to expand XML-like structures into these `element/3` terms. You can escape to Prolog using {}. Maps are supported indirectly: You can write {State.foo} to mean 'the value that foo would have in the state'. The client unpacks this and binds the argument to the correct value just before execution - it is not an actual map (GNU Prolog for Java does not support them).
+The JSX syntax uses quasiquotation in SWI-Prolog (with the domain jsx) to expand XML-like structures into these `element/3` terms. You can escape to Prolog using {}. Maps are supported indirectly: You can write {State.foo} to mean 'the value that foo would have in the state'. You can also use the distinguished map 'this' to refer to the current execution context, meaning you can pass this.handler to a subcomponent and the context will be switched back from the subcomponent to the current component when the handler is executed
 
 Example:
 ```
 render(State, _, App):-
-   App = {|jsx||
-          <Panel>
-            <Button label={State.label}/>
-            <Field value={Value}/>
-          </Panel>|},
+   jsx(App,
+       {|jsx||
+       <Panel>
+         <Button label={State.label} onClick={this.handleClick}/>
+         <Field value={Value}/>
+       </Panel>|},
    Value = 'This is a value'.
 ```
 Note that it is forbidden to call on_server/1 in render/3.
@@ -124,7 +125,7 @@ This is a partial implementation of the HTML DOM, and is implemented by ReactCom
 The visible components are created out of the Java DOM on demand via getAWTComponent().
 
 ### Diagram
-
+```
 
       <Panel>  . . . . . . . . . . . . . . . . (org.proactive.ui.Panel) . . . . . . . . . . . . . . . . . . . . . . . . . . . . . {JPanel}
         /\                                               /\                                                                         / \
@@ -141,5 +142,5 @@ The visible components are created out of the Java DOM on demand via getAWTCompo
     / \____                                         / \______________________                                                 /   \____
    /       \                                       /                         \                                               /         \
 <Label/>  <Field/>                     (org.proactive.ui.Label)    (org.proactive.ui.Field)                              {JLabel}  {JTextField}
-
+```
 Note that the trees do not correspond 1-1 with each other. Specifically, things get a bit complicated when dealing with the user-defined components.
