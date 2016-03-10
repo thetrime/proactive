@@ -29,6 +29,14 @@ public class PasswordField implements InputWidget
          field.setText(value.asString());
    }
 
+   public void setDisabled(boolean disabled)
+   {
+      field.setEnabled(!disabled);
+   }
+
+
    public void setChangeListener(InputWidgetListener value) {}
    public void setVerifier(InputWidgetVerifier value) {}
+
+
 }

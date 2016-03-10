@@ -8,6 +8,7 @@ public interface InputWidget
    public Component getAWTComponent();
    public void setValue(PrologObject value);
    public Object getValue();
+   public void setDisabled(boolean disabled);
    public void setChangeListener(InputWidgetListener listener);
    public void setVerifier(InputWidgetVerifier verifier);
 }

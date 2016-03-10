@@ -115,6 +115,9 @@ public class Field extends ReactLeafComponent
       }
       if (properties.containsKey("onBlur"))
          setFocusListener(properties.get("onBlur"));
+      if (properties.containsKey("disabled"))
+         widget.setDisabled(properties.get("disabled").asBoolean());
+
       if (properties.containsKey("verifyValue"))
       {
          PrologObject handler = properties.get("verifyValue");

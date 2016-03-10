@@ -59,7 +59,7 @@ public class PrologObject
 
    public String asOrientation()
    {
-      Term t = term; //Engine.unpack(term);
+      Term t = term;
       if (t instanceof AtomTerm)
       {
          String orientation = ((AtomTerm)term).value;
@@ -78,7 +78,7 @@ public class PrologObject
 
    public int asInteger()
    {
-      Term t = term; //Engine.unpack(term);
+      Term t = term;
       if (t instanceof IntegerTerm)
          return ((IntegerTerm)t).value;
       else if (t instanceof AtomTerm)
@@ -88,7 +88,7 @@ public class PrologObject
 
    public boolean asBoolean()
    {
-      Term t = term; //Engine.unpack(term);
+      Term t = term;
       if (t instanceof AtomTerm)
          return ((AtomTerm)t).value.equals("true");
       return false;
@@ -97,7 +97,7 @@ public class PrologObject
 
    public String asScroll()
    {
-      Term t = term; //Engine.unpack(term);
+      Term t = term;
       if (t instanceof AtomTerm)
          return((AtomTerm)term).value;
       return "vertical";

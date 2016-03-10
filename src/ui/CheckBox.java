@@ -35,6 +35,12 @@ public class CheckBox implements InputWidget
          field.setSelected(value.asBoolean());
    }
 
+   public void setDisabled(boolean disabled)
+   {
+      field.setEnabled(!disabled);
+   }
+
+
    public void setChangeListener(InputWidgetListener value) {}
    public void setVerifier(InputWidgetVerifier value) {}
 }

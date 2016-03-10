@@ -172,5 +172,10 @@ public class TextField implements InputWidget
       document.setDocumentFilter(documentFilter);
    }
 
+   public void setDisabled(boolean disabled)
+   {
+      field.setEnabled(!disabled);
+   }
+
 
 }
