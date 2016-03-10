@@ -13,6 +13,7 @@ public class ReactEditNode extends ReactEdit
    }
    public ReactComponent apply(ReactComponent domNode) throws Exception
    {
+      /*
       ReactComponent parentNode = domNode.getParentNode();
       // I think this is right. If the parent has a different execution context, then the child will create a completely
       // new context in instantiateNode() and this will be ignored
@@ -22,6 +23,8 @@ public class ReactEditNode extends ReactEdit
          parentNode.replaceChild(newNode, domNode);
       }
       return newNode;
+      */
+      return null;
    }
    public String toString()
    {

@@ -9,8 +9,7 @@ render(State, _Props, Form):-
         get_some_fields(Buttons, Fields),
         Form = {|jsx||
                <Panel>
-                 <Title label={Label}/>
-               {Fields}
+                 <Label label={Label}/>
                <Splunge foo="bar"/>
                <Button label={State.label}/>
                </Panel>|},
@@ -23,7 +22,7 @@ get_some_fields(Buttons, Fields):-
                 member(Label, Buttons),
                 Fields).
 
-getInitialState(_, [buttons=[foo, bar, qux, baz], label='Label defined in state']).
+getInitialState(_, [buttons=[foo, bar, qux, baz], label='Label of button defined in state']).
 
 
 some_exported_goal:-

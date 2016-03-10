@@ -1,17 +1,13 @@
 package org.proactive;
 
 import java.util.List;
-import org.proactive.vdom.PrologNode;
-import org.proactive.prolog.PrologContext;
+import java.util.LinkedList;
 
 public abstract class ReactLeafComponent extends ReactComponent
 {
-   public ReactLeafComponent(PrologContext context)
-   {
-      super(context);
-   }
+   public List<ReactComponent> children = new LinkedList<ReactComponent>();
    public void insertChildBefore(ReactComponent child, ReactComponent sibling) {}
    public void removeChild(ReactComponent child) {}
    public void replaceChild(ReactComponent newChild, ReactComponent oldChild) {}
-   public List<ReactComponent> getChildNodes() { return null; }
+   public List<ReactComponent> getChildNodes() { return children; }
 }

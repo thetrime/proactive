@@ -5,8 +5,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.lang.reflect.Constructor;
 import org.proactive.ReactComponent;
-import org.proactive.vdom.PrologNode;
-import org.proactive.prolog.PrologContext;
 import org.proactive.ReactComponentFactoryConfiguration;
 
 public class DefaultReactComponentFactoryConfiguration implements ReactComponentFactoryConfiguration
@@ -16,18 +14,18 @@ public class DefaultReactComponentFactoryConfiguration implements ReactComponent
    {
       try
       {
-         constructorHash.put("Panel", Panel.class.getConstructor(PrologNode.class, PrologContext.class));
-         constructorHash.put("Field", Field.class.getConstructor(PrologNode.class, PrologContext.class));
-         constructorHash.put("Button", Button.class.getConstructor(PrologNode.class, PrologContext.class));
-         constructorHash.put("Label", Label.class.getConstructor(PrologNode.class, PrologContext.class));
-         constructorHash.put("Table", Table.class.getConstructor(PrologNode.class, PrologContext.class));
-         constructorHash.put("List", List.class.getConstructor(PrologNode.class, PrologContext.class));
-         constructorHash.put("TextArea", TextArea.class.getConstructor(PrologNode.class, PrologContext.class));
-         constructorHash.put("Tree", Tree.class.getConstructor(PrologNode.class, PrologContext.class));
-         constructorHash.put("EditorPane", EditorPane.class.getConstructor(PrologNode.class, PrologContext.class));
-         constructorHash.put("TabbedPane", TabbedPane.class.getConstructor(PrologNode.class, PrologContext.class));
-         constructorHash.put("Tab", Tab.class.getConstructor(PrologNode.class, PrologContext.class));
-         constructorHash.put("Frame", Frame.class.getConstructor(PrologNode.class, PrologContext.class));
+         constructorHash.put("Panel", Panel.class.getConstructor());
+         constructorHash.put("Field", Field.class.getConstructor());
+         constructorHash.put("Button", Button.class.getConstructor());
+         constructorHash.put("Label", Label.class.getConstructor());
+         constructorHash.put("Table", Table.class.getConstructor());
+         constructorHash.put("List", List.class.getConstructor());
+         constructorHash.put("TextArea", TextArea.class.getConstructor());
+         constructorHash.put("Tree", Tree.class.getConstructor());
+         constructorHash.put("EditorPane", EditorPane.class.getConstructor());
+         constructorHash.put("TabbedPane", TabbedPane.class.getConstructor());
+         constructorHash.put("Tab", Tab.class.getConstructor());
+         constructorHash.put("Frame", Frame.class.getConstructor());
       }
       catch(Exception e)
       {

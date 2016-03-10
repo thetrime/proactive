@@ -1,7 +1,5 @@
 package org.proactive.ui;
 
-import org.proactive.vdom.PrologNode;
-import org.proactive.prolog.PrologContext;
 import org.proactive.prolog.PrologObject;
 import org.proactive.prolog.Engine;
 import org.proactive.ReactLeafComponent;
@@ -16,10 +14,6 @@ import java.awt.Component;
 public class Button extends ReactLeafComponent 
 {
    private JButton button = new JButton();
-   public Button(PrologNode n, PrologContext context)
-   {
-      super(context);
-   }
 
    private PrologObject serializeObject()
    {
@@ -32,7 +26,7 @@ public class Button extends ReactLeafComponent
       if (actionListener != null)
          button.removeActionListener(actionListener);
 
-      if (value == null)
+      if (value == null || value.isNull())
          return;
       
       actionListener = new ActionListener()
@@ -41,7 +35,7 @@ public class Button extends ReactLeafComponent
             {
                try
                {
-                  context.triggerEvent(value.asTerm(), serializeObject());
+                  getOwnerDocument().triggerEvent(value.asTerm(), serializeObject().asTerm());
                }
                catch (Exception e)
                {
@@ -54,10 +48,9 @@ public class Button extends ReactLeafComponent
    
    public void setProperties(HashMap<String, PrologObject> properties)
    {
+      super.setProperties(properties);
       if (properties.containsKey("label"))
          button.setText(properties.get("label").asString());
-      if (properties.containsKey("fill"))
-         fill = properties.get("fill").asFill();
       if (properties.containsKey("onClick"))
          setClickHandler(properties.get("onClick"));
    }

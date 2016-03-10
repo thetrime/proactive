@@ -10,11 +10,12 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
+import org.proactive.ReactWidget;
 
 public class FluxDispatcher
 {
    public static final CompoundTermTag handlerTag = CompoundTermTag.get("handle_event", 5);
-   private static Map<String, LinkedList<PrologContext>> eventListeners = new HashMap<String, LinkedList<PrologContext>>();
+   private static Map<String, LinkedList<ReactWidget>> eventListeners = new HashMap<String, LinkedList<ReactWidget>>();
 
    private static boolean isProcessing = false;
    private static Queue<String> unprocessed = null;
@@ -29,27 +30,27 @@ public class FluxDispatcher
       listenerModules.add(name);
    }
 
-   public static void registerFluxListener(String componentName, PrologContext context)
+   public static void registerFluxListener(String componentName, ReactWidget context)
    {
       //System.out.println("Checking " + componentName + " for fluxion");
       if (!listenerModules.contains(componentName))
          return;
       System.out.println("fluxion located. Linking...");
-      LinkedList<PrologContext> existing = eventListeners.get(componentName);
+      LinkedList<ReactWidget> existing = eventListeners.get(componentName);
       if (existing == null)
       {
-         existing = new LinkedList<PrologContext>();
+         existing = new LinkedList<ReactWidget>();
          eventListeners.put(componentName, existing);
       }
       existing.add(context);
    }
 
    // Does this happen every time a component is destroyed, or only if a module gets unloaded somehow?
-   // The critical thing is: If we have created a new PrologContext, we must need a new listener...
+   // The critical thing is: If we have created a new ReactWidget, we must need a new listener...
    // In particular one module can result in TWO listeners if it is used twice, like <Foo><Bar x=1/><Bar x=2/></Foo>
-   public static void deregisterFluxListener(String componentName, PrologContext context)
+   public static void deregisterFluxListener(String componentName, ReactWidget context)
    {
-      List<PrologContext> existing = eventListeners.get(componentName);
+      List<ReactWidget> existing = eventListeners.get(componentName);
       if (existing != null)         
          existing.remove(context);
    }
@@ -72,9 +73,9 @@ public class FluxDispatcher
       while (unprocessed.size() > 0)
       {
          String componentName = unprocessed.remove();
-         LinkedList<PrologContext> tasks = new LinkedList<PrologContext>();
+         LinkedList<ReactWidget> tasks = new LinkedList<ReactWidget>();
          tasks.addAll(eventListeners.get(componentName));
-         PrologContext context;
+         ReactWidget context;
          while((context = tasks.poll()) != null)
          {
             System.out.println(" Dispatching an event. " + tasks.size() + " tasks remaining in " + componentName);

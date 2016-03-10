@@ -13,23 +13,21 @@ import java.awt.Component;
 import java.awt.BorderLayout;
 import java.awt.event.FocusListener;
 import java.awt.event.FocusEvent;
-import org.proactive.vdom.PrologNode;
-import org.proactive.prolog.PrologContext;
 import org.proactive.prolog.PrologObject;
 import org.proactive.ReactLeafComponent;
 
-public class Field extends ReactLeafComponent 
+public class Field extends ReactLeafComponent
 {
    private static final int TEXT = 0;
    private static final int RADIO = 1;
    private static final int CHECKBOX = 2;
    private static final int PASSWORD = 3;
+   private static final int SELECT = 4;
 
    private InputWidget widget;
    private int type = TEXT;
-   public Field(PrologNode n, PrologContext context)
+   public Field()
    {
-      super(context);
       widget = new TextField();
    }
 
@@ -45,7 +43,7 @@ public class Field extends ReactLeafComponent
    {
       if (focusListener != null)
          widget.getAWTComponent().removeFocusListener(focusListener);
-      if (value == null || value.asTerm() == null)
+      if (value == null || value.isNull())
          return;
       focusListener = new FocusListener()
          {
@@ -53,7 +51,7 @@ public class Field extends ReactLeafComponent
             {
                try
                {
-                  context.triggerEvent(value.asTerm(), serializeObject());
+                  getOwnerDocument().triggerEvent(value.asTerm(), serializeObject().asTerm());
                }
                catch (Exception e)
                {
@@ -66,6 +64,8 @@ public class Field extends ReactLeafComponent
          };
       widget.getAWTComponent().addFocusListener(focusListener);
    }
+
+
 
 
    public void setProperties(HashMap<String, PrologObject> properties)
@@ -86,6 +86,8 @@ public class Field extends ReactLeafComponent
             type = CHECKBOX;
          else if (key.equals("password"))
             type = PASSWORD;
+         else if (key.equals("select"))
+            type = SELECT;
          if (oldType != type)
          {
             switch(type)
@@ -102,10 +104,18 @@ public class Field extends ReactLeafComponent
                case CHECKBOX:
                   widget = new CheckBox();
                   break;
+               case SELECT:
+                  widget = new ComboBox();
+                  break;
             }
             if (getParentNode() != null)
                getParentNode().replaceChild(this, this);
          }
+      }
+      if (properties.containsKey("allowedValues"))
+      {
+         if (type == SELECT)
+            ((ComboBox)widget).setAllowedValues(properties.get("allowedValues"));
       }
       if (properties.containsKey("value"))
       {
@@ -116,13 +126,59 @@ public class Field extends ReactLeafComponent
       }
       if (properties.containsKey("onBlur"))
          setFocusListener(properties.get("onBlur"));
+      if (properties.containsKey("disabled"))
+         widget.setDisabled(properties.get("disabled").asBoolean());
+
+      if (properties.containsKey("verifyValue"))
+      {
+         PrologObject handler = properties.get("verifyValue");
+         if (handler == null || handler.isNull())
+            widget.setVerifier(null);
+         else
+            widget.setVerifier(new InputWidgetVerifier()
+               {
+                  public boolean verifyValue(PrologObject newValue)
+                  {
+                     try
+                     {
+                        return getOwnerDocument().triggerEvent(handler.asTerm(), newValue.asTerm());
+                     }
+                     catch(Exception e)
+                     {
+                        e.printStackTrace();
+                     }
+                     return false;
+                  }
+               });
+      }
+
+
+      if (properties.containsKey("onChange"))
+      {
+         PrologObject handler = properties.get("onChange");
+         if (handler == null || handler.isNull())
+            widget.setChangeListener(null);
+         else
+            widget.setChangeListener(new InputWidgetListener()
+               {
+                  public void valueWouldChange(PrologObject newValue)
+                  {
+                     try
+                     {
+                        getOwnerDocument().triggerEvent(handler.asTerm(), newValue.asTerm());
+                     }
+                     catch(Exception e)
+                     {
+                        e.printStackTrace();
+                     }
+                  }
+               });
+      }
+
    }
 
    public void setValue(PrologObject value)
    {
-      if (type == RADIO)
-         System.out.println("setValue on widget: " + value);
-
       widget.setValue(value);
    }
 

@@ -1,7 +1,7 @@
 package org.proactive.prolog;
 
-import org.proactive.vdom.PrologNode;
-import org.proactive.vdom.PrologDocument;
+import org.proactive.ReactComponent;
+import org.proactive.ReactWidget;
 
 import gnu.prolog.database.PrologTextLoaderError;
 import gnu.prolog.io.ReadOptions;
@@ -51,10 +51,33 @@ public class Engine
       long t1 = System.currentTimeMillis();
       env = new ReactEnvironment(this);
       env.installBuiltin("java_println", 1);
+      env.installBuiltin("upcase_atom", 2);
+
+
       env.installBuiltin("on_server", 1);
       env.installBuiltin("raise_event", 2);
       env.installBuiltin("wait_for", 1);
+      env.installBuiltin("get_this", 1);
+      env.installBuiltin("react_handler", 3);
+
+      env.installBuiltin("remove_child", 2);
+      env.installBuiltin("append_child", 2);
+      env.installBuiltin("insert_before", 3);
+      env.installBuiltin("replace_child", 3);
+      env.installBuiltin("child_nodes", 2);
+      env.installBuiltin("create_element", 3);
+      env.installBuiltin("create_text_node", 3);
+      env.installBuiltin("parent_node", 2);
+      env.installBuiltin("node_type", 2);
+      env.installBuiltin("set_properties", 2);
+      env.installBuiltin("replace_node_data", 2);
+      env.installBuiltin("destroy_widget", 2);
+      env.installBuiltin("init_widget", 3);
+      env.installBuiltin("update_widget", 4);
+
+
       env.ensureLoaded(new CompoundTerm(CompoundTermTag.get("resource", 1), AtomTerm.get("/boilerplate.pl")));
+      env.ensureLoaded(new CompoundTerm(CompoundTermTag.get("resource", 1), AtomTerm.get("/diff.pl")));
       interpreter = env.createInterpreter();      
       env.ensureLoaded(componentURL, rootElementId);
       env.runInitialization(interpreter);
@@ -66,44 +89,13 @@ public class Engine
          error.printStackTrace();
       }
       System.out.println("Compile time: " + (System.currentTimeMillis() - t1) + "ms");
-   }   
-   
-   public PrologDocument render(String component, PrologState stateWrapper, PrologState propsWrapper, PrologContext parentContext) throws Exception
-   {
-      //System.out.println("Rendering " + component);
-      Term state;
-      Term props;
-      if (stateWrapper == null) 
-         state = TermConstants.emptyListAtom;
-      else
-         state = stateWrapper.getValue();
-      if (propsWrapper == null)
-         props = TermConstants.emptyListAtom;
-      else
-         props = propsWrapper.getValue();
-      VariableTerm replyTerm = new VariableTerm("Result");
-      Term goal = ReactModule.crossModuleCall(component, new CompoundTerm(AtomTerm.get("render"), new Term[]{state, props, replyTerm}));
-      //System.out.println("Execute: " + goal);
-      // We cannot undo(0) here because we might be in the middle of processing a flux event, and that would muck up the stack
-      Interpreter.Goal g = interpreter.prepareGoal(goal);
-      PrologCode.RC rc = interpreter.execute(g);
-      if (rc == PrologCode.RC.SUCCESS)
-         interpreter.stop(g);
-      if (rc == PrologCode.RC.SUCCESS || rc == PrologCode.RC.SUCCESS_LAST)
-      {
-         Term result = replyTerm.dereference();
-         PrologDocument doc = new PrologDocument(result, state, props, component, this, parentContext);
-         return doc;
-      }
-      System.out.println("Failed to render");
-      return null;
    }
 
-   public PrologState getInitialState(String component, PrologState props)
+   public Term getInitialState(String component, Term props)
    {
       VariableTerm replyTerm = new VariableTerm("Result");
-      Term goal = ReactModule.crossModuleCall(component, new CompoundTerm(AtomTerm.get("getInitialState"), new Term[]{props.getValue(), replyTerm}));
-      // We cannot undo(0) here because we might be in the middle of processing a flux event, and that would muck up the stack
+      Term goal = ReactModule.crossModuleCall(component, new CompoundTerm(AtomTerm.get("getInitialState"), new Term[]{props, replyTerm}));
+      int undoPosition = interpreter.getUndoPosition();
       Interpreter.Goal g = interpreter.prepareGoal(goal);
       try
       {
@@ -112,7 +104,9 @@ public class Engine
             interpreter.stop(g);
          if (rc == PrologCode.RC.SUCCESS || rc == PrologCode.RC.SUCCESS_LAST)
          {
-            return new PrologState(replyTerm.dereference());
+            Term result = replyTerm.dereference().clone(new TermCloneContext());
+            interpreter.undo(undoPosition);
+            return result;
          }
       }
       catch (PrologException notDefined)         
@@ -122,10 +116,10 @@ public class Engine
          //notDefined.printStackTrace();
          //System.exit(-1);
       }      
-      return PrologState.emptyState();
+      return TermConstants.emptyListAtom;
    }
 
-   public PrologState instantiateProps(Map<String, Term> properties)
+   public Term instantiateProps(Map<String, Term> properties)
    {
       Term[] elements = new Term[properties.size()];
       int j = 0;
@@ -137,21 +131,11 @@ public class Engine
                                         (Term)entry.getValue());
          j++;
       }
-      return new PrologState(CompoundTerm.getList(elements));
+      return CompoundTerm.getList(elements);
    }
 
-   public PrologState fluxEvent(String componentName, Term key, Term value, PrologState stateWrapper, PrologState propsWrapper) throws Exception
+   public Term fluxEvent(String componentName, Term key, Term value, Term state, Term props) throws Exception
    {
-      Term state;
-      Term props;
-      if (stateWrapper == null)
-         state = TermConstants.emptyListAtom;
-      else
-         state = stateWrapper.getValue();
-      if (propsWrapper == null)
-         props = TermConstants.emptyListAtom;
-      else
-         props = propsWrapper.getValue();
       VariableTerm newState = new VariableTerm("NewState");
       // We need to make sure that handlers dont (further) instantiate the key or value
       Term goal = ReactModule.crossModuleCall(componentName, new CompoundTerm(AtomTerm.get("handle_event"), new Term[]{key.clone(new TermCloneContext()),
@@ -159,7 +143,7 @@ public class Engine
                                                                                                                        state,
                                                                                                                        props,
                                                                                                                        newState}));
-      // We cannot call undo(0) here because we might be processing recursive events
+      int undoPosition = interpreter.getUndoPosition();
       Interpreter.Goal g = interpreter.prepareGoal(goal);
       try
       {
@@ -168,8 +152,9 @@ public class Engine
             interpreter.stop(g);
          if (rc == PrologCode.RC.SUCCESS || rc == PrologCode.RC.SUCCESS_LAST)
          {
-            PrologState adjustedState = applyState(state, newState.dereference());
+            Term adjustedState = applyState(state, newState.dereference()).clone(new TermCloneContext());
             System.out.println("flux handler set state to: " + adjustedState);
+            interpreter.undo(undoPosition);
             return adjustedState;
          }
       }
@@ -182,37 +167,42 @@ public class Engine
       }
       return null;
    }
-   
-   public void triggerEvent(Object handler, PrologObject event, PrologContext context) throws Exception
+
+   public boolean triggerEvent(Object handler, Term event, ReactWidget context) throws PrologException
    {
       Term state;
       Term props;
-
-      System.out.println("Handler: " + handler);
-      if (handler instanceof JavaObjectTerm && (((JavaObjectTerm)handler).value instanceof BoundHandler))
+      if (handler instanceof CompoundTerm && ((CompoundTerm)handler).tag.functor.value.equals("react_handler"))
       {
-         BoundHandler boundHandler = (BoundHandler)((JavaObjectTerm)handler).value;
-         // Context switch!
-         context = boundHandler.context;
-         handler = boundHandler.handler;
+         // Just call the handler directly and return
+         Term goal;
+         CompoundTerm c_handler = (CompoundTerm)handler;
+         goal = ReactModule.crossModuleCall(context.getComponentName(), new CompoundTerm(c_handler.tag.functor, new Term[]{c_handler.args[0], c_handler.args[1], event}));
+         //System.out.println("Executing " + goal);
+         int undoPosition = interpreter.getUndoPosition();
+         Interpreter.Goal g = interpreter.prepareGoal(goal);
+         try
+         {
+            PrologCode.RC rc = interpreter.execute(g);
+            if (rc == PrologCode.RC.SUCCESS)
+               interpreter.stop(g);
+            return (rc == PrologCode.RC.SUCCESS || rc == PrologCode.RC.SUCCESS_LAST);
+         }
+         catch (PrologException notDefined)
+         {
+            notDefined.printStackTrace();
+         }
+         return false;
       }
 
-      PrologState stateWrapper = context.state;
-      PrologState propsWrapper = context.props;
 
+      state = context.getState();
+      props = context.getProps();
 
-      if (stateWrapper == null)
-         state = TermConstants.emptyListAtom;
-      else
-         state = stateWrapper.getValue();
-      if (propsWrapper == null)
-         props = TermConstants.emptyListAtom;
-      else
-         props = propsWrapper.getValue();
-      VariableTerm newState = new VariableTerm("NewState");
       Term goal;
+      VariableTerm newState = new VariableTerm("NewState");
       if (handler instanceof AtomTerm)
-         goal = ReactModule.crossModuleCall(context.componentName, new CompoundTerm((AtomTerm)handler, new Term[]{event.asTerm(), state, props, newState}));
+         goal = ReactModule.crossModuleCall(context.getComponentName(), new CompoundTerm((AtomTerm)handler, new Term[]{event, state, props, newState}));
       else if (handler instanceof CompoundTerm)
       {
          CompoundTerm c_handler = (CompoundTerm)handler;
@@ -220,20 +210,20 @@ public class Engine
          for (int i = 0; i < c_handler.tag.arity; i++)
             args[i] = c_handler.args[i];
             //args[i] = unpack_recursive(c_handler.args[i]);
-         args[c_handler.tag.arity+0] = event.asTerm();
+         args[c_handler.tag.arity+0] = event;
          args[c_handler.tag.arity+1] = state;
          args[c_handler.tag.arity+2] = props;
          args[c_handler.tag.arity+3] = newState;
-         goal = ReactModule.crossModuleCall(context.componentName, new CompoundTerm(c_handler.tag.functor, args));
+         goal = ReactModule.crossModuleCall(context.getComponentName(), new CompoundTerm(c_handler.tag.functor, args));
       }
       else
       {
          System.out.println("Handler is not callable: " + handler);
-         return;
+         return false;
       }
       // This SHOULD be safe since we SHOULD always be at the top-level when doing this, and if not, we want to go there!
-      interpreter.undo(0);
-      System.out.println("Executing " + goal);
+      //System.out.println("Executing " + goal);
+      int undoPosition = interpreter.getUndoPosition();
       Interpreter.Goal g = interpreter.prepareGoal(goal);
       try
       {
@@ -242,18 +232,21 @@ public class Engine
             interpreter.stop(g);
          if (rc == PrologCode.RC.SUCCESS || rc == PrologCode.RC.SUCCESS_LAST)
          {
+            //System.out.println("Goal " + goal + " has set the state to " + newState.dereference());
             context.setState(applyState(state, newState.dereference()));
-            return;
+            interpreter.undo(undoPosition);
+            return (rc == PrologCode.RC.SUCCESS || rc == PrologCode.RC.SUCCESS_LAST);
          }
       }
       catch (PrologException notDefined)
       {
          notDefined.printStackTrace();
       }
+      return false;
       // State is not updated if we get to here
    }
 
-   private PrologState applyState(Term oldState, Term newState) throws Exception
+   private Term applyState(Term oldState, Term newState) throws PrologException
    {
       Map<String, Term> properties = new HashMap<String, Term>();
       addProperties(oldState, properties);
@@ -272,7 +265,7 @@ public class Engine
       return false;
    }
    
-   private void addProperties(Term state, Map<String, Term> props) throws Exception
+   private void addProperties(Term state, Map<String, Term> props) throws PrologException
    {
       if (TermConstants.emptyListAtom.equals(state))
          return;
@@ -284,12 +277,12 @@ public class Engine
             if (c.args[0] instanceof CompoundTerm)
             {
                CompoundTerm attr = (CompoundTerm)c.args[0];
-               if (attr.tag.arity != 2 || !attr.tag.functor.value.equals("="))                     
-                  throw new RuntimeException("Invalid state: element is not =/2: " + attr);
+               if (attr.tag.arity != 2 || !attr.tag.functor.value.equals("="))
+                  PrologException.typeError(AtomTerm.get("=/2"), attr);
                Term attrName = attr.args[0];
                Term attrValue = attr.args[1];
                if (!(attrName instanceof AtomTerm))
-                  throw new RuntimeException("Invalid state: element name is not an atom: " + attrName);
+                  PrologException.typeError(AtomTerm.get("atom"), attrName);
                attrValue = attrValue.dereference();
                if (isNull(attrValue))
                   props.remove(((AtomTerm)attrName).value);
@@ -297,88 +290,17 @@ public class Engine
                   props.put(((AtomTerm)attrName).value, attrValue.dereference());
             }
             else
-               throw new RuntimeException("Invalid state element: " + c);
+               PrologException.typeError(AtomTerm.get("=/2"), c);
             if (c.args[1] instanceof CompoundTerm)
                c = (CompoundTerm)c.args[1];
             else if (TermConstants.emptyListAtom.equals(c.args[1]))
                break;
             else
-               throw new RuntimeException("Invalid state. Not a list: " + c);
+               PrologException.typeError(AtomTerm.get("list"), c);
          }
       }
    }
 
-   // This adds quite a bit of overhead
-   public static Term unpack_recursive(Term value, PrologContext context)
-   {
-      if (value instanceof CompoundTerm)
-      {
-         CompoundTerm c = (CompoundTerm)value;
-         if (c.tag.functor.value.equals("$state"))
-            return unpack(c, context);
-         
-         Term[] args = new Term[c.args.length];
-         for (int i = 0; i < c.args.length; i++)
-            args[i] = unpack_recursive(c.args[i], context);
-         CompoundTerm replacement = new CompoundTerm(c.tag.functor.value, args);
-         return replacement;
-      }
-      return value;
-   }
-
-   public static Term unpack(Term value, PrologContext context)
-   {
-      if (value instanceof CompoundTerm)
-      {
-         if (((CompoundTerm)value).tag.functor.value.equals("$state"))
-         {
-            // Fake maps
-            CompoundTerm c = (CompoundTerm)value;
-            String key = ((AtomTerm)(c.args[0])).value;
-
-            if (TermConstants.emptyListAtom.equals(c.args[1]))
-               return value;
-            else if (!(c.args[1] instanceof CompoundTerm))
-               return value;
-            CompoundTerm list = (CompoundTerm)c.args[1];
-            while (list.tag.arity == 2 && list.tag.functor.value.equals("."))
-            {
-               Term head = list.args[0];
-               if (head instanceof CompoundTerm && ((CompoundTerm)head).tag.functor.value.equals("=") && ((CompoundTerm)head).tag.arity == 2)
-               {
-                  CompoundTerm pair = (CompoundTerm)head;
-                  if (pair.args[0] instanceof AtomTerm && ((AtomTerm)pair.args[0]).value.equals(key))
-                     return unpack(pair.args[1].dereference(), context);
-               }
-               if (list.args[1] instanceof CompoundTerm)
-                  list = (CompoundTerm)list.args[1];
-               else
-               {
-                  // Entry is not found.
-                  return null;
-               }
-            }
-         }
-         else if (((CompoundTerm)value).tag.functor.value.equals("$this"))
-         {
-            System.out.println("Unpacking a this pointer in " + context.componentName);
-            System.out.println("Handler is " +unpack(((CompoundTerm)value).args[0], context));
-            return new JavaObjectTerm(new BoundHandler(unpack(((CompoundTerm)value).args[0], context), context));
-         }
-      }
-      return value;
-   }
-
-   public static class BoundHandler
-   {
-      public Term handler;
-      public PrologContext context;
-      public BoundHandler(Term handler, PrologContext context)
-      {
-         this.handler = handler;
-         this.context = context;
-      }
-   }
 
    public static class ExecutionState extends WebSocketClient
    {
@@ -439,7 +361,7 @@ public class Engine
                else
                   state = RC.SUCCESS;
                response = c.args[0];
-               System.out.println("Got: " + response);
+               //System.out.println("Got: " + response);
             }
          }
          return state;
@@ -480,9 +402,116 @@ public class Engine
    
    public ExecutionState prepareGoal(Term t, Environment e) throws IOException, InterruptedException
    {
-      System.out.println(goalURI);
       return new ExecutionState(goalURI, t, e);
    }
-    
+
+
+   public Term diff(Term a, Term b) throws PrologException
+   {
+      VariableTerm patchTerm = new VariableTerm("Patch");
+      Term goal = ReactModule.crossModuleCall("diff", new CompoundTerm(AtomTerm.get("diff"), new Term[]{a, b, patchTerm}));
+      int undoPosition = interpreter.getUndoPosition();
+      Interpreter.Goal g = interpreter.prepareGoal(goal);
+      PrologCode.RC rc = interpreter.execute(g);
+      if (rc == PrologCode.RC.SUCCESS)
+         interpreter.stop(g);
+      if (rc == PrologCode.RC.SUCCESS || rc == PrologCode.RC.SUCCESS_LAST)
+      {
+         Term result = patchTerm.dereference().clone(new TermCloneContext());
+         interpreter.undo(undoPosition);
+         return result;
+      }
+      return TermConstants.emptyListAtom;
+   }
+
+   public ReactComponent applyPatch(Term patch, ReactComponent root) throws PrologException
+   {
+      //System.out.println("Patching tree from " + root + " AWT: " + javax.swing.SwingUtilities.isEventDispatchThread());
+      VariableTerm newRoot = new VariableTerm("NewRoot");
+      Term renderOptions = CompoundTerm.getList(new Term[]{new CompoundTerm("document", new Term[]{new JavaObjectTerm(root.getOwnerDocument())})});
+      Term goal = ReactModule.crossModuleCall("diff", new CompoundTerm(AtomTerm.get("patch"), new Term[]{new JavaObjectTerm(root),
+                                                                                                         patch,
+                                                                                                         renderOptions,
+                                                                                                         newRoot}));
+      int undoPosition = interpreter.getUndoPosition();
+      Interpreter.Goal g = interpreter.prepareGoal(goal);
+      PrologCode.RC rc = interpreter.execute(g);
+      if (rc == PrologCode.RC.SUCCESS)
+         interpreter.stop(g);
+      if (rc == PrologCode.RC.SUCCESS || rc == PrologCode.RC.SUCCESS_LAST)
+      {
+         JavaObjectTerm result = (JavaObjectTerm)(newRoot.dereference());
+         ReactComponent returnValue = ((ReactComponent)result.value);
+         interpreter.undo(undoPosition);
+         return returnValue;
+      }
+      System.out.println(" *********************** patch/4 failed: " + patch);
+      System.exit(-1);
+      return null;
+   }
+
+   public Term render(ReactWidget widget, String component, Term state, Term props) throws PrologException
+   {
+      //System.out.println("Rendering " + component + " with props " + props + " and state " + state);
+      VariableTerm vDom = new VariableTerm("VDom");
+      Term goal = ReactModule.crossModuleCall(component, new CompoundTerm(AtomTerm.get("render"), new Term[]{state,
+                                                                                                             props,
+                                                                                                             vDom}));
+      int undoPosition = interpreter.getUndoPosition();
+      Interpreter.Goal g = interpreter.prepareGoal(goal);
+      env.pushContext(interpreter, widget);
+      PrologCode.RC rc;
+      try
+      {
+         rc = interpreter.execute(g);
+      }
+      finally
+      {
+         env.popContext(interpreter);
+      }
+      if (rc == PrologCode.RC.SUCCESS)
+         interpreter.stop(g);
+      if (rc == PrologCode.RC.SUCCESS || rc == PrologCode.RC.SUCCESS_LAST)
+      {
+         Term result = vDom.dereference().clone(new TermCloneContext());
+         interpreter.undo(undoPosition);
+         return result;
+      }
+      return null;
+   }
+
+   public static HashMap<String, PrologObject> termToProperties(Term t) throws PrologException
+   {
+      HashMap<String, PrologObject> properties = new HashMap<String,PrologObject>();
+      if (!TermConstants.emptyListAtom.equals(t))
+      {
+         if (t instanceof CompoundTerm)
+         {
+            CompoundTerm list = (CompoundTerm)t;
+            while (list.tag == TermConstants.listTag && list.tag.arity == 2)
+            {
+               if (list.args[0] instanceof CompoundTerm)
+               {
+                  CompoundTerm attr = (CompoundTerm)list.args[0];
+                  if (attr.tag.arity != 2 || !attr.tag.functor.value.equals("="))
+                     PrologException.typeError(AtomTerm.get("attribute"), attr);
+                  Term attrName = attr.args[0];
+                  Term attrValue = attr.args[1];
+                  if (attrName instanceof AtomTerm)
+                     properties.put(((AtomTerm)attrName).value, new PrologObject(attrValue));
+                  else
+                     PrologException.typeError(AtomTerm.get("atom"), attrName);
+                  if (TermConstants.emptyListAtom.equals(list.args[1]))
+                     break;
+                  else if (list.args[1] instanceof CompoundTerm)
+                     list = (CompoundTerm)list.args[1];
+                  else
+                     PrologException.typeError(AtomTerm.get("list"), t);
+               }
+            }
+         }
+      }
+      return properties;
+   }
 
 }

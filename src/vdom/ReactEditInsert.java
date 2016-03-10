@@ -11,12 +11,15 @@ public class ReactEditInsert extends ReactEdit
 
    public ReactComponent apply(ReactComponent domNode) throws Exception
    {
+      /*
       if (domNode != null)
       {      
          ReactComponent newNode = ReactComponentFactory.instantiateNode(node, domNode.getContext());
          domNode.insertChildBefore(newNode, null);
       }
       return domNode;
+      */
+      return null;
    }
    
    public String toString()

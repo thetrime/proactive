@@ -1,7 +1,9 @@
 :-module(react,
          [raise_event/2,
-          wait_for/1,         
-          trigger_react_recompile/1]).
+          wait_for/1,
+          bubble_event/3,
+          trigger_react_recompile/1,
+          jsx/2]).
 
 %       You MUST provide an implementation of react:goal_is_safe/1 or on_server/1 will always fail on the client.
 %       This is because an unscrupulous user could easily execute on_server with whatever goal they want! 
@@ -170,12 +172,23 @@ send_reply(WebSocket, Term):-
 trigger_react_recompile(Module):-
         forall(react_listener(Queue),
                thread_send_message(Queue, text(Module))).
-              
+
+jsx(Form, jsx(Form)):- !.
+jsx(Form, jsx(Form, Goals)):- Goals.
+
 
 :-meta_predicate(user:on_server(0)).
 user:on_server(X):- X.
 
 raise_event(Key, _):- permission_error(raise, server_side_event, Key).
 wait_for(List):- permission_error(wait_for, server_side_event, List).
+
+bubble_event(List, Key, Event):-
+        ( memberchk(Key=Handler, List),
+          Handler \== {null}->
+            call(Handler, Event)
+        ; otherwise->
+            true
+        ).
 
 user:term_expansion(requires(X), [depends_on(X), :-use_module(X)]).

@@ -5,8 +5,6 @@ import java.util.List;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.awt.Component;
-import org.proactive.vdom.PrologNode;
-import org.proactive.prolog.PrologContext;
 import org.proactive.prolog.PrologObject;
 import org.proactive.prolog.Engine;
 import org.proactive.ReactComponent;
@@ -18,15 +16,12 @@ public class Tab extends ReactComponent
    private String tooltip = "???";
    List<ReactComponent> children = new LinkedList<ReactComponent>();
 
-   public Tab(PrologNode n, PrologContext context)
-   {
-      super(context);
-   }
    public void setProperties(HashMap<String, PrologObject> properties)
    {
+      super.setProperties(properties);
       if (properties.containsKey("label"))
          label = properties.get("label").asString();
-      if (properties.containsKey("tooltip"))
+      else if (properties.containsKey("tooltip"))
          tooltip = properties.get("tooltip").asString();
    }
    public Component getAWTComponent()
@@ -63,6 +58,8 @@ public class Tab extends ReactComponent
          children.clear();
          children.add(newChild);
       }
+      newChild.setOwnerDocument(owner);
+      newChild.setParentNode(this);
    }
 
    public List<ReactComponent> getChildNodes()

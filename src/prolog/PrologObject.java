@@ -7,6 +7,8 @@ import gnu.prolog.term.CompoundTerm;
 import gnu.prolog.term.CompoundTermTag;
 import gnu.prolog.vm.TermConstants;
 import java.util.Map;
+import java.util.List;
+import java.util.LinkedList;
 
 
 // This is a wrapper for Term with a number of methods for getting the data out in a standardized way
@@ -16,7 +18,18 @@ public class PrologObject
    Term term;
    public PrologObject(Term term)
    {
-      this.term = term;
+      this.term = term; // Engine.unpack(term, null);
+   }
+
+   public boolean isNull()
+   {
+      if (term instanceof CompoundTerm)
+      {
+         CompoundTerm c = (CompoundTerm)term;
+         return (c.tag == CompoundTermTag.curly1 && c.args[0] instanceof AtomTerm && "null".equals(((AtomTerm)c.args[0]).value));
+      }
+      return false;
+
    }
 
    public String asString()
@@ -24,7 +37,8 @@ public class PrologObject
       Term t = term; //Engine.unpack(term);
       if (t instanceof AtomTerm)
          return ((AtomTerm)t).value;
-      else
+      else if (isNull())
+         return null;
          System.out.println("Warning: asString called on " + term + " of type " + term.getClass() + " which unpacks something which is not a string: " + t + " of type " + t.getClass());
       return t.toString();
    }
@@ -47,7 +61,7 @@ public class PrologObject
 
    public String asOrientation()
    {
-      Term t = term; //Engine.unpack(term);
+      Term t = term;
       if (t instanceof AtomTerm)
       {
          String orientation = ((AtomTerm)term).value;
@@ -66,7 +80,7 @@ public class PrologObject
 
    public int asInteger()
    {
-      Term t = term; //Engine.unpack(term);
+      Term t = term;
       if (t instanceof IntegerTerm)
          return ((IntegerTerm)t).value;
       else if (t instanceof AtomTerm)
@@ -76,7 +90,7 @@ public class PrologObject
 
    public boolean asBoolean()
    {
-      Term t = term; //Engine.unpack(term);
+      Term t = term;
       if (t instanceof AtomTerm)
          return ((AtomTerm)t).value.equals("true");
       return false;
@@ -85,7 +99,7 @@ public class PrologObject
 
    public String asScroll()
    {
-      Term t = term; //Engine.unpack(term);
+      Term t = term;
       if (t instanceof AtomTerm)
          return((AtomTerm)term).value;
       return "vertical";
@@ -95,6 +109,65 @@ public class PrologObject
       return term;
    }
 
+   public List<PrologObject> asList()
+   {
+      if (isNull())
+         return null;
+      List<PrologObject> list = new LinkedList<PrologObject>();
+      if (TermConstants.emptyListAtom.equals(term))
+         return list;
+      else if (term instanceof CompoundTerm)
+      {
+         CompoundTerm c = (CompoundTerm)term;
+         while(c.tag.arity == 2)
+         {
+            list.add(new PrologObject(c.args[0]));
+            if (c.args[1] instanceof CompoundTerm)
+               c = (CompoundTerm)c.args[1];
+            else if (TermConstants.emptyListAtom.equals(c.args[1]))
+               break;
+            else
+               return null;
+         }
+         return list;
+      }
+      else
+         return null;
+   }
+
+   public class NameValuePair
+   {
+      private String key;
+      private PrologObject value;
+      public NameValuePair(String key, PrologObject value)
+      {
+         this.key = key;
+         this.value = value;
+      }
+      public String getKey()
+      {
+         return key;
+      }
+      public PrologObject getValue()
+      {
+         return value;
+      }
+
+   }
+
+   public NameValuePair asNameValuePair()
+   {
+      if (term instanceof CompoundTerm)
+      {
+         CompoundTerm c = (CompoundTerm)term;
+         if (c.tag.arity == 2 && c.tag.functor.value.equals("="))
+         {
+            if (c.args[0] instanceof AtomTerm)
+               return new NameValuePair(((AtomTerm)c.args[0]).value, new PrologObject(c.args[1]));
+         }
+      }
+      return null;
+   }
 
 
    public static PrologObject serialize(Map<String, Object> map)
@@ -121,8 +194,12 @@ public class PrologObject
 
    public static Term serializeObject(Object value)
    {
+      if (value == null)
+         return new CompoundTerm(CompoundTermTag.curly1, AtomTerm.get("null"));
       if (value instanceof String)
          return AtomTerm.get((String)value);
+      if (value instanceof PrologObject)
+         return ((PrologObject)value).asTerm();
       return new CompoundTerm(CompoundTermTag.curly1, AtomTerm.get("null"));
    }
 

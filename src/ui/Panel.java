@@ -1,7 +1,5 @@
 package org.proactive.ui;
 
-import org.proactive.vdom.PrologNode;
-import org.proactive.prolog.PrologContext;
 import org.proactive.prolog.PrologObject;
 import org.proactive.ReactComponent;
 import org.proactive.ReactComponentFactory;
@@ -39,16 +37,22 @@ public class Panel extends ReactComponent
 
    JPanel alignmentPanel = new JPanel();
 
-   private java.util.List<ReactComponent> children = new LinkedList<ReactComponent>();
    private LayoutManager layoutManager = new GridBagLayout();
    private Component awtComponent;
    private JPanel panel = new JPanel();
-
    private String id;
+   private static int global_id = 0;
 
-   public Panel(PrologNode n, PrologContext context) throws Exception
+   public Panel(String q) throws Exception
    {
-      super(context);
+      this();
+      this.id = q;
+   }
+
+   public Panel() throws Exception
+   {
+      super();
+      this.id = "{" + (global_id++) + "}";
       awtComponent = panel;
       panel.setBackground(new Color(150, 168, 200));
       panel.setLayout(layoutManager);
@@ -57,6 +61,7 @@ public class Panel extends ReactComponent
    }
    public void setProperties(HashMap<String, PrologObject> properties)
    {
+      super.setProperties(properties);
       if (properties.containsKey("key"))
          id = properties.get("key").asString();
       if (properties.containsKey("layout"))
@@ -89,10 +94,10 @@ public class Panel extends ReactComponent
             {
                int rows = 0;
                int cols = 0;
-               if (properties.containsKey("rows"))
-                  rows = properties.get("rows").asInteger();
                if (properties.containsKey("cols"))
                   cols = properties.get("cols").asInteger();
+               if (properties.containsKey("rows"))
+                  rows = properties.get("rows").asInteger();
                layoutManager = new GridLayout(rows, cols);
                panel.setLayout(layoutManager);
 
@@ -155,10 +160,6 @@ public class Panel extends ReactComponent
             getParentNode().replaceChild(this, this);
 
       }
-      if (properties.containsKey("fill"))
-      {
-         fill = properties.get("fill").asFill();
-      }
    }
    public void insertChildBefore(ReactComponent child, ReactComponent sibling)
    {
@@ -166,7 +167,7 @@ public class Panel extends ReactComponent
       if (child.getParentNode() != null)
          child.getParentNode().removeChild(child);
       child.setParentNode(this);
-      child.setOwnerDocument(owner);
+      awtMap.put(child, child.getAWTComponent());
       int childFill = child.getFill();
       if (childFill == GridBagConstraints.HORIZONTAL || childFill == GridBagConstraints.BOTH)
          total_x_weight++;
@@ -271,21 +272,27 @@ public class Panel extends ReactComponent
    public void removeChild(ReactComponent child)
    {
       children.remove(child);
+      awtMap.remove(child);
       int childFill = child.getFill();
       if (childFill == GridBagConstraints.HORIZONTAL || childFill == GridBagConstraints.BOTH)
          total_x_weight--;
       if (childFill == GridBagConstraints.VERTICAL || childFill == GridBagConstraints.BOTH)
          total_y_weight--;
+      nextIndex--;
       checkAlignment();
       panel.remove(child.getAWTComponent());
    }
 
    public void replaceChild(ReactComponent newChild, ReactComponent oldChild)
    {
-      int i = children.indexOf(oldChild);
-      children.set(i, newChild);
-      newChild.setParentNode(this);
+      // If the component is the same, do not remove and replace it; doing so will only
+      // cause it to lose focus for no reason
+      if (newChild.getAWTComponent().equals(oldChild.getAWTComponent()))
+         return;
 
+      int i = children.indexOf(oldChild);
+      Component oldComponent = awtMap.get(oldChild);
+      super.replaceChild(newChild, oldChild);
       int childFill = oldChild.getFill();
       if (childFill == GridBagConstraints.HORIZONTAL || childFill == GridBagConstraints.BOTH)
          total_x_weight--;
@@ -298,19 +305,25 @@ public class Panel extends ReactComponent
          total_y_weight--;
       if (orientation == VERTICAL || orientation == HORIZONTAL)
       {
-         GridBagConstraints constraints = ((GridBagLayout)layoutManager).getConstraints(oldChild.getAWTComponent());
+         GridBagConstraints constraints = ((GridBagLayout)layoutManager).getConstraints(oldComponent);
          // We cannot call removeChild here since the list of children will get truncated
          // and we want to swap in-place
-         panel.remove(oldChild.getAWTComponent());
+         panel.remove(oldComponent);
          // We may have to edit the constraints if the child has a different fill
          constraints.fill = newChild.getFill();
-         panel.add(newChild.getAWTComponent(), constraints);
-         checkAlignment();
+         if (!(newChild.getAWTComponent() instanceof JFrame))
+         {
+            panel.add(newChild.getAWTComponent(), constraints);
+            checkAlignment();
+         }
       }
       else if (orientation == GRID)
       {
-         panel.remove(oldChild.getAWTComponent());
-         panel.add(newChild.getAWTComponent(), i);
+         panel.remove(oldComponent);
+         if (!(newChild.getAWTComponent() instanceof JFrame))
+         {
+            panel.add(newChild.getAWTComponent(), i);
+         }
       }
    }
 
@@ -322,5 +335,12 @@ public class Panel extends ReactComponent
    public Component getAWTComponent()
    {
       return awtComponent;
+   }
+
+   public String toString()
+   {
+      if (id != null)
+         return "(Panel: " + id + ")";
+      return "(Panel " + children + ")";
    }
 }

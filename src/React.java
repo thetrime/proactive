@@ -7,66 +7,105 @@ import java.util.LinkedList;
 import javax.swing.SwingUtilities;
 import java.awt.BorderLayout;
 import java.net.URI;
-import org.proactive.vdom.PrologDocument;
-import org.proactive.vdom.PatchSet;
-import org.proactive.prolog.PrologContext;
+import org.proactive.prolog.Engine;
+import gnu.prolog.term.Term;
 
 public class React
 {
    // Prevent instantiation
    private React() {}
 
-   static PrologDocument nextDocument = null;
    public static void main(String[] args) throws Exception
    {
       if (args.length != 2)
       {
          System.err.println("Usage: React <URI> <Component>");
       }
+      SwingUtilities.invokeLater(new Runnable()
+         {
+            public void run()
+            {
+               /*
+               javax.swing.JButton button = new javax.swing.JButton("ohai");
+               javax.swing.JFrame frame = new javax.swing.JFrame();
+               frame.getContentPane().add(button);
+               frame.setVisible(true);
+               button.addActionListener(new java.awt.event.ActionListener()
+                  {
+                     public void actionPerformed(java.awt.event.ActionEvent ae)
+                     {
+                        try
+                        {
+                           long startTime = System.currentTimeMillis();
+                           new org.proactive.ui.ReactApp(args[0], args[1]);
+                           System.out.println("Render time: " + (System.currentTimeMillis() - startTime ) + "ms");
+                        }
+                        catch(Exception e)
+                        {
+                           e.printStackTrace();
+                           System.exit(-1);
+                        }
+                     }
+                  });
+               */
+               try
+               {
+                  long startTime = System.currentTimeMillis();
+                  new org.proactive.ui.ReactApp(args[0], args[1]);
+                  System.out.println("Render time: " + (System.currentTimeMillis() - startTime ) + "ms");
+               }
+               catch(Exception e)
+               {
+                  e.printStackTrace();
+                  System.exit(-1);
+               }
+
+            }
+
+         });
+   }
+
+   
+   private static LinkedList<TreePatch> dispatchQueue = new LinkedList<TreePatch>();   
+
+   public static void queuePatch(Term p, ReactComponent root, Engine engine)
+   {
+      // FIXME: What ARE we trying to achieve here?
       try
       {
-         long startTime = System.currentTimeMillis();
-         new org.proactive.ui.ReactApp(args[0], args[1]);
-         System.out.println("Render time: " + (System.currentTimeMillis() - startTime ) + "ms");
+         engine.applyPatch(p, root);
       }
       catch(Exception e)
       {
          e.printStackTrace();
          System.exit(-1);
       }
-   }
-
-   
-   private static LinkedList<TreePatch> dispatchQueue = new LinkedList<TreePatch>();   
-
-   public static void queuePatch(PatchSet p, ReactComponent root, PrologContext context)
-   {
+/*
       synchronized(dispatchQueue)
       {
-         System.out.println("Received patch: " + p + " for root " + root);
+         //System.out.println("Received patch: " + p + " for root " + root);
          if (root == null)
             throw new NullPointerException();
-         dispatchQueue.offer(new TreePatch(p, root, context));
+         dispatchQueue.offer(new TreePatch(p, root, engine));
       }
       flushQueue();
+*/
    }
 
    private static class TreePatch
    {
-      private PatchSet patch;
+      private Term patch;
       private ReactComponent root;
-      private PrologContext context;
-      public TreePatch(PatchSet patch, ReactComponent root, PrologContext context)
+      private Engine engine;
+      public TreePatch(Term patch, ReactComponent root, Engine engine)
       {
          this.patch = patch;
          this.root = root;
-         this.context = context;
+         this.engine = engine;
       }
       public void apply() throws Exception
       {
-         root = patch.apply(root);
-         if (context != null)
-            context.setRoot(root);
+         root = engine.applyPatch(patch, root);
       }
    }
 

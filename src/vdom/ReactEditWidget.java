@@ -13,6 +13,7 @@ public class ReactEditWidget extends ReactEdit
 
    public ReactComponent apply(ReactComponent domNode) throws Exception
    {
+      /*
       boolean updating = false;
       if (node instanceof PrologWidget)
       {
@@ -42,6 +43,8 @@ public class ReactEditWidget extends ReactEdit
       if (!updating)
          destroyWidget(domNode, node);
       return newNode;
+      */
+      return null;
    }
    
    public String toString()
