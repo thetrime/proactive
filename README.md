@@ -103,6 +103,7 @@ You MAY declare event handlers in the Javascript way: For example,
   <Button label='Click me' onClick={some_goal}/>|}
 ```
 When the button is clicked, some_goal will be called with 3 extra arguments:
+   * +Event (which is dependent on the widget generating the event)
    * +State
    * +Props
    * -NewState
