@@ -627,8 +627,9 @@ render(Options, VNodeIn, DomNode):-
             create_text_node(Document, VNode, DomNode)
         ; VNode = element(Tag, Properties, Children)->
             create_element(Document, Tag, DomNode),
-            render_children(Children, Options, DomNode),
-            apply_properties(DomNode, Properties, [])
+            %render_children(Children, Options, DomNode),
+            apply_properties(DomNode, Properties, []),
+            render_children(Children, Options, DomNode)
         ).
 
 render_children([], _, _):- !.

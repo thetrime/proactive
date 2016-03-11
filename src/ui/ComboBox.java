@@ -19,13 +19,12 @@ import java.awt.event.FocusEvent;
 public class ComboBox extends ReactComponent
 {
    JComboBox<ComboItem> field = null;
-   private DocumentFilter documentFilter = null;
-   private DocumentFilter.FilterBypass bypass = null;
+   private boolean stillConstructing = false;
+
    public ComboBox()
    {
       field = new JComboBox<ComboItem>(new ReactComboBoxModel());
    }
-
    public class ReactComboBoxModel extends DefaultComboBoxModel<ComboItem>
    {
       public void reallySetSelectedItem(Object anObject)
@@ -36,6 +35,8 @@ public class ComboBox extends ReactComponent
       @Override
       public void setSelectedItem(Object anObject)
       {
+         if (stillConstructing)
+            return;
          if (changeListener != null)
             changeListener.stateWouldChange(((ComboItem)anObject).getValue());
       }
@@ -126,34 +127,64 @@ public class ComboBox extends ReactComponent
       super.insertChildBefore(child, sibling);
       if (child instanceof ComboItem)
       {
-         if (sibling == null)
-            field.addItem((ComboItem)child);
-         else
+         stillConstructing = true;
+         try
          {
-            int index = children.indexOf(sibling);
-            field.insertItemAt((ComboItem)child, index);
+            if (sibling == null)
+               field.addItem((ComboItem)child);
+            else
+            {
+               int index = children.indexOf(sibling);
+               field.insertItemAt((ComboItem)child, index);
+            }
+            if (child.equals(currentValue))
+               ((ReactComboBoxModel)field.getModel()).reallySetSelectedItem((ComboItem)child);
          }
+         finally
+         {
+            stillConstructing = false;
+         }
+
       }
    }
 
    public void removeChild(ReactComponent child)
    {
-      super.removeChild(child);
-      if (child instanceof ComboItem)
-         field.removeItem((ComboItem)child);
+         super.removeChild(child);
+         if (child instanceof ComboItem)
+         {
+            stillConstructing = true;
+            try
+            {
+               field.removeItem((ComboItem)child);
+            }
+            finally
+            {
+               stillConstructing = false;
+            }
+         }
    }
 
    public void replaceChild(ReactComponent newChild, ReactComponent oldChild)
    {
       if (newChild instanceof ComboItem)
       {
-         int index = children.indexOf(oldChild);
-         field.removeItemAt(index);
-         field.insertItemAt((ComboItem)newChild, index);
+         stillConstructing = true;
+         try
+         {
+            int index = children.indexOf(oldChild);
+            field.removeItemAt(index);
+            field.insertItemAt((ComboItem)newChild, index);
+            if (newChild.equals(currentValue))
+               ((ReactComboBoxModel)field.getModel()).reallySetSelectedItem(newChild);
+         }
+         finally
+         {
+            stillConstructing = false;
+         }
       }
+
       super.replaceChild(newChild, oldChild);
-
-
    }
 
    public Object getValue()
@@ -163,13 +194,12 @@ public class ComboBox extends ReactComponent
       if (field.getSelectedIndex() != -1)
          value = ((ComboItem)field.getItemAt(field.getSelectedIndex())).getValue();
 
-      System.out.println("GetValue: " + value);
       return value;
    }
 
+   private ComboItem currentValue;
    public void setValue(PrologObject value)
    {
-      ComboItem comboItem = new ComboItem(value.asString());
-      ((ReactComboBoxModel)field.getModel()).reallySetSelectedItem(comboItem);
+      currentValue = new ComboItem(value);
    }
 }

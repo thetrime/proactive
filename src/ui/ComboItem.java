@@ -30,9 +30,9 @@ public class ComboItem extends ReactLeafComponent
    }
 
    // Used by ComboBox to create a fake key to set the selected item
-   public ComboItem(String label)
+   public ComboItem(PrologObject value)
    {
-      this.label = label;
+      this.value = value;
    }
 
    public void setProperties(HashMap<String, PrologObject> properties)
@@ -50,7 +50,7 @@ public class ComboItem extends ReactLeafComponent
 
    public boolean equals(Object o)
    {
-      return (o instanceof ComboItem) && (((ComboItem)o).label.equals(label));
+      return (o instanceof ComboItem) && (((ComboItem)o).value.asTerm().equals(value.asTerm()));
    }
 
    public PrologObject getValue()
