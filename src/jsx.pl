@@ -2,12 +2,12 @@
 
 :- quasi_quotation_syntax(jsx).
 
-jsx(Content, Vars, Dict, Term):-
-        phrase_from_quasi_quotation(jsx_children(Vars, Dict, [DOM], Goals, true), Content),
+jsx(Content, [Variable], Dict, Term):-
+        phrase_from_quasi_quotation(jsx_children(Dict, [DOM], Goals, true), Content),
         ( Goals == true->
-            Term = jsx(DOM)
+            Term = (Variable = DOM)
         ; otherwise->
-            Term = jsx(DOM, Goals)
+            Term = (Variable = jsx(Goals, DOM))
         ).
 
 garbage(X,_):-
@@ -29,16 +29,16 @@ tag_mismatch(Close, Tag, X, _):-
 qq(X, X):-
         writeln(X).
 
-jsx_node(Vars, Dict, element(Tag, Attributes, Content), Goals, GoalsTail) -->
+jsx_node(Dict, element(Tag, Attributes, Content), Goals, GoalsTail) -->
         optional_spaces,
         `<`,
-        jsx_tag(Tag), optional_spaces, jsx_attributes(Vars, Dict, Attributes, Goals, G1),
+        jsx_tag(Tag), optional_spaces, jsx_attributes(Dict, Attributes, Goals, G1),
         % {compile_aux_clauses([jsx_require(Tag)])}, This causes swipl to crash :(
         ( `/>` ->
             {Content = [],
              G1 = GoalsTail}
         ; `>` ->
-            jsx_children(Vars, Dict, Content, G1, GoalsTail),
+            jsx_children(Dict, Content, G1, GoalsTail),
             optional_spaces,
             `</`, jsx_tag(Close), `>`,
             ( {Close == Tag}->
@@ -90,7 +90,7 @@ jsx_atom_codes([Code|Codes])-->
         jsx_atom_codes(Codes).
 jsx_atom_codes([])--> [].
 
-jsx_children(Vars, Dict, Children, Goal, GoalTail)-->
+jsx_children(Dict, Children, Goal, GoalTail)-->
         % {Foo}. Note that {[Foo, Bar]} is not supported (yet)
         optional_spaces,
         `{`,
@@ -108,25 +108,25 @@ jsx_children(Vars, Dict, Children, Goal, GoalTail)-->
                   ; Children = [List|Tail]
                   ), G1)},
         `}`,
-        jsx_children(Vars, Dict, Tail, G1, GoalTail).
+        jsx_children(Dict, Tail, G1, GoalTail).
 
-jsx_children(Vars, Dict, [Element|Elements], Goal, GoalTail)-->
-        jsx_node(Vars, Dict, Element, Goal, G1),
+jsx_children(Dict, [Element|Elements], Goal, GoalTail)-->
+        jsx_node(Dict, Element, Goal, G1),
         !,
-        jsx_children(Vars, Dict, Elements, G1, GoalTail).
+        jsx_children(Dict, Elements, G1, GoalTail).
 
-jsx_children(_Vars, _Dict, [], G, G)--> [].
+jsx_children(_Dict, [], G, G)--> [].
 
 
-jsx_attributes(Vars, Dict, [Name=Value|Attributes], Goals, GoalsTail)-->
-        jsx_atom(Name), `=`, jsx_value(Value, Vars, Dict, Goals, G1),
+jsx_attributes(Dict, [Name=Value|Attributes], Goals, GoalsTail)-->
+        jsx_atom(Name), `=`, jsx_value(Value, Dict, Goals, G1),
         ( spaces,
-          jsx_attributes(Vars, Dict, Attributes, G1, GoalsTail)->
+          jsx_attributes(Dict, Attributes, G1, GoalsTail)->
             !
         ; {Attributes = [],
            G1 = GoalsTail}
         ).
-jsx_attributes(_, _, [], G, G)--> [].
+jsx_attributes(_, [], G, G)--> [].
 
 read_until_close_brace([], 1, [125|C], [125|C]):- !.
 read_until_close_brace([123|Codes], N)-->
@@ -149,7 +149,7 @@ unify_variables([Name=Value|Vars], Dict):-
         ignore(memberchk(Name=Value, Dict)),
         unify_variables(Vars, Dict).
 
-jsx_value(Value, _Vars, Dict, Goals, GoalsTail)-->
+jsx_value(Value, Dict, Goals, GoalsTail)-->
         `{`, !,
           read_until_close_brace(Codes, 1),
           {read_term_from_atom(Codes, Term, [variable_names(TermVariableNames)]),
@@ -157,7 +157,7 @@ jsx_value(Value, _Vars, Dict, Goals, GoalsTail)-->
            expand_goals(Term, Value, Goals, GoalsTail)},
          `}`.
 
-jsx_value(Value, _Vars, _Dict, G, G)-->
+jsx_value(Value, _Dict, G, G)-->
         quoted_string(Value).
 
 expand_goals(Variable, Variable, Tail, Tail):- var(Variable), !.
