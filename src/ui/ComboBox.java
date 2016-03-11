@@ -29,7 +29,9 @@ public class ComboBox extends ReactComponent
    {
       public void reallySetSelectedItem(Object anObject)
       {
-         super.setSelectedItem(anObject);
+         int index = getIndexOf(anObject);
+         if (index != -1)
+            super.setSelectedItem(getElementAt(index));
       }
 
       @Override
@@ -201,5 +203,6 @@ public class ComboBox extends ReactComponent
    public void setValue(PrologObject value)
    {
       currentValue = new ComboItem(value);
+      ((ReactComboBoxModel)field.getModel()).reallySetSelectedItem(currentValue);
    }
 }
