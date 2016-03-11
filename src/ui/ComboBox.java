@@ -1,8 +1,10 @@
 package org.proactive.ui;
 
 import org.proactive.prolog.PrologObject;
+import org.proactive.ReactComponent;
 import java.awt.Component;
 import javax.swing.JComboBox;
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.text.DocumentFilter;
 import javax.swing.text.AbstractDocument;
 import javax.swing.text.AttributeSet;
@@ -10,22 +12,148 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 import java.util.HashMap;
 import java.util.List;
-import javax.swing.InputVerifier;
 import javax.swing.JComponent;
+import java.awt.event.FocusListener;
+import java.awt.event.FocusEvent;
 
-public class ComboBox implements InputWidget
+public class ComboBox extends ReactComponent
 {
    JComboBox<ComboItem> field = null;
    private DocumentFilter documentFilter = null;
    private DocumentFilter.FilterBypass bypass = null;
    public ComboBox()
    {
-      field = new JComboBox<ComboItem>();
+      field = new JComboBox<ComboItem>(new ReactComboBoxModel());
+   }
+
+   public class ReactComboBoxModel extends DefaultComboBoxModel<ComboItem>
+   {
+      public void reallySetSelectedItem(Object anObject)
+      {
+         super.setSelectedItem(anObject);
+      }
+
+      @Override
+      public void setSelectedItem(Object anObject)
+      {
+         if (changeListener != null)
+            changeListener.stateWouldChange(((ComboItem)anObject).getValue());
+      }
+   }
+
+   public void setProperties(HashMap<String, PrologObject> properties)
+   {
+      super.setProperties(properties);
+      if (properties.containsKey("value"))
+         setValue(properties.get("value"));
+      if (properties.containsKey("onBlur"))
+         setFocusListener(properties.get("onBlur"));
+      if (properties.containsKey("disabled"))
+         field.setEnabled(!properties.get("disabled").asBoolean());
+      if (properties.containsKey("onChange"))
+         setChangeListener(properties.get("onChange"));
+   }
+
+   private PrologObject serializeObject()
+   {
+      HashMap<String, Object> properties = new HashMap<String, Object>();
+      properties.put("value", getValue());
+      return PrologObject.serialize(properties);
+   }
+
+   private FocusListener focusListener = null;
+   private void setFocusListener(PrologObject value)
+   {
+      if (focusListener != null)
+         field.removeFocusListener(focusListener);
+      if (value == null || value.isNull())
+         return;
+      focusListener = new FocusListener()
+         {
+            public void focusLost(FocusEvent fe)
+            {
+               try
+               {
+                  getOwnerDocument().triggerEvent(value.asTerm(), serializeObject().asTerm());
+               }
+               catch (Exception e)
+               {
+                  e.printStackTrace();
+               }
+            }
+            public void focusGained(FocusEvent fe)
+            {
+            }
+         };
+      field.addFocusListener(focusListener);
+   }
+
+   protected interface ChangeListener
+   {
+      public void stateWouldChange(PrologObject newValue);
+   }
+
+   ChangeListener changeListener = null;
+   public void setChangeListener(PrologObject value)
+   {
+      if (value == null || value.isNull())
+         changeListener = null;
+      changeListener = new ChangeListener()
+         {
+            public void stateWouldChange(PrologObject newValue)
+            {
+               try
+               {
+                  HashMap<String, Object> properties = new HashMap<String, Object>();
+                  properties.put("value", newValue);
+                  getOwnerDocument().triggerEvent(value.asTerm(), PrologObject.serialize(properties).asTerm());
+               }
+               catch (Exception e)
+               {
+                  e.printStackTrace();
+               }
+            }
+         };
    }
 
    public Component getAWTComponent()
    {
       return field;
+   }
+
+   public void insertChildBefore(ReactComponent child, ReactComponent sibling)
+   {
+      super.insertChildBefore(child, sibling);
+      if (child instanceof ComboItem)
+      {
+         if (sibling == null)
+            field.addItem((ComboItem)child);
+         else
+         {
+            int index = children.indexOf(sibling);
+            field.insertItemAt((ComboItem)child, index);
+         }
+      }
+   }
+
+   public void removeChild(ReactComponent child)
+   {
+      super.removeChild(child);
+      if (child instanceof ComboItem)
+         field.removeItem((ComboItem)child);
+   }
+
+   public void replaceChild(ReactComponent newChild, ReactComponent oldChild)
+   {
+      if (newChild instanceof ComboItem)
+      {
+         int index = children.indexOf(oldChild);
+         field.removeItemAt(index);
+         field.insertItemAt((ComboItem)newChild, index);
+      }
+      super.replaceChild(newChild, oldChild);
+
+
    }
 
    public Object getValue()
@@ -42,59 +170,6 @@ public class ComboBox implements InputWidget
    public void setValue(PrologObject value)
    {
       ComboItem comboItem = new ComboItem(value.asString());
-      field.setSelectedItem(comboItem);
+      ((ReactComboBoxModel)field.getModel()).reallySetSelectedItem(comboItem);
    }
-
-   public void setAllowedValues(PrologObject values)
-   {
-      List<PrologObject> allowedValues = values.asList();
-      field.removeAllItems();
-      for (PrologObject object: allowedValues)
-         field.addItem(new ComboItem(object.asNameValuePair()));
-   }
-
-   public class ComboItem
-   {
-      String name;
-      PrologObject value;
-      public ComboItem(PrologObject.NameValuePair pair)
-      {
-         name = pair.getKey();
-         value = pair.getValue();
-      }
-      public ComboItem(String key)
-      {
-         this.name = key;
-         this.value = null;
-      }
-      public PrologObject getValue()
-      {
-         return value;
-      }
-
-      @Override
-      public String toString()
-      {
-         return name;
-      }
-      @Override
-      public boolean equals(Object o)
-      {
-         return (o instanceof ComboItem) && (((ComboItem)o).name.equals(name));
-      }
-   }
-
-   public void setVerifier(InputWidgetVerifier listener) {}
-
-
-   public void setChangeListener(InputWidgetListener listener)
-   {
-      // FIXME: Implement this
-   }
-
-   public void setDisabled(boolean disabled)
-   {
-      field.setEnabled(!disabled);
-   }
-
 }

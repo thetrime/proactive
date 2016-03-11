@@ -16,6 +16,8 @@ public class DefaultReactComponentFactoryConfiguration implements ReactComponent
       {
          constructorHash.put("Panel", Panel.class.getConstructor());
          constructorHash.put("Field", Field.class.getConstructor());
+         constructorHash.put("ComboBox", ComboBox.class.getConstructor());
+         constructorHash.put("ComboItem", ComboItem.class.getConstructor());
          constructorHash.put("Button", Button.class.getConstructor());
          constructorHash.put("Label", Label.class.getConstructor());
          constructorHash.put("Table", Table.class.getConstructor());

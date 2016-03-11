@@ -406,7 +406,7 @@ has_hooks(_):- fail. % FIXME: Stub
 has_descendent_hooks(_):- fail. % FIXME: Stub
 
 is_widget(element(Tag, _, _)):-
-        \+memberchk(Tag, ['Button', 'EditorPane','Field', 'Frame', 'Label', 'List', 'Panel', 'Tab', 'TabbedPane', 'Table', 'TextArea', 'Tree']).
+        \+memberchk(Tag, ['Button', 'EditorPane','Field', 'Frame', 'Label', 'List', 'Panel', 'Tab', 'TabbedPane', 'Table', 'TextArea', 'Tree', 'ComboBox', 'ComboItem']).
 
 
 %----------------------------------------------------------------------------
@@ -627,8 +627,8 @@ render(Options, VNodeIn, DomNode):-
             create_text_node(Document, VNode, DomNode)
         ; VNode = element(Tag, Properties, Children)->
             create_element(Document, Tag, DomNode),
-            apply_properties(DomNode, Properties, []),
-            render_children(Children, Options, DomNode)
+            render_children(Children, Options, DomNode),
+            apply_properties(DomNode, Properties, [])
         ).
 
 render_children([], _, _):- !.

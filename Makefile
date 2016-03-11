@@ -13,6 +13,7 @@ UI=  src/ui/Panel.java                                        \
      src/ui/Button.java                                       \
      src/ui/Field.java                                        \
      src/ui/ComboBox.java                                     \
+     src/ui/ComboItem.java                                    \
      src/ui/InputWidget.java                                  \
      src/ui/InputWidgetListener.java                          \
      src/ui/InputWidgetVerifier.java                          \
