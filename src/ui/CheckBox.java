@@ -4,17 +4,46 @@ import org.proactive.prolog.PrologObject;
 import java.awt.Component;
 import java.awt.BorderLayout;
 import javax.swing.JPanel;
+import javax.swing.JToggleButton;
 import javax.swing.JCheckBox;
+import java.util.HashMap;
+
 
 public class CheckBox implements InputWidget
 {
    JPanel panel = new JPanel();
    JCheckBox field = new JCheckBox();
+   private InputWidgetListener listener = null;
    public CheckBox()
    {
       panel.setLayout(new BorderLayout());
       panel.setOpaque(false);
       panel.add(field, BorderLayout.EAST);
+      field.setModel(new ReactButtonModel());
+   }
+
+   public class ReactButtonModel extends JToggleButton.ToggleButtonModel
+   {
+      public void setSelected(boolean isSelected)
+      {
+         if (listener != null)
+         {
+            try
+            {
+               HashMap<String, Object> properties = new HashMap<String, Object>();
+               properties.put("value", isSelected);
+               listener.valueWouldChange(PrologObject.serialize(properties));
+            }
+            catch(Exception e)
+            {
+               e.printStackTrace();
+            }
+         }
+      }
+      public void reallySetSelected(boolean isSelected)
+      {
+         super.setSelected(isSelected);
+      }
    }
 
    public Component getAWTComponent()
@@ -30,9 +59,9 @@ public class CheckBox implements InputWidget
    public void setValue(PrologObject value)
    {
       if (value == null)
-         field.setSelected(false);
+         ((ReactButtonModel)field.getModel()).reallySetSelected(false);
       else
-         field.setSelected(value.asBoolean());
+         ((ReactButtonModel)field.getModel()).reallySetSelected(value.asBoolean());
    }
 
    public void setDisabled(boolean disabled)
@@ -40,7 +69,9 @@ public class CheckBox implements InputWidget
       field.setEnabled(!disabled);
    }
 
-
-   public void setChangeListener(InputWidgetListener value) {}
+   public void setChangeListener(InputWidgetListener value)
+   {
+      this.listener = value;
+   }
    public void setVerifier(InputWidgetVerifier value) {}
 }
