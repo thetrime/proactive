@@ -17,6 +17,9 @@ public abstract class ReactComponent
    protected List<ReactComponent> children = new LinkedList<ReactComponent>();
    protected HashMap<ReactComponent, Component> awtMap = new HashMap<ReactComponent, Component>();
 
+   protected String id = null;
+   protected String className = null;
+
    protected int fill = GridBagConstraints.NONE;
    public ReactComponent()
    {
@@ -34,6 +37,11 @@ public abstract class ReactComponent
          else
             fill = properties.get("fill").asFill();
       }
+      if (properties.containsKey("className"))
+         className = properties.get("className").asString();
+      if (properties.containsKey("id"))
+         id = properties.get("id").asString();
+
    }
    
    public List<ReactComponent> getChildNodes()

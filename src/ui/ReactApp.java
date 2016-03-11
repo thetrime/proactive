@@ -14,7 +14,9 @@ import org.proactive.prolog.Engine;
 import org.proactive.prolog.PrologObject;
 import org.proactive.ReactComponent;
 import org.proactive.CodeChangeListener;
+import org.proactive.StyleSheetListener;
 import org.proactive.React;
+import org.proactive.StyleSheet;
 import org.proactive.ReactWidget;
 import org.proactive.ReactComponentFactory;
 import org.proactive.prolog.PrologState;
@@ -24,7 +26,7 @@ import gnu.prolog.term.CompoundTerm;
 import gnu.prolog.term.AtomTerm;
 import gnu.prolog.vm.TermConstants;
 
-public class ReactApp extends JFrame implements CodeChangeListener
+public class ReactApp extends JFrame implements CodeChangeListener, StyleSheetListener
 {
    String URL = null;
    private Engine engine;
@@ -32,9 +34,14 @@ public class ReactApp extends JFrame implements CodeChangeListener
    public ReactApp(String URL, String rootElementId) throws Exception
    {
       super("React Test");
+      StyleSheet sheet = new StyleSheet();
+      sheet.setValueForClass("title", "colour", java.awt.Color.WHITE);
+      sheet.setValueForClass("title", "font-size", 24);
+      React.setStyleSheet(sheet);
       engine = new Engine(URL, rootElementId);
       context = new ReactWidget(null, engine, rootElementId, TermConstants.emptyListAtom);
       React.addCodeChangeListener(new URI(URL + "/listen"), rootElementId, this);
+      React.addStyleSheetListener(this);
       getContentPane().setLayout(new BorderLayout());
       getContentPane().add(context.getAWTComponent(), BorderLayout.CENTER);
       setSize(800, 600);
@@ -42,6 +49,25 @@ public class ReactApp extends JFrame implements CodeChangeListener
       setVisible(true);
    }
 
+   public void styleSheetChanged()
+   {
+      SwingUtilities.invokeLater(new Runnable()
+         {
+            public void run()
+            {
+               try
+               {
+                  context.reRender();
+                  validate();
+                  repaint();
+               }
+               catch(Exception e)
+               {
+                  e.printStackTrace();
+               }
+            }
+         });
+   }
    public void handleCodeChange() 
    {
       SwingUtilities.invokeLater(new Runnable()

@@ -149,5 +149,29 @@ public class React
       ServerConnection.addCodeChangeListener(uri, rootElementId, listener);
    }
 
+   private static StyleSheet styleSheet = new StyleSheet();
+   private static List<StyleSheetListener> styleSheetListeners = new LinkedList<StyleSheetListener>();
+
+   public static void addStyleSheetListener(StyleSheetListener l)
+   {
+      styleSheetListeners.add(l);
+   }
+   public static void removeStyleSheetListener(StyleSheetListener l)
+   {
+      styleSheetListeners.remove(l);
+   }
+
+   public static void setStyleSheet(StyleSheet styleSheet)
+   {
+      React.styleSheet = styleSheet;
+      for (StyleSheetListener listener: styleSheetListeners)
+         listener.styleSheetChanged();
+   }
+
+   public static Object getStyle(String id, String className, String type, String key)
+   {
+      return styleSheet.getValue(id, className, type, key);
+   }
+
 }
 
