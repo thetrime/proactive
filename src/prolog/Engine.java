@@ -464,18 +464,28 @@ public class Engine
       try
       {
          rc = interpreter.execute(g);
+         if (rc == PrologCode.RC.SUCCESS)
+            interpreter.stop(g);
+         if (rc == PrologCode.RC.SUCCESS || rc == PrologCode.RC.SUCCESS_LAST)
+         {
+            Term result = vDom.dereference();
+            if (result instanceof CompoundTerm && ((CompoundTerm)result).tag.functor.value.equals("jsx") && ((CompoundTerm)result).tag.arity == 2)
+            {
+               CompoundTerm jsx = (CompoundTerm)result;
+               rc = interpreter.runOnce(jsx.args[0]);
+               if (rc == PrologCode.RC.SUCCESS || rc == PrologCode.RC.SUCCESS_LAST)
+                  result = jsx.args[1].dereference();
+               else
+                  result = TermConstants.emptyListAtom;
+            }
+            result = result.clone(new TermCloneContext());
+            interpreter.undo(undoPosition);
+            return result;
+         }
       }
       finally
       {
          env.popContext(interpreter);
-      }
-      if (rc == PrologCode.RC.SUCCESS)
-         interpreter.stop(g);
-      if (rc == PrologCode.RC.SUCCESS || rc == PrologCode.RC.SUCCESS_LAST)
-      {
-         Term result = vDom.dereference().clone(new TermCloneContext());
-         interpreter.undo(undoPosition);
-         return result;
       }
       return null;
    }
