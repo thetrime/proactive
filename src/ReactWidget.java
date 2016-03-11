@@ -142,6 +142,7 @@ public class ReactWidget extends ReactComponent
       child.setOwnerDocument(this);
       children.clear();
       children.add(child);
+      getAWTComponent().validate();
       vDom = newvDom;
    }
 
