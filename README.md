@@ -10,8 +10,7 @@ render(State, Props, MyApp):-
     findall(Field,
             render_some_field(State, Props, Field),
             SeveralFields),
-    jsx(MyApp,
-        {|jsx||
+    {|jsx(MyApp)||
         <Panel>
           <Label label="Hello from Prolog!"/>
           {SeveralFields}
@@ -36,12 +35,14 @@ Currently this is just a toy, but the skeleton is almost complete and ready for 
 
 ### Major tasks
    * I would like to be able to handle HTML natively. That is, tags which are not otherwise overloaded, but also valid HTML will become PrologHTML nodes in the tree. Components can then do with those what they want.
+     * But what might that look like if we want to pass it in to a subcomponent? It might not make much sense.
    * I had to suck quite a bit of code from GPJ into ReactEnvironment and ReactModule. I need to talk to the GPJ people to see if I can make some tiny modifications in their code to allow me to just override the methods I want
+     * This is in progress
    * A lot of documentation needs to be written.
+   * Style sheets might be an interesting idea. You could register one with a static method in React and then the various UI elements could query it to find out what fonts, colours and so on to use
    
 ### Boring tasks
-   * The org.proactive.ui components I have are pretty useless. Only one of them has an event handler you can attach, for example!
-   * Currently there is a org.proactive.ui.Field which acts as a super-type for all fields. This is not how HTML does it, and I'm inclined to push this logic into Prolog.
+   * The org.proactive.ui components I have are pretty useless. Many of them are just stubs, but at least we now have working fields (text, checkbox, radio and a combobox) and buttons, so a lot of apps are now actually feasible
 
 ### Minor tasks
    * Make on_server illegal from inside render/3
@@ -75,17 +76,16 @@ The JSX syntax uses quasiquotation in SWI-Prolog (with the domain jsx) to expand
 Example:
 ```
 render(State, _, App):-
-   jsx(App,
-       {|jsx||
-       <Panel>
-         <Button label={State.label} onClick={this.handleClick}/>
-         <Field value={Value}/>
-       </Panel>|},
+   {|jsx(App)||
+   <Panel>
+     <Button label={State.label} onClick={this.handleClick}/>
+     <Field value={Value}/>
+   </Panel>|},
    Value = 'This is a value'.
 ```
 Note that it is forbidden to call on_server/1 in render/3.
 
-If you don't want to use JSX, you can create the terms yourself. A document is always an `element/3` term (in future atoms may also be permitted)
+If you don't want to use JSX, you can create the terms yourself. A document is always[1] an `element/3` term (in future atoms may also be permitted)
 
 An `element/3` term has the following args:
    * First arg is a tag name, and must be an atom
@@ -93,13 +93,15 @@ An `element/3` term has the following args:
       * An attribute is a term `=/2` where the first argument is an atom, and the second argument is an *arbitrary term*. This differs from the `element/3` case in SWI-Prolog where the second argument must be an atom, and consequently means that `xml_write/2` on the VDOM will not (necessarily) work.
    * Third arg is a list of children, where each child is a Document.
 
+[1] actually, if you want, you can return a jsx/2 term, where the first argument is a goal to run, and the second argument is the Document. This should not be required for hand-written code, but JSX uses it so that constructs like `{|jsx(Foo)||<X>{Var}</X>}, X = []` where we do not know when compiling the JSX whether or not X has any children.
+
 ##### State
 You MAY declare a predicate `getInitialState(+Props, -State)` in your module. (note that using Props here may be an anti-pattern, depending on exactly what you do. See https://facebook.github.io/react/tips/props-in-getInitialState-as-anti-pattern.html). getInitialState/2 will be called before the component is _first_ instantiated. State is expected to be a list of `=/2` terms, where each term has an atom for the first argument. This is not currently checked, but I plan to add a check to ensure this is the case, since failing to do so leads to surprising and unexpected problems in event handlers when we try and 'merge' states.
 
 ##### Event Handlers
 You MAY declare event handlers in the Javascript way: For example,
 ```
-{|jsx||
+{|jsx(...)||
   <Button label='Click me' onClick={some_goal}/>|}
 ```
 When the button is clicked, some_goal will be called with 3 extra arguments:
@@ -126,9 +128,8 @@ and then in the Bar module:
 
 ```
 render(_State, _Props, Bar):-
-   jsx(Bar,
-       {||jsx|
-       <Widget onQux={this.handleQux}/>|}.
+  {||jsx(Bar)|
+  <Widget onQux={this.handleQux}/>|}.
 
 handleQux(Event, _State, Props, []):-
     bubble_event(Props, onQux, Event).
