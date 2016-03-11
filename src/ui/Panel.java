@@ -15,6 +15,7 @@ import java.awt.GridLayout;
 import java.awt.Insets;
 import java.awt.Color;
 import javax.swing.BorderFactory;
+import javax.swing.border.TitledBorder;
 import java.awt.Component;
 import java.util.List;
 import java.util.Iterator;
@@ -64,6 +65,23 @@ public class Panel extends ReactComponent
       super.setProperties(properties);
       if (properties.containsKey("key"))
          id = properties.get("key").asString();
+      if (properties.containsKey("label"))
+      {
+         if (properties.get("label").isNull())
+            panel.setBorder(null);
+         else
+         {
+            java.awt.Font font = new java.awt.Font("Arial", 0, 11);
+            java.awt.Color colour = java.awt.Color.WHITE;
+            panel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createCompoundBorder(BorderFactory.createLineBorder(colour),
+                                                                                                BorderFactory.createEmptyBorder(0, 0, 0, 0)),
+                                                             properties.get("label").asString(),
+                                                             TitledBorder.LEFT,
+                                                             TitledBorder.TOP,
+                                                             font,
+                                                             colour));
+         }
+      }
       if (properties.containsKey("layout"))
       {
          int oldOrientation = orientation;
@@ -158,7 +176,6 @@ public class Panel extends ReactComponent
          }
          if (getParentNode() != null)
             getParentNode().replaceChild(this, this);
-
       }
    }
    public void insertChildBefore(ReactComponent child, ReactComponent sibling)
@@ -228,6 +245,8 @@ public class Panel extends ReactComponent
 
    public void checkAlignment()
    {
+      if ("option".equals(id))
+         System.out.println("Checking alignment for option panel");
       if (alignment == END && fill != GridBagConstraints.NONE)
       {
          if (orientation == HORIZONTAL && total_x_weight == 0)
@@ -243,6 +262,8 @@ public class Panel extends ReactComponent
          else
          {
             // Remove padding if present
+            if ("option".equals(id))
+               System.out.println("WHAT?");
             panel.remove(alignmentPanel);
          }
       }
@@ -256,6 +277,8 @@ public class Panel extends ReactComponent
          else if (orientation == VERTICAL && total_y_weight == 0)
          {
             // Requires padding at bottom
+            if ("option".equals(id))
+               System.out.println("Adding padding to panel at " + (children.size() +1));
             panel.add(alignmentPanel, new GridBagConstraints(0, children.size()+1, 1, 1, 0, 1, GridBagConstraints.CENTER, GridBagConstraints.VERTICAL, new Insets(0,0,0,0), 0, 0));
 
          }
@@ -263,10 +286,16 @@ public class Panel extends ReactComponent
          {
             // Remove padding if present
             panel.remove(alignmentPanel);
+            if ("option".equals(id))
+               System.out.println("Removing padding from panel: Panel does not need it?" + total_y_weight + ", " + orientation + ", " + alignment);
          }
       }
       else
+      {
+         if ("option".equals(id))
+            System.out.println("Removing padding from panel: Alignment is ");
          panel.remove(alignmentPanel);
+      }
    }
 
    public void removeChild(ReactComponent child)
