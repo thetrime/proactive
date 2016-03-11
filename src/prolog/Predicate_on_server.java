@@ -6,14 +6,14 @@ import gnu.prolog.vm.Interpreter;
 import gnu.prolog.vm.ExecuteOnlyCode;
 import gnu.prolog.vm.PrologException;
 import gnu.prolog.vm.interpreter.Predicate_call;
-import gnu.prolog.vm.BacktrackInfo;
+import gnu.prolog.vm.BacktrackInfoWithCleanup;
 import gnu.prolog.vm.Environment;
 import gnu.prolog.io.PrologStream;
 import java.io.IOException;
 
 public class Predicate_on_server extends ExecuteOnlyCode
 {
-   public class ServerBacktrackInfo extends BacktrackInfo
+   public class ServerBacktrackInfo extends BacktrackInfoWithCleanup
    {
       protected int startUndoPosition;
       private Engine.ExecutionState state;
@@ -21,7 +21,7 @@ public class Predicate_on_server extends ExecuteOnlyCode
 
       protected ServerBacktrackInfo(Term goal)
       {
-         super(-1, -1);
+         super(null);
          this.goal = goal;
       }
       
@@ -47,6 +47,11 @@ public class Predicate_on_server extends ExecuteOnlyCode
             return RC.SUCCESS_LAST;
          interpreter.pushBacktrackInfo(this);
          return RC.SUCCESS;
+      }
+
+      public void cleanup(Interpreter interpreter)
+      {
+         state.cut();
       }
    }
 

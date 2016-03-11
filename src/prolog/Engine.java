@@ -366,6 +366,11 @@ public class Engine
          }
          return state;
       }
+
+      public void cut()
+      {
+         close();
+      }
    
       @Override
       public void onMessage(String message)
