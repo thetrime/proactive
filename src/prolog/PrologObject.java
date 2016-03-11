@@ -198,6 +198,8 @@ public class PrologObject
          return new CompoundTerm(CompoundTermTag.curly1, AtomTerm.get("null"));
       if (value instanceof String)
          return AtomTerm.get((String)value);
+      if (value instanceof Boolean)
+         return (((Boolean)value).booleanValue())?AtomTerm.get("true"):AtomTerm.get("false");
       if (value instanceof PrologObject)
          return ((PrologObject)value).asTerm();
       return new CompoundTerm(CompoundTermTag.curly1, AtomTerm.get("null"));
