@@ -100,7 +100,6 @@ jsx_children(Dict, Children, Goal, GoalTail)-->
           variable_name(HeadName),
           optional_spaces,
           {memberchk(HeadName=List, Dict)},
-          optional_spaces,
           {Goal = ((List == [] ->
                      Children = Tail
                   ; is_list(List)->
