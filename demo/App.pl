@@ -11,9 +11,13 @@ render(State, _Props, Form):-
         <Panel>
         <Label label={Label}/>
         {Fields}
-        <Frame>
-        <Label label="Hello"/>
-        </Frame>
+        <List fill="both">
+        <ListItem label="Hello"/>
+        <ListItem label="Hello"/>
+        <ListItem label="Hello"/>
+        <ListItem label="Hello"/>
+        <ListItem label="Hello"/>
+        </List>
         <Splunge foo="bar"/>
         <Button label={State.label}/>
         </Panel>|},

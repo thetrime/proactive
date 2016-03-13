@@ -406,7 +406,8 @@ has_hooks(_):- fail. % FIXME: Stub
 has_descendent_hooks(_):- fail. % FIXME: Stub
 
 is_widget(element(Tag, _, _)):-
-        \+memberchk(Tag, ['Button', 'EditorPane','Field', 'Frame', 'Label', 'List', 'Panel', 'Tab', 'TabbedPane', 'Table', 'TextArea', 'Tree', 'ComboBox', 'ComboItem']).
+        
+        \+memberchk(Tag, ['Button', 'EditorPane','Field', 'Frame', 'Label', 'List', 'ListItem', 'Panel', 'Tab', 'TabbedPane', 'Table', 'TextArea', 'Tree', 'ComboBox', 'ComboItem']).
 
 
 %----------------------------------------------------------------------------

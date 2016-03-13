@@ -38,11 +38,6 @@ public class Frame extends ReactComponent
    public void setProperties(HashMap<String, PrologObject> properties)
    {
      super.setProperties(properties);
-     if (properties.containsKey("visible"))
-     {
-        // FIXME: Really the frame is ALWAYS visible...
-        frame.setVisible(properties.get("visible").asBoolean());
-     }
    }
    public Component getAWTComponent()
    {

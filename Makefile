@@ -28,6 +28,7 @@ UI=  src/ui/Panel.java                                        \
      src/ui/TabbedPane.java                                   \
      src/ui/Tab.java                                          \
      src/ui/List.java                                         \
+     src/ui/ListItem.java                                     \
      src/ui/TextArea.java                                     \
      src/ui/Tree.java                                         \
      src/ui/EditorPane.java                                   \
