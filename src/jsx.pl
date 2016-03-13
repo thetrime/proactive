@@ -26,14 +26,16 @@ tag_mismatch(Close, Tag, X, _):-
         atom_codes(Atom, Codes),
         throw(tag_mismatch(Close, Tag, Atom)).
 
-qq(X, X):-
-        writeln(X).
-
-jsx_node(Dict, element(Tag, Attributes, Content), Goals, GoalsTail) -->
+jsx_node(Dict, Node, Goals, GoalsTail) -->
         optional_spaces,
         `<`,
         jsx_tag(Tag), optional_spaces, jsx_attributes(Dict, Attributes, Goals, G1),
-        % {compile_aux_clauses([jsx_require(Tag)])}, This causes swipl to crash :(
+        { ( prolog_load_context(module, Module),
+            current_predicate(Module:depends_on/1),           
+            Module:depends_on(Tag)->
+             Node = widget(Tag, Attributes, Content)
+          ; Node = element(Tag, Attributes, Content)
+          )},
         ( `/>` ->
             {Content = [],
              G1 = GoalsTail}

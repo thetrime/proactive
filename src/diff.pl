@@ -29,9 +29,7 @@ walk(A, {null}, Index, Index-Patch):-
 
 walk(A, B, Index, PatchIndex-Patch):-
         B = element(BTag, BProps, _),
-        \+is_widget(B),
         ( A = element(ATag, AProps, _),
-          \+is_widget(A)->
             ( ATag == BTag,
               ( memberchk(key=Key, AProps),
                 memberchk(key=Key, BProps)
@@ -158,17 +156,6 @@ get_count_1([Child|Children], Count):-
         get_count_1(Children, CC),
         Count is CC + C + 1.
 
-/*
-get_count(element(_, _, Children), Count):-
-        !,
-        aggregate_all(r(sum(N+1)),
-                      ( member(Child, Children),
-                        get_count(Child, N)
-                      ),
-                      r(Sum)),
-        Count is Sum.
-get_count(_, 0).
-*/
 
 thunks(A, B, Index, Index-thunk({null}, PatchSet)):-
         handle_thunk(A, B, ANodes, BNodes),
@@ -328,6 +315,7 @@ simulate([_|BChildren], K, BKeys, SimulateIndex, [_|Simulations], Removes, Inser
 
 %get_key_if_exists(A, A).
 get_key_if_exists(element(_, A, _), Key):- memberchk(key=Key, A).
+get_key_if_exists(widget(_, A, _), Key):- memberchk(key=Key, A).
 get_key_or_null(A, Key):-
         ( get_key_if_exists(A, Key)->
             true
@@ -405,9 +393,7 @@ has_thunks(_):- fail. % FIXME: Stub
 has_hooks(_):- fail. % FIXME: Stub
 has_descendent_hooks(_):- fail. % FIXME: Stub
 
-is_widget(element(Tag, _, _)):-
-        
-        \+memberchk(Tag, ['Button', 'EditorPane','Field', 'Frame', 'Label', 'List', 'ListItem', 'Panel', 'Tab', 'TabbedPane', 'Table', 'TextArea', 'Tree', 'ComboBox', 'ComboItem']).
+is_widget(widget(_, _, _)):- !.
 
 
 %----------------------------------------------------------------------------
@@ -547,9 +533,8 @@ patch_op(text_patch(_LeftVNode, VText), DomNode, Options, NewNode):-
         ).
 
 patch_op(widget_patch(LeftVNode, Widget), DomNode, Options, NewNode):-
-        ( is_widget(LeftVNode), is_widget(Widget),
-          LeftVNode = element(WidgetName, _, _),
-          Widget = element(WidgetName, _, _)->
+        ( LeftVNode = widget(WidgetName, _, _),
+          Widget = widget(WidgetName, _, _)->
             Updating = true,
             update_widget(Widget, LeftVNode, DomNode, NewNode)
         ; otherwise->
@@ -588,8 +573,11 @@ patch_op(order_patch(_VNode, Moves), DomNode, _Options, DomNode):-
         reorder_inserts(Inserts, DomNode, ChildNodes, KeyMap).
 
 patch_op(props_patch(VNode, Patch), DomNode, _Options, DomNode):-
-        VNode = element(_, Properties, _),
-        apply_properties(DomNode, Patch, Properties).
+        ( VNode = element(_, Properties, _)->
+            apply_properties(DomNode, Patch, Properties)
+        ; VNode = widget(_, Properties, _)->
+            apply_properties(DomNode, Patch, Properties)
+        ).
 
 %patch_op(thunk_patch(VNode, Patch), DomNode, Options, ?) % FIXME: Implement
 
