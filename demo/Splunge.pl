@@ -15,12 +15,12 @@ render(State, _Props, Form):-
             Label1 = bottom,
             Label2 = top
         ),
-        Form = {|jsx||
-               <Panel layout="horizontal" fill="horizontal">
-               <Label label={State.order}/>
-               <Button key={Key1} label={Label1} onClick={swap_labels}/>
-               <Button key={Key2} label={Label2} onClick={swap_labels}/>
-               </Panel>|}.
+        {|jsx(Form)||
+        <Panel layout="horizontal" fill="horizontal">
+        <Label label={State.order}/>
+        <Button key={Key1} label={Label1} onClick={swap_labels}/>
+        <Button key={Key2} label={Label2} onClick={swap_labels}/>
+        </Panel>|}.
 
 getInitialState(_, [order=default]).
 

@@ -7,19 +7,25 @@ requires('Splunge').
 render(State, _Props, Form):-
         memberchk(buttons=Buttons, State),
         get_some_fields(Buttons, Fields),
-        Form = {|jsx||
-               <Panel>
-                 <Label label={Label}/>
-               <Splunge foo="bar"/>
-               <Button label={State.label}/>
-               </Panel>|},
+        {|jsx(Form)||
+        <Panel>
+        <Label label={Label}/>
+        {Fields}
+        <Frame>
+        <Label label="Hello"/>
+        </Frame>
+        <Splunge foo="bar"/>
+        <Button label={State.label}/>
+        </Panel>|},
         Label = 'This is my title'.
 
 
 get_some_fields(Buttons, Fields):-
-        findall({|jsx||
-                <Button label={Label}/>|},
-                member(Label, Buttons),
+        findall(Field,
+                ( member(Label, Buttons),
+                  {|jsx(Field)||
+                  <Button label={Label}/>|}
+                ),
                 Fields).
 
 getInitialState(_, [buttons=[foo, bar, qux, baz], label='Label of button defined in state']).
