@@ -45,13 +45,13 @@ public class Panel extends ReactComponent
    ReactComponent alignmentComponent = null;
    LinkedList<ReactComponent> childComponents = new LinkedList<ReactComponent>();
 
-   public Panel(String q) throws Exception
+   public Panel(String q)
    {
       this();
       this.id = q;
    }
 
-   public Panel() throws Exception
+   public Panel()
    {
       super();
       this.id = "{" + (global_id++) + "}";
@@ -398,6 +398,7 @@ public class Panel extends ReactComponent
       }
    }
 
+  // FIXME: Is this necessary? Doesnt ReactComponent do this?
    public List<ReactComponent> getChildNodes()
    {
       return children;
