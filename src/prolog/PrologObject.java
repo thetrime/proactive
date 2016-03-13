@@ -37,6 +37,8 @@ public class PrologObject
       Term t = term; //Engine.unpack(term);
       if (t instanceof AtomTerm)
          return ((AtomTerm)t).value;
+      if (t instanceof IntegerTerm)
+        return String.valueOf(((IntegerTerm)t).value);
       else if (isNull())
          return null;
          System.out.println("Warning: asString called on " + term + " of type " + term.getClass() + " which unpacks something which is not a string: " + t + " of type " + t.getClass());

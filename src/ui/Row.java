@@ -24,6 +24,6 @@ public class Row extends ReactComponent
 
    public ReactComponent get(int index)
    {
-      return children.get(index);
+      return index<children.size()?children.get(index):null;
    }
 }

@@ -28,3 +28,11 @@ bubble_event(List, Key, Event):-
         ; otherwise->
             true
         ).
+
+between(Low, High, I):-
+        High >= Low,
+        ( I = Low
+        ; II is Low+1,
+          between(II, High, I)
+        ).
+        

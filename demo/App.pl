@@ -12,14 +12,24 @@ render(State, _Props, Form):-
         <Label label={Label}/>
         {Fields}
         <Table fill="both">
-        <Row><Label label="A"/><Label label="A"/><Label label="A"/><Label label="A"/><Label label="A"/></Row>
-        <Row><Label label="A"/><Label label="A"/><Label label="A"/><Label label="A"/><Label label="A"/></Row>
-        <Row><Label label="A"/><Label label="A"/><Label label="A"/><Label label="A"/><Label label="A"/></Row>
+        {Rows}
         </Table>
         <Splunge foo="bar"/>
         <Button label={State.label}/>
         </Panel>|},
-        Label = 'This is my title'.
+        Label = 'This is my title',
+        findall(Row,
+                ( between(0, 500, I),
+                  L1 is I * 5 + 0,
+                  L2 is I * 5 + 1,
+                  L3 is I * 5 + 2,
+                  L4 is I * 5 + 3,
+                  L5 is I * 5 + 4,
+                  {|jsx(Row)||
+                  <Row><Label label={L1}/><Label label={L2}/><Label label={L3}/><Label label={L4}/><Label label={L5}/></Row>|}
+                ),                  
+                Rows).
+
 
 
 get_some_fields(Buttons, Fields):-

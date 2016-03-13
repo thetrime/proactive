@@ -3,6 +3,7 @@ package org.proactive.ui;
 import javax.swing.JTable;
 import javax.swing.JScrollPane;
 import javax.swing.table.AbstractTableModel;
+import javax.swing.table.TableCellRenderer;
 import java.util.List;
 import java.util.LinkedList;
 import java.util.HashMap;
@@ -16,11 +17,30 @@ public class Table extends ReactComponent
    JTable table;
    JScrollPane scrollPane;
    ReactTableModel model = new ReactTableModel();
-   
+   TableCellRenderer cellRenderer = new ReactTableCellRenderer();
    public Table()
    {
-      table = new JTable(model);
+      cellRenderer = new ReactTableCellRenderer();
+      table = new JTable(model)
+         {
+            public TableCellRenderer getCellRenderer(int row, int column)
+            {
+               return cellRenderer;
+            }
+         };
       scrollPane = new JScrollPane(table);
+   }
+   
+   public class ReactTableCellRenderer implements TableCellRenderer
+   {      
+      public ReactTableCellRenderer()
+      {
+      }
+      
+      public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column)
+      {
+         return ((ReactComponent)value).getAWTComponent();
+      }
    }
 
    public class ReactTableModel extends AbstractTableModel
@@ -56,9 +76,14 @@ public class Table extends ReactComponent
       }
       public Object getValueAt(int row, int col)
       {
-         return rows.get(row).get(col).getAWTComponent();
+         return rows.get(row).get(col);
       }
 
+      public void setValueAt(Object value, int row, int col)
+      {
+         // FIXME: Fire an event here
+      }
+      
    }
    
    
