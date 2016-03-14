@@ -249,7 +249,7 @@ public class Engine
 
    private Term applyState(Term oldState, Term newState) throws PrologException
    {
-      Map<String, Term> properties = new HashMap<String, Term>();
+      HashMap<String, Term> properties = new HashMap<String, Term>();
       addProperties(oldState, properties);
       addProperties(newState, properties);
       return instantiateProps(properties);
@@ -266,7 +266,7 @@ public class Engine
       return false;
    }
    
-   private void addProperties(Term state, Map<String, Term> props) throws PrologException
+   private void addProperties(Term state, HashMap<String, Term> props) throws PrologException
    {
       if (TermConstants.emptyListAtom.equals(state))
          return;
@@ -287,6 +287,19 @@ public class Engine
                attrValue = attrValue.dereference();
                if (isNull(attrValue))
                   props.remove(((AtomTerm)attrName).value);
+               else if (props.containsKey(((AtomTerm)attrName).value))
+               {
+                  Term existingValue = props.get(((AtomTerm)attrName).value);
+                  System.out.println("Existing: " + existingValue);
+                  if (existingValue instanceof CompoundTerm && ((CompoundTerm)existingValue).tag == TermConstants.listTag)
+                  {
+                     // This happens if we want to update a sub-state. Basically we just recurse here
+                     Term replacement = applyState(existingValue, attrValue.dereference());
+                     props.put(((AtomTerm)attrName).value, replacement);
+                  }
+                  else
+                     props.put(((AtomTerm)attrName).value, attrValue.dereference());
+               }
                else
                   props.put(((AtomTerm)attrName).value, attrValue.dereference());
             }
