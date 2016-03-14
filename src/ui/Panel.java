@@ -44,7 +44,7 @@ public class Panel extends ReactComponent
 
    ReactComponent alignmentComponent = null;
    LinkedList<ReactComponent> childComponents = new LinkedList<ReactComponent>();
-
+   HashMap<ReactComponent, Integer> fillMap = new HashMap<ReactComponent, Integer>();
    public Panel(String q)
    {
       this();
@@ -120,7 +120,6 @@ public class Panel extends ReactComponent
                   rows = properties.get("rows").asInteger();
                layoutManager = new GridLayout(rows, cols);
                panel.setLayout(layoutManager);
-
             }
             repackChildren();
          }
@@ -187,6 +186,8 @@ public class Panel extends ReactComponent
          child.getParentNode().removeChild(child);
       child.setParentNode(this);
       awtMap.put(child, child.getAWTComponent());
+      fillMap.put(child, child.getFill());
+
       int childFill = child.getFill();
       if (childFill == GridBagConstraints.HORIZONTAL || childFill == GridBagConstraints.BOTH)
          total_x_weight++;
@@ -343,6 +344,7 @@ public class Panel extends ReactComponent
       children.remove(child);
       childComponents.remove(child);
       awtMap.remove(child);
+      fillMap.remove(child);
       int childFill = child.getFill();
       if (childFill == GridBagConstraints.HORIZONTAL || childFill == GridBagConstraints.BOTH)
          total_x_weight--;
@@ -357,11 +359,14 @@ public class Panel extends ReactComponent
    {
       // If the component is the same, do not remove and replace it; doing so will only
       // cause it to lose focus for no reason
-      if (newChild.getAWTComponent().equals(oldChild.getAWTComponent()))
+      if (newChild.getAWTComponent().equals(oldChild.getAWTComponent()) &&
+          fillMap.get(newChild).intValue() == newChild.getFill())
          return;
       int i = children.indexOf(oldChild);
       Component oldComponent = awtMap.get(oldChild);
       childComponents.remove(oldChild);
+      fillMap.remove(oldChild);
+      fillMap.put(newChild, newChild.getFill());
 
       super.replaceChild(newChild, oldChild);
       int childFill = oldChild.getFill();

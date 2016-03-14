@@ -32,10 +32,13 @@ public abstract class ReactComponent
          properties.put(property.getKey(), property.getValue());
       if (properties.containsKey("fill"))
       {
+         int oldFill = fill;
          if (properties.get("fill") == null)
             fill = GridBagConstraints.NONE;
          else
             fill = properties.get("fill").asFill();
+         if (oldFill != fill && getParentNode() != null)
+            getParentNode().replaceChild(this, this);
       }
       if (properties.containsKey("className"))
          className = properties.get("className").asString();
