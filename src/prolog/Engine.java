@@ -52,6 +52,7 @@ public class Engine
       env = new ReactEnvironment(this);
       env.installBuiltin("java_println", 1);
       env.installBuiltin("upcase_atom", 2);
+      env.installBuiltin("format", 3);
 
 
       env.installBuiltin("on_server", 1);
