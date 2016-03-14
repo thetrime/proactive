@@ -7,7 +7,7 @@ jsx(Content, [Variable], Dict, Term):-
         ( Goals == true->
             Term = (NotSingletons, Variable = DOM)
         ; otherwise->
-            Term = (NotSingletons, Variable = jsx(Goals, DOM))
+            Term = (NotSingletons, Goals, Variable = DOM)
         ).
 
 garbage(X,_):-
