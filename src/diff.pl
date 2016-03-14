@@ -29,7 +29,7 @@ walk(A, {null}, Index, Index-Patch):-
 
 walk(A, B, Index, PatchIndex-Patch):-
         B = element(BTag, BProps, _),
-        ( A = element(ATag, AProps, _),
+        ( A = element(ATag, AProps, _)->
             ( ATag == BTag,
               ( memberchk(key=Key, AProps),
                 memberchk(key=Key, BProps)
@@ -156,7 +156,6 @@ get_count_1([Child|Children], Count):-
         get_count_1(Children, CC),
         Count is CC + C + 1.
 
-
 thunks(A, B, Index, Index-thunk({null}, PatchSet)):-
         handle_thunk(A, B, ANodes, BNodes),
         diff(ANodes, BNodes, PatchSet).
@@ -194,7 +193,11 @@ destroy_widgets_1([Child|Children], Index, Patch):-
         ).
 
 unhook(A, Index, Index-props_patch(A, UndefinedKeys)):-
-        A = element(_, Attributes, _),
+        ( A = element(_, Attributes, _)->
+            true
+        ; A = widget(_, Attributes, _)->
+            true
+        ),
         has_hooks(A),
         findall(Key={null},
                 member(Key=_, Attributes),
@@ -314,8 +317,8 @@ simulate([_|BChildren], K, BKeys, SimulateIndex, [_|Simulations], Removes, Inser
 
 
 %get_key_if_exists(A, A).
-get_key_if_exists(element(_, A, _), Key):- memberchk(key=Key, A).
-get_key_if_exists(widget(_, A, _), Key):- memberchk(key=Key, A).
+get_key_if_exists(element(_, A, _), Key):- !, memberchk(key=Key, A).
+get_key_if_exists(widget(_, A, _), Key):- !, memberchk(key=Key, A).
 get_key_or_null(A, Key):-
         ( get_key_if_exists(A, Key)->
             true
@@ -393,8 +396,7 @@ has_thunks(_):- fail. % FIXME: Stub
 has_hooks(_):- fail. % FIXME: Stub
 has_descendent_hooks(_):- fail. % FIXME: Stub
 
-is_widget(widget(_, _, _)):- !.
-
+is_widget(widget(_, _, _)).
 
 %----------------------------------------------------------------------------
 patch(RootNode, Patches, Options, NewRoot):-
@@ -450,6 +452,9 @@ recurse(RootNode, Tree, Indices, Nodes, RootIndex, Index):-
             N1 = Nodes
         ),
         ( Tree = element(_, _, VChildren)->
+            child_nodes(RootNode, ChildNodes),
+            recurse_1(ChildNodes, VChildren, RootIndex, Indices, N1, Index)
+        ; Tree = widget(_, _, VChildren)->
             child_nodes(RootNode, ChildNodes),
             recurse_1(ChildNodes, VChildren, RootIndex, Indices, N1, Index)
         ; otherwise->
@@ -573,11 +578,8 @@ patch_op(order_patch(_VNode, Moves), DomNode, _Options, DomNode):-
         reorder_inserts(Inserts, DomNode, ChildNodes, KeyMap).
 
 patch_op(props_patch(VNode, Patch), DomNode, _Options, DomNode):-
-        ( VNode = element(_, Properties, _)->
-            apply_properties(DomNode, Patch, Properties)
-        ; VNode = widget(_, Properties, _)->
-            apply_properties(DomNode, Patch, Properties)
-        ).
+        VNode = element(_, Properties, _),
+        apply_properties(DomNode, Patch, Properties).
 
 %patch_op(thunk_patch(VNode, Patch), DomNode, Options, ?) % FIXME: Implement
 
