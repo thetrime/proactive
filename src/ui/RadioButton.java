@@ -18,6 +18,7 @@ public class RadioButton implements InputWidget
       panel.setLayout(new BorderLayout());
       panel.setOpaque(false);
       panel.add(field, BorderLayout.EAST);
+      field.setOpaque(false);
       field.setModel(new ReactButtonModel());
    }
 

@@ -50,6 +50,15 @@ public class React
                */
                try
                {
+                  for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels())
+                  {
+                     System.out.println(info.getName());
+                     if ("-put-laf-here-".equals(info.getName()))
+                     {
+                        javax.swing.UIManager.setLookAndFeel(info.getClassName());
+                        break;
+                     }
+                  }
                   long startTime = System.currentTimeMillis();
                   new org.proactive.ui.ReactApp(args[0], args[1]);
                   System.out.println("Render time: " + (System.currentTimeMillis() - startTime ) + "ms");
