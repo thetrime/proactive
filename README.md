@@ -188,7 +188,7 @@ The visible components are created out of the Java DOM on demand via getAWTCompo
      |             \                                  /                       \                                                  /       \
 <MyComponent/>   <Button/>             (org.proactive.ReactWidget)    (org.proactive.ui.Button)                                 |     {JButton}
      .                                               .                                                                          |
-     . (defined as)                                  . (refers to)                                                              | (contains)
+     . (defined as)                                  . (contains)                                                               | (contains)
      .                                               .                                                                          |
   <Panel/>                                (org.proactive.ui.Panel)                                                           {JPanel}
      |                                               |                                                                          |

@@ -103,6 +103,9 @@ jsx_children(Dict, Children, Goal, GoalTail, Singletons, SingletonsTail)-->
           variable_name(HeadName),
           optional_spaces,
           {memberchk(HeadName=List, Dict)},
+          % {Foo|Bar} notation where the tail is specified in advance
+          % This is not quite the same as [Foo|Bar] notation in Prolog:
+          %   {Foo|Foo} implies no items, whereas [A|A], A = [] implies [[]] rather than []
           ( `|` ->
               variable_name(TailName),
               optional_spaces,
@@ -178,9 +181,12 @@ expand_goals(Map, react_handler(This, Value), (get_this(This), Tail), Tail):-
         functor(Map, '.', 2),
         Map =.. ['.', Key, Value],
         Key == this, !.
-expand_goals(Map, Value, ((memberchk(Key=Value, Object)->true ; otherwise->Value = {null}), Tail), Tail):-
+expand_goals(Map, Value, (T1, get_state(Source, Key, Value)), Tail):-
         functor(Map, '.', 2), !,
-        Map =.. ['.', Object, Key].
+        % Object could also be a ./3 term
+        Map =.. ['.', Object, Key],
+        expand_goals(Object, Source, T1, Tail).
+
 expand_goals([], [], Tail, Tail):- !.
 expand_goals([Head|Tail], [NewHead|NewTail], Goals, GoalTail):-
         !,

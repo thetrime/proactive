@@ -14,6 +14,7 @@
           update_widget/4,
           destroy_widget/2,
 
+          get_state/3,
           get_this/1
          ]).
 
@@ -201,3 +202,11 @@ crystalize_attributes([_-Value|Attributes]):-
         crystalize_attributes(Attributes).
 
 react:attr_unify_hook(X, X).
+
+get_state({null}, _, {null}):- !.
+get_state(Object, Key, Value):-
+        ( memberchk(Key=Value, Object)->
+            true
+        ; otherwise->
+            Value = {null}
+        ).

@@ -35,4 +35,11 @@ between(Low, High, I):-
         ; II is Low+1,
           between(II, High, I)
         ).
-        
+
+get_state({null}, _, {null}):- !.
+get_state(Object, Key, Value):-
+        ( memberchk(Key=Value, Object)->
+            true
+        ; otherwise->
+            Value = {null}
+        ).
