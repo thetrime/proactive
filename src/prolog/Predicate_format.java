@@ -3,6 +3,7 @@ package org.proactive.prolog;
 import gnu.prolog.term.Term;
 import gnu.prolog.term.AtomTerm;
 import gnu.prolog.term.FloatTerm;
+import gnu.prolog.term.NumericTerm;
 import gnu.prolog.term.IntegerTerm;
 import gnu.prolog.term.CompoundTerm;
 import gnu.prolog.term.CompoundTermTag;
@@ -83,7 +84,7 @@ public class Predicate_format extends ExecuteOnlyCode
                            Term arg = (Term)a.next();
                            if (arg instanceof AtomTerm)
                               ps.print(((AtomTerm)arg).value);
-                           else if (arg instanceof FloatTerm)
+                           else if (arg instanceof NumericTerm)
                            {
                               String s;
                               if (r == 0)
@@ -95,7 +96,10 @@ public class Predicate_format extends ExecuteOnlyCode
                                     s = s + "0";
                               }
                               DecimalFormat df = new DecimalFormat(s);
-                              ps.print(df.format(((FloatTerm)arg).value));
+                              if (arg instanceof FloatTerm)
+                                 ps.print(df.format(((FloatTerm)arg).value));
+                              else if (arg instanceof IntegerTerm)
+                                 ps.print(df.format(((IntegerTerm)arg).value));
                            }
                            else
                               ps.print(arg.toString());
