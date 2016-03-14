@@ -38,8 +38,41 @@ between(Low, High, I):-
 
 get_state({null}, _, {null}):- !.
 get_state(Object, Key, Value):-
-        ( memberchk(Key=Value, Object)->
-            true
+        ( atom(Key)->
+            ( memberchk(Key=Value, Object)->
+                true
+            ; otherwise->
+                Value = {null}
+            )
         ; otherwise->
-            Value = {null}
+            Key =.. [Atom|Args],
+            ( memberchk(Atom=ValueWithLessArgs, Object)->
+                glue_args(ValueWithLessArgs, Args, Value)
+            ; otherwise->
+                Value = {null}
+            )
+        ).
+
+glue_args(react_handler(Context, Goal), Args, react_handler(Context, NewGoal)):- !,
+        ( Goal = Module:ActualGoal->
+            ActualGoal =.. [Name|ExistingArgs],
+            append(ExistingArgs, Args, NewArgs),
+            NewActualGoal =.. [Name|NewArgs],
+            NewGoal = Module:NewActualGoal
+        ; otherwise->
+            Goal =.. [Name|ExistingArgs],
+            append(ExistingArgs, Args, NewArgs),
+            NewGoal =.. [Name|NewArgs]
+        ).
+
+glue_args(Goal, Args, NewGoal):- !,
+        ( Goal = Module:ActualGoal->
+            ActualGoal =.. [Name|ExistingArgs],
+            append(ExistingArgs, Args, NewArgs),
+            NewActualGoal =.. [Name|NewArgs],
+            NewGoal = Module:NewActualGoal
+        ; otherwise->
+            Goal =.. [Name|ExistingArgs],
+            append(ExistingArgs, Args, NewArgs),
+            NewGoal =.. [Name|NewArgs]
         ).
