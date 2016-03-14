@@ -3,11 +3,11 @@
 :- quasi_quotation_syntax(jsx).
 
 jsx(Content, [Variable], Dict, Term):-
-        phrase_from_quasi_quotation(jsx_children(Dict, [DOM], Goals, true), Content),
+        phrase_from_quasi_quotation(jsx_children(Dict, [DOM], Goals, true, NotSingletons, true), Content),
         ( Goals == true->
-            Term = (Variable = DOM)
+            Term = (NotSingletons, Variable = DOM)
         ; otherwise->
-            Term = (Variable = jsx(Goals, DOM))
+            Term = (NotSingletons, Variable = jsx(Goals, DOM))
         ).
 
 garbage(X,_):-
@@ -26,7 +26,7 @@ tag_mismatch(Close, Tag, X, _):-
         atom_codes(Atom, Codes),
         throw(tag_mismatch(Close, Tag, Atom)).
 
-jsx_node(Dict, Node, Goals, GoalsTail) -->
+jsx_node(Dict, Node, Goals, GoalsTail, Singletons, SingletonsTail) -->
         optional_spaces,
         `<`,
         jsx_tag(Tag), optional_spaces, jsx_attributes(Dict, Attributes, Goals, G1),
@@ -38,9 +38,10 @@ jsx_node(Dict, Node, Goals, GoalsTail) -->
           )},
         ( `/>` ->
             {Content = [],
-             G1 = GoalsTail}
+             G1 = GoalsTail,
+             SingletonsTail = Singletons}
         ; `>` ->
-            jsx_children(Dict, Content, G1, GoalsTail),
+            jsx_children(Dict, Content, G1, GoalsTail, Singletons, SingletonsTail),
             optional_spaces,
             `</`, jsx_tag(Close), `>`,
             ( {Close == Tag}->
@@ -92,7 +93,7 @@ jsx_atom_codes([Code|Codes])-->
         jsx_atom_codes(Codes).
 jsx_atom_codes([])--> [].
 
-jsx_children(Dict, Children, Goal, GoalTail)-->
+jsx_children(Dict, Children, Goal, GoalTail, Singletons, SingletonsTail)-->
         % {Foo}. Note that {[Foo, Bar]} is not supported (yet)
         optional_spaces,
         `{`,
@@ -102,21 +103,32 @@ jsx_children(Dict, Children, Goal, GoalTail)-->
           variable_name(HeadName),
           optional_spaces,
           {memberchk(HeadName=List, Dict)},
-          {Goal = ((List == [] ->
-                     Children = Tail
-                  ; is_list(List)->
-                     append(List, Tail, Children)
-                  ; Children = [List|Tail]
-                  ), G1)},
+          ( `|` ->
+              variable_name(TailName),
+              optional_spaces,
+              {memberchk(TailName=TailVar, Dict),
+               Children = List,
+               Goal = G1,
+               TailVar = Tail,
+               Singletons = ((TailVar = TailVar), S1)}
+          ; {otherwise}->
+              {Singletons = S1,
+               Goal = ((List == [] ->
+                          Children = Tail
+                       ; is_list(List)->
+                          append(List, Tail, Children)
+                       ; Children = [List|Tail]
+                       ), G1)}
+          ),
         `}`,
-        jsx_children(Dict, Tail, G1, GoalTail).
+        jsx_children(Dict, Tail, G1, GoalTail, S1, SingletonsTail).
 
-jsx_children(Dict, [Element|Elements], Goal, GoalTail)-->
-        jsx_node(Dict, Element, Goal, G1),
+jsx_children(Dict, [Element|Elements], Goal, GoalTail, Singletons, SingletonsTail)-->
+        jsx_node(Dict, Element, Goal, G1, Singletons, S1),
         !,
-        jsx_children(Dict, Elements, G1, GoalTail).
+        jsx_children(Dict, Elements, G1, GoalTail, S1, SingletonsTail).
 
-jsx_children(_Dict, [], G, G)--> [].
+jsx_children(_Dict, [], G, G, S, S)--> [].
 
 
 jsx_attributes(Dict, [Name=Value|Attributes], Goals, GoalsTail)-->

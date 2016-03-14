@@ -4,18 +4,34 @@
 
 requires('Splunge').
 
+q(X):-
+        {|jsx(X)||
+        <Panel>
+          {A|B}
+          <Button/>
+        </Panel>|},
+        A = B.
+
+
+
 render(State, _Props, Form):-
         memberchk(buttons=Buttons, State),
         get_some_fields(Buttons, Fields),
         {|jsx(Form)||
         <Panel>
-        <Label label={Label}/>
-        {Fields}
-        <Table fill="both">
-        {Rows}
-        </Table>
-        <Splunge foo="bar"/>
-        <Button label={State.label}/>
+          <Label label={Label}/>
+          {Fields}
+          <List>
+            <ListItem label="Foo"/>
+            <ListItem label="Foo"/>
+            <ListItem label="Foo"/>
+            <ListItem label="Foo"/>
+          </List>
+          <Table fill="both">
+            {Rows|Tail}
+          </Table>
+          <Splunge foo="bar"/>
+          <Button label={State.label}/>
         </Panel>|},
         Label = 'This is my title',
         findall(Row,
@@ -27,8 +43,9 @@ render(State, _Props, Form):-
                   L5 is I * 5 + 4,
                   {|jsx(Row)||
                   <Row><Label label={L1}/><Label label={L2}/><Label label={L3}/><Label label={L4}/><Label label={L5}/></Row>|}
-                ),                  
-                Rows).
+                ),
+                Rows,
+                Tail).
 
 
 
