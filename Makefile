@@ -63,6 +63,7 @@ ENGINE= src/prolog/Predicate_remove_child.java                \
         src/prolog/FluxDispatcher.java                        \
 	src/prolog/Predicate_java_println.java                \
 	src/prolog/Predicate_format.java                      \
+	src/prolog/Predicate_findall.java                     \
 	src/prolog/Predicate_upcase_atom.java                 \
         src/prolog/Predicate_on_server.java                   \
         src/prolog/Predicate_colon.java                       \
