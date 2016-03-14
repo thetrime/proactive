@@ -431,7 +431,10 @@ patch_recursive([NodeIndex|Indices], RootNode, Index, PatchSet, Options, NewRoot
 apply_patch(RootNode, {null}, _Patches, _Options, RootNode):- !.
 apply_patch(RootNode, _DomNode, [], _Options, RootNode):- !.
 apply_patch(RootNode, DomNode, [Patch|Patches], Options, NewRoot):-
-        patch_op(Patch, DomNode, Options, NewNode),
+        ( patch_op(Patch, DomNode, Options, NewNode)->
+            true
+        ; writeln(failed_to_apply_patch(Patch)), fail
+        ),
         ( DomNode == RootNode->
             R1 = NewNode
         ; otherwise->
