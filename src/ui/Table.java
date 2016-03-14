@@ -1,9 +1,12 @@
 package org.proactive.ui;
 
+// see http://stackoverflow.com/questions/12060587/how-to-scroll-two-or-more-jtables-with-a-single-scrollbar
+
 import javax.swing.JTable;
 import javax.swing.JScrollPane;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableCellRenderer;
+import javax.swing.JComponent;
 import java.util.List;
 import java.util.LinkedList;
 import java.util.HashMap;
@@ -39,7 +42,13 @@ public class Table extends ReactComponent
       
       public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column)
       {
-         return ((ReactComponent)value).getAWTComponent();
+         Component c = ((ReactComponent)value).getAWTComponent();
+         if (c instanceof JComponent)
+            ((JComponent)c).setOpaque(isSelected);
+         if (isSelected)
+            c.setBackground(java.awt.Color.GRAY);
+
+         return c;
       }
    }
 
@@ -83,7 +92,6 @@ public class Table extends ReactComponent
       {
          // FIXME: Fire an event here
       }
-      
    }
    
    
