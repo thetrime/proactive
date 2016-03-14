@@ -53,6 +53,7 @@ public class Engine
       env.installBuiltin("java_println", 1);
       env.installBuiltin("upcase_atom", 2);
       env.installBuiltin("format", 3);
+      env.installBuiltin("findall", 4);
 
 
       env.installBuiltin("on_server", 1);
