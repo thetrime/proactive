@@ -126,6 +126,32 @@ jsx_children(Dict, Children, Goal, GoalTail, Singletons, SingletonsTail)-->
         `}`,
         jsx_children(Dict, Tail, G1, GoalTail, S1, SingletonsTail).
 
+jsx_children(Dict, Children, Goal, GoalTail, Singletons, SingletonsTail)-->
+        % call(+DCG)
+        % Called as call(DCG, Children, Tail)
+        optional_spaces,
+        `call(`, !,
+         read_until_close_paren(Codes, [], 1),
+        `)`,
+        {read_term_from_atom(Codes, Term, [variable_names(TermVariableNames)]),
+         unify_variables(TermVariableNames, Dict),
+         Goal = (call(Term, Children, T1), G1)},
+        jsx_children(Dict, T1, G1, GoalTail, Singletons, SingletonsTail).
+
+jsx_children(Dict, Children, Goal, GoalTail, Singletons, SingletonsTail)-->
+        % findall(+Template, +Goal)
+        % Called as findall(Template, Goal, Children, Tail)
+        optional_spaces,
+        `findall(`, !,
+         read_until_close_paren(Codes, [41], 1),
+        `)`,
+        {read_term_from_atom([102, 105, 110, 100, 97, 108, 108, 40|Codes], Term, [variable_names(TermVariableNames)]),
+         Term = findall(Template, BagGoal),
+         unify_variables(TermVariableNames, Dict),
+         Goal = (findall(Template, BagGoal, Children, T1), G1)},
+        jsx_children(Dict, T1, G1, GoalTail, Singletons, SingletonsTail).
+
+
 jsx_children(Dict, [Element|Elements], Goal, GoalTail, Singletons, SingletonsTail)-->
         jsx_node(Dict, Element, Goal, G1, Singletons, S1),
         !,
@@ -143,6 +169,21 @@ jsx_attributes(Dict, [Name=Value|Attributes], Goals, GoalsTail)-->
            G1 = GoalsTail}
         ).
 jsx_attributes(_, [], G, G)--> [].
+
+read_until_close_paren(T, T, 1, [41|C], [41|C]):- !.
+read_until_close_paren([40|Codes], T, N)-->
+        `(`, !,
+        {NN is N+1},
+        read_until_close_paren(Codes, T, NN).
+
+read_until_close_paren([41|Codes], T, N)-->
+        `)`, !,
+        {NN is N-1},
+        read_until_close_paren(Codes, T, NN).
+
+read_until_close_paren([Code|Codes], T, N)-->
+        [Code],
+        read_until_close_paren(Codes, T, N).
 
 read_until_close_brace([], 1, [125|C], [125|C]):- !.
 read_until_close_brace([123|Codes], N)-->

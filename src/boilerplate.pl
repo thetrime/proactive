@@ -21,6 +21,19 @@ call(A,B):-
           call(Goal)
         ).
 
+call(A,B,C):-
+        ( A = Module:InGoal->
+            InGoal =.. [Name|Args],
+            append(Args, [B,C], NewArgs),
+            Goal =.. [Name|NewArgs],
+            call(Module:Goal)
+        ; A =.. [Name|Args],
+          append(Args, [B,C], NewArgs),
+          Goal =.. [Name|NewArgs],
+          call(Goal)
+        ).
+
+
 bubble_event(List, Key, Event):-
         ( memberchk(Key=Handler, List),
           Handler \== {null}->
