@@ -2,6 +2,7 @@ package org.proactive.ui;
 
 import javax.swing.JList;
 import javax.swing.DefaultListModel;
+import javax.swing.DefaultListSelectionModel;
 import java.awt.Component;
 import java.util.HashMap;
 import org.proactive.prolog.PrologObject;
@@ -17,6 +18,19 @@ public class List extends ReactComponent
    {
       model = new ReactListModel<ListItem>();
       list = new JList<ListItem>(model);
+      list.setSelectionModel(new ReactListSelectionModel());
+   }
+
+   public class ReactListSelectionModel extends DefaultListSelectionModel
+   {
+      public void addSelectionInterval(int index0, int index1)
+      {
+         System.out.println("List would select");
+      }
+      public void setSelectionInterval(int index0, int index1)
+      {
+         System.out.println("List would select");
+      }
    }
 
    public class ReactListModel<E> extends DefaultListModel<E>
