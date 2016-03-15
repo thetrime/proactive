@@ -11,7 +11,7 @@ diff(A, B, [a-A|PatchSet]):-
         ; otherwise->
             PatchSet = []
         ),
-        %writeln(diff(A, B, [a-A|PatchSet])).
+        writeln(diff(A, B, [a-A|PatchSet])),
         true.
 
 walk(A, A, _, _):- !, fail.
@@ -97,6 +97,12 @@ diff_props(A, B, Diff):-
                 Diff),
         Diff \== [].
 
+expand_children(widget(_, _, Children), AllChildren):-
+        !,
+        findall(ChildElement,
+                child_element(Children, ChildElement),
+                AllChildren).
+
 expand_children(element(_, _, Children), AllChildren):-
         findall(ChildElement,
                 child_element(Children, ChildElement),
@@ -146,7 +152,9 @@ diff_children_1(A, B, Index, ParentIndex, Patch):-
           )
         ).
 
-
+get_count(widget(_, _, Children), Count):-
+        !,
+        get_count_1(Children, Count).
 get_count(element(_, _, Children), Count):-
         !,
         get_count_1(Children, Count).
@@ -634,8 +642,8 @@ render(Options, VNodeIn, DomNode):-
         ; otherwise->
             Document = {root_document}
         ),
-        ( is_widget(VNode)->
-            init_widget(Document, VNode, DomNode)
+        ( VNode = widget(Tag, Attributes, Children)->
+            init_widget(Document, widget(Tag, [children=Children|Attributes], []), DomNode)
         ; atom(VNode)->  % Text node
             writeln(text_node(VNode)),
             create_text_node(Document, VNode, DomNode)
