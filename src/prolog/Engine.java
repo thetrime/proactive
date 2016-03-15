@@ -298,7 +298,7 @@ public class Engine
                else if (props.containsKey(((AtomTerm)attrName).value))
                {
                   Term existingValue = props.get(((AtomTerm)attrName).value);
-                  System.out.println("Existing: " + existingValue);
+                  //System.out.println("Existing: " + existingValue);
                   if (existingValue instanceof CompoundTerm && ((CompoundTerm)existingValue).tag == TermConstants.listTag)
                   {
                      // This happens if we want to update a sub-state. Basically we just recurse here
