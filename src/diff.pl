@@ -10,7 +10,9 @@ diff(A, B, [a-A|PatchSet]):-
             true
         ; otherwise->
             PatchSet = []
-        ).
+        ),
+        %writeln(diff(A, B, [a-A|PatchSet])).
+        true.
 
 walk(A, A, _, _):- !, fail.
 
@@ -220,6 +222,8 @@ unhook_1([Child|Children], Index, Patch):-
           unhook_1(Children, III, Patch)
         ).
 
+% reorder puts BChildren into a list that matches AChildren as closely as possible
+% inserting nulls or removing items to make them the same length
 reorder(AChildren, BChildren, Ordered, Moves):-
         key_index(BChildren, AChildren, 0, BKeys, BFree),
         key_index(AChildren, BChildren, 0, AKeys, AFree),
@@ -257,6 +261,21 @@ simulate([], K, BKeys, SimulateIndex, [SimulateItem|SimulateItems], [remove(Simu
 simulate([WantedItem|BChildren], K, BKeys, SimulateIndex, [{null}|Simulations], [remove({null}, SimulateIndex, {null})|Removes], Inserts):-
         !,
         simulate([WantedItem|BChildren], K, BKeys, SimulateIndex, Simulations, Removes, Inserts).
+
+simulate([WantedItem|BChildren], K, BKeys, SimulateIndex, [], Removes, Inserts):-
+        !,
+        % This is the case where simulateItems are finished but WantedItems are not (ie when an item is added)
+        get_key_or_null(WantedItem, WantedKey),
+        ( WantedKey \== {null} ->
+            Inserts = [insert(WantedKey, K)|MoreInserts],
+            NextB = BChildren,
+            KK is K+1
+        ; otherwise->
+            NextB = [WantedItem|BChildren],
+            KK = K,
+            MoreInserts = Inserts
+        ),
+        simulate(NextB, KK, BKeys, SimulateIndex, [], Removes, MoreInserts).
 
 simulate([WantedItem|BChildren], K, BKeys, SimulateIndex, [SimulateItem|Simulations], Removes, Inserts):-
         ( SimulateItem == {null}
@@ -298,10 +317,11 @@ simulate([WantedItem|BChildren], K, BKeys, SimulateIndex, [SimulateItem|Simulati
             KK is K+1,
             NextB = BChildren
         ; otherwise->
+            % A key in simulate has no matching wanted key, remove it
             KK = K,
             % K does not increment
-            % simulateIndex does not increment
-            MoreSimulations = [SimulateItem|Simulations],
+            % simulateIndex does not increment but we DO remove the item from simulations
+            MoreSimulations = Simulations,
             SS = SimulateIndex,
             NextB = [WantedItem|BChildren],
             MoreInserts = Inserts,
@@ -379,8 +399,8 @@ reorder_2([NewItem|BChildren], AKeys, BStillFree, NewChildren):-
             ),
             MoreBFree = BStillFree
         ; otherwise->
-            ( BStillFree = [_|MoreBFree]->
-                NewChildren = [NewItem|More]
+            ( BStillFree = [free(BItem, _)|MoreBFree]->
+                NewChildren = [BItem|More]
             ; otherwise->
                 MoreBFree = BStillFree,
                 NewChildren = More
@@ -590,12 +610,12 @@ reorder_removes([], _DomNode, _ChildNodes, T, T):- !.
 reorder_removes([remove(From, Key)|Removes], DomNode, ChildNodes, KeyMap, FinalKeyMap):-
         qnth0(From, ChildNodes, Node),
         ( Key \== {null}->
-            KeyMap = [Key-Node|T]
+            NewKeyMap = [Key-Node|KeyMap]
         ; otherwise->
-            KeyMap = T
+            NewKeyMap = KeyMap
         ),
         remove_child(DomNode, Node),
-        reorder_removes(Removes, DomNode, ChildNodes, T, FinalKeyMap).
+        reorder_removes(Removes, DomNode, ChildNodes, NewKeyMap, FinalKeyMap).
 
 reorder_inserts([], _DomNode, _ChildNodes, _KeyMap):- !.
 reorder_inserts([insert(Key, Position)|Inserts], DomNode, ChildNodes, KeyMap):-
