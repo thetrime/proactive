@@ -6,28 +6,84 @@ import javax.swing.JLabel;
 import javax.swing.JRadioButton;
 import javax.swing.JCheckBox;
 import javax.swing.JPasswordField;
+import javax.swing.JPopupMenu;
+import javax.swing.JMenuItem;
 import javax.swing.BorderFactory;
 import java.util.List;
 import java.util.HashMap;
 import java.awt.Component;
 import java.awt.BorderLayout;
+import javax.swing.event.PopupMenuListener;
+import javax.swing.event.PopupMenuEvent;
 import java.awt.event.FocusListener;
 import java.awt.event.FocusEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseEvent;
 import org.proactive.prolog.PrologObject;
 import org.proactive.ReactLeafComponent;
 
-public class Field extends ReactLeafComponent
+public class Field extends ReactComponent
 {
    private static final int TEXT = 0;
    private static final int RADIO = 1;
    private static final int CHECKBOX = 2;
    private static final int PASSWORD = 3;
 
+   private ReactPopupMenu popup = null;
    private InputWidget widget;
    private int type = TEXT;
    public Field()
    {
       widget = new TextField();
+      popup = new ReactPopupMenu();
+      popup.addPopupMenuListener(new PopupMenuListener()
+         {
+            public void popupMenuCanceled(PopupMenuEvent e)
+            {
+               System.out.println("Cancel menu");
+               popup.setVisible(true);
+            }
+            public void popupMenuWillBecomeVisible(PopupMenuEvent e)
+            {
+               System.out.println("Show menu");
+            }
+            public void popupMenuWillBecomeInvisible(PopupMenuEvent e)
+            {
+               System.out.println("Hide menu");
+               popup.setVisible(true);
+            }
+         });
+   }
+
+   public class ReactPopupMenu extends JPopupMenu implements MouseListener
+   {
+      public ReactPopupMenu()
+      {
+         addMouseListener(this);
+      }
+
+      public void mouseEntered(MouseEvent me)
+      {
+         System.out.println("Mouse entered");
+         reallySetVisible(true);
+      }
+
+      public void mouseExited(MouseEvent me) {}
+      public void mouseClicked(MouseEvent me) {}
+      public void mousePressed(MouseEvent me) {}
+      public void mouseReleased(MouseEvent me) {}
+
+      public void setVisible(boolean b)
+      {
+         super.setVisible(b);
+         if (!b)
+         {
+            // This is a bit ugly really. Almost always you would want to dismiss the popup at this point
+            // however, we cannot rely on the event to actually hide it
+            reallySetVisible(true);
+         }
+      }
    }
 
    private PrologObject serializeObject()
@@ -64,7 +120,45 @@ public class Field extends ReactLeafComponent
       widget.getAWTComponent().addFocusListener(focusListener);
    }
 
+   private MouseListener contextMenuListener = null;
+   private void setContextMenuListener(PrologObject value)
+   {
+      if (contextMenuListener != null)
+         widget.getAWTComponent().removeMouseListener(contextMenuListener);
+      if (value == null || value.isNull())
+         return;
+      System.out.println("onContext: " + value);
+      contextMenuListener = new MouseAdapter()
+         {
+            public void triggerPopup()
+            {
+               try
+               {
+                  getOwnerDocument().triggerEvent(value.asTerm(), serializeObject().asTerm());
+               }
+               catch (Exception e)
+               {
+                  e.printStackTrace();
+               }
+            }
 
+            public void mouseClicked(MouseEvent me)
+            {
+               if (me.isPopupTrigger())
+               {
+                  triggerPopup();
+               }
+            }
+            public void mousePressed(MouseEvent me)
+            {
+               if (me.isPopupTrigger())
+               {
+                  triggerPopup();
+               }
+            }
+         };
+      widget.getAWTComponent().addMouseListener(contextMenuListener);
+   }
 
 
    public void setProperties(HashMap<String, PrologObject> properties)
@@ -139,8 +233,8 @@ public class Field extends ReactLeafComponent
                   }
                });
       }
-
-
+      if (properties.containsKey("onContextMenu"))
+         setContextMenuListener(properties.get("onContextMenu"));
       if (properties.containsKey("onChange"))
       {
          PrologObject handler = properties.get("onChange");
@@ -162,7 +256,61 @@ public class Field extends ReactLeafComponent
                   }
                });
       }
+      if (properties.containsKey("contextMenu"))
+      {
+         PrologObject menu = properties.get("contextMenu");
+         if (menu.isNull())
+         {
+            popup.setVisible(false);
+         }
+         else
+         {
+            popup.removeAll();
+            popup.add(new JMenuItem("Foo"));
+            popup.add(new JMenuItem("Bar"));
+            popup.add(new JMenuItem("Baz"));
+            if (widget.getAWTComponent().isDisplayable())
+               popup.show(widget.getAWTComponent(), 0, 0);
+         }
+      }
 
+   }
+
+   public void insertChildBefore(ReactComponent child, ReactComponent sibling)
+   {
+      super.insertChildBefore(child, sibling);
+      if (child instanceof PopupMenu)
+      {
+         popup.createFrom((PopupMenu)child);
+         if (widget.getAWTComponent().isDisplayable())
+            popup.show(widget.getAWTComponent(), 0, 0);
+      }
+   }
+
+   public void removeChild(ReactComponent child)
+   {
+      super.removeChild(child);
+      if (child instanceof PopupMenu)
+      {
+         popup.removeAll();
+         popup.setVisible(false);
+      }
+   }
+
+   public void replaceChild(ReactComponent newChild, ReactComponent oldChild)
+   {
+      if (newChild instanceof PopupMenu)
+      {
+         popup.createFrom((PopupMenu)child);
+         if (widget.getAWTComponent().isDisplayable())
+            popup.show(widget.getAWTComponent(), 0, 0);
+      }
+      if (oldChild instanceof PopupMenu)
+      {
+         popup.removeAll();
+         popup.setVisible(false);
+      }
+      super.replaceChild(newChild, oldChild);
    }
 
    public void setValue(PrologObject value)
