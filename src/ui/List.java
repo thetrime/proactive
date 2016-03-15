@@ -13,12 +13,13 @@ public class List extends ReactComponent
 {
    JList<ListItem> list = null;
    ReactListModel<ListItem> model = null;
-   
+   ReactListSelectionModel selectionModel;
    public List()
    {
       model = new ReactListModel<ListItem>();
       list = new JList<ListItem>(model);
-      list.setSelectionModel(new ReactListSelectionModel());
+      selectionModel = new ReactListSelectionModel();
+      list.setSelectionModel(selectionModel);
    }
 
    public class ReactListSelectionModel extends DefaultListSelectionModel
@@ -30,6 +31,10 @@ public class List extends ReactComponent
       public void setSelectionInterval(int index0, int index1)
       {
          System.out.println("List would select");
+      }
+      public void reallyAddSelectionInterval(int index0, int index1)
+      {
+         super.addSelectionInterval(index0, index1);
       }
    }
 
@@ -52,12 +57,20 @@ public class List extends ReactComponent
       super.insertChildBefore(child, sibling);
       if (child instanceof ListItem)
       {
+         ListItem item = (ListItem)child;
          if (sibling == null)
-            model.addElement((ListItem)child);
+         {
+            model.addElement(item);
+            if (item.isSelected())
+               selectionModel.reallyAddSelectionInterval(model.getSize()-1, model.getSize()-1);
+         }
          else
          {
             int index = children.indexOf(sibling);
-            model.insertElementAt((ListItem)child, index);
+            model.insertElementAt(item, index);
+            if (item.isSelected())
+               selectionModel.reallyAddSelectionInterval(index, index);
+
          }
       }
    }

@@ -21,11 +21,8 @@ render(State, _Props, Form):-
         <Panel>
           <Label label={Label}/>
           {Fields}
-          <List>
-            <ListItem label="Foo"/>
-            <ListItem label="Foo"/>
-            <ListItem label="Foo"/>
-            <ListItem label="Foo"/>
+          <List fill="horizontal" onSelect={this.listSelect}>
+            findall(ListItem, list_item(State, ListItem))
           </List>
           <Table fill="both">
             {Rows|Tail}
@@ -47,7 +44,24 @@ render(State, _Props, Form):-
                 Rows,
                 Tail).
 
+list_item(State, ListItem):-
+        member(Label, [foo, bar, baz, qux]),
+        ( memberchk(Label=selected, State)->
+            Selected = true
+        ; otherwise->
+            Selected = false
+        ),
+        {|jsx(ListItem)||
+        <ListItem label={Label} key={Label} selected={Selected}/>|}.
 
+listSelect(Event, _State, _Props, NewState):-
+        memberchk(key=Key, Event),
+        memberchk(isSelected=IsSelected, Event),
+        ( IsSelected == true ->
+            NewState = [Key=selected]
+        ; otherwise->
+            NewState = [Key=not_selected]
+        ).
 
 get_some_fields(Buttons, Fields):-
         findall(Field,

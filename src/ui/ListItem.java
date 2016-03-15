@@ -20,6 +20,7 @@ public class ListItem extends ReactLeafComponent
 {
    private String label = "";
    private PrologObject value = null;
+   private boolean isSelected = false;
    public Component getAWTComponent()
    {
       return null;
@@ -40,6 +41,9 @@ public class ListItem extends ReactLeafComponent
          label = properties.get("label").asString();
       if (properties.containsKey("value"))
          value = properties.get("value");
+      if (properties.containsKey("selected"))
+         isSelected = properties.get("selected").asBoolean();
+
    }
 
    public String toString()
@@ -55,5 +59,10 @@ public class ListItem extends ReactLeafComponent
    public PrologObject getValue()
    {
       return value;
+   }
+
+   public boolean isSelected()
+   {
+      return isSelected;
    }
 }
