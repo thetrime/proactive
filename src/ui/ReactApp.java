@@ -26,7 +26,7 @@ import gnu.prolog.term.CompoundTerm;
 import gnu.prolog.term.AtomTerm;
 import gnu.prolog.vm.TermConstants;
 
-public class ReactApp extends JFrame implements CodeChangeListener, StyleSheetListener
+public class ReactApp extends JFrame implements StyleSheetListener
 {
    String URL = null;
    private Engine engine;
@@ -40,7 +40,7 @@ public class ReactApp extends JFrame implements CodeChangeListener, StyleSheetLi
       React.setStyleSheet(sheet);
       engine = new Engine(URL, rootElementId);
       context = new ReactWidget(null, engine, rootElementId, TermConstants.emptyListAtom);
-      React.addCodeChangeListener(new URI(URL + "/listen"), rootElementId, this);
+      //React.addCodeChangeListener(new URI(URL + "/listen"), rootElementId, this);
       React.addStyleSheetListener(this);
       getContentPane().setLayout(new BorderLayout());
       getContentPane().add(context.getAWTComponent(), BorderLayout.CENTER);

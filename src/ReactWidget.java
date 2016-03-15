@@ -13,9 +13,10 @@ import java.util.HashMap;
 import java.awt.Component;
 import java.awt.GridBagConstraints;
 import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
 import java.awt.BorderLayout;
 
-public class ReactWidget extends ReactComponent
+public class ReactWidget extends ReactComponent implements CodeChangeListener
 {
    protected Engine engine;
    protected String elementId;
@@ -32,6 +33,8 @@ public class ReactWidget extends ReactComponent
       this.elementId = elementId;
       this.props = props;
       this.owner = parentContext;
+
+      React.addCodeChangeListener(engine.getListenURI(), elementId, this);
 
       // First, get the state
       this.state = engine.getInitialState(elementId, props);
@@ -53,7 +56,26 @@ public class ReactWidget extends ReactComponent
       Term patches = engine.diff(emptyVDom, vDom);
       // And ask for them to be realized
       React.queuePatch(patches, child, engine);
-//      engine.applyPatch(patches, child);
+   }
+
+   public void handleCodeChange() 
+   {
+      System.out.println("Widget code changed");
+      SwingUtilities.invokeLater(new Runnable()
+         {
+            public void run()
+            {
+               try
+               {
+                  engine.make();
+                  reRender();
+               }
+               catch(Exception e)
+               {
+                  e.printStackTrace();
+               }
+            }
+         });
    }
 
    public Component getAWTComponent()

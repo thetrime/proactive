@@ -37,14 +37,21 @@ public class Engine
    private Interpreter interpreter;
    private String componentURL;
    private String rootElementId;
+   private URI listenURI;
    private URI goalURI;
    public Engine(String baseURL, String rootElementId) throws Exception
    {
       this.goalURI = new URI(baseURL + "/goal");
       this.componentURL = baseURL + "/component/";
+      this.listenURI = new URI(baseURL + "/listen");
       this.rootElementId = rootElementId;
       make();
-   }   
+   }
+
+   public URI getListenURI()
+   {
+      return listenURI;
+   }
 
    public void make() throws Exception
    {
