@@ -94,37 +94,47 @@ jsx_atom_codes([Code|Codes])-->
 jsx_atom_codes([])--> [].
 
 jsx_children(Dict, Children, Goal, GoalTail, Singletons, SingletonsTail)-->
-        % {Foo}. Note that {[Foo, Bar]} is not supported (yet)
+        % This allows terms like {A|Tail}
         optional_spaces,
         `{`,
-          !,
-          % Array of components. We have to have a pointer to the siblings, which is why we do it in jsx_children
-          % rather than jsx_node
+          optional_spaces,
           variable_name(HeadName),
           optional_spaces,
-          {memberchk(HeadName=List, Dict)},
-          % {Foo|Bar} notation where the tail is specified in advance
-          % This is not quite the same as [Foo|Bar] notation in Prolog:
-          %   {Foo|Foo} implies no items, whereas [A|A], A = [] implies [[]] rather than []
-          ( `|` ->
-              variable_name(TailName),
-              optional_spaces,
-              {memberchk(TailName=TailVar, Dict),
-               Children = List,
-               Goal = G1,
-               TailVar = Tail,
-               Singletons = ((TailVar = TailVar), S1)}
-          ; {otherwise}->
-              {Singletons = S1,
-               Goal = ((List == [] ->
-                          Children = Tail
-                       ; is_list(List)->
-                          append(List, Tail, Children)
-                       ; Children = [List|Tail]
-                       ), G1)}
-          ),
+          `|`,
+          !,
+          optional_spaces,
+          variable_name(TailName),
+          optional_spaces,
         `}`,
+        !,
+        {memberchk(HeadName=List, Dict),
+         memberchk(TailName=TailVar, Dict),
+         Children = List,
+         Goal = G1,
+         TailVar = Tail,
+         Singletons = ((TailVar = TailVar), S1)},
         jsx_children(Dict, Tail, G1, GoalTail, S1, SingletonsTail).
+
+jsx_children(Dict, Children, Goal, GoalTail, Singletons, SingletonsTail)-->
+        % This allows terms like {A}, {[A, B]} and {Props.children}
+        optional_spaces,
+        `{`,
+        read_until_close_brace(Codes, 1),
+        `}`,
+        !,
+        {read_term_from_atom(Codes, Term, [variable_names(TermVariableNames)]),
+         unify_variables(TermVariableNames, Dict),
+         ( var(Term)->
+             Goal = ((Term == [] ->
+                        Children = Tail
+                     ; is_list(Term)->
+                        append(Term, Tail, Children)
+                     ; Children = [Term|Tail]
+                     ), G1)
+         ; expand_goals(Term, List, G2, G1),
+           Goal = (append(List, Tail, Children), G2)
+         )},
+        jsx_children(Dict, Tail, G1, GoalTail, Singletons, SingletonsTail).
 
 jsx_children(Dict, Children, Goal, GoalTail, Singletons, SingletonsTail)-->
         % call(+DCG)
