@@ -11,7 +11,7 @@ diff(A, B, [a-A|PatchSet]):-
         ; otherwise->
             PatchSet = []
         ),
-        writeln(diff(A, B, [a-A|PatchSet])),
+        %writeln(diff(A, B, [a-A|PatchSet])),
         true.
 
 walk(A, A, _, _):- !, fail.

@@ -38,6 +38,7 @@ public class Frame extends ReactComponent
    public void setProperties(HashMap<String, PrologObject> properties)
    {
      super.setProperties(properties);
+     contentPane.setProperties(properties);
    }
    public Component getAWTComponent()
    {

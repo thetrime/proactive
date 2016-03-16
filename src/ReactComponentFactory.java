@@ -22,6 +22,8 @@ public class ReactComponentFactory
       Constructor<? extends ReactComponent> c = configuration.getImplementingClass(tagName);
       if (c != null)
          return c.newInstance();
+      System.out.println("Could not construct element: " + tagName);
+      System.exit(-1);
       return null;
    }
 

@@ -14,6 +14,8 @@ BASE=src/React.java                                           \
 UI=  src/ui/Panel.java                                        \
      src/ui/Button.java                                       \
      src/ui/Field.java                                        \
+     src/ui/PopupMenu.java                                    \
+     src/ui/MenuItem.java                                     \
      src/ui/ComboBox.java                                     \
      src/ui/ComboItem.java                                    \
      src/ui/InputWidget.java                                  \

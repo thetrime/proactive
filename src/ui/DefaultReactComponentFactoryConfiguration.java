@@ -30,6 +30,8 @@ public class DefaultReactComponentFactoryConfiguration implements ReactComponent
          constructorHash.put("TabbedPane", TabbedPane.class.getConstructor());
          constructorHash.put("Tab", Tab.class.getConstructor());
          constructorHash.put("Frame", Frame.class.getConstructor());
+         constructorHash.put("PopupMenu", PopupMenu.class.getConstructor());
+         constructorHash.put("MenuItem", MenuItem.class.getConstructor());
       }
       catch(Exception e)
       {

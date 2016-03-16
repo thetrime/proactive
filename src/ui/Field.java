@@ -30,44 +30,12 @@ public class Field extends ReactComponent
    private static final int CHECKBOX = 2;
    private static final int PASSWORD = 3;
 
-   private ReactPopupMenu popup = null;
+   private PopupMenu popup = null;
    private InputWidget widget;
    private int type = TEXT;
    public Field()
    {
       widget = new TextField();
-      popup = new ReactPopupMenu();
-      popup.addPopupMenuListener(new PopupMenuListener()
-         {
-            public void popupMenuCanceled(PopupMenuEvent e)
-            {
-               System.out.println("Cancel menu");
-               popup.setVisible(true);
-            }
-            public void popupMenuWillBecomeVisible(PopupMenuEvent e)
-            {
-               System.out.println("Show menu");
-            }
-            public void popupMenuWillBecomeInvisible(PopupMenuEvent e)
-            {
-               System.out.println("Hide menu");
-               popup.setVisible(true);
-            }
-         });
-   }
-
-   public class ReactPopupMenu extends JPopupMenu
-   {
-      public void setVisible(boolean b)
-      {
-         super.setVisible(b);
-         if (!b)
-         {
-            // This is a bit ugly really. Almost always you would want to dismiss the popup at this point
-            // however, we cannot rely on the event to actually hide it
-            super.setVisible(true);
-         }
-      }
    }
 
    private PrologObject serializeObject()
@@ -111,7 +79,6 @@ public class Field extends ReactComponent
          widget.getAWTComponent().removeMouseListener(contextMenuListener);
       if (value == null || value.isNull())
          return;
-      System.out.println("onContext: " + value);
       contextMenuListener = new MouseAdapter()
          {
             public void triggerPopup()
@@ -164,6 +131,8 @@ public class Field extends ReactComponent
             type = PASSWORD;
          if (oldType != type)
          {
+            if (internalPopupListener != null)
+               widget.getAWTComponent().removeMouseListener(internalPopupListener);
             switch(type)
             {
                case TEXT:
@@ -179,6 +148,7 @@ public class Field extends ReactComponent
                   widget = new CheckBox();
                   break;
             }
+            configureInternalPopupListener();
             if (getParentNode() != null)
                getParentNode().replaceChild(this, this);
          }
@@ -240,29 +210,6 @@ public class Field extends ReactComponent
                   }
                });
       }
-      if (properties.containsKey("contextMenu"))
-      {
-         PrologObject menu = properties.get("contextMenu");
-         if (menu.isNull())
-         {
-            popup.setVisible(false);
-         }
-         else
-         {
-            popup.removeAll();
-            popup.add(new JMenuItem("Foo"));
-            popup.add(new JMenuItem("Bar"));
-            popup.add(new JMenuItem("Baz"));
-            if (widget.getAWTComponent().isDisplayable())
-               popup.show(widget.getAWTComponent(), 0, 0);
-         }
-      }
-
-   }
-
-   public class PopupMenu extends ReactComponent
-   {
-      public Component getAWTComponent() { return null; }
    }
 
    public class MenuItem extends ReactComponent
@@ -276,39 +223,66 @@ public class Field extends ReactComponent
       if (child instanceof PopupMenu)
       {
          System.out.println("Got popup menu!");
-         createPopupFrom((PopupMenu)child, popup);
-         if (widget.getAWTComponent().isDisplayable())
-            popup.show(widget.getAWTComponent(), 0, 0);
+         popup = (PopupMenu)child;
+         configureInternalPopupListener();
       }
    }
 
-   public void createPopupFrom(PopupMenu item, JPopupMenu popup)
+   private MouseListener internalPopupListener = null;
+   private void configureInternalPopupListener()
    {
+      if (internalPopupListener != null)
+         widget.getAWTComponent().removeMouseListener(internalPopupListener);
+      if (popup == null)
+      {
+         internalPopupListener = null;
+      }
+      else
+      {
+         internalPopupListener = new MouseAdapter()
+            {
+               public void mouseClicked(MouseEvent me)
+               {
+                  if (me.isPopupTrigger() && popup != null)
+                  {
+                     popup.getMenu().show(widget.getAWTComponent(), me.getX(), me.getY());
+                  }
+               }
+               public void mousePressed(MouseEvent me)
+               {
+                  if (me.isPopupTrigger() && popup != null)
+                  {
+                     popup.getMenu().show(widget.getAWTComponent(), me.getX(), me.getY());
+                  }
+               }
+            };
+         widget.getAWTComponent().addMouseListener(internalPopupListener);
+      }
    }
+
 
    public void removeChild(ReactComponent child)
    {
       super.removeChild(child);
       if (child instanceof PopupMenu)
       {
-         popup.removeAll();
-         popup.setVisible(false);
+         popup = null;
+         configureInternalPopupListener();
       }
    }
 
    public void replaceChild(ReactComponent newChild, ReactComponent oldChild)
    {
-      if (newChild instanceof PopupMenu)
-      {
-         createPopupFrom((PopupMenu)newChild, popup);
-         if (widget.getAWTComponent().isDisplayable())
-            popup.show(widget.getAWTComponent(), 0, 0);
-      }
       if (oldChild instanceof PopupMenu)
       {
-         popup.removeAll();
-         popup.setVisible(false);
+         popup = null;
       }
+      if (newChild instanceof PopupMenu)
+      {
+         popup = (PopupMenu)newChild;
+      }
+      if (newChild instanceof PopupMenu || oldChild instanceof PopupMenu)
+         configureInternalPopupListener();
       super.replaceChild(newChild, oldChild);
    }
 
