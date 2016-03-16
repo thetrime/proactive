@@ -187,11 +187,10 @@ public class Panel extends ReactComponent
       child.setParentNode(this);
       awtMap.put(child, child.getAWTComponent());
       fillMap.put(child, child.getFill());
-
       int childFill = child.getFill();
-      if (childFill == GridBagConstraints.HORIZONTAL || childFill == GridBagConstraints.BOTH)
+      if ((childFill == GridBagConstraints.HORIZONTAL) || (childFill == GridBagConstraints.BOTH))
          total_x_weight++;
-      if (childFill == GridBagConstraints.VERTICAL || childFill == GridBagConstraints.BOTH)
+      if ((childFill == GridBagConstraints.VERTICAL) || (childFill == GridBagConstraints.BOTH))
          total_y_weight++;
       int index = (sibling==null)?-1:children.indexOf(sibling);
       if (index != -1)
@@ -341,11 +340,13 @@ public class Panel extends ReactComponent
 
    public void removeChild(ReactComponent child)
    {
+      if (!children.contains(child))
+         return;
       children.remove(child);
       childComponents.remove(child);
       awtMap.remove(child);
+      int childFill = fillMap.get(child);
       fillMap.remove(child);
-      int childFill = child.getFill();
       if (childFill == GridBagConstraints.HORIZONTAL || childFill == GridBagConstraints.BOTH)
          total_x_weight--;
       if (childFill == GridBagConstraints.VERTICAL || childFill == GridBagConstraints.BOTH)
@@ -362,6 +363,7 @@ public class Panel extends ReactComponent
       if (newChild.getAWTComponent().equals(oldChild.getAWTComponent()) &&
           fillMap.get(newChild).intValue() == newChild.getFill())
          return;
+
       int i = children.indexOf(oldChild);
       Component oldComponent = awtMap.get(oldChild);
       childComponents.remove(oldChild);

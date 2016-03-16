@@ -14,11 +14,15 @@ import org.proactive.ReactComponent;
 public class Frame extends ReactComponent 
 {
    protected JFrame frame = new JFrame();
-   private Panel contentPane = new Panel();
+   private Panel contentPane = new Panel("qqq");
    private boolean userHasResizedFrame = false;
    private int repackCount = 0;
    public Frame()
    {
+      HashMap<String, PrologObject> contentPaneProperties = new HashMap<String, PrologObject>();
+      contentPaneProperties.put("fill", new PrologObject(PrologObject.serializeObject("both")));
+      contentPaneProperties.put("layout", new PrologObject(PrologObject.serializeObject("vertical")));
+      contentPane.setProperties(contentPaneProperties);
       frame.getContentPane().setLayout(new BorderLayout());
       frame.getContentPane().add(contentPane.getAWTComponent(), BorderLayout.CENTER);
       frame.pack();
