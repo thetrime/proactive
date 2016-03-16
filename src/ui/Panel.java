@@ -340,6 +340,9 @@ public class Panel extends ReactComponent
 
    public void removeChild(ReactComponent child)
    {
+      // FIXME: This is wallpaper. We should not be removing children from things that are not their parents
+      //        I suspect this happens in things like Frame where adding a child to the Frame actually adds it
+      //        to the Panel inside the Frame
       if (!children.contains(child))
          return;
       children.remove(child);
