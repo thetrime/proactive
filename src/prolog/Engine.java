@@ -187,7 +187,6 @@ public class Engine
          Term goal;
          CompoundTerm c_handler = (CompoundTerm)handler;
          goal = ReactModule.crossModuleCall(context.getComponentName(), new CompoundTerm(c_handler.tag.functor, new Term[]{c_handler.args[0], c_handler.args[1], event}));
-         //System.out.println("Executing " + goal);
          int undoPosition = interpreter.getUndoPosition();
          Interpreter.Goal g = interpreter.prepareGoal(goal);
          try
@@ -244,6 +243,7 @@ public class Engine
             //System.out.println("Goal " + goal + " has set the state to " + newState.dereference());
             context.setState(applyState(state, newState.dereference()));
             interpreter.undo(undoPosition);
+            //System.out.println("Executed " + goal);
             return (rc == PrologCode.RC.SUCCESS || rc == PrologCode.RC.SUCCESS_LAST);
          }
       }
@@ -260,6 +260,7 @@ public class Engine
       HashMap<String, Term> properties = new HashMap<String, Term>();
       addProperties(oldState, properties);
       addProperties(newState, properties);
+      System.out.println("properties: " + properties);
       return instantiateProps(properties);
    }
 
@@ -293,7 +294,9 @@ public class Engine
                if (!(attrName instanceof AtomTerm))
                   PrologException.typeError(AtomTerm.get("atom"), attrName);
                attrValue = attrValue.dereference();
-               if (isNull(attrValue))
+               if (attrValue instanceof VariableTerm)
+                  ;
+               else if (isNull(attrValue))
                   props.remove(((AtomTerm)attrName).value);
                else if (props.containsKey(((AtomTerm)attrName).value))
                {
@@ -309,7 +312,16 @@ public class Engine
                      props.put(((AtomTerm)attrName).value, attrValue.dereference());
                }
                else
-                  props.put(((AtomTerm)attrName).value, attrValue.dereference());
+               {
+                  // A totally new value. Note that it might still be a list with variables in it
+                  if (attrValue instanceof CompoundTerm && ((CompoundTerm)attrValue).tag == TermConstants.listTag)
+                  {
+                     Term replacement = applyState(TermConstants.emptyListAtom, attrValue.dereference());
+                     props.put(((AtomTerm)attrName).value, replacement);
+                  }
+                  else
+                     props.put(((AtomTerm)attrName).value, attrValue.dereference());
+               }
             }
             else
                PrologException.typeError(AtomTerm.get("=/2"), c);
