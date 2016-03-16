@@ -27,6 +27,7 @@ UI=  src/ui/Panel.java                                        \
      src/ui/PasswordField.java                                \
      src/ui/Label.java                                        \
      src/ui/Table.java                                        \
+     src/ui/TableHeader.java                                  \
      src/ui/Row.java                                          \
      src/ui/TabbedPane.java                                   \
      src/ui/Tab.java                                          \

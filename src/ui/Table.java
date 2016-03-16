@@ -5,8 +5,13 @@ package org.proactive.ui;
 import javax.swing.JTable;
 import javax.swing.JScrollPane;
 import javax.swing.table.AbstractTableModel;
+import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.JComponent;
+import javax.swing.AbstractButton;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseMotionAdapter;
+import java.awt.event.MouseEvent;
 import java.util.List;
 import java.util.LinkedList;
 import java.util.HashMap;
@@ -21,6 +26,8 @@ public class Table extends ReactComponent
    JScrollPane scrollPane;
    ReactTableModel model = new ReactTableModel();
    TableCellRenderer cellRenderer = new ReactTableCellRenderer();
+   private ReactHeaderRenderer currentlyArmedHeader = null;
+
    public Table()
    {
       cellRenderer = new ReactTableCellRenderer();
@@ -31,6 +38,53 @@ public class Table extends ReactComponent
                return cellRenderer;
             }
          };
+      table.getTableHeader().addMouseMotionListener(new MouseMotionAdapter()
+         {
+            public void mouseMoved(MouseEvent me)
+            {
+               int i = table.getTableHeader().columnAtPoint(me.getPoint());
+               TableCellRenderer renderer = table.getColumnModel().getColumn(i).getHeaderRenderer();
+               if (currentlyArmedHeader == renderer)
+                  return;
+               if (currentlyArmedHeader != null)
+                  currentlyArmedHeader.setArmed(false);
+               if (renderer instanceof ReactHeaderRenderer)
+               {
+                  ((ReactHeaderRenderer)renderer).setArmed(true);
+                  currentlyArmedHeader = (ReactHeaderRenderer)renderer;
+                  table.getTableHeader().repaint();
+               }
+            }
+         });
+      table.getTableHeader().addMouseListener(new MouseAdapter()
+         {
+            public void mouseExited(MouseEvent me)
+            {
+               if (currentlyArmedHeader != null)
+                  currentlyArmedHeader.setArmed(false);
+               currentlyArmedHeader = null;
+            }
+            public void mousePressed(MouseEvent me)
+            {
+               int i = table.getTableHeader().columnAtPoint(me.getPoint());
+               TableCellRenderer renderer = table.getColumnModel().getColumn(i).getHeaderRenderer();
+               if (renderer instanceof ReactHeaderRenderer)
+               {
+                  ((ReactHeaderRenderer)renderer).setActive(true);
+                  table.getTableHeader().repaint();
+               }
+            }
+            public void mouseReleased(MouseEvent me)
+            {
+               int i = table.getTableHeader().columnAtPoint(me.getPoint());
+               TableCellRenderer renderer = table.getColumnModel().getColumn(i).getHeaderRenderer();
+               if (renderer instanceof ReactHeaderRenderer)
+               {
+                  ((ReactHeaderRenderer)renderer).setActive(false);
+                  table.getTableHeader().repaint();
+               }
+            }
+         });
       scrollPane = new JScrollPane(table);
    }
    
@@ -52,32 +106,74 @@ public class Table extends ReactComponent
       }
    }
 
+   public class ReactHeaderRenderer implements TableCellRenderer
+   {
+      private ReactComponent component;
+      private boolean isActive = false;
+      private boolean isArmed = false;
+      public ReactHeaderRenderer(ReactComponent component)
+      {
+         this.component = component;
+      }
+      public void setActive(boolean b)
+      {
+         isActive = b;
+      }
+      public void setArmed(boolean b)
+      {
+         isArmed = b;
+      }
+      public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column)
+      {
+         Component c = component.getAWTComponent();
+         if (c instanceof AbstractButton)
+         {
+            ((AbstractButton)c).getModel().setPressed(isActive);
+            ((AbstractButton)c).getModel().setArmed(isArmed);
+         }
+         return c;
+      }
+   }
+
    public class ReactTableModel extends AbstractTableModel
    {
-      protected List<Row> rows = new LinkedList<Row>();
+      protected LinkedList<Row> rows = new LinkedList<Row>();
+      int columnCount = 1;
       public void addRow(Row row)
       {
+         if (row.getSize() > columnCount)
+         {
+            columnCount = row.getSize();
+            fireTableStructureChanged();
+         }
          rows.add(row);
       }
 
       public void insertRowAt(Row row, int index)
       {
+         if (row.getSize() > columnCount)
+         {
+            columnCount = row.getSize();
+            fireTableStructureChanged();
+         }
          rows.add(index, row);
       }
 
       public void removeRow(Row row)
       {
+         // We do not shrink the table here. Perhaps we should...
          rows.remove(row);
       }
 
       public void removeRowAt(int index)
       {
+         // We do not shrink the table here. Perhaps we should...
          rows.remove(index);
       }
 
       public int getColumnCount()
       {
-         return 5;
+         return columnCount;
       }
       public int getRowCount()
       {
@@ -92,6 +188,24 @@ public class Table extends ReactComponent
       {
          // FIXME: Fire an event here
       }
+
+      public int indexOfRow(Row row)
+      {
+         return rows.indexOf(row);
+      }
+      public void setHeader(TableHeader header)
+      {
+         int i = 0;
+         if (header.getSize() > columnCount)
+            columnCount = header.getSize();
+         fireTableStructureChanged();
+         for (ReactComponent o : header.getColumnHeaders())
+         {
+            table.getColumnModel().getColumn(i).setHeaderRenderer(new ReactHeaderRenderer(o));
+            i++;
+         }
+      }
+
    }
    
    
@@ -113,9 +227,15 @@ public class Table extends ReactComponent
             model.addRow((Row)child);
          else
          {
-            int index = children.indexOf(sibling);
+            // FIXME: sibling may not be a row!
+            int index = model.indexOfRow((Row)sibling);
             model.insertRowAt((Row)child, index);
          }
+      }
+      else if (child instanceof TableHeader)
+      {
+         // It doesnt matter (currently) where the header is in the table. Later this might change
+         model.setHeader((TableHeader)child);
       }
    }
 
@@ -124,30 +244,40 @@ public class Table extends ReactComponent
       super.removeChild(child);
       if (child instanceof Row)
       {
-         try
-         {
-            model.removeRow((Row)child);
-         }
-         finally
-         {           
-         }
+         model.removeRow((Row)child);
       }
+      else if (child instanceof TableHeader)
+      {
+         // This means there is no longer to be any header?
+      }
+
    }
 
    public void replaceChild(ReactComponent newChild, ReactComponent oldChild)
    {
+      int index = -1;
+      if (oldChild instanceof Row)
+      {
+         index = model.indexOfRow((Row)oldChild);
+         model.removeRowAt(index);
+      }
+      else if (oldChild instanceof TableHeader)
+      {
+         //
+      }
+
       if (newChild instanceof Row)
       {
-         try
-         {
-            int index = children.indexOf(oldChild);
-            model.removeRowAt(index);
+         if (index == -1)
+            model.addRow((Row)newChild);
+         else
             model.insertRowAt((Row)newChild, index);
-         }
-         finally
-         {
-         }
       }
+      else if (newChild instanceof TableHeader)
+      {
+         //
+      }
+
       super.replaceChild(newChild, oldChild);
    }
    
