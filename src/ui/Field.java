@@ -21,7 +21,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseEvent;
 import org.proactive.prolog.PrologObject;
-import org.proactive.ReactLeafComponent;
+import org.proactive.ReactComponent;
 
 public class Field extends ReactComponent
 {
@@ -56,24 +56,8 @@ public class Field extends ReactComponent
          });
    }
 
-   public class ReactPopupMenu extends JPopupMenu implements MouseListener
+   public class ReactPopupMenu extends JPopupMenu
    {
-      public ReactPopupMenu()
-      {
-         addMouseListener(this);
-      }
-
-      public void mouseEntered(MouseEvent me)
-      {
-         System.out.println("Mouse entered");
-         reallySetVisible(true);
-      }
-
-      public void mouseExited(MouseEvent me) {}
-      public void mouseClicked(MouseEvent me) {}
-      public void mousePressed(MouseEvent me) {}
-      public void mouseReleased(MouseEvent me) {}
-
       public void setVisible(boolean b)
       {
          super.setVisible(b);
@@ -81,7 +65,7 @@ public class Field extends ReactComponent
          {
             // This is a bit ugly really. Almost always you would want to dismiss the popup at this point
             // however, we cannot rely on the event to actually hide it
-            reallySetVisible(true);
+            super.setVisible(true);
          }
       }
    }
@@ -276,15 +260,30 @@ public class Field extends ReactComponent
 
    }
 
+   public class PopupMenu extends ReactComponent
+   {
+      public Component getAWTComponent() { return null; }
+   }
+
+   public class MenuItem extends ReactComponent
+   {
+      public Component getAWTComponent() { return null; }
+   }
+
    public void insertChildBefore(ReactComponent child, ReactComponent sibling)
    {
       super.insertChildBefore(child, sibling);
       if (child instanceof PopupMenu)
       {
-         popup.createFrom((PopupMenu)child);
+         System.out.println("Got popup menu!");
+         createPopupFrom((PopupMenu)child, popup);
          if (widget.getAWTComponent().isDisplayable())
             popup.show(widget.getAWTComponent(), 0, 0);
       }
+   }
+
+   public void createPopupFrom(PopupMenu item, JPopupMenu popup)
+   {
    }
 
    public void removeChild(ReactComponent child)
@@ -301,7 +300,7 @@ public class Field extends ReactComponent
    {
       if (newChild instanceof PopupMenu)
       {
-         popup.createFrom((PopupMenu)child);
+         createPopupFrom((PopupMenu)newChild, popup);
          if (widget.getAWTComponent().isDisplayable())
             popup.show(widget.getAWTComponent(), 0, 0);
       }
