@@ -302,7 +302,8 @@ public class Engine
                {
                   Term existingValue = props.get(((AtomTerm)attrName).value);
                   //System.out.println("Existing: " + existingValue);
-                  if (existingValue instanceof CompoundTerm && ((CompoundTerm)existingValue).tag == TermConstants.listTag)
+                  if ((existingValue instanceof CompoundTerm && ((CompoundTerm)existingValue).tag == TermConstants.listTag) ||
+                      existingValue == TermConstants.emptyListAtom)
                   {
                      // This happens if we want to update a sub-state. Basically we just recurse here
                      Term replacement = applyState(existingValue, attrValue.dereference());
