@@ -120,11 +120,12 @@ public class Field extends ReactComponent
          return;
       internalPopupListener = new MouseAdapter()
          {
-            public void createPopup()
+            public void createPopup(MouseEvent me)
             {
                try
                {
                   popup = (PopupMenu)getOwnerDocument().renderContextualElement(value.asTerm(), serializeObject().asTerm());
+                  popup.getMenu().show(widget.getAWTComponent(), me.getX(), me.getY());
                }
                catch(Exception e)
                {
@@ -133,16 +134,16 @@ public class Field extends ReactComponent
             }
             public void mouseClicked(MouseEvent me)
             {
-               if (me.isPopupTrigger() && popup != null)
+               if (me.isPopupTrigger())
                {
-                  createPopup();
+                  createPopup(me);
                }
             }
             public void mousePressed(MouseEvent me)
             {
-               if (me.isPopupTrigger() && popup != null)
+               if (me.isPopupTrigger())
                {
-                  createPopup();
+                  createPopup(me);
                }
             }
          };

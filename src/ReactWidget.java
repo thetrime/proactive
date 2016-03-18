@@ -192,8 +192,9 @@ public class ReactWidget extends ReactComponent implements CodeChangeListener
       stub.insertChildBefore(stub_child, null);
       Term comparisonDom = new CompoundTerm("element", new Term[]{AtomTerm.get("Panel"), props, TermConstants.emptyListAtom});
       Term patches = engine.diff(comparisonDom, elementDom);
-      engine.applyPatch(patches, stub);
-      // FIXME: Need to reset undo position here
+      stub_child.setOwnerDocument(this);
+      stub.setOwnerDocument(this);
+      engine.applyPatch(patches, stub_child);
       return stub.getChildNodes().get(0);
    }
 

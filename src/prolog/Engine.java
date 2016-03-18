@@ -214,9 +214,10 @@ public class Engine
          PrologException.typeError(AtomTerm.get("callable"), handler);
          return null; // Not really reachable
       }
-      //System.out.println("Executing " + goal);
+      System.out.println("Executing " + goal);
       int undoPosition = interpreter.getUndoPosition();
       Interpreter.Goal g = interpreter.prepareGoal(goal);
+      env.pushContext(interpreter, context);
       try
       {
          PrologCode.RC rc = interpreter.execute(g);
@@ -234,6 +235,10 @@ public class Engine
       catch (PrologException notDefined)
       {
          notDefined.printStackTrace();
+      }
+      finally
+      {
+         env.popContext(interpreter);
       }
       return TermConstants.emptyListAtom;
    }
