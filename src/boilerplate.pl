@@ -37,7 +37,7 @@ call(A,B,C):-
 bubble_event(List, Key, Event):-
         ( memberchk(Key=Handler, List),
           Handler \== {null}->
-            call(Handler, Event)
+            bubble_event(Handler, Event)
         ; otherwise->
             true
         ).

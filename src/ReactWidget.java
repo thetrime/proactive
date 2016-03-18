@@ -8,6 +8,7 @@ import gnu.prolog.term.AtomTerm;
 import gnu.prolog.vm.TermConstants;
 import gnu.prolog.vm.PrologException;
 import java.util.List;
+import java.util.Stack;
 import java.util.LinkedList;
 import java.util.HashMap;
 import java.awt.Component;
@@ -176,9 +177,24 @@ public class ReactWidget extends ReactComponent implements CodeChangeListener
       return this;
    }
 
+
    public boolean triggerEvent(Term handler, Term event) throws PrologException
    {
       return engine.triggerEvent(handler, event, this);
+   }
+
+   public ReactComponent renderContextualElement(Term handler, Term event) throws PrologException
+   {
+      // FIXME: Need to get undo position here
+      Term elementDom = engine.renderContextualElement(handler, event, this);
+      ReactComponent stub = new org.proactive.ui.Panel("stub root for " + event);
+      ReactComponent stub_child = new org.proactive.ui.Panel("stub child for " + event);
+      stub.insertChildBefore(stub_child, null);
+      Term comparisonDom = new CompoundTerm("element", new Term[]{AtomTerm.get("Panel"), props, TermConstants.emptyListAtom});
+      Term patches = engine.diff(comparisonDom, elementDom);
+      engine.applyPatch(patches, stub);
+      // FIXME: Need to reset undo position here
+      return stub.getChildNodes().get(0);
    }
 
 

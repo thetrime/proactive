@@ -3,6 +3,7 @@ package org.proactive.prolog;
 import gnu.prolog.vm.Interpreter;
 import gnu.prolog.vm.ExecuteOnlyCode;
 import gnu.prolog.vm.PrologException;
+import gnu.prolog.vm.TermConstants;
 import gnu.prolog.term.Term;
 import gnu.prolog.term.AtomTerm;
 import gnu.prolog.term.CompoundTerm;
@@ -23,7 +24,11 @@ public class Predicate_update_widget extends ExecuteOnlyCode
          ReactComponent domNode = (ReactComponent)((JavaObjectTerm)args[2]).value;
          ReactWidget widget = ((ReactWidget)domNode);
          //System.out.println("update_widget(" + args[0] + ", " + args[1] + ", " + args[2] + ", _)");
-         widget.updateWidget(newvDom.args[1]);
+         // We have to put the children in there too
+         Term newProperties = newvDom.args[1];
+         newProperties = new CompoundTerm(TermConstants.listTag, new Term[]{new CompoundTerm(AtomTerm.get("="), new Term[]{AtomTerm.get("children"), newvDom.args[2]}),
+                                                                            newProperties});
+         widget.updateWidget(newProperties);
          return interpreter.simpleUnify(args[3], new JavaObjectTerm(domNode));
       }
       catch (Exception e)

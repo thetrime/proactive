@@ -125,14 +125,16 @@ jsx_children(Dict, Children, Goal, GoalTail, Singletons, SingletonsTail)-->
         {read_term_from_atom(Codes, Term, [variable_names(TermVariableNames)]),
          unify_variables(TermVariableNames, Dict),
          ( var(Term)->
-             Goal = ((Term == [] ->
+             Goal = ((var(Term)->
+                        throw(error(instantiation_error(Term), _))
+                     ; Term == [] ->
                         Children = Tail
                      ; is_list(Term)->
-                        append(Term, Tail, Children)
+                        once(append(Term, Tail, Children))
                      ; Children = [Term|Tail]
                      ), G1)
          ; expand_goals(Term, List, G2, G1),
-           Goal = (append(List, Tail, Children), G2)
+           Goal = (once(append(List, Tail, Children)), G2)
          )},
         jsx_children(Dict, Tail, G1, GoalTail, Singletons, SingletonsTail).
 
@@ -228,7 +230,7 @@ jsx_value(Value, _Dict, G, G)-->
         quoted_string(Value).
 
 expand_goals(Variable, Variable, Tail, Tail):- var(Variable), !.
-expand_goals(Map, react_handler(This, Value), (get_this(This), Tail), Tail):-
+expand_goals(Map, '$this'(This, Value), (get_this(This), Tail), Tail):-
         functor(Map, '.', 2),
         Map =.. ['.', Key, Value],
         Key == this, !.

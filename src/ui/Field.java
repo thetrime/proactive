@@ -111,6 +111,43 @@ public class Field extends ReactComponent
       widget.getAWTComponent().addMouseListener(contextMenuListener);
    }
 
+   private MouseListener internalPopupListener = null;
+   public void setContextMenuRenderer(PrologObject value)
+   {
+      if (internalPopupListener != null)
+         widget.getAWTComponent().removeMouseListener(internalPopupListener);
+      if (value.isNull())
+         return;
+      internalPopupListener = new MouseAdapter()
+         {
+            public void createPopup()
+            {
+               try
+               {
+                  popup = (PopupMenu)getOwnerDocument().renderContextualElement(value.asTerm(), serializeObject().asTerm());
+               }
+               catch(Exception e)
+               {
+                  e.printStackTrace();
+               }
+            }
+            public void mouseClicked(MouseEvent me)
+            {
+               if (me.isPopupTrigger() && popup != null)
+               {
+                  createPopup();
+               }
+            }
+            public void mousePressed(MouseEvent me)
+            {
+               if (me.isPopupTrigger() && popup != null)
+               {
+                  createPopup();
+               }
+            }
+         };
+      widget.getAWTComponent().addMouseListener(internalPopupListener);
+   }
 
    public void setProperties(HashMap<String, PrologObject> properties)
    {
@@ -148,7 +185,8 @@ public class Field extends ReactComponent
                   widget = new CheckBox();
                   break;
             }
-            configureInternalPopupListener();
+            if (internalPopupListener != null)
+               widget.getAWTComponent().addMouseListener(internalPopupListener);
             if (getParentNode() != null)
                getParentNode().replaceChild(this, this);
          }
@@ -164,7 +202,8 @@ public class Field extends ReactComponent
          setFocusListener(properties.get("onBlur"));
       if (properties.containsKey("disabled"))
          widget.setDisabled(properties.get("disabled").asBoolean());
-
+      if (properties.containsKey("renderContextMenu"))
+         setContextMenuRenderer(properties.get("renderContextMenu"));
       if (properties.containsKey("verifyValue"))
       {
          PrologObject handler = properties.get("verifyValue");
@@ -220,69 +259,16 @@ public class Field extends ReactComponent
    public void insertChildBefore(ReactComponent child, ReactComponent sibling)
    {
       super.insertChildBefore(child, sibling);
-      if (child instanceof PopupMenu)
-      {
-         System.out.println("Got popup menu!");
-         popup = (PopupMenu)child;
-         configureInternalPopupListener();
-      }
-   }
-
-   private MouseListener internalPopupListener = null;
-   private void configureInternalPopupListener()
-   {
-      if (internalPopupListener != null)
-         widget.getAWTComponent().removeMouseListener(internalPopupListener);
-      if (popup == null)
-      {
-         internalPopupListener = null;
-      }
-      else
-      {
-         internalPopupListener = new MouseAdapter()
-            {
-               public void mouseClicked(MouseEvent me)
-               {
-                  if (me.isPopupTrigger() && popup != null)
-                  {
-                     popup.getMenu().show(widget.getAWTComponent(), me.getX(), me.getY());
-                  }
-               }
-               public void mousePressed(MouseEvent me)
-               {
-                  if (me.isPopupTrigger() && popup != null)
-                  {
-                     popup.getMenu().show(widget.getAWTComponent(), me.getX(), me.getY());
-                  }
-               }
-            };
-         widget.getAWTComponent().addMouseListener(internalPopupListener);
-      }
    }
 
 
    public void removeChild(ReactComponent child)
    {
       super.removeChild(child);
-      if (child instanceof PopupMenu)
-      {
-         popup = null;
-         configureInternalPopupListener();
-      }
    }
 
    public void replaceChild(ReactComponent newChild, ReactComponent oldChild)
    {
-      if (oldChild instanceof PopupMenu)
-      {
-         popup = null;
-      }
-      if (newChild instanceof PopupMenu)
-      {
-         popup = (PopupMenu)newChild;
-      }
-      if (newChild instanceof PopupMenu || oldChild instanceof PopupMenu)
-         configureInternalPopupListener();
       super.replaceChild(newChild, oldChild);
    }
 
