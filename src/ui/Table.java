@@ -9,6 +9,7 @@ import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.JComponent;
 import javax.swing.AbstractButton;
+import javax.swing.JPanel;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionAdapter;
@@ -132,18 +133,24 @@ public class Table extends ReactComponent
    }
    
    public class ReactTableCellRenderer implements TableCellRenderer
-   {      
+   {
+      private JPanel nullPanel = null;
       public ReactTableCellRenderer()
       {
+         nullPanel = new JPanel();
       }
       
       public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column)
       {
-         Component c = ((ReactComponent)value).getAWTComponent();
+         Component c = null;
+         if (value == null)
+            c = nullPanel;
+         else
+            c = ((ReactComponent)value).getAWTComponent();
          if (c instanceof JComponent)
             ((JComponent)c).setOpaque(isSelected);
          if (isSelected)
-            c.setBackground(java.awt.Color.GRAY);
+            c.setBackground(java.awt.Color.LIGHT_GRAY);
 
          return c;
       }
