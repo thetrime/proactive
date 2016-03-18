@@ -10,6 +10,7 @@ import javax.swing.table.TableCellRenderer;
 import javax.swing.JComponent;
 import javax.swing.AbstractButton;
 import java.awt.event.MouseAdapter;
+import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionAdapter;
 import java.awt.event.MouseEvent;
 import java.util.List;
@@ -27,6 +28,7 @@ public class Table extends ReactComponent
    ReactTableModel model = new ReactTableModel();
    TableCellRenderer cellRenderer = new ReactTableCellRenderer();
    private ReactHeaderRenderer currentlyArmedHeader = null;
+   private PopupMenu popup = null;
 
    public Table()
    {
@@ -86,6 +88,47 @@ public class Table extends ReactComponent
             }
          });
       scrollPane = new JScrollPane(table);
+   }
+
+    private MouseListener internalPopupListener = null;
+   public void setContextMenuRenderer(PrologObject value)
+   {
+      if (internalPopupListener != null)
+         table.removeMouseListener(internalPopupListener);
+      if (value.isNull())
+         return;
+      internalPopupListener = new MouseAdapter()
+         {
+            public void createPopup(MouseEvent me)
+            {
+               try
+               {
+                  HashMap<String, Object> event = new HashMap<String, Object>();
+                  event.put("row_number", table.rowAtPoint(me.getPoint()));
+                  popup = (PopupMenu)getOwnerDocument().renderContextualElement(value.asTerm(), PrologObject.serialize(event).asTerm());
+                  popup.getMenu().show(table, me.getX(), me.getY());
+               }
+               catch(Exception e)
+               {
+                  e.printStackTrace();
+               }
+            }
+            public void mouseClicked(MouseEvent me)
+            {
+               if (me.isPopupTrigger())
+               {
+                  createPopup(me);
+               }
+            }
+            public void mousePressed(MouseEvent me)
+            {
+               if (me.isPopupTrigger())
+               {
+                  createPopup(me);
+               }
+            }
+         };
+      table.addMouseListener(internalPopupListener);
    }
    
    public class ReactTableCellRenderer implements TableCellRenderer
@@ -212,6 +255,9 @@ public class Table extends ReactComponent
    public void setProperties(HashMap<String, PrologObject> properties)
    {
       super.setProperties(properties);
+      if (properties.containsKey("renderContextMenu"))
+         setContextMenuRenderer(properties.get("renderContextMenu"));
+
    }
    public Component getAWTComponent()
    {
