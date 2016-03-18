@@ -280,7 +280,7 @@ public class Engine
          System.out.println("Handler is not callable: " + handler);
          return false;
       }
-      //System.out.println("Executing " + goal);
+      System.out.println("Executing " + goal);
       int undoPosition = interpreter.getUndoPosition();
       Interpreter.Goal g = interpreter.prepareGoal(goal);
       try

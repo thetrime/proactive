@@ -99,20 +99,28 @@ public abstract class ReactComponent
    }
    public ReactWidget getOwnerDocument()
    {
+      return owner;
+      /*
       ReactWidget c = this.owner;
-      ReactComponent n = this;
+      ReactComponent n = getParentNode();
       while (c == null)
       {
          if (n == null)
+         {
+            System.out.println("Component " + this + " has no eventual owner...");
             return null;
-         n = n.getParentNode();
+         }
          c = n.getOwnerDocument();
+         n = n.getParentNode();
       }
       return c;
+      */
    }
    public void setOwnerDocument(ReactWidget owner)
    {
       this.owner = owner;
+      for (ReactComponent child: children)
+         child.setOwnerDocument(owner);
    }
    public int getFill()
    {

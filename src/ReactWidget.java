@@ -47,6 +47,7 @@ public class ReactWidget extends ReactComponent implements CodeChangeListener
       // Start by creating an initial contentPane.
       // FIXME: Can we come up with something that does not need ui.Panel? Like ReactComponent(); ?
       child = new org.proactive.ui.Panel("root panel for " + this);
+      child.setOwnerDocument(this);
 
       setProperties(Engine.termToProperties(props));
       // Then we add the contentPane to the widget. This means the parent of the contentPane is the widget itself
@@ -86,6 +87,7 @@ public class ReactWidget extends ReactComponent implements CodeChangeListener
    public void insertChildBefore(ReactComponent child, ReactComponent sibling)
    {
       this.child = child;
+//      System.out.println("Setting child " + child + " to have " + this + " as owner");
       child.setOwnerDocument(this);
       child.setParentNode(this);
       if (getParentNode() != null)
@@ -159,7 +161,6 @@ public class ReactWidget extends ReactComponent implements CodeChangeListener
       Term patches = engine.diff(vDom, newvDom);
       //System.out.println("Rerendering: " +elementId + ":" + vDom + " ----> " + newvDom);
       //System.out.println("Patch: " + patches);
-      child.setOwnerDocument(this);
       //System.out.println("Applying patches from: " + child);
       child = engine.applyPatch(patches, child);
       child.setOwnerDocument(this);
@@ -167,6 +168,11 @@ public class ReactWidget extends ReactComponent implements CodeChangeListener
       children.add(child);
       getAWTComponent().validate();
       vDom = newvDom;
+   }
+
+   public void destroy()
+   {
+
    }
 
    public ReactWidget updateWidget(Term newProps) throws Exception
@@ -195,7 +201,9 @@ public class ReactWidget extends ReactComponent implements CodeChangeListener
       stub_child.setOwnerDocument(this);
       stub.setOwnerDocument(this);
       engine.applyPatch(patches, stub_child);
-      return stub.getChildNodes().get(0);
+      ReactComponent element = stub.getChildNodes().get(0);
+      element.setOwnerDocument(this);
+      return element;
    }
 
 

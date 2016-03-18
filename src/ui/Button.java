@@ -59,4 +59,9 @@ public class Button extends ReactLeafComponent
    {
       return button;
    }
+
+   public String toString()
+   {
+      return "<Button " + button.getText() + ">";
+   }
 }

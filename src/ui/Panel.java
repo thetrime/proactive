@@ -205,6 +205,7 @@ public class Panel extends ReactComponent
          checkAlignment();
          nextIndex++;         
       }
+      child.setOwnerDocument(owner);
    }
 
    private void addChildToDOM(int index, ReactComponent child)
@@ -345,8 +346,10 @@ public class Panel extends ReactComponent
       //        to the Panel inside the Frame
       if (!children.contains(child))
          return;
+      child.setOwnerDocument(null);
       children.remove(child);
       childComponents.remove(child);
+      child.setParentNode(null);
       awtMap.remove(child);
       int childFill = fillMap.get(child);
       fillMap.remove(child);
@@ -372,7 +375,9 @@ public class Panel extends ReactComponent
       childComponents.remove(oldChild);
       fillMap.remove(oldChild);
       fillMap.put(newChild, newChild.getFill());
-
+      oldChild.setOwnerDocument(null);
+      oldChild.setParentNode(null);
+      newChild.setOwnerDocument(owner);
       super.replaceChild(newChild, oldChild);
       int childFill = oldChild.getFill();
       if (childFill == GridBagConstraints.HORIZONTAL || childFill == GridBagConstraints.BOTH)

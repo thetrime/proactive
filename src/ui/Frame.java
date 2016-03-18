@@ -10,6 +10,7 @@ import java.awt.BorderLayout;
 import org.proactive.prolog.PrologObject;
 import org.proactive.prolog.Engine;
 import org.proactive.ReactComponent;
+import org.proactive.ReactWidget;
 
 public class Frame extends ReactComponent 
 {
@@ -23,6 +24,7 @@ public class Frame extends ReactComponent
       contentPaneProperties.put("fill", new PrologObject(PrologObject.serializeObject("both")));
       contentPaneProperties.put("layout", new PrologObject(PrologObject.serializeObject("vertical")));
       contentPane.setProperties(contentPaneProperties);
+      contentPane.setOwnerDocument(owner);
       frame.getContentPane().setLayout(new BorderLayout());
       frame.getContentPane().add(contentPane.getAWTComponent(), BorderLayout.CENTER);
       frame.pack();
@@ -38,7 +40,20 @@ public class Frame extends ReactComponent
          });
       frame.setVisible(true);
    }
-   
+
+   public void setOwnerDocument(ReactWidget owner)
+   {
+      super.setOwnerDocument(owner);
+      contentPane.setOwnerDocument(owner);
+   }
+
+   public void setParentNode(ReactComponent parent)
+   {
+      super.setParentNode(parent);
+      if (parent == null)
+         frame.dispose();
+   }
+
    public void setProperties(HashMap<String, PrologObject> properties)
    {
      super.setProperties(properties);
