@@ -21,15 +21,20 @@ public class PrologObject
       this.term = term; // Engine.unpack(term, null);
    }
 
-   public boolean isNull()
+   public static boolean isNull(Term t)
    {
-      if (term instanceof CompoundTerm)
+      if (t instanceof CompoundTerm)
       {
-         CompoundTerm c = (CompoundTerm)term;
+         CompoundTerm c = (CompoundTerm)t;
          return (c.tag == CompoundTermTag.curly1 && c.args[0] instanceof AtomTerm && "null".equals(((AtomTerm)c.args[0]).value));
       }
       return false;
 
+   }
+
+   public boolean isNull()
+   {
+      return isNull(term);
    }
 
    public String asString()

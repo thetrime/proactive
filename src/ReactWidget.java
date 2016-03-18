@@ -17,6 +17,13 @@ import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import java.awt.BorderLayout;
 
+/* Important notes
+ *    o A ReactWidget does NOT contain any children!
+ *    o it DOES however, have a visual representation. Imagine it as a photo of another component
+ *    o It has a single reference internalComponent which has its own life. We just grab the AWT component from it when rendering
+ */
+
+
 public class ReactWidget extends ReactComponent implements CodeChangeListener
 {
    protected Engine engine;
@@ -25,8 +32,7 @@ public class ReactWidget extends ReactComponent implements CodeChangeListener
    protected Term props;
    protected Term vDom = null;
 
-   private List<ReactComponent> children = new LinkedList<ReactComponent>();
-   private ReactComponent child;
+   private ReactComponent internalComponent;
 
    public ReactWidget(ReactWidget parentContext, Engine engine, String elementId, Term props) throws Exception
    {
@@ -34,6 +40,8 @@ public class ReactWidget extends ReactComponent implements CodeChangeListener
       this.elementId = elementId;
       this.props = props;
       this.owner = parentContext;
+
+      setProperties(Engine.termToProperties(props));
 
       React.addCodeChangeListener(engine.getListenURI(), elementId, this);
 
@@ -43,21 +51,9 @@ public class ReactWidget extends ReactComponent implements CodeChangeListener
       // Then render the initial vDOM
       vDom = engine.render(this, elementId, state, props);
 
-      // But we cannot just realize the vDOM->DOM directly. Instead, we must compute diffs from a known state and apply those to a known DOM
-      // Start by creating an initial contentPane.
-      // FIXME: Can we come up with something that does not need ui.Panel? Like ReactComponent(); ?
-      child = new org.proactive.ui.Panel("root panel for " + this);
-      child.setOwnerDocument(this);
-
-      setProperties(Engine.termToProperties(props));
-      // Then we add the contentPane to the widget. This means the parent of the contentPane is the widget itself
-      insertChildBefore(child, null);
-      // Now we make an equivalent VDOM for the empty widget
-      Term emptyVDom = new CompoundTerm("element", new Term[]{AtomTerm.get("Panel"), props, TermConstants.emptyListAtom});
-      // Compute the diffs
-      Term patches = engine.diff(emptyVDom, vDom);
-      // And ask for them to be realized
-      React.queuePatch(patches, child, engine);
+      // Now turn that into an actual component
+      internalComponent = engine.createElementFromVDom(vDom, this);
+      internalComponent.setOwnerDocument(this);
    }
 
    public void handleCodeChange() 
@@ -82,56 +78,21 @@ public class ReactWidget extends ReactComponent implements CodeChangeListener
 
    public Component getAWTComponent()
    {
-      return child.getAWTComponent();
+      return internalComponent.getAWTComponent();
    }
-   public void insertChildBefore(ReactComponent child, ReactComponent sibling)
-   {
-      this.child = child;
-//      System.out.println("Setting child " + child + " to have " + this + " as owner");
-      child.setOwnerDocument(this);
-      child.setParentNode(this);
-      if (getParentNode() != null)
-         getParentNode().replaceChild(this, this);
 
-   }
-   public void removeChild(ReactComponent child)
+   public void setParentNode(ReactComponent parent)
    {
-      this.child = null;
-      child.setOwnerDocument(null);
-      if (getParentNode() != null)
-         getParentNode().replaceChild(this, this);
-
-   }
-   public void replaceChild(ReactComponent newNode, ReactComponent oldNode)
-   {
-      this.child = newNode;
-      child.setOwnerDocument(this);
-      child.setParentNode(this);
-      if (getParentNode() != null)
-         getParentNode().replaceChild(this, this);
-   }
-   public List<ReactComponent> getChildNodes()
-   {
-      List<ReactComponent> list = new LinkedList<ReactComponent>();
-      if (child != null)
-         list.add(child);
-      return list;
+      super.setParentNode(parent);
+      // Destroy child if we are being destroyed
+      if (parent == null && internalComponent != null)
+         internalComponent.setParentNode(null);
    }
 
    public String toString()
    {
       return "<Widget:" + elementId + " " + props+ ">";
    }
-
-
-   public void setOwnerDocument(ReactWidget owner)
-   {
-      if (getChildNodes() != null)
-         for (ReactComponent child: getChildNodes())
-            child.setOwnerDocument(this);
-      this.owner = owner;
-   }
-
 
    public Term getState()
    {
@@ -159,13 +120,9 @@ public class ReactWidget extends ReactComponent implements CodeChangeListener
    {
       Term newvDom = engine.render(this, elementId, state, props);
       Term patches = engine.diff(vDom, newvDom);
-      //System.out.println("Rerendering: " +elementId + ":" + vDom + " ----> " + newvDom);
-      //System.out.println("Patch: " + patches);
-      //System.out.println("Applying patches from: " + child);
-      child = engine.applyPatch(patches, child);
-      child.setOwnerDocument(this);
-      children.clear();
-      children.add(child);
+      //System.out.println("new VDOM: " + newvDom);
+      internalComponent = engine.applyPatch(patches, internalComponent);
+      internalComponent.setOwnerDocument(this);
       getAWTComponent().validate();
       vDom = newvDom;
    }
@@ -191,17 +148,8 @@ public class ReactWidget extends ReactComponent implements CodeChangeListener
 
    public ReactComponent renderContextualElement(Term handler, Term event) throws PrologException
    {
-      // FIXME: Need to get undo position here
       Term elementDom = engine.renderContextualElement(handler, event, this);
-      ReactComponent stub = new org.proactive.ui.Panel("stub root for " + event);
-      ReactComponent stub_child = new org.proactive.ui.Panel("stub child for " + event);
-      stub.insertChildBefore(stub_child, null);
-      Term comparisonDom = new CompoundTerm("element", new Term[]{AtomTerm.get("Panel"), props, TermConstants.emptyListAtom});
-      Term patches = engine.diff(comparisonDom, elementDom);
-      stub_child.setOwnerDocument(this);
-      stub.setOwnerDocument(this);
-      engine.applyPatch(patches, stub_child);
-      ReactComponent element = stub.getChildNodes().get(0);
+      ReactComponent element = engine.createElementFromVDom(elementDom, this);
       element.setOwnerDocument(this);
       return element;
    }

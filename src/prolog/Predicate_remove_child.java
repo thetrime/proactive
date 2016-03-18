@@ -13,6 +13,7 @@ public class Predicate_remove_child extends ExecuteOnlyCode
    {
       ReactComponent domNode = (ReactComponent)((JavaObjectTerm)args[0]).value;
       ReactComponent childNode = (ReactComponent)((JavaObjectTerm)args[1]).value;
+      //System.out.println("Calling removeChild on" + domNode + " with " + childNode);
       domNode.removeChild(childNode);
       return RC.SUCCESS_LAST;
    }

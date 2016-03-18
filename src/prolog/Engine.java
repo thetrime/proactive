@@ -214,7 +214,7 @@ public class Engine
          PrologException.typeError(AtomTerm.get("callable"), handler);
          return null; // Not really reachable
       }
-      System.out.println("Executing " + goal);
+      //System.out.println("Executing " + goal);
       int undoPosition = interpreter.getUndoPosition();
       Interpreter.Goal g = interpreter.prepareGoal(goal);
       env.pushContext(interpreter, context);
@@ -241,6 +241,30 @@ public class Engine
          env.popContext(interpreter);
       }
       return TermConstants.emptyListAtom;
+   }
+
+   public ReactComponent createElementFromVDom(Term vDOM, ReactWidget context) throws PrologException
+   {
+      VariableTerm resultValue = new VariableTerm("Result");
+      Term renderOptions = CompoundTerm.getList(new Term[]{new CompoundTerm("document", new Term[]{new JavaObjectTerm(context)})});
+      Term goal = ReactModule.crossModuleCall("diff", new CompoundTerm(AtomTerm.get("create_element_from_vdom"), new Term[]{renderOptions,
+                                                                                                                            vDOM,
+                                                                                                                            resultValue}));
+      int undoPosition = interpreter.getUndoPosition();
+      Interpreter.Goal g = interpreter.prepareGoal(goal);
+      PrologCode.RC rc = interpreter.execute(g);
+      if (rc == PrologCode.RC.SUCCESS)
+         interpreter.stop(g);
+      if (rc == PrologCode.RC.SUCCESS || rc == PrologCode.RC.SUCCESS_LAST)
+      {
+         JavaObjectTerm result = (JavaObjectTerm)(resultValue.dereference());
+         ReactComponent returnValue = ((ReactComponent)result.value);
+         interpreter.undo(undoPosition);
+         return returnValue;
+      }
+      System.out.println(" *********************** create_element_from_vdom/3 failed: " + vDOM);
+      System.exit(-1);
+      return null;
    }
 
    public boolean triggerEvent(Term handler, Term event, ReactWidget context) throws PrologException

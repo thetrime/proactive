@@ -205,6 +205,7 @@ public class Panel extends ReactComponent
          checkAlignment();
          nextIndex++;         
       }
+
       child.setOwnerDocument(owner);
    }
 
@@ -371,6 +372,7 @@ public class Panel extends ReactComponent
          return;
 
       int i = children.indexOf(oldChild);
+      children.set(i, newChild);
       Component oldComponent = awtMap.get(oldChild);
       childComponents.remove(oldChild);
       fillMap.remove(oldChild);
@@ -413,12 +415,6 @@ public class Panel extends ReactComponent
       }
    }
 
-  // FIXME: Is this necessary? Doesnt ReactComponent do this?
-   public List<ReactComponent> getChildNodes()
-   {
-      return children;
-   }
-
    public Component getAWTComponent()
    {
       return awtComponent;
@@ -427,7 +423,7 @@ public class Panel extends ReactComponent
    public String toString()
    {
       if (id != null)
-         return "(Panel: " + id + ")";
+         return "(Panel: " + id + ", " + children + ")";
       return "(Panel " + children + ")";
    }
 }

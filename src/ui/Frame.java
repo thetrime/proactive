@@ -15,19 +15,12 @@ import org.proactive.ReactWidget;
 public class Frame extends ReactComponent 
 {
    protected JFrame frame = new JFrame();
-   private Panel contentPane = new Panel("qqq");
    private boolean userHasResizedFrame = false;
+   private ReactComponent contentPane;
    private int repackCount = 0;
    public Frame()
    {
-      HashMap<String, PrologObject> contentPaneProperties = new HashMap<String, PrologObject>();
-      contentPaneProperties.put("fill", new PrologObject(PrologObject.serializeObject("both")));
-      contentPaneProperties.put("layout", new PrologObject(PrologObject.serializeObject("vertical")));
-      contentPane.setProperties(contentPaneProperties);
-      contentPane.setOwnerDocument(owner);
       frame.getContentPane().setLayout(new BorderLayout());
-      frame.getContentPane().add(contentPane.getAWTComponent(), BorderLayout.CENTER);
-      frame.pack();
       frame.addComponentListener(new ComponentAdapter()
          {
             public void componentResized(ComponentEvent e)
@@ -41,12 +34,6 @@ public class Frame extends ReactComponent
       frame.setVisible(true);
    }
 
-   public void setOwnerDocument(ReactWidget owner)
-   {
-      super.setOwnerDocument(owner);
-      contentPane.setOwnerDocument(owner);
-   }
-
    public void setParentNode(ReactComponent parent)
    {
       super.setParentNode(parent);
@@ -54,11 +41,6 @@ public class Frame extends ReactComponent
          frame.dispose();
    }
 
-   public void setProperties(HashMap<String, PrologObject> properties)
-   {
-     super.setProperties(properties);
-     contentPane.setProperties(properties);
-   }
    public Component getAWTComponent()
    {
       return frame;
@@ -67,21 +49,26 @@ public class Frame extends ReactComponent
   public void insertChildBefore(ReactComponent child, ReactComponent sibling)
   {
      super.insertChildBefore(child, sibling);
-     contentPane.insertChildBefore(child, sibling);
+     this.contentPane = child;
+     frame.getContentPane().removeAll();
+     frame.getContentPane().add(contentPane.getAWTComponent(), BorderLayout.CENTER);
      repack();
   }
 
   public void removeChild(ReactComponent child)
   {
      super.removeChild(child);
-     contentPane.removeChild(child);
+     contentPane = null;
+     frame.getContentPane().removeAll();
      repack();
   }
 
   public void replaceChild(ReactComponent newChild, ReactComponent oldChild)
   {
      super.replaceChild(newChild, oldChild);
-     contentPane.replaceChild(newChild, oldChild);
+     frame.getContentPane().removeAll();
+     contentPane = newChild;
+     frame.getContentPane().add(contentPane.getAWTComponent(), BorderLayout.CENTER);
      repack();
   }
 

@@ -1,4 +1,5 @@
-:-module(diff, [diff/3,
+:-module(diff, [create_element_from_vdom/3,
+                diff/3,
                 patch/4]).
 
 diff(A, B, [a-A|PatchSet]):-
@@ -438,6 +439,7 @@ patch_recursive(RootNode, PatchSet, Options, NewRoot):-
                 Indices)->
             memberchk(a-A, PatchSet),
             dom_index(RootNode, A, Indices, [], Index),
+            %writeln(dom_index(RootNode, A, Indices, [], Index)),
             %owner_document(RootNode, OwnerDocument)
             patch_recursive(Indices, RootNode, Index, PatchSet, Options, NewRoot)
         ; otherwise->
@@ -606,7 +608,8 @@ patch_op(order_patch(_VNode, Moves), DomNode, _Options, DomNode):-
         Moves = moves(inserts(Inserts),
                       removes(Removes)),
         reorder_removes(Removes, DomNode, ChildNodes, [], KeyMap),
-        reorder_inserts(Inserts, DomNode, ChildNodes, KeyMap).
+        child_nodes(DomNode, ChildNodesAfterRemoves),
+        reorder_inserts(Inserts, DomNode, ChildNodesAfterRemoves, KeyMap).
 
 patch_op(props_patch(VNode, Patch), DomNode, _Options, DomNode):-
         VNode = element(_, Properties, _),
@@ -714,3 +717,7 @@ qnth0(0, [X|_], X):- !.
 qnth0(I, [_|X], Y):-
         II is I-1,
         qnth0(II, X, Y).
+
+
+create_element_from_vdom(Options, VDom, Element):-
+        render(Options, VDom, Element).

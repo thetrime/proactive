@@ -96,6 +96,9 @@ public abstract class ReactComponent
    public void setParentNode(ReactComponent parent)
    {
       this.parent = parent;
+      if (parent == null) // destroy subtree
+         for (ReactComponent child: children)
+            child.setParentNode(null);
    }
    public ReactWidget getOwnerDocument()
    {
