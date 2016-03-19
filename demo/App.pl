@@ -7,7 +7,7 @@ requires('SomeStore').
 
 listen_for('SomeStore', flux_handler).
 
-flux_handler(_StoreName, StoreState, _State, _Props, StoreState):-
+flux_handler(StoreState, _State, _Props, StoreState):-
         writeln(ohai(StoreState)).
 
 q(X):-

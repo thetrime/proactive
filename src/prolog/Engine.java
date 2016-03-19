@@ -204,7 +204,7 @@ public class Engine
       Term goal;
       VariableTerm newState = new VariableTerm("NewState");
       if (handler instanceof AtomTerm)
-         goal = ReactModule.crossModuleCall(context.getComponentName(), new CompoundTerm((AtomTerm)handler, new Term[]{AtomTerm.get(storeName), storeState, state, props, newState}));
+         goal = ReactModule.crossModuleCall(context.getComponentName(), new CompoundTerm((AtomTerm)handler, new Term[]{storeState, state, props, newState}));
       else if (handler instanceof CompoundTerm)
       {
          CompoundTerm c_handler = (CompoundTerm)handler;
