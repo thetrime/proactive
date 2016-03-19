@@ -33,12 +33,6 @@ public class FluxDispatcher
       return store.getState();
    }
 
-   public void registerHandlerModule(String name)
-   {
-      if (!stores.containsKey(name))
-         stores.put(name, new FluxStore(name, engine));
-   }
-
    public void initializeFlux(Engine engine)
    {
       this.engine = engine;

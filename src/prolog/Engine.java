@@ -232,7 +232,7 @@ public class Engine
          System.out.println("Handler is not callable: " + handler);
          return false;
       }
-      System.out.println("Executing " + goal);
+      //System.out.println("Executing " + goal);
       int undoPosition = interpreter.getUndoPosition();
       Interpreter.Goal g = interpreter.prepareGoal(goal);
       try
@@ -383,7 +383,7 @@ public class Engine
          System.out.println("Handler is not callable: " + handler);
          return false;
       }
-      System.out.println("Executing " + goal);
+      //System.out.println("Executing " + goal);
       int undoPosition = interpreter.getUndoPosition();
       Interpreter.Goal g = interpreter.prepareGoal(goal);
       try
@@ -432,7 +432,7 @@ public class Engine
       goal = ReactModule.crossModuleCall(componentName, new CompoundTerm(FluxDispatcher.handlerTag, new Term[]{key, value, state, newState}));
       int undoPosition = interpreter.getUndoPosition();
       Interpreter.Goal g = interpreter.prepareGoal(goal);
-      System.out.println("Executing " + g);
+      //System.out.println("Executing " + g);
       try
       {
          PrologCode.RC rc = interpreter.execute(g);

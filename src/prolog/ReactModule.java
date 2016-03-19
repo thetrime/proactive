@@ -208,17 +208,4 @@ public class ReactModule extends Module
 
       CompoundTermTag tag;
    }
-
-   /* I dont think this is actually necessary anymore
-   public Predicate getOrCreateDefinedPredicate(CompoundTermTag head)
-   {
-      if (!(this instanceof ReactUserModule))
-      {
-         if (head.equals(FluxDispatcher.handlerTag))
-            FluxDispatcher.registerHandlerModule(name);
-      }
-      return super.getOrCreateDefinedPredicate(head);
-   }
-   */
-   
 }

@@ -8,7 +8,7 @@ requires('SomeStore').
 listen_for('SomeStore', flux_handler).
 
 flux_handler(StoreState, _State, _Props, StoreState):-
-        writeln(ohai(StoreState)).
+        writeln(detected_state(StoreState)).
 
 q(X):-
         {|jsx(X)||
@@ -52,7 +52,7 @@ render(State, _Props, Form):-
         </Panel>|},
         Label = 'This is my title',
         findall(Row,
-                ( between(0, 500, I),
+                ( between(0, 10, I),
                   L1 is I * 5 + 0,
                   L2 is I * 5 + 1,
                   L3 is I * 5 + 2,
