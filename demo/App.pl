@@ -19,6 +19,8 @@ q(X):-
         A = B.
 
 raiseAnEvent(_Event, _State, _Props, []):-
+        get_store_state('SomeStore', X),
+        writeln(store_state=X),
         raise_event(bing, bong).
 
 render(State, _Props, Form):-

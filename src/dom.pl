@@ -14,6 +14,7 @@
           update_widget/4,
           destroy_widget/2,
 
+          get_store_state/2,
           get_state/3,
           get_this/1
          ]).
@@ -243,3 +244,5 @@ glue_args(Goal, Args, NewGoal):- !,
             append(ExistingArgs, Args, NewArgs),
             NewGoal =.. [Name|NewArgs]
         ).
+
+get_store_state(_, []). % FIXME: Implement Flux!

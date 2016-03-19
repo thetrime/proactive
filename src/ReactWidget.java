@@ -88,10 +88,12 @@ public class ReactWidget extends ReactComponent implements CodeChangeListener
    public void setParentNode(ReactComponent parent)
    {
       super.setParentNode(parent);
-      destroy();
       // Destroy child if we are being destroyed
       if (parent == null && internalComponent != null)
+      {
+         destroy();
          internalComponent.setParentNode(null);
+      }
    }
 
    public String toString()

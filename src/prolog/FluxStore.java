@@ -12,9 +12,11 @@ public class FluxStore
    protected Engine engine;
    private LinkedList<FluxListener> listeners = new LinkedList<FluxListener>();
 
-   public FluxStore(String storeName)
+   public FluxStore(String storeName, Engine engine)
    {
       this.storeName = storeName;
+      if (engine != null)
+         initialize(engine);
    }
 
    public void initialize(Engine engine)
@@ -35,7 +37,7 @@ public class FluxStore
 
    public boolean handleEvent(Term key, Term value)
    {
-      System.out.println("Updating store " + storeName);
+      System.out.println("Updating store " + storeName + " engine=" + engine);
       return engine.updateStore(storeName, key, value, state, this);
    }
 

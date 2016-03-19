@@ -69,6 +69,7 @@ public class Engine
       env.installBuiltin("raise_event", 2);
       env.installBuiltin("wait_for", 1);
       env.installBuiltin("get_this", 1);
+      env.installBuiltin("get_store_state", 2);
       env.installBuiltin("bubble_event", 2);
 
       env.installBuiltin("remove_child", 2);

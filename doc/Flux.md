@@ -26,4 +26,23 @@ To request that you are notified when a store changes its state, your component 
 In your event callbacks, you can use `raise_event(+Key, +Data)` to trigger an event. Note that it is NOT allowed to raise an event while processing an existing one (as in React's Flux).
 
 ### Wait for other stores
-Your `handle_event/5` clause is allowed to use `wait_for(+ListOfStoreNames)` if it wants to wait for other stores to finish processing first. It's not entirely clear to me how this might be useful in Proactive, though, since you cannot query a store state directly. (I may have to change that in the future!)
+Your `handle_event/5` clause is allowed to use `wait_for(+ListOfStoreNames)` if it wants to wait for other stores to finish processing first. This is because of the next point:
+
+### Stores can coordinate with each other
+You can use `get_store_state(+StoreName, -State)` to retrieve (but not mutate) the state of another store. This allows dependent interactions like
+
+```
+city_store:handle_event('ChangeCountry', _, CurrentState, NewState):-
+   wait_for([country_store]),
+   get_store_state(country_store, CountryState),
+   get_state(CountryState, current_country, Country),
+   get_state(CurrentState, current_city, CurrentCity),
+   (  check_city(Country, CurrentCity)
+   -> NewState = []
+   ;  NewState = [current_city='Please select a city']
+   ).
+
+country_store:handle_event('ChangeCountry', Event, _, [current_country=Country]):-
+```
+
+This is analogous to the Flux canonical example

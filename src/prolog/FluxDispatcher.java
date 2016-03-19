@@ -23,6 +23,7 @@ public class FluxDispatcher
    private Queue<String> processed = null;
    private Term currentKey = null;
    private Term currentValue = null;
+   private Engine engine;
 
    public Term getStoreState(String name)
    {
@@ -35,11 +36,12 @@ public class FluxDispatcher
    public void registerHandlerModule(String name)
    {
       if (!stores.containsKey(name))
-         stores.put(name, new FluxStore(name));
+         stores.put(name, new FluxStore(name, engine));
    }
 
    public void initializeFlux(Engine engine)
    {
+      this.engine = engine;
       for (Map.Entry<String, FluxStore> entry : stores.entrySet())
          entry.getValue().initialize(engine);
    }
@@ -51,7 +53,7 @@ public class FluxDispatcher
       {
          // This happens if we register an interest in a module before we actually hear about the module itself
          // Do not initialize it yet though
-         stores.put(storeName, new FluxStore(storeName));
+         stores.put(storeName, new FluxStore(storeName, engine));
       }
       stores.get(storeName).addListener(context, callback);
    }
