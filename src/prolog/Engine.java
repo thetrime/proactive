@@ -91,6 +91,7 @@ public class Engine
       env.ensureLoaded(componentURL, rootElementId);
       env.runInitialization(interpreter);
       env.linkModules();
+      FluxDispatcher.initializeFlux(this);
       System.out.println("Checking for load errors...");
       List<PrologTextLoaderError> errors = env.getLoadingErrors();
       for (PrologTextLoaderError error : errors)
@@ -104,6 +105,34 @@ public class Engine
    {
       VariableTerm replyTerm = new VariableTerm("Result");
       Term goal = ReactModule.crossModuleCall(component, new CompoundTerm(AtomTerm.get("getInitialState"), new Term[]{props, replyTerm}));
+      int undoPosition = interpreter.getUndoPosition();
+      Interpreter.Goal g = interpreter.prepareGoal(goal);
+      try
+      {
+         PrologCode.RC rc = interpreter.execute(g);
+         if (rc == PrologCode.RC.SUCCESS)
+            interpreter.stop(g);
+         if (rc == PrologCode.RC.SUCCESS || rc == PrologCode.RC.SUCCESS_LAST)
+         {
+            Term result = replyTerm.dereference().clone(new TermCloneContext());
+            interpreter.undo(undoPosition);
+            return result;
+         }
+      }
+      catch (PrologException notDefined)         
+      {
+          // FIXME: There are two possible exceptions here. One is that there is no such predicate - that is OK. The other is there is no such module - that is bad.
+          // Really we should be checking for the predicates existence first, somehow...
+         //notDefined.printStackTrace();
+         //System.exit(-1);
+      }      
+      return TermConstants.emptyListAtom;
+   }
+
+   public Term getInitialStoreState(String component)
+   {
+      VariableTerm replyTerm = new VariableTerm("Result");
+      Term goal = ReactModule.crossModuleCall(component, new CompoundTerm(AtomTerm.get("getInitialStoreState"), new Term[]{replyTerm}));
       int undoPosition = interpreter.getUndoPosition();
       Interpreter.Goal g = interpreter.prepareGoal(goal);
       try
@@ -143,15 +172,58 @@ public class Engine
       return CompoundTerm.getList(elements);
    }
 
-   public Term fluxEvent(String componentName, Term key, Term value, Term state, Term props) throws Exception
+   public void checkForFluxListeners(ReactWidget context)
    {
+      // FIXME: Not quite. listen_for needs to have a goal as the second argument, and we need to take note of that!
+      VariableTerm storeName = new VariableTerm("Module");
+      VariableTerm goalName = new VariableTerm("Goal");
+      Term goal = ReactModule.crossModuleCall(context.getComponentName(), new CompoundTerm(AtomTerm.get("listen_for"), new Term[]{storeName, goalName}));
+      int undoPosition = interpreter.getUndoPosition();
+      Interpreter.Goal g = interpreter.prepareGoal(goal);
+      try
+      {
+         while (true)
+         {
+            PrologCode.RC rc = interpreter.execute(g);
+            if (rc == PrologCode.RC.SUCCESS || rc == PrologCode.RC.SUCCESS_LAST)
+               FluxDispatcher.registerFluxListener(((AtomTerm)(storeName.dereference())).value, goalName.dereference(), context);
+            if (rc == PrologCode.RC.FAIL || rc == PrologCode.RC.SUCCESS_LAST)
+               break;
+         }
+      }
+      catch (PrologException notDefined)
+      {
+         // Thats ok
+      }
+   }
+
+   public boolean fluxEvent(Term handler, String storeName, Term storeState, ReactWidget context) throws Exception
+   {
+      Term state = context.getState();
+      Term props = context.getProps();
+      Term goal;
       VariableTerm newState = new VariableTerm("NewState");
-      // We need to make sure that handlers dont (further) instantiate the key or value
-      Term goal = ReactModule.crossModuleCall(componentName, new CompoundTerm(AtomTerm.get("handle_event"), new Term[]{key.clone(new TermCloneContext()),
-                                                                                                                       value.clone(new TermCloneContext()),
-                                                                                                                       state,
-                                                                                                                       props,
-                                                                                                                       newState}));
+      if (handler instanceof AtomTerm)
+         goal = ReactModule.crossModuleCall(context.getComponentName(), new CompoundTerm((AtomTerm)handler, new Term[]{AtomTerm.get(storeName), storeState, state, props, newState}));
+      else if (handler instanceof CompoundTerm)
+      {
+         CompoundTerm c_handler = (CompoundTerm)handler;
+         Term[] args = new Term[c_handler.tag.arity + 5];
+         for (int i = 0; i < c_handler.tag.arity; i++)
+            args[i] = c_handler.args[i];
+         args[c_handler.tag.arity+0] = AtomTerm.get(storeName);
+         args[c_handler.tag.arity+1] = storeState;
+         args[c_handler.tag.arity+2] = state;
+         args[c_handler.tag.arity+3] = props;
+         args[c_handler.tag.arity+4] = newState;
+         goal = ReactModule.crossModuleCall(context.getComponentName(), new CompoundTerm(c_handler.tag.functor, args));
+      }
+      else
+      {
+         System.out.println("Handler is not callable: " + handler);
+         return false;
+      }
+      System.out.println("Executing " + goal);
       int undoPosition = interpreter.getUndoPosition();
       Interpreter.Goal g = interpreter.prepareGoal(goal);
       try
@@ -161,20 +233,18 @@ public class Engine
             interpreter.stop(g);
          if (rc == PrologCode.RC.SUCCESS || rc == PrologCode.RC.SUCCESS_LAST)
          {
-            Term adjustedState = applyState(state, newState.dereference()).clone(new TermCloneContext());
-            System.out.println("flux handler set state to: " + adjustedState);
+            //System.out.println("Goal " + goal + " has set the state of " + context + " to " + newState.dereference());
+            context.setState(applyState(state, newState.dereference()));
             interpreter.undo(undoPosition);
-            return adjustedState;
+            return (rc == PrologCode.RC.SUCCESS || rc == PrologCode.RC.SUCCESS_LAST);
          }
       }
-      catch (PrologException notDefined)         
+      catch (PrologException notDefined)
       {
-          // FIXME: There are two possible exceptions here. One is that there is no such predicate - that is OK. The other is there is no such module - that is bad.
-          // Really we should be checking for the predicates existence first, somehow...
          notDefined.printStackTrace();
-         System.exit(-1);
       }
-      return null;
+      return false;
+
    }
 
    public static final CompoundTermTag tagThis = CompoundTermTag.get("$this", 2);
@@ -315,7 +385,9 @@ public class Engine
          if (rc == PrologCode.RC.SUCCESS || rc == PrologCode.RC.SUCCESS_LAST)
          {
             //System.out.println("Goal " + goal + " has set the state to " + newState.dereference());
-            context.setState(applyState(state, newState.dereference()));
+            // We must call getState() here since the state might have changed since we started! A series of events might have fired (specifically, Flux)
+            // which might have mutated the state from its value when we started this event
+            context.setState(applyState(context.getState(), newState.dereference()));
             interpreter.undo(undoPosition);
             return (rc == PrologCode.RC.SUCCESS || rc == PrologCode.RC.SUCCESS_LAST);
          }
@@ -326,6 +398,33 @@ public class Engine
       }
       return false;
       // State is not updated if we get to here
+   }
+
+   public boolean updateStore(String componentName, Term key, Term value, Term state, FluxStore store)
+   {
+      Term goal;
+      VariableTerm newState = new VariableTerm("NewState");
+      goal = ReactModule.crossModuleCall(componentName, new CompoundTerm(FluxDispatcher.handlerTag, new Term[]{key, value, state, newState}));
+      int undoPosition = interpreter.getUndoPosition();
+      Interpreter.Goal g = interpreter.prepareGoal(goal);
+      System.out.println("Executing " + g);
+      try
+      {
+         PrologCode.RC rc = interpreter.execute(g);
+         if (rc == PrologCode.RC.SUCCESS)
+            interpreter.stop(g);
+         if (rc == PrologCode.RC.SUCCESS || rc == PrologCode.RC.SUCCESS_LAST)
+         {
+            store.setState(applyState(state, newState.dereference()));
+            interpreter.undo(undoPosition);
+            return (rc == PrologCode.RC.SUCCESS || rc == PrologCode.RC.SUCCESS_LAST);
+         }
+      }
+      catch (PrologException notDefined)
+      {
+         notDefined.printStackTrace();
+      }
+      return false;
    }
 
    private Term applyState(Term oldState, Term newState) throws PrologException

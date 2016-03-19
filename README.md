@@ -154,7 +154,7 @@ You can use `on_server/1` to call goals on the server. On the server side, `on_s
 The `on_server/1` goal supports nondeterminism. You can backtrack onto the server, but be aware of the consequences in latency this may introduce.
 
 ##### Data flow
-Like in React, data always flows down the tree, however in Proactive it is even more rigid since you cannot pass handlers with pointers to parent functions (well you can, but there is no point since the functions contain no references to the state in the parent so you cannot mutate them).
+Like in React, data always flows down the tree. You CAN use the this pointer to get events to flow up the tree, or you can use the implementation of the Flux dispatcher.
 
 A component can ONLY change its own state.
 A component can ONLY provide props to child components. These props may be hard coded or derived from the parents own state.

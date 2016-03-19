@@ -11,11 +11,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
 import org.proactive.ReactWidget;
+import org.proactive.prolog.Engine;
 
 public class FluxDispatcher
 {
-   public static final CompoundTermTag handlerTag = CompoundTermTag.get("handle_event", 5);
-   private static Map<String, LinkedList<ReactWidget>> eventListeners = new HashMap<String, LinkedList<ReactWidget>>();
+   public static final CompoundTermTag handlerTag = CompoundTermTag.get("handle_event", 4);
+   private static HashMap<String, FluxStore> stores = new HashMap<String, FluxStore>();
 
    private static boolean isProcessing = false;
    private static Queue<String> unprocessed = null;
@@ -23,36 +24,36 @@ public class FluxDispatcher
    private static Term currentKey = null;
    private static Term currentValue = null;
 
-   private static List<String> listenerModules = new LinkedList<String>();
-
    public static void registerHandlerModule(String name)
    {
-      listenerModules.add(name);
+      if (!stores.containsKey(name))
+         stores.put(name, new FluxStore(name));
    }
 
-   public static void registerFluxListener(String componentName, ReactWidget context)
+   public static void initializeFlux(Engine engine)
+   {
+      for (Map.Entry<String, FluxStore> entry : stores.entrySet())
+         entry.getValue().initialize(engine);
+   }
+
+   public static void registerFluxListener(String storeName, Term callback, ReactWidget context)
    {
       //System.out.println("Checking " + componentName + " for fluxion");
-      if (!listenerModules.contains(componentName))
-         return;
-      System.out.println("fluxion located. Linking...");
-      LinkedList<ReactWidget> existing = eventListeners.get(componentName);
-      if (existing == null)
+      if (!stores.containsKey(storeName))
       {
-         existing = new LinkedList<ReactWidget>();
-         eventListeners.put(componentName, existing);
+         // This happens if we register an interest in a module before we actually hear about the module itself
+         // Do not initialize it yet though
+         stores.put(storeName, new FluxStore(storeName));
       }
-      existing.add(context);
+      stores.get(storeName).addListener(context, callback);
    }
 
-   // Does this happen every time a component is destroyed, or only if a module gets unloaded somehow?
-   // The critical thing is: If we have created a new ReactWidget, we must need a new listener...
-   // In particular one module can result in TWO listeners if it is used twice, like <Foo><Bar x=1/><Bar x=2/></Foo>
    public static void deregisterFluxListener(String componentName, ReactWidget context)
    {
-      List<ReactWidget> existing = eventListeners.get(componentName);
-      if (existing != null)         
-         existing.remove(context);
+      if (stores.containsKey(componentName))
+         stores.get(componentName).removeListener(context);
+      else
+         System.out.println("Warning: Attempt to deregister " + componentName + " which is not currently listening to anything...");
    }
    
    public static synchronized void queueEvent(Term key, Term value) throws PrologException
@@ -64,31 +65,19 @@ public class FluxDispatcher
       currentValue = value;
       unprocessed = new LinkedList<String>();
       processed = new LinkedList<String>();
-      unprocessed.addAll(eventListeners.keySet());
+      unprocessed.addAll(stores.keySet());
    }
 
    public static void dispatchEvents()
    {
-      System.out.println("Dispatching flux events. " + unprocessed.size() + " modules pending");
+      //System.out.println("Dispatching flux events. " + unprocessed.size() + " modules pending");
+      System.out.println("Dispatching flux events. Pending: " + unprocessed);
       while (unprocessed.size() > 0)
       {
          String componentName = unprocessed.remove();
-         LinkedList<ReactWidget> tasks = new LinkedList<ReactWidget>();
-         tasks.addAll(eventListeners.get(componentName));
-         ReactWidget context;
-         while((context = tasks.poll()) != null)
-         {
-            System.out.println(" Dispatching an event. " + tasks.size() + " tasks remaining in " + componentName);
-            try
-            {
-               context.fluxEvent(currentKey, currentValue);
-            }
-            catch(Exception e)
-            {
-               e.printStackTrace();
-            }
-            System.out.println(" Dispatched an event. Remaining: " + tasks.size());
-         }
+         // Dispatch the event to the store
+         FluxStore store = stores.get(componentName);
+         store.handleEvent(currentKey, currentValue);
          System.out.println("Flux finished dispatching events to instances of " + componentName);
          processed.add(componentName);
       }

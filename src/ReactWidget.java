@@ -2,6 +2,7 @@ package org.proactive;
 
 import org.proactive.prolog.PrologObject;
 import org.proactive.prolog.Engine;
+import org.proactive.prolog.FluxDispatcher;
 import gnu.prolog.term.Term;
 import gnu.prolog.term.CompoundTerm;
 import gnu.prolog.term.AtomTerm;
@@ -54,6 +55,9 @@ public class ReactWidget extends ReactComponent implements CodeChangeListener
       // Now turn that into an actual component
       internalComponent = engine.createElementFromVDom(vDom, this);
       internalComponent.setOwnerDocument(this);
+
+      // Next, check to see if the module needs any flux listeners
+      engine.checkForFluxListeners(this);
    }
 
    public void handleCodeChange() 
@@ -84,6 +88,7 @@ public class ReactWidget extends ReactComponent implements CodeChangeListener
    public void setParentNode(ReactComponent parent)
    {
       super.setParentNode(parent);
+      destroy();
       // Destroy child if we are being destroyed
       if (parent == null && internalComponent != null)
          internalComponent.setParentNode(null);
@@ -112,7 +117,7 @@ public class ReactWidget extends ReactComponent implements CodeChangeListener
    public void setState(Term newState) throws PrologException
    {
       state = newState;
-      //System.out.println("State of " + elementId + " is now " + newState);
+      System.out.println("State of " + elementId + " is now " + newState);
       reRender();
    }
 
@@ -129,7 +134,7 @@ public class ReactWidget extends ReactComponent implements CodeChangeListener
 
    public void destroy()
    {
-
+      FluxDispatcher.deregisterFluxListener(elementId, this);
    }
 
    public ReactWidget updateWidget(Term newProps) throws Exception
@@ -155,14 +160,9 @@ public class ReactWidget extends ReactComponent implements CodeChangeListener
    }
 
 
-   public void fluxEvent(Term key, Term value) throws Exception
+   public boolean fluxEvent(Term goal, String storeName, Term storeState) throws Exception
    {
-      Term proposedState = engine.fluxEvent(elementId, key, value, state, props);
-      if (proposedState != null)
-      {      
-         state = proposedState;
-         reRender();
-      }
+      return engine.fluxEvent(goal, storeName, storeState, this);
    }
 
    public Engine getEngine()

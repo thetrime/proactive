@@ -3,6 +3,12 @@
 :- quasi_quotation_syntax(jsx).
 
 requires('Splunge').
+requires('SomeStore').
+
+listen_for('SomeStore', flux_handler).
+
+flux_handler(_StoreName, StoreState, _State, _Props, StoreState):-
+        writeln(ohai(StoreState)).
 
 q(X):-
         {|jsx(X)||
@@ -12,19 +18,31 @@ q(X):-
         </Panel>|},
         A = B.
 
-
+raiseAnEvent(_Event, _State, _Props, []):-
+        raise_event(bing, bong).
 
 render(State, _Props, Form):-
         memberchk(buttons=Buttons, State),
         get_some_fields(Buttons, Fields),
+        get_state(State, event_triggered, EventTriggered),
+        writeln(event=EventTriggered),
         {|jsx(Form)||
         <Panel>
           <Label label={Label}/>
+          <Button label="Click me for an event" onClick={raiseAnEvent}/>
+          <Label label={EventTriggered}/>
           {Fields}
           <List fill="horizontal" onSelect={this.listSelect}>
             findall(ListItem, list_item(State, ListItem))
           </List>
           <Table fill="both">
+            <TableHeader>
+              <Button label="column 1"/>
+              <Button label="column 2" onClick={this.columnClick(2)}/>
+              <Button label="column 3"/>
+              <Button label="column 4"/>
+              <Button label="column 5"/>
+            </TableHeader>
             {Rows|Tail}
           </Table>
           <Splunge foo="bar"/>
@@ -63,7 +81,7 @@ listSelect(Event, _State, _Props, NewState):-
             NewState = [Key=not_selected]
         ).
 
-get_some_fields(Buttons, Fields):-
+get_some_fields(buttons(Buttons), Fields):-
         findall(Field,
                 ( member(Label, Buttons),
                   {|jsx(Field)||
@@ -71,7 +89,10 @@ get_some_fields(Buttons, Fields):-
                 ),
                 Fields).
 
-getInitialState(_, [buttons=[foo, bar, qux, baz], label='Label of button defined in state']).
+columnClick(Key, Event, _, _, []):-
+        writeln(click(Key, Event)).
+
+getInitialState(_, [buttons=buttons([foo, bar, qux, baz]), label='Label of button defined in state', event_triggered=false]).
 
 
 some_exported_goal:-
@@ -83,4 +104,3 @@ some_local_goal(cat).
 some_local_goal(dog).
 some_local_goal(mouse).
 
-handle_event(set_buttons, Term, _State, _Props, [buttons=Term]).

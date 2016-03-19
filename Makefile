@@ -63,7 +63,8 @@ ENGINE= src/prolog/Predicate_remove_child.java                \
         src/prolog/ReactLoaderState.java                      \
         src/prolog/ReactModule.java                           \
         src/prolog/ReactUserModule.java                       \
-        src/prolog/FluxDispatcher.java                        \
+	src/prolog/FluxDispatcher.java                        \
+	src/prolog/FluxStore.java                             \
 	src/prolog/Predicate_java_println.java                \
 	src/prolog/Predicate_format.java                      \
 	src/prolog/Predicate_findall.java                     \
