@@ -16,7 +16,8 @@ public class Predicate_wait_for extends ExecuteOnlyCode
    {
       if (TermConstants.emptyListAtom.equals(args[0]))
          return RC.SUCCESS_LAST;
-      List<String> tokens = new LinkedList<String>();      
+      List<String> tokens = new LinkedList<String>();
+      ReactEnvironment environment = (ReactEnvironment)interpreter.getEnvironment();
       if (args[0] instanceof CompoundTerm)
       {
          CompoundTerm list = (CompoundTerm)args[0];
@@ -34,7 +35,7 @@ public class Predicate_wait_for extends ExecuteOnlyCode
                PrologException.typeError(AtomTerm.get("list"), args[0]);
          }
       }      
-      FluxDispatcher.waitFor(tokens);
+      environment.getEngine().waitForFluxStores(tokens);
       return RC.SUCCESS_LAST;
    }
 }

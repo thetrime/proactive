@@ -209,6 +209,7 @@ public class ReactModule extends Module
       CompoundTermTag tag;
    }
 
+   /* I dont think this is actually necessary anymore
    public Predicate getOrCreateDefinedPredicate(CompoundTermTag head)
    {
       if (!(this instanceof ReactUserModule))
@@ -218,5 +219,6 @@ public class ReactModule extends Module
       }
       return super.getOrCreateDefinedPredicate(head);
    }
+   */
    
 }

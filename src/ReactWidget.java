@@ -134,7 +134,7 @@ public class ReactWidget extends ReactComponent implements CodeChangeListener
 
    public void destroy()
    {
-      FluxDispatcher.deregisterFluxListener(elementId, this);
+      engine.deregisterFluxListener(elementId, this);
    }
 
    public ReactWidget updateWidget(Term newProps) throws Exception

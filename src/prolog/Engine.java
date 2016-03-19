@@ -39,6 +39,8 @@ public class Engine
    private String rootElementId;
    private URI listenURI;
    private URI goalURI;
+   private FluxDispatcher fluxDispatcher = new FluxDispatcher();
+
    public Engine(String baseURL, String rootElementId) throws Exception
    {
       this.goalURI = new URI(baseURL + "/goal");
@@ -91,7 +93,7 @@ public class Engine
       env.ensureLoaded(componentURL, rootElementId);
       env.runInitialization(interpreter);
       env.linkModules();
-      FluxDispatcher.initializeFlux(this);
+      fluxDispatcher.initializeFlux(this);
       System.out.println("Checking for load errors...");
       List<PrologTextLoaderError> errors = env.getLoadingErrors();
       for (PrologTextLoaderError error : errors)
@@ -186,7 +188,7 @@ public class Engine
          {
             PrologCode.RC rc = interpreter.execute(g);
             if (rc == PrologCode.RC.SUCCESS || rc == PrologCode.RC.SUCCESS_LAST)
-               FluxDispatcher.registerFluxListener(((AtomTerm)(storeName.dereference())).value, goalName.dereference(), context);
+               fluxDispatcher.registerFluxListener(((AtomTerm)(storeName.dereference())).value, goalName.dereference(), context);
             if (rc == PrologCode.RC.FAIL || rc == PrologCode.RC.SUCCESS_LAST)
                break;
          }
@@ -196,6 +198,12 @@ public class Engine
          // Thats ok
       }
    }
+
+   public Term getStoreState(String storeName)
+   {
+      return fluxDispatcher.getStoreState(storeName);
+   }
+
 
    public boolean fluxEvent(Term handler, String storeName, Term storeState, ReactWidget context) throws Exception
    {
@@ -398,6 +406,22 @@ public class Engine
       }
       return false;
       // State is not updated if we get to here
+   }
+
+   public void waitForFluxStores(List<String> stores) throws PrologException
+   {
+      fluxDispatcher.waitFor(stores);
+   }
+
+   public void queueFluxEvent(Term key, Term value) throws PrologException
+   {
+      fluxDispatcher.queueEvent(key, value);
+      fluxDispatcher.dispatchEvents();
+   }
+
+   public void deregisterFluxListener(String componentName, ReactWidget listener)
+   {
+      fluxDispatcher.deregisterFluxListener(componentName, listener);
    }
 
    public boolean updateStore(String componentName, Term key, Term value, Term state, FluxStore store)

@@ -16,27 +16,35 @@ import org.proactive.prolog.Engine;
 public class FluxDispatcher
 {
    public static final CompoundTermTag handlerTag = CompoundTermTag.get("handle_event", 4);
-   private static HashMap<String, FluxStore> stores = new HashMap<String, FluxStore>();
+   private HashMap<String, FluxStore> stores = new HashMap<String, FluxStore>();
 
-   private static boolean isProcessing = false;
-   private static Queue<String> unprocessed = null;
-   private static Queue<String> processed = null;
-   private static Term currentKey = null;
-   private static Term currentValue = null;
+   private boolean isProcessing = false;
+   private Queue<String> unprocessed = null;
+   private Queue<String> processed = null;
+   private Term currentKey = null;
+   private Term currentValue = null;
 
-   public static void registerHandlerModule(String name)
+   public Term getStoreState(String name)
+   {
+      FluxStore store = stores.get(name);
+      if (store == null)
+         return TermConstants.emptyListAtom;
+      return store.getState();
+   }
+
+   public void registerHandlerModule(String name)
    {
       if (!stores.containsKey(name))
          stores.put(name, new FluxStore(name));
    }
 
-   public static void initializeFlux(Engine engine)
+   public void initializeFlux(Engine engine)
    {
       for (Map.Entry<String, FluxStore> entry : stores.entrySet())
          entry.getValue().initialize(engine);
    }
 
-   public static void registerFluxListener(String storeName, Term callback, ReactWidget context)
+   public void registerFluxListener(String storeName, Term callback, ReactWidget context)
    {
       //System.out.println("Checking " + componentName + " for fluxion");
       if (!stores.containsKey(storeName))
@@ -48,7 +56,7 @@ public class FluxDispatcher
       stores.get(storeName).addListener(context, callback);
    }
 
-   public static void deregisterFluxListener(String componentName, ReactWidget context)
+   public void deregisterFluxListener(String componentName, ReactWidget context)
    {
       if (stores.containsKey(componentName))
          stores.get(componentName).removeListener(context);
@@ -56,7 +64,7 @@ public class FluxDispatcher
          System.out.println("Warning: Attempt to deregister " + componentName + " which is not currently listening to anything...");
    }
    
-   public static synchronized void queueEvent(Term key, Term value) throws PrologException
+   public synchronized void queueEvent(Term key, Term value) throws PrologException
    {
       if (isProcessing)
          PrologException.permissionError(AtomTerm.get("raise"), AtomTerm.get("event"), AtomTerm.get("<while processing an existing event>"));
@@ -68,7 +76,7 @@ public class FluxDispatcher
       unprocessed.addAll(stores.keySet());
    }
 
-   public static void dispatchEvents()
+   public void dispatchEvents()
    {
       //System.out.println("Dispatching flux events. " + unprocessed.size() + " modules pending");
       System.out.println("Dispatching flux events. Pending: " + unprocessed);
@@ -84,7 +92,7 @@ public class FluxDispatcher
       isProcessing = false;
    }
 
-   public static void waitFor(List<String> tokens)
+   public void waitFor(List<String> tokens)
    {
       if (isProcessing == false)
          throw new RuntimeException("FIXME: Surely this is impossible?");

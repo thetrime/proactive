@@ -55,6 +55,11 @@ public class FluxStore
       }
    }
 
+   public Term getState()
+   {
+      return state;
+   }
+
    private class FluxListener
    {
       public Term callback;

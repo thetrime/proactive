@@ -3,6 +3,7 @@ package org.proactive.prolog;
 import gnu.prolog.database.PredicateUpdatedEvent;
 import gnu.prolog.database.Predicate;
 import gnu.prolog.database.Module;
+import gnu.prolog.term.Term;
 import gnu.prolog.term.AtomTerm;
 import gnu.prolog.term.CompoundTerm;
 import gnu.prolog.term.CompoundTermTag;
@@ -203,4 +204,5 @@ public class ReactEnvironment extends Environment
    {
       getModule().predicateUpdated(this, evt);
    }
+
 }
