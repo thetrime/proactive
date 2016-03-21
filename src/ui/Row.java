@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.awt.Component;
 import org.proactive.prolog.PrologObject;
 import org.proactive.ReactComponent;
+import gnu.prolog.vm.TermConstants;
 
 public class Row extends ReactComponent
 {
@@ -41,9 +42,46 @@ public class Row extends ReactComponent
       // No need to propagate?
    }
 
+   private interface DoubleClickHandler
+   {
+      public void doubleClick();
+   }
+
+   private DoubleClickHandler doubleClickHandler = null;
+   private void setDoubleClickHandler(PrologObject value)
+   {
+      if (value.isNull())
+	 doubleClickHandler = null;
+      else
+      {
+	 doubleClickHandler = new DoubleClickHandler()
+	    {
+	       public void doubleClick()
+	       {
+		  try
+		  {
+		     getOwnerDocument().triggerEvent(value.asTerm(), TermConstants.emptyListAtom);
+		  }
+		  catch (Exception e)
+		  {
+		     e.printStackTrace();
+		  }
+	       }
+	    };
+      }
+   }
+
+   public void doubleClick()
+   {
+      if (doubleClickHandler != null)
+	 doubleClickHandler.doubleClick();
+   }
+
    public void setProperties(HashMap<String, PrologObject> properties)
    {
       super.setProperties(properties);
+      if (properties.containsKey("onDoubleClick"))
+	 setDoubleClickHandler(properties.get("onDoubleClick"));
    }  
 
    public ReactComponent get(int index)

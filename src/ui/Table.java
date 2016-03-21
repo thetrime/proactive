@@ -87,11 +87,27 @@ public class Table extends ReactComponent
                   table.getTableHeader().repaint();
                }
             }
-         });
+	 });
+      table.addMouseListener(new MouseAdapter()
+	 {
+	    public void mouseClicked(MouseEvent me)
+	    {
+	       if (me.getClickCount() == 2)
+	       {
+		  int index = table.rowAtPoint(me.getPoint());
+		  if (index != -1)
+		  {
+		     Row row = model.getRowAt(index);
+		     row.doubleClick();
+		     // FIXME: Cells may also have double-click handlers!
+		  }
+	       }
+	    }
+	 });
       scrollPane = new JScrollPane(table);
    }
 
-    private MouseListener internalPopupListener = null;
+   private MouseListener internalPopupListener = null;
    public void setContextMenuRenderer(PrologObject value)
    {
       if (internalPopupListener != null)
@@ -256,6 +272,11 @@ public class Table extends ReactComponent
          // FIXME: Fire an event here
       }
 
+      public Row getRowAt(int row)
+      {
+	 return rows.get(row);
+      }
+
       public int indexOfRow(Row row)
       {
          return rows.indexOf(row);
@@ -274,7 +295,6 @@ public class Table extends ReactComponent
       }
 
    }
-   
    
    public void setProperties(HashMap<String, PrologObject> properties)
    {
