@@ -74,4 +74,5 @@ public class RadioButton implements InputWidget
       this.listener = value;
    }
    public void setVerifier(InputWidgetVerifier value) {}
+   public void setAlignment(int alignment) {}
 }

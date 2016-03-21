@@ -250,6 +250,21 @@ public class Field extends ReactComponent
                   }
                });
       }
+      if (properties.containsKey("align"))
+	 setAlignment(properties.get("align"));
+   }
+   public void setAlignment(PrologObject value)
+   {
+      int alignment = JTextField.LEFT;
+      if (!value.isNull())
+      {
+	 if ("left".equals(value.asString()))
+	    alignment = JTextField.LEFT;
+	 else if ("right".equals(value.asString()))
+	    alignment = JTextField.RIGHT;
+      }
+      widget.setAlignment(alignment);
+
    }
 
    public class MenuItem extends ReactComponent

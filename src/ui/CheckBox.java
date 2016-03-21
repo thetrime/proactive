@@ -75,4 +75,5 @@ public class CheckBox implements InputWidget
       this.listener = value;
    }
    public void setVerifier(InputWidgetVerifier value) {}
+   public void setAlignment(int alignment) {}
 }

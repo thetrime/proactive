@@ -177,5 +177,9 @@ public class TextField implements InputWidget
       field.setEnabled(!disabled);
    }
 
+   public void setAlignment(int alignment)
+   {
+      field.setHorizontalAlignment(alignment);
+   }
 
 }

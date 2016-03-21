@@ -11,4 +11,5 @@ public interface InputWidget
    public void setDisabled(boolean disabled);
    public void setChangeListener(InputWidgetListener listener);
    public void setVerifier(InputWidgetVerifier verifier);
+   public void setAlignment(int alignment);
 }
