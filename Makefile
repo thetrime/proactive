@@ -29,6 +29,7 @@ UI=  src/ui/Panel.java                                        \
      src/ui/Table.java                                        \
      src/ui/TableHeader.java                                  \
      src/ui/Row.java                                          \
+     src/ui/RowChangeListener.java                            \
      src/ui/TabbedPane.java                                   \
      src/ui/Tab.java                                          \
      src/ui/List.java                                         \

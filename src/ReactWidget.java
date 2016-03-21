@@ -118,8 +118,8 @@ public class ReactWidget extends ReactComponent implements CodeChangeListener
 
    public void setState(Term newState) throws PrologException
    {
-      state = newState;
-      System.out.println("State of " + elementId + " is now " + newState);
+      state = (Term)newState.clone();
+      //System.out.println("State of " + elementId + " is now " + newState);
       reRender();
    }
 

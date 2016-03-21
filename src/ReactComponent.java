@@ -43,8 +43,15 @@ public abstract class ReactComponent
       if (properties.containsKey("className"))
          className = properties.get("className").asString();
       if (properties.containsKey("id"))
-         id = properties.get("id").asString();
+	 id = properties.get("id").asString();
+      if (getParentNode() != null)
+	 getParentNode().childUpdated(this);
+   }
 
+   public void childUpdated(ReactComponent childInQuestion)
+   {
+      if (getParentNode() != null)
+	 getParentNode().childUpdated(this);
    }
    
    public List<ReactComponent> getChildNodes()

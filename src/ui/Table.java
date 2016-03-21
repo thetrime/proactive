@@ -185,10 +185,17 @@ public class Table extends ReactComponent
       }
    }
 
-   public class ReactTableModel extends AbstractTableModel
+   public class ReactTableModel extends AbstractTableModel implements RowChangeListener
    {
       protected LinkedList<Row> rows = new LinkedList<Row>();
       int columnCount = 1;
+
+      public void rowChanged(Row row)
+      {
+	 int index = rows.indexOf(row);
+	 fireTableRowsUpdated(index, index);
+      }
+
       public void addRow(Row row)
       {
          if (row.getSize() > columnCount)
@@ -196,7 +203,9 @@ public class Table extends ReactComponent
             columnCount = row.getSize();
             fireTableStructureChanged();
          }
-         rows.add(row);
+	 rows.add(row);
+	 row.addRowChangeListener(this);
+	 fireTableRowsInserted(rows.size(), rows.size());
       }
 
       public void insertRowAt(Row row, int index)
@@ -206,19 +215,27 @@ public class Table extends ReactComponent
             columnCount = row.getSize();
             fireTableStructureChanged();
          }
-         rows.add(index, row);
+	 rows.add(index, row);
+	 row.addRowChangeListener(this);
+	 fireTableRowsInserted(index, index);
       }
 
       public void removeRow(Row row)
       {
-         // We do not shrink the table here. Perhaps we should...
-         rows.remove(row);
+	 // We do not shrink width of the table here. Perhaps we should...
+	 int index = model.indexOfRow(row);
+	 rows.remove(row);
+	 row.removeRowChangeListener(this);
+	 fireTableRowsDeleted(index, index);
       }
 
       public void removeRowAt(int index)
       {
-         // We do not shrink the table here. Perhaps we should...
-         rows.remove(index);
+	 // We do not shrink the width of table here. Perhaps we should...
+	 Row row = rows.get(index);
+	 row.removeRowChangeListener(this);
+	 rows.remove(index);
+	 fireTableRowsDeleted(index, index);
       }
 
       public int getColumnCount()
