@@ -3,6 +3,7 @@ package org.proactive.prolog;
 import gnu.prolog.term.Term;
 import gnu.prolog.term.AtomTerm;
 import gnu.prolog.term.IntegerTerm;
+import gnu.prolog.term.FloatTerm;
 import gnu.prolog.term.CompoundTerm;
 import gnu.prolog.term.CompoundTermTag;
 import gnu.prolog.vm.TermConstants;
@@ -44,6 +45,8 @@ public class PrologObject
          return ((AtomTerm)t).value;
       if (t instanceof IntegerTerm)
         return String.valueOf(((IntegerTerm)t).value);
+      if (t instanceof FloatTerm)
+	return String.valueOf(((FloatTerm)t).value);
       else if (isNull())
          return null;
          System.out.println("Warning: asString called on " + term + " of type " + term.getClass() + " which unpacks something which is not a string: " + t + " of type " + t.getClass());
