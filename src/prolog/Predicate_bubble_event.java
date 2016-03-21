@@ -38,7 +38,8 @@ public class Predicate_bubble_event extends ExecuteOnlyCode
          Term[] newArgs = new Term[handlerTerm.args.length+1];
          for (int i = 0; i < handlerTerm.args.length; i++)
             newArgs[i] = handlerTerm.args[i];
-         newArgs[handlerTerm.args.length] = args[1];
+	 newArgs[handlerTerm.args.length] = args[1];
+	 goal = new CompoundTerm(handlerTerm.tag, newArgs);
       }
       else
       {
@@ -46,6 +47,6 @@ public class Predicate_bubble_event extends ExecuteOnlyCode
          return null; // Not really reachable
       }
       //System.out.println("calling goal directly: " + goal);
-      return Predicate_call.staticExecute(interpreter, true, goal);
+      return Predicate_call.staticExecute(interpreter, backtrackMode, goal);
    }
 }

@@ -66,7 +66,7 @@ get_state(Object, Key, Value):-
             )
         ).
 
-glue_args(react_handler(Context, Goal), Args, react_handler(Context, NewGoal)):- !,
+glue_args('$this'(Context, Goal), Args, '$this'(Context, NewGoal)):- !,
         ( Goal = Module:ActualGoal->
             ActualGoal =.. [Name|ExistingArgs],
             append(ExistingArgs, Args, NewArgs),
