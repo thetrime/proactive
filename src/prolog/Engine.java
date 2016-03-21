@@ -175,7 +175,7 @@ public class Engine
       return CompoundTerm.getList(elements);
    }
 
-   public void checkForFluxListeners(ReactWidget context)
+   public boolean checkForFluxListeners(ReactWidget context)
    {
       // FIXME: Not quite. listen_for needs to have a goal as the second argument, and we need to take note of that!
       VariableTerm storeName = new VariableTerm("Module");
@@ -183,13 +183,17 @@ public class Engine
       Term goal = ReactModule.crossModuleCall(context.getComponentName(), new CompoundTerm(AtomTerm.get("listen_for"), new Term[]{storeName, goalName}));
       int undoPosition = interpreter.getUndoPosition();
       Interpreter.Goal g = interpreter.prepareGoal(goal);
+      boolean hasListener = false;
       try
       {
          while (true)
          {
             PrologCode.RC rc = interpreter.execute(g);
-            if (rc == PrologCode.RC.SUCCESS || rc == PrologCode.RC.SUCCESS_LAST)
-               fluxDispatcher.registerFluxListener(((AtomTerm)(storeName.dereference())).value, goalName.dereference(), context);
+	    if (rc == PrologCode.RC.SUCCESS || rc == PrologCode.RC.SUCCESS_LAST)
+	    {
+	       fluxDispatcher.registerFluxListener(((AtomTerm)(storeName.dereference())).value, goalName.dereference(), context);
+	       hasListener = true;
+	    }
             if (rc == PrologCode.RC.FAIL || rc == PrologCode.RC.SUCCESS_LAST)
                break;
          }
@@ -198,6 +202,7 @@ public class Engine
       {
          // Thats ok
       }
+      return hasListener;
    }
 
    public Term getStoreState(String storeName)
@@ -383,7 +388,7 @@ public class Engine
          System.out.println("Handler is not callable: " + handler);
          return false;
       }
-      //System.out.println("Executing " + goal);
+//      System.out.println("Executing " + goal);
       int undoPosition = interpreter.getUndoPosition();
       Interpreter.Goal g = interpreter.prepareGoal(goal);
       try
@@ -399,7 +404,9 @@ public class Engine
             context.setState(applyState(context.getState(), newState.dereference()));
             interpreter.undo(undoPosition);
             return (rc == PrologCode.RC.SUCCESS || rc == PrologCode.RC.SUCCESS_LAST);
-         }
+	 }
+//	 else
+//	    System.out.println("Failed")
       }
       catch (PrologException notDefined)
       {

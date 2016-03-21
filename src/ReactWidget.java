@@ -32,6 +32,7 @@ public class ReactWidget extends ReactComponent implements CodeChangeListener
    protected Term state;
    protected Term props;
    protected Term vDom = null;
+   private boolean hasFluxListeners = false;
 
    private ReactComponent internalComponent;
 
@@ -57,7 +58,7 @@ public class ReactWidget extends ReactComponent implements CodeChangeListener
       internalComponent.setOwnerDocument(this);
 
       // Next, check to see if the module needs any flux listeners
-      engine.checkForFluxListeners(this);
+      hasFluxListeners = engine.checkForFluxListeners(this);
    }
 
    public void handleCodeChange() 
@@ -136,7 +137,8 @@ public class ReactWidget extends ReactComponent implements CodeChangeListener
 
    public void destroy()
    {
-      engine.deregisterFluxListener(elementId, this);
+      if (hasFluxListeners)
+	 engine.deregisterFluxListener(elementId, this);
    }
 
    public ReactWidget updateWidget(Term newProps) throws Exception
