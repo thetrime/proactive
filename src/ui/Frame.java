@@ -6,6 +6,9 @@ import java.util.HashMap;
 import java.awt.Component;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
+import java.awt.event.WindowListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.awt.BorderLayout;
 import org.proactive.prolog.PrologObject;
 import org.proactive.prolog.Engine;
@@ -30,8 +33,42 @@ public class Frame extends ReactComponent
                else if (repackCount > 0)
                   repackCount--;
             }
-         });
+	 });
+      frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
       frame.setVisible(true);
+   }
+
+   private WindowListener windowListener = null;
+   private void setCloseHandler(PrologObject value)
+   {
+      if (windowListener != null)
+	 frame.removeWindowListener(windowListener);
+
+      if (value.isNull())
+         return;
+      windowListener = new WindowAdapter()
+	 {
+	    public void windowClosing(WindowEvent ev)
+	    {
+	       try
+               {
+		  getOwnerDocument().triggerEvent(value.asTerm(), PrologObject.emptyList().asTerm());
+               }
+               catch (Exception e)
+               {
+                  e.printStackTrace();
+               }
+            }
+         };
+      frame.addWindowListener(windowListener);
+   }
+
+   @Override
+   public void setProperties(HashMap<String, PrologObject> properties)
+   {
+      super.setProperties(properties);
+      if (properties.containsKey("onClose"))
+	 setCloseHandler(properties.get("onClose"));
    }
 
    public void setParentNode(ReactComponent parent)

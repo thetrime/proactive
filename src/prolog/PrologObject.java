@@ -176,6 +176,10 @@ public class PrologObject
       return null;
    }
 
+   public static PrologObject emptyList()
+   {
+      return new PrologObject(TermConstants.emptyListAtom);
+   }
 
    public static PrologObject serialize(Map<String, Object> map)
    {
