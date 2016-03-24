@@ -17,7 +17,9 @@ public class Predicate_parent_node extends ExecuteOnlyCode
       ReactComponent domNode = (ReactComponent)((JavaObjectTerm)args[0]).value;
       if (domNode == null)
          return interpreter.simpleUnify(args[1], new CompoundTerm(CompoundTermTag.curly1, AtomTerm.get("null")));
-      else
-         return interpreter.simpleUnify(args[1], new JavaObjectTerm(domNode.getParentNode()));
+      ReactComponent parent = domNode.getParentNode();
+      if (parent == null)
+	 return interpreter.simpleUnify(args[1], new CompoundTerm(CompoundTermTag.curly1, AtomTerm.get("null")));
+      return interpreter.simpleUnify(args[1], new JavaObjectTerm(domNode.getParentNode()));
    }
 }
