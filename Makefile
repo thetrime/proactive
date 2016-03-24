@@ -57,6 +57,7 @@ ENGINE= src/prolog/Predicate_remove_child.java                \
 	src/prolog/Predicate_init_widget.java                 \
 	src/prolog/Predicate_get_this.java                    \
 	src/prolog/Predicate_get_store_state.java             \
+	src/prolog/Predicate_get_state.java                   \
 	src/prolog/Predicate_bubble_event.java                \
 	src/prolog/Engine.java                                \
         src/prolog/PrologState.java                           \

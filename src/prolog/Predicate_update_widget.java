@@ -25,10 +25,9 @@ public class Predicate_update_widget extends ExecuteOnlyCode
          ReactWidget widget = ((ReactWidget)domNode);
          //System.out.println("update_widget(" + args[0] + ", " + args[1] + ", " + args[2] + ", _)");
          // We have to put the children in there too
-         Term newProperties = newvDom.args[1];
-         newProperties = new CompoundTerm(TermConstants.listTag, new Term[]{new CompoundTerm(AtomTerm.get("="), new Term[]{AtomTerm.get("children"), newvDom.args[2]}),
-                                                                            newProperties});
-         widget.updateWidget(newProperties);
+	 PrologState newProperties = PrologState.fromList(newvDom.args[1]);
+	 newProperties.put(AtomTerm.get("children"), newvDom.args[2]);
+	 widget.updateWidget(newProperties);
          return interpreter.simpleUnify(args[3], new JavaObjectTerm(domNode));
       }
       catch (Exception e)

@@ -35,8 +35,8 @@ call(A,B,C):-
 
 
 bubble_event(List, Key, Event):-
-        ( memberchk(Key=Handler, List),
-          Handler \== {null}->
+	get_state(List, Key, Handler),
+	( Handler \== {null}->
             bubble_event(Handler, Event)
         ; otherwise->
             true
@@ -49,6 +49,7 @@ between(Low, High, I):-
           between(II, High, I)
         ).
 
+/*
 get_state({null}, _, {null}):- !.
 get_state(Object, Key, Value):-
         ( atom(Key)->
@@ -88,4 +89,5 @@ glue_args(Goal, Args, NewGoal):- !,
             Goal =.. [Name|ExistingArgs],
             append(ExistingArgs, Args, NewArgs),
             NewGoal =.. [Name|NewArgs]
-        ).
+	).
+*/

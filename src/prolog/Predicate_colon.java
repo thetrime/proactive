@@ -24,8 +24,7 @@ public class Predicate_colon extends ExecuteOnlyCode
       environment.pushModule(moduleName.value); // If this fails we want to let the exception bubble up. We DEFINITELY do not want to pop later!
       try
       {
-
-         rc = Predicate_call.staticExecute(interpreter, backtrackMode, args[1]);
+	 rc = Predicate_call.staticExecute(interpreter, backtrackMode, args[1]);
          if (rc == RC.SUCCESS)
          {
             // Make a fake backtrack point here so we get a chance to restore the module context if backtracking

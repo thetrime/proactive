@@ -7,7 +7,7 @@ import java.util.LinkedList;
 
 public class FluxStore
 {
-   protected Term state;
+   protected PrologState state;
    protected String storeName;
    protected Engine engine;
    private LinkedList<FluxListener> listeners = new LinkedList<FluxListener>();
@@ -41,7 +41,7 @@ public class FluxStore
       return engine.updateStore(storeName, key, value, state, this);
    }
 
-   public void setState(Term t)
+   public void setState(PrologState t)
    {
       state = t;
       for (FluxListener listener: listeners)
@@ -57,7 +57,7 @@ public class FluxStore
       }
    }
 
-   public Term getState()
+   public PrologState getState()
    {
       return state;
    }

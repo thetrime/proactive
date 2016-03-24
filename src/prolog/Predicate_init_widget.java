@@ -23,7 +23,7 @@ public class Predicate_init_widget extends ExecuteOnlyCode
          ReactWidget widget = new ReactWidget(parentContext,
                                               parentContext.getEngine(),
                                               ((AtomTerm)element.args[0]).value,
-                                              element.args[1]);
+					      PrologState.fromList(element.args[1]));
          return interpreter.simpleUnify(args[2], new JavaObjectTerm(widget));
       }
       catch (Exception e)

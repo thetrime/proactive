@@ -64,7 +64,7 @@ public class Engine
       env.installBuiltin("format", 3);
       env.installBuiltin("findall", 4);
 
-
+      env.installBuiltin("get_state", 3);
       env.installBuiltin("on_server", 1);
       env.installBuiltin("raise_event", 2);
       env.installBuiltin("wait_for", 1);
@@ -104,8 +104,12 @@ public class Engine
       System.out.println("Compile time: " + (System.currentTimeMillis() - t1) + "ms");
    }
 
-   public Term getInitialState(String component, Term props)
+   public PrologState getInitialState(String component, PrologState props)
    {
+      if (!env.predicateExists(component, CompoundTermTag.get("getInitialState", 2)))
+      {
+	 return PrologState.emptyState;
+      }
       VariableTerm replyTerm = new VariableTerm("Result");
       Term goal = ReactModule.crossModuleCall(component, new CompoundTerm(AtomTerm.get("getInitialState"), new Term[]{props, replyTerm}));
       int undoPosition = interpreter.getUndoPosition();
@@ -117,22 +121,20 @@ public class Engine
             interpreter.stop(g);
          if (rc == PrologCode.RC.SUCCESS || rc == PrologCode.RC.SUCCESS_LAST)
          {
-            Term result = replyTerm.dereference().clone(new TermCloneContext());
+	    PrologState result = new PrologState(replyTerm.dereference());
             interpreter.undo(undoPosition);
             return result;
          }
       }
       catch (PrologException notDefined)         
       {
-          // FIXME: There are two possible exceptions here. One is that there is no such predicate - that is OK. The other is there is no such module - that is bad.
-          // Really we should be checking for the predicates existence first, somehow...
-         //notDefined.printStackTrace();
-         //System.exit(-1);
+	 notDefined.printStackTrace();
+	 //System.exit(-1);
       }      
-      return TermConstants.emptyListAtom;
+      return PrologState.emptyState;
    }
 
-   public Term getInitialStoreState(String component)
+   public PrologState getInitialStoreState(String component)
    {
       VariableTerm replyTerm = new VariableTerm("Result");
       Term goal = ReactModule.crossModuleCall(component, new CompoundTerm(AtomTerm.get("getInitialStoreState"), new Term[]{replyTerm}));
@@ -145,7 +147,7 @@ public class Engine
             interpreter.stop(g);
          if (rc == PrologCode.RC.SUCCESS || rc == PrologCode.RC.SUCCESS_LAST)
          {
-            Term result = replyTerm.dereference().clone(new TermCloneContext());
+	    PrologState result = new PrologState(replyTerm.dereference().clone(new TermCloneContext()));
             interpreter.undo(undoPosition);
             return result;
          }
@@ -157,7 +159,7 @@ public class Engine
          //notDefined.printStackTrace();
          //System.exit(-1);
       }      
-      return TermConstants.emptyListAtom;
+      return PrologState.emptyState;
    }
 
    public Term instantiateProps(Map<String, Term> properties)
@@ -205,20 +207,23 @@ public class Engine
       return hasListener;
    }
 
-   public Term getStoreState(String storeName)
+   public PrologState getStoreState(String storeName)
    {
       return fluxDispatcher.getStoreState(storeName);
    }
 
 
-   public boolean fluxEvent(Term handler, String storeName, Term storeState, ReactWidget context) throws Exception
+   public boolean fluxEvent(Term handler, String storeName, PrologState storeState, ReactWidget context) throws Exception
    {
-      Term state = context.getState();
-      Term props = context.getProps();
+      PrologState state = context.getState();
+      PrologState props = context.getProps();
       Term goal;
       VariableTerm newState = new VariableTerm("NewState");
       if (handler instanceof AtomTerm)
-         goal = ReactModule.crossModuleCall(context.getComponentName(), new CompoundTerm((AtomTerm)handler, new Term[]{storeState, state, props, newState}));
+	 goal = ReactModule.crossModuleCall(context.getComponentName(), new CompoundTerm((AtomTerm)handler, new Term[]{storeState,
+														       state,
+														       props,
+														       newState}));
       else if (handler instanceof CompoundTerm)
       {
          CompoundTerm c_handler = (CompoundTerm)handler;
@@ -226,10 +231,10 @@ public class Engine
          for (int i = 0; i < c_handler.tag.arity; i++)
             args[i] = c_handler.args[i];
          args[c_handler.tag.arity+0] = AtomTerm.get(storeName);
-         args[c_handler.tag.arity+1] = storeState;
-         args[c_handler.tag.arity+2] = state;
-         args[c_handler.tag.arity+3] = props;
-         args[c_handler.tag.arity+4] = newState;
+	 args[c_handler.tag.arity+1] = storeState;
+	 args[c_handler.tag.arity+2] = state;
+	 args[c_handler.tag.arity+3] = props;
+	 args[c_handler.tag.arity+4] = newState;
          goal = ReactModule.crossModuleCall(context.getComponentName(), new CompoundTerm(c_handler.tag.functor, args));
       }
       else
@@ -265,8 +270,8 @@ public class Engine
 
    public Term renderContextualElement(Term handler, Term event, ReactWidget context) throws PrologException
    {
-      Term state;
-      Term props;
+      PrologState state;
+      PrologState props;
       if (handler instanceof CompoundTerm && ((CompoundTerm)handler).tag == tagThis)
       {
          CompoundTerm handlerTerm = (CompoundTerm)handler;
@@ -280,7 +285,7 @@ public class Engine
       Term goal;
       VariableTerm result = new VariableTerm("Result");
       if (handler instanceof AtomTerm)
-         goal = ReactModule.crossModuleCall(context.getComponentName(), new CompoundTerm((AtomTerm)handler, new Term[]{event, state, props, result}));
+	 goal = ReactModule.crossModuleCall(context.getComponentName(), new CompoundTerm((AtomTerm)handler, new Term[]{event, state, props, result}));
       else if (handler instanceof CompoundTerm)
       {
          CompoundTerm c_handler = (CompoundTerm)handler;
@@ -288,8 +293,8 @@ public class Engine
          for (int i = 0; i < c_handler.tag.arity; i++)
             args[i] = c_handler.args[i];
          args[c_handler.tag.arity+0] = event;
-         args[c_handler.tag.arity+1] = state;
-         args[c_handler.tag.arity+2] = props;
+	 args[c_handler.tag.arity+1] = state;
+	 args[c_handler.tag.arity+2] = props;
          args[c_handler.tag.arity+3] = result;
          goal = ReactModule.crossModuleCall(context.getComponentName(), new CompoundTerm(c_handler.tag.functor, args));
       }
@@ -353,8 +358,8 @@ public class Engine
 
    public boolean triggerEvent(Term handler, Term event, ReactWidget context) throws PrologException
    {
-      Term state;
-      Term props;
+      PrologState state;
+      PrologState props;
       if (handler instanceof CompoundTerm && ((CompoundTerm)handler).tag == tagThis)
       {
          CompoundTerm handlerTerm = (CompoundTerm)handler;
@@ -369,7 +374,7 @@ public class Engine
       Term goal;
       VariableTerm newState = new VariableTerm("NewState");
       if (handler instanceof AtomTerm)
-         goal = ReactModule.crossModuleCall(context.getComponentName(), new CompoundTerm((AtomTerm)handler, new Term[]{event, state, props, newState}));
+	 goal = ReactModule.crossModuleCall(context.getComponentName(), new CompoundTerm((AtomTerm)handler, new Term[]{event, state, props, newState}));
       else if (handler instanceof CompoundTerm)
       {
          CompoundTerm c_handler = (CompoundTerm)handler;
@@ -378,8 +383,8 @@ public class Engine
             args[i] = c_handler.args[i];
             //args[i] = unpack_recursive(c_handler.args[i]);
          args[c_handler.tag.arity+0] = event;
-         args[c_handler.tag.arity+1] = state;
-         args[c_handler.tag.arity+2] = props;
+	 args[c_handler.tag.arity+1] = state;
+	 args[c_handler.tag.arity+2] = props;
          args[c_handler.tag.arity+3] = newState;
          goal = ReactModule.crossModuleCall(context.getComponentName(), new CompoundTerm(c_handler.tag.functor, args));
       }
@@ -388,7 +393,7 @@ public class Engine
          System.out.println("Handler is not callable: " + handler);
          return false;
       }
-//      System.out.println("Executing " + goal);
+      //System.out.println("Executing " + goal);
       int undoPosition = interpreter.getUndoPosition();
       Interpreter.Goal g = interpreter.prepareGoal(goal);
       try
@@ -432,7 +437,7 @@ public class Engine
       fluxDispatcher.deregisterFluxListener(componentName, listener);
    }
 
-   public boolean updateStore(String componentName, Term key, Term value, Term state, FluxStore store)
+   public boolean updateStore(String componentName, Term key, Term value, PrologState state, FluxStore store)
    {
       Term goal;
       VariableTerm newState = new VariableTerm("NewState");
@@ -459,13 +464,9 @@ public class Engine
       return false;
    }
 
-   private Term applyState(Term oldState, Term newState) throws PrologException
+   private PrologState applyState(PrologState oldState, Term newState) throws PrologException
    {
-      HashMap<String, Term> properties = new HashMap<String, Term>();
-      addProperties(oldState, properties);
-      addProperties(newState, properties);
-      //System.out.println("properties: " + properties);
-      return instantiateProps(properties);
+      return oldState.cloneWith(newState);
    }
 
    private static boolean isNull(Term t)
@@ -478,7 +479,8 @@ public class Engine
       }
       return false;
    }
-   
+
+   /*
    private void addProperties(Term state, HashMap<String, Term> props) throws PrologException
    {
       if (TermConstants.emptyListAtom.equals(state))
@@ -539,6 +541,7 @@ public class Engine
          }
       }
    }
+   */
 
 
    public static class ExecutionState extends WebSocketClient
@@ -694,12 +697,12 @@ public class Engine
       return null;
    }
 
-   public Term render(ReactWidget widget, String component, Term state, Term props) throws PrologException
+   public Term render(ReactWidget widget, String component, PrologState state, PrologState props) throws PrologException
    {
       //System.out.println("Rendering " + component + " with props " + props + " and state " + state);
       VariableTerm vDom = new VariableTerm("VDom");
       Term goal = ReactModule.crossModuleCall(component, new CompoundTerm(AtomTerm.get("render"), new Term[]{state,
-                                                                                                             props,
+													     props,
                                                                                                              vDom}));
       int undoPosition = interpreter.getUndoPosition();
       Interpreter.Goal g = interpreter.prepareGoal(goal);
@@ -707,25 +710,14 @@ public class Engine
       PrologCode.RC rc;
       try
       {
-         //System.out.println("Rendering: " + g);
+	 //System.out.println("Rendering: " + g);
          rc = interpreter.execute(g);
          //System.out.println("Rendering complete");
          if (rc == PrologCode.RC.SUCCESS)
             interpreter.stop(g);
          if (rc == PrologCode.RC.SUCCESS || rc == PrologCode.RC.SUCCESS_LAST)
          {
-            Term result = vDom.dereference();
-            /*
-            if (result instanceof CompoundTerm && ((CompoundTerm)result).tag.functor.value.equals("jsx") && ((CompoundTerm)result).tag.arity == 2)
-            {
-               CompoundTerm jsx = (CompoundTerm)result;
-               rc = interpreter.runOnce(jsx.args[0]);
-               if (rc == PrologCode.RC.SUCCESS || rc == PrologCode.RC.SUCCESS_LAST)
-                  result = jsx.args[1].dereference();
-               else
-                  result = TermConstants.emptyListAtom;
-            }
-            */
+	    Term result = vDom.dereference();
             result = result.clone(new TermCloneContext());
             interpreter.undo(undoPosition);
             return result;

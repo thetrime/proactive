@@ -39,7 +39,7 @@ public class ReactApp extends JFrame implements StyleSheetListener
       sheet.setValueForClass("title", "font-size", 24);
       React.setStyleSheet(sheet);
       engine = new Engine(URL, rootElementId);
-      context = new ReactWidget(null, engine, rootElementId, TermConstants.emptyListAtom);
+      context = new ReactWidget(null, engine, rootElementId, PrologState.emptyState);
       //React.addCodeChangeListener(new URI(URL + "/listen"), rootElementId, this);
       React.addStyleSheetListener(this);
       getContentPane().setLayout(new BorderLayout());

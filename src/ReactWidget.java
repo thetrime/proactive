@@ -1,6 +1,7 @@
 package org.proactive;
 
 import org.proactive.prolog.PrologObject;
+import org.proactive.prolog.PrologState;
 import org.proactive.prolog.Engine;
 import org.proactive.prolog.FluxDispatcher;
 import gnu.prolog.term.Term;
@@ -29,21 +30,21 @@ public class ReactWidget extends ReactComponent implements CodeChangeListener
 {
    protected Engine engine;
    protected String elementId;
-   protected Term state;
-   protected Term props;
+   protected PrologState state;
+   protected PrologState props;
    protected Term vDom = null;
    private boolean hasFluxListeners = false;
 
    private ReactComponent internalComponent;
 
-   public ReactWidget(ReactWidget parentContext, Engine engine, String elementId, Term props) throws Exception
+   public ReactWidget(ReactWidget parentContext, Engine engine, String elementId, PrologState props) throws Exception
    {
       this.engine = engine;
       this.elementId = elementId;
       this.props = props;
       this.owner = parentContext;
 
-      setProperties(Engine.termToProperties(props));
+      setProperties(props.getProperties());
 
       React.addCodeChangeListener(engine.getListenURI(), elementId, this);
 
@@ -102,12 +103,12 @@ public class ReactWidget extends ReactComponent implements CodeChangeListener
       return "<Widget:" + elementId + " " + props+ ">";
    }
 
-   public Term getState()
+   public PrologState getState()
    {
       return state;
    }
 
-   public Term getProps()
+   public PrologState getProps()
    {
       return props;
    }
@@ -117,9 +118,9 @@ public class ReactWidget extends ReactComponent implements CodeChangeListener
       return elementId;
    }
 
-   public void setState(Term newState) throws PrologException
+   public void setState(PrologState newState) throws PrologException
    {
-      state = (Term)newState.clone();
+      state = newState;
       //System.out.println("State of " + elementId + " is now " + newState);
       reRender();
    }
@@ -141,7 +142,7 @@ public class ReactWidget extends ReactComponent implements CodeChangeListener
 	 engine.deregisterFluxListener(elementId, this);
    }
 
-   public ReactWidget updateWidget(Term newProps) throws Exception
+   public ReactWidget updateWidget(PrologState newProps) throws Exception
    {
       //System.out.println("UpdateWidget called on " + elementId + " with props: " + newProps);
       props = newProps;
@@ -164,7 +165,7 @@ public class ReactWidget extends ReactComponent implements CodeChangeListener
    }
 
 
-   public boolean fluxEvent(Term goal, String storeName, Term storeState) throws Exception
+   public boolean fluxEvent(Term goal, String storeName, PrologState storeState) throws Exception
    {
       return engine.fluxEvent(goal, storeName, storeState, this);
    }

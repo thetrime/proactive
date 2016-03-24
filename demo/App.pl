@@ -18,17 +18,16 @@ q(X):-
         </Panel>|},
         A = B.
 
-raiseAnEvent(_Event, _State, _Props, []):-
+raiseAnEvent(_Event, _State, _Props, _):-
         get_store_state('SomeStore', X),
         writeln(store_state=X),
         raise_event(bing, bong).
 
 render(State, _Props, Form):-
-        memberchk(buttons=Buttons, State),
-        get_some_fields(Buttons, Fields),
-        get_state(State, event_triggered, EventTriggered),
-        writeln(event=EventTriggered),
-        {|jsx(Form)||
+	get_state(State, buttons, Buttons),
+	get_some_fields(Buttons, Fields),
+	get_state(State, event_triggered, EventTriggered),
+	{|jsx(Form)||
         <Panel>
           <Label label={Label}/>
           <Button label="Click me for an event" onClick={raiseAnEvent}/>
@@ -65,9 +64,9 @@ render(State, _Props, Form):-
                 Tail).
 
 list_item(State, ListItem):-
-        member(Label, [foo, bar, baz, qux]),
-        ( memberchk(Label=selected, State)->
-            Selected = true
+	member(Label, [foo, bar, baz, qux]),
+	( get_state(State, Label, selected)->
+	    Selected = true
         ; otherwise->
             Selected = false
         ),
@@ -78,12 +77,12 @@ listSelect(Event, _State, _Props, NewState):-
         memberchk(key=Key, Event),
         memberchk(isSelected=IsSelected, Event),
         ( IsSelected == true ->
-            NewState = [Key=selected]
+	    NewState = {Key: selected}
         ; otherwise->
-            NewState = [Key=not_selected]
+	    NewState = {Key: not_selected}
         ).
 
-get_some_fields(buttons(Buttons), Fields):-
+get_some_fields(Buttons, Fields):-
         findall(Field,
                 ( member(Label, Buttons),
                   {|jsx(Field)||
@@ -94,7 +93,9 @@ get_some_fields(buttons(Buttons), Fields):-
 columnClick(Key, Event, _, _, []):-
         writeln(click(Key, Event)).
 
-getInitialState(_, [buttons=buttons([foo, bar, qux, baz]), label='Label of button defined in state', event_triggered=false]).
+getInitialState(_, {buttons: [foo, bar, qux, baz],
+		    label: 'Label of button defined in state',
+		    event_triggered: false}).
 
 
 some_exported_goal:-

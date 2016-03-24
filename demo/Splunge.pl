@@ -3,7 +3,7 @@
 :- quasi_quotation_syntax(jsx).
 
 render(State, _Props, Form):-
-        memberchk(order=Order, State),
+	get_state(State, order, Order),
         ( Order == default->
             Label1 = top,
             Label2 = bottom,
@@ -22,13 +22,14 @@ render(State, _Props, Form):-
         <Button key={Key2} label={Label2} onClick={swap_labels}/>
         </Panel>|}.
 
-getInitialState(_, [order=default]).
+getInitialState(_, {order: default}).
 
-swap_labels(State, _, [order=swapped]):-
-        memberchk(order=default, State),
+swap_labels(_, State, _, {order: swapped}):-
+	get_state(State, order, default),
         some_local_goal,
         on_server(member(A, [a,b,c])), writeln(A), A == c.
-swap_labels(State, _, [order=default]):- memberchk(order=swapped, State).
+swap_labels(_, State, _, {order: default}):-
+	get_state(State, order, swapped).
 
 
 some_local_goal:-

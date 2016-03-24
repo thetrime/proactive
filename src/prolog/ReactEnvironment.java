@@ -156,6 +156,12 @@ public class ReactEnvironment extends Environment
       moduleStack.push("user");
    }
 
+   public boolean predicateExists(String module, CompoundTermTag tag)
+   {
+      ReactModule m = modules.get(module);
+      return m != null && m.getDefinedPredicate(tag) != null;
+   }
+
    public void installBuiltin(String functor, int arity) throws PrologException
    {
       Module module = getModule();

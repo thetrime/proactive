@@ -25,11 +25,11 @@ public class FluxDispatcher
    private Term currentValue = null;
    private Engine engine;
 
-   public Term getStoreState(String name)
+   public PrologState getStoreState(String name)
    {
       FluxStore store = stores.get(name);
       if (store == null)
-         return TermConstants.emptyListAtom;
+	 return PrologState.emptyState;
       return store.getState();
    }
 
