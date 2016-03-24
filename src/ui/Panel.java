@@ -380,7 +380,11 @@ public class Panel extends ReactComponent
       oldChild.setOwnerDocument(null);
       oldChild.setParentNode(null);
       newChild.setOwnerDocument(owner);
-      super.replaceChild(newChild, oldChild);
+      newChild.setParentNode(this);
+      awtMap.remove(oldChild);
+      awtMap.put(newChild, newChild.getAWTComponent());
+      // do NOT do this here. We have already changed the appropriate stuff, and doing a second time will lead to tears!
+      // super.replaceChild(newChild, oldChild);
       int childFill = oldChild.getFill();
       if (childFill == GridBagConstraints.HORIZONTAL || childFill == GridBagConstraints.BOTH)
          total_x_weight--;
