@@ -106,7 +106,7 @@ public class PrologState extends AtomicTerm
 	 if (isState(value))
 	    map.put((AtomTerm)key, new PrologState(value));
 	 else
-	    map.put((AtomTerm)key, value);
+	    map.put((AtomTerm)key, (Term)value.clone());
       }
       else
       {
@@ -122,7 +122,7 @@ public class PrologState extends AtomicTerm
 	    else
 	    {
 	       // Changing {foo: {bar: .....}} -> {foo: atomic-type}
-	       map.put(key, value);
+	       map.put(key, (Term)value.clone());
 	    }
 	 }
 	 else
@@ -130,7 +130,7 @@ public class PrologState extends AtomicTerm
 	    if (isState(value))
 	       map.put((AtomTerm)key, new PrologState(value));
 	    else
-	       map.put((AtomTerm)key, value);
+	       map.put((AtomTerm)key, (Term)value.clone());
 	 }
       }
    }
