@@ -41,4 +41,9 @@ public class Label extends ReactLeafComponent
    {
       return label;
    }
+
+   public String toString()
+   {
+      return "<Label: " + label.getText() + ">";
+   }
 }
