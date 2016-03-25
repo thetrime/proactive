@@ -46,8 +46,6 @@ Currently this is just a toy, but the skeleton is almost complete and ready for 
 
 ### Minor tasks
    * Make on_server illegal from inside render/3
-   * Enforce state being a list of =/2 pairs where the first arg of each is an atom
-      * Or maybe state should be something more exotic that has rapid access. In SWI we could use maps. In GPJ we could use a JavaObjectTerm backed by a HashMap. Both could be accessed via a predicate like get(+State, +Key, -Value), or more extreme still, I could just implement ./3 in GPJ, though how would we create a new state?
 
 
 Using Proactive in your project
@@ -96,10 +94,27 @@ An `element/3` term has the following args:
 [1] actually, if you want, you can return a jsx/2 term, where the first argument is a goal to run, and the second argument is the Document. This should not be required for hand-written code, but JSX uses it so that constructs like `{|jsx(Foo)||<X>{Var}</X>}, X = []` where we do not know when compiling the JSX whether or not X has any children.
 
 ##### State
-You MAY declare a predicate `getInitialState(+Props, -State)` in your module. (note that using Props here may be an anti-pattern, depending on exactly what you do. See https://facebook.github.io/react/tips/props-in-getInitialState-as-anti-pattern.html). getInitialState/2 will be called before the component is _first_ instantiated. State is expected to be a list of `=/2` terms, where each term has an atom for the first argument. This is not currently checked, but I plan to add a check to ensure this is the case, since failing to do so leads to surprising and unexpected problems in event handlers when we try and 'merge' states.
+You MAY declare a predicate `getInitialState(+Props, -State)` in your module. (note that using Props here may be an anti-pattern, depending on exactly what you do. See https://facebook.github.io/react/tips/props-in-getInitialState-as-anti-pattern.html). getInitialState/2 will be called before the component is _first_ instantiated. State is expected to be a term {}(Term), where Term is either:
+   * ,(Cell, Term)
+   * Cell
+And Cell is a term :(Atom, Value).
+
+This looks obtuse, but it means you can write states like {foo: bar, qux: {baz: [], quux:3}}. Why use {} instead of []? There are two reasons:
+   * I found myself wanting to write [rows=[a,b,c]] several times, and the recursive nature of the state meant that I had to 'protect' the inner list from being converted into a state. This made it ugly to recover it later
+   * In the end, I never found myself building a state piecewise like you might a list - the lack of an | operator simply didn't seem to matter. If it became necessary, a put_state(+State, +Key, +Value, -NewState) could be trivially written
+
+Note that the empty state is {}, but an unbound state is simply ignored. This may come in handy if your version of GNU Prolog for Java does not support {} as a term due to https://github.com/drt24/gnuprologjava/issues/6
+
+You can get at these elements using get_state(+State, +Key, -Value). This has some slightly unusual behaviour:
+   * The functor of Key is used as the lookup
+   * If there is no match in the state, then {null} is returned
+   * {null} is a valid state, and always returns {null} for any key. This means you can write State.foo.bar.baz, and if State has no foo, then you'll just get {null} rather than a Prolog version of a null pointer exception.
+   * If a value is found:
+      * If Key is an atom, then Value is the found value
+      * If Key was a compound, then Value is the found value with the arguments of Key consed on to it. FIXME: This was to enable some syntactic sugar, but now I cant find the example I needed it for.
 
 ##### Event Handlers
-You MAY declare event handlers in the Javascript way: For example,
+You MAY declare event handlers in a Javascript-esque way: For example,
 ```
 {|jsx(...)||
   <Button label='Click me' onClick={some_goal}/>|}
@@ -131,7 +146,7 @@ render(_State, _Props, Bar):-
   {||jsx(Bar)|
   <Widget onQux={this.handleQux}/>|}.
 
-handleQux(Event, _State, Props, []):-
+handleQux(Event, _State, Props, _):-
     bubble_event(Props, onQux, Event).
 ```
 
