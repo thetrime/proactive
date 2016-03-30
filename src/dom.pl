@@ -16,6 +16,7 @@
 
           get_store_state/2,
           get_state/3,
+          state_to_term/2,
           get_this/1
          ]).
 
@@ -246,3 +247,5 @@ glue_args(Goal, Args, NewGoal):- !,
         ).
 
 get_store_state(_, []). % FIXME: Implement Flux!
+
+state_to_term(X, X). % FIXME: This should copy X and instantiate all the vars
