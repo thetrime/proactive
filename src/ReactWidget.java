@@ -103,6 +103,13 @@ public class ReactWidget extends ReactComponent implements CodeChangeListener
       return "<Widget:" + elementId + " " + props+ ">";
    }
 
+   public int getFill()
+   {
+      if (internalComponent != null)
+         return internalComponent.getFill();
+      return super.getFill();
+   }
+
    public PrologState getState()
    {
       return state;
