@@ -101,11 +101,14 @@ public class PrologState extends AtomicTerm
    private void processElement(AtomTerm key, Term value, CompoundTermTag functor) throws PrologException
    {
       Term existingValue = map.get(key);
+      value = value.dereference();
       if (existingValue == null)
       {
 	 if (isState(value))
 	    map.put((AtomTerm)key, new PrologState(value));
-	 else
+         else if (value instanceof VariableTerm)
+            map.put((AtomTerm)key, nullTerm);
+         else
 	    map.put((AtomTerm)key, (Term)value.clone());
       }
       else
@@ -121,14 +124,19 @@ public class PrologState extends AtomicTerm
 	    }
 	    else
 	    {
-	       // Changing {foo: {bar: .....}} -> {foo: atomic-type}
-	       map.put(key, (Term)value.clone());
+               // Changing {foo: {bar: .....}} -> {foo: atomic-type}
+               if (value instanceof VariableTerm)
+                  map.put(key, nullTerm);
+               else
+                  map.put(key, (Term)value.clone());
 	    }
 	 }
 	 else
 	 {
 	    if (isState(value))
-	       map.put((AtomTerm)key, new PrologState(value));
+               map.put((AtomTerm)key, new PrologState(value));
+            else if (value instanceof VariableTerm)
+               map.put((AtomTerm)key, nullTerm);
 	    else
 	       map.put((AtomTerm)key, (Term)value.clone());
 	 }
