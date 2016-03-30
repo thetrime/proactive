@@ -37,7 +37,7 @@ serve_react(Request):-
             format(current_output, 'Content-Type: text/prolog~n~n', []),
             forall(member(Clause, Clauses),
                    ( numbervars(Clause, 0, _, [singletons(true)]),
-                     write_term(current_output, Clause, [numbervars(true), quoted(true)]),
+                     write_term(current_output, Clause, [numbervars(true), quoted(true), ignore_ops(true)]),
                      writeln(current_output, '.')
                    ))
         ; otherwise->
@@ -166,7 +166,7 @@ react_cleanup(Goal, !, WebSocket):-
         send_reply(WebSocket, cut(Goal)).
 
 send_reply(WebSocket, Term):-
-        format(atom(Text), '~q', [Term]),
+        format(atom(Text), '~k', [Term]),
         ws_send(WebSocket, text(Text)).
 
 trigger_react_recompile(Module):-
