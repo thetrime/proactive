@@ -149,11 +149,11 @@ public class ReactWidget extends ReactComponent implements CodeChangeListener
 	 engine.deregisterFluxListener(elementId, this);
    }
 
-   public ReactWidget updateWidget(PrologState newProps) throws Exception
+   public ReactWidget updateWidget(PrologState newProps) throws PrologException
    {
-      //System.out.println("UpdateWidget called on " + elementId + " with props: " + newProps);
       props = newProps;
-      reRender();
+      if (!engine.componentWillReceiveProps(elementId, this))
+         reRender();
       return this;
    }
 

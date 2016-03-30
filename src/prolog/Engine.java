@@ -135,6 +135,39 @@ public class Engine
       return PrologState.emptyState;
    }
 
+   public boolean componentWillReceiveProps(String component, ReactWidget context) throws PrologException
+   {
+      if (!env.predicateExists(component, CompoundTermTag.get("componentWillReceiveProps", 3)))
+         return false;
+
+      PrologState state = context.getState();
+      PrologState props = context.getProps();
+      VariableTerm newState = new VariableTerm("NewState");
+      Term goal = ReactModule.crossModuleCall(component, new CompoundTerm(AtomTerm.get("componentWillReceiveProps"), new Term[]{state, props, newState}));
+      int undoPosition = interpreter.getUndoPosition();
+      Interpreter.Goal g = interpreter.prepareGoal(goal);
+      try
+      {
+         PrologCode.RC rc = interpreter.execute(g);
+         if (rc == PrologCode.RC.SUCCESS)
+            interpreter.stop(g);
+         if (rc == PrologCode.RC.SUCCESS || rc == PrologCode.RC.SUCCESS_LAST)
+         {
+            // We must call getState() here since the state might have changed since we started! A series of events might have fired (specifically, Flux)
+            // which might have mutated the state from its value when we started this event
+            // FIXME: Is this really true for componentWillReceiveProps?
+            PrologState finalState = applyState(context.getState(), newState.dereference());
+            context.setState(finalState);
+            return (rc == PrologCode.RC.SUCCESS || rc == PrologCode.RC.SUCCESS_LAST);
+	 }
+      }
+      finally
+      {
+         interpreter.undo(undoPosition);
+      }
+      return false;
+   }
+
    public PrologState getInitialStoreState(String component)
    {
       VariableTerm replyTerm = new VariableTerm("Result");
