@@ -17,6 +17,14 @@ public class TextField implements InputWidget
    JTextField field = new JTextField();
    private DocumentFilter documentFilter = null;
    private DocumentFilter.FilterBypass bypass = null;
+   private enum BypassType
+   {
+      INSERT, REMOVE, REPLACE;
+   }
+   private BypassType bypass_op;
+   private int bypass_off = 0;
+   private int bypass_len = 0;
+   private int bypass_replacement_len = 0;
    public TextField()
    {
    }
@@ -64,7 +72,51 @@ public class TextField implements InputWidget
    {
       try
       {
-         bypass.replace(0, field.getText().length(), text, null);
+         if (bypass_op == BypassType.INSERT)
+         {
+            // Simulate the insert and see if it gives the right value
+            if (text.length() == field.getText().length() + bypass_len &&
+                text.substring(0, bypass_off).equals(field.getText().substring(0, bypass_off)) &&
+                text.substring(bypass_off+bypass_len).equals(field.getText().substring(bypass_off)))
+            {
+               // Yes, looks OK
+               bypass.insertString(bypass_off, text.substring(bypass_off, bypass_off+bypass_len), null);
+            }
+            else
+            {
+               // No good. Just replace the whole lot
+               bypass.replace(0, field.getText().length(), text, null);
+            }
+
+         }
+         else if (bypass_op == BypassType.REMOVE)
+         {
+            if ((text.length() == field.getText().length() - bypass_len) &&
+                text.substring(0, bypass_off).equals(field.getText().substring(0, bypass_off)) &&
+                text.substring(bypass_off).equals(field.getText().substring(bypass_off + bypass_len)))
+            {
+               // Looks OK
+               bypass.remove(bypass_off, bypass_len);
+            }
+            else
+            {
+               bypass.replace(0, field.getText().length(), text, null);
+            }
+         }
+         else if (bypass_op == BypassType.REPLACE)
+         {
+            if ((text.length() == field.getText().length() - bypass_len + bypass_replacement_len) &&
+                text.substring(0, bypass_off).equals(field.getText().substring(0, bypass_off)) &&
+                text.substring(bypass_off + bypass_replacement_len).equals(field.getText().substring(bypass_off + bypass_len)))
+            {
+               // Looks OK
+               bypass.replace(bypass_off, bypass_len, text.substring(bypass_off, bypass_off+bypass_replacement_len), null);
+            }
+            else
+            {
+               bypass.replace(0, field.getText().length(), text, null);
+            }
+         }
       }
       catch(Exception e)
       {
@@ -107,6 +159,9 @@ public class TextField implements InputWidget
                                 else
                                 {
                                    bypass = fb;
+                                   bypass_op = BypassType.INSERT;
+                                   bypass_off = offs;
+                                   bypass_len = str.length();
                                    try
                                    {
                                       String newValue = new StringBuilder(field.getText()).insert(offs, str).toString();
@@ -127,6 +182,9 @@ public class TextField implements InputWidget
                                 else
                                 {
                                    bypass = fb;
+                                   bypass_op = BypassType.REMOVE;
+                                   bypass_off = offset;
+                                   bypass_len = length;
                                    try
                                    {
                                       String newValue = new StringBuilder(field.getText()).replace(offset, offset+length, "").toString();
@@ -148,6 +206,10 @@ public class TextField implements InputWidget
                                 else
                                 {
                                    bypass = fb;
+                                   bypass_op = BypassType.REPLACE;
+                                   bypass_off = offset;
+                                   bypass_len = length;
+                                   bypass_replacement_len = text.length();
                                    try
                                    {
                                       String newValue = new StringBuilder(field.getText()).replace(offset, offset+length, text).toString();
