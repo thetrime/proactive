@@ -1,6 +1,10 @@
 package org.proactive.ui;
 
 import javax.swing.JFrame;
+import javax.swing.KeyStroke;
+import javax.swing.InputMap;
+import javax.swing.JComponent;
+import javax.swing.AbstractAction;
 import java.util.List;
 import java.util.HashMap;
 import java.awt.Component;
@@ -9,6 +13,8 @@ import java.awt.event.ComponentEvent;
 import java.awt.event.WindowListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.awt.event.KeyEvent;
+import java.awt.event.ActionEvent;
 import java.awt.BorderLayout;
 import org.proactive.prolog.PrologObject;
 import org.proactive.prolog.Engine;
@@ -41,11 +47,14 @@ public class Frame extends ReactComponent
    private WindowListener windowListener = null;
    private void setCloseHandler(PrologObject value)
    {
+      KeyStroke keyStrokeEscape = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0, false);
       if (windowListener != null)
-	 frame.removeWindowListener(windowListener);
-
+         frame.removeWindowListener(windowListener);
       if (value.isNull())
+      {
+         ((InputMap)frame.getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW)).put(keyStrokeEscape, "none");
          return;
+      }
       windowListener = new WindowAdapter()
 	 {
 	    public void windowClosing(WindowEvent ev)
@@ -61,6 +70,21 @@ public class Frame extends ReactComponent
             }
          };
       frame.addWindowListener(windowListener);
+      ((InputMap)frame.getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW)).put(keyStrokeEscape, "cancel-action");
+      frame.getRootPane().getActionMap().put("cancel-action", new AbstractAction("cancel-action")
+         {
+            public void actionPerformed(ActionEvent event)
+            {
+               try
+               {
+                  getOwnerDocument().triggerEvent(value.asTerm(), PrologObject.emptyList().asTerm());
+               }
+               catch (Exception e)
+               {
+                  e.printStackTrace();
+               }
+            }
+         });
    }
 
    @Override
