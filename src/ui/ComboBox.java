@@ -32,6 +32,8 @@ public class ComboBox extends ReactComponent
          int index = getIndexOf(anObject);
          if (index != -1)
             super.setSelectedItem(getElementAt(index));
+         else if (anObject == null)
+            super.setSelectedItem(null);
       }
 
       @Override
@@ -158,6 +160,9 @@ public class ComboBox extends ReactComponent
             stillConstructing = true;
             try
             {
+               if (field.getSelectedItem() != null &&
+                   field.getSelectedItem().equals(child))
+                  ((ReactComboBoxModel)field.getModel()).reallySetSelectedItem(null);
                field.removeItem((ComboItem)child);
             }
             finally
@@ -175,6 +180,8 @@ public class ComboBox extends ReactComponent
          try
          {
             int index = children.indexOf(oldChild);
+            if (field.getSelectedIndex() == index)
+               ((ReactComboBoxModel)field.getModel()).reallySetSelectedItem(null);
             field.removeItemAt(index);
             field.insertItemAt((ComboItem)newChild, index);
             if (newChild.equals(currentValue))
