@@ -66,6 +66,7 @@ public class Engine
       env.installBuiltin("findall", 4);
 
       env.installBuiltin("get_state", 3);
+      env.installBuiltin("state_to_term", 2);
       env.installBuiltin("on_server", 1);
       env.installBuiltin("raise_event", 2);
       env.installBuiltin("wait_for", 1);

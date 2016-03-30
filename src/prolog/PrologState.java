@@ -167,6 +167,23 @@ public class PrologState extends AtomicTerm
       return map.toString();
    }
 
+   public Term getTerm()
+   {
+      Term t = null;
+      CompoundTermTag colon2 = CompoundTermTag.get(":", 2);
+      for (Map.Entry<AtomTerm, Term> entry : map.entrySet())
+      {
+         Term value = entry.getValue();
+         if (value instanceof PrologState)
+            value = ((PrologState)value).getTerm();
+         if (t == null)
+            t = new CompoundTerm(colon2, entry.getKey(), value);
+         else
+            t = new CompoundTerm(TermConstants.conjunctionTag, new CompoundTerm(colon2, entry.getKey(), value), t);
+      }
+      return new CompoundTerm(CompoundTermTag.curly1, t);
+   }
+
    public void put(AtomTerm key, Term value)
    {
       map.put(key, value);
