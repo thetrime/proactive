@@ -4,6 +4,7 @@ import org.proactive.ReactComponent;
 import org.proactive.ReactWidget;
 
 import gnu.prolog.database.PrologTextLoaderError;
+import gnu.prolog.database.Module;
 import gnu.prolog.io.ReadOptions;
 import gnu.prolog.io.ParseException;
 import gnu.prolog.io.TermReader;
@@ -95,7 +96,6 @@ public class Engine
       interpreter = env.createInterpreter();      
       env.ensureLoaded(componentURL, rootElementId);
       env.runInitialization(interpreter);
-      env.linkModules();
       fluxDispatcher.initializeFlux(this);
       System.out.println("Checking for load errors...");
       List<PrologTextLoaderError> errors = env.getLoadingErrors();
@@ -113,7 +113,7 @@ public class Engine
 	 return PrologState.emptyState;
       }
       VariableTerm replyTerm = new VariableTerm("Result");
-      Term goal = ReactModule.crossModuleCall(component, new CompoundTerm(AtomTerm.get("getInitialState"), new Term[]{props, replyTerm}));
+      Term goal = Module.crossModuleCall(component, new CompoundTerm(AtomTerm.get("getInitialState"), new Term[]{props, replyTerm}));
       int undoPosition = interpreter.getUndoPosition();
       Interpreter.Goal g = interpreter.prepareGoal(goal);
       try
@@ -144,7 +144,7 @@ public class Engine
       PrologState state = context.getState();
       PrologState props = context.getProps();
       VariableTerm newState = new VariableTerm("NewState");
-      Term goal = ReactModule.crossModuleCall(component, new CompoundTerm(AtomTerm.get("componentWillReceiveProps"), new Term[]{state, props, newState}));
+      Term goal = Module.crossModuleCall(component, new CompoundTerm(AtomTerm.get("componentWillReceiveProps"), new Term[]{state, props, newState}));
       int undoPosition = interpreter.getUndoPosition();
       Interpreter.Goal g = interpreter.prepareGoal(goal);
       try
@@ -172,7 +172,7 @@ public class Engine
    public PrologState getInitialStoreState(String component)
    {
       VariableTerm replyTerm = new VariableTerm("Result");
-      Term goal = ReactModule.crossModuleCall(component, new CompoundTerm(AtomTerm.get("getInitialStoreState"), new Term[]{replyTerm}));
+      Term goal = Module.crossModuleCall(component, new CompoundTerm(AtomTerm.get("getInitialStoreState"), new Term[]{replyTerm}));
       int undoPosition = interpreter.getUndoPosition();
       Interpreter.Goal g = interpreter.prepareGoal(goal);
       try
@@ -217,7 +217,7 @@ public class Engine
       // FIXME: Not quite. listen_for needs to have a goal as the second argument, and we need to take note of that!
       VariableTerm storeName = new VariableTerm("Module");
       VariableTerm goalName = new VariableTerm("Goal");
-      Term goal = ReactModule.crossModuleCall(context.getComponentName(), new CompoundTerm(AtomTerm.get("listen_for"), new Term[]{storeName, goalName}));
+      Term goal = Module.crossModuleCall(context.getComponentName(), new CompoundTerm(AtomTerm.get("listen_for"), new Term[]{storeName, goalName}));
       int undoPosition = interpreter.getUndoPosition();
       Interpreter.Goal g = interpreter.prepareGoal(goal);
       boolean hasListener = false;
@@ -255,7 +255,7 @@ public class Engine
       Term goal;
       VariableTerm newState = new VariableTerm("NewState");
       if (handler instanceof AtomTerm)
-	 goal = ReactModule.crossModuleCall(context.getComponentName(), new CompoundTerm((AtomTerm)handler, new Term[]{storeState,
+	 goal = Module.crossModuleCall(context.getComponentName(), new CompoundTerm((AtomTerm)handler, new Term[]{storeState,
 														       state,
 														       props,
 														       newState}));
@@ -270,7 +270,7 @@ public class Engine
 	 args[c_handler.tag.arity+2] = state;
 	 args[c_handler.tag.arity+3] = props;
 	 args[c_handler.tag.arity+4] = newState;
-         goal = ReactModule.crossModuleCall(context.getComponentName(), new CompoundTerm(c_handler.tag.functor, args));
+         goal = Module.crossModuleCall(context.getComponentName(), new CompoundTerm(c_handler.tag.functor, args));
       }
       else
       {
@@ -320,7 +320,7 @@ public class Engine
       Term goal;
       VariableTerm result = new VariableTerm("Result");
       if (handler instanceof AtomTerm)
-	 goal = ReactModule.crossModuleCall(context.getComponentName(), new CompoundTerm((AtomTerm)handler, new Term[]{event, state, props, result}));
+	 goal = Module.crossModuleCall(context.getComponentName(), new CompoundTerm((AtomTerm)handler, new Term[]{event, state, props, result}));
       else if (handler instanceof CompoundTerm)
       {
          CompoundTerm c_handler = (CompoundTerm)handler;
@@ -331,7 +331,7 @@ public class Engine
 	 args[c_handler.tag.arity+1] = state;
 	 args[c_handler.tag.arity+2] = props;
          args[c_handler.tag.arity+3] = result;
-         goal = ReactModule.crossModuleCall(context.getComponentName(), new CompoundTerm(c_handler.tag.functor, args));
+         goal = Module.crossModuleCall(context.getComponentName(), new CompoundTerm(c_handler.tag.functor, args));
       }
       else
       {
@@ -371,7 +371,7 @@ public class Engine
    {
       VariableTerm resultValue = new VariableTerm("Result");
       Term renderOptions = CompoundTerm.getList(new Term[]{new CompoundTerm("document", new Term[]{new JavaObjectTerm(context)})});
-      Term goal = ReactModule.crossModuleCall("diff", new CompoundTerm(AtomTerm.get("create_element_from_vdom"), new Term[]{renderOptions,
+      Term goal = Module.crossModuleCall("diff", new CompoundTerm(AtomTerm.get("create_element_from_vdom"), new Term[]{renderOptions,
                                                                                                                             vDOM,
                                                                                                                             resultValue}));
       int undoPosition = interpreter.getUndoPosition();
@@ -409,7 +409,7 @@ public class Engine
       Term goal;
       VariableTerm newState = new VariableTerm("NewState");
       if (handler instanceof AtomTerm)
-	 goal = ReactModule.crossModuleCall(context.getComponentName(), new CompoundTerm((AtomTerm)handler, new Term[]{event, state, props, newState}));
+	 goal = Module.crossModuleCall(context.getComponentName(), new CompoundTerm((AtomTerm)handler, new Term[]{event, state, props, newState}));
       else if (handler instanceof CompoundTerm)
       {
          CompoundTerm c_handler = (CompoundTerm)handler;
@@ -421,7 +421,7 @@ public class Engine
 	 args[c_handler.tag.arity+1] = state;
 	 args[c_handler.tag.arity+2] = props;
          args[c_handler.tag.arity+3] = newState;
-         goal = ReactModule.crossModuleCall(context.getComponentName(), new CompoundTerm(c_handler.tag.functor, args));
+         goal = Module.crossModuleCall(context.getComponentName(), new CompoundTerm(c_handler.tag.functor, args));
       }
       else
       {
@@ -476,7 +476,7 @@ public class Engine
    {
       Term goal;
       VariableTerm newState = new VariableTerm("NewState");
-      goal = ReactModule.crossModuleCall(componentName, new CompoundTerm(FluxDispatcher.handlerTag, new Term[]{key, value, state, newState}));
+      goal = Module.crossModuleCall(componentName, new CompoundTerm(FluxDispatcher.handlerTag, new Term[]{key, value, state, newState}));
       int undoPosition = interpreter.getUndoPosition();
       Interpreter.Goal g = interpreter.prepareGoal(goal);
       //System.out.println("Executing " + g);
@@ -691,7 +691,7 @@ public class Engine
    public Term diff(Term a, Term b) throws PrologException
    {
       VariableTerm patchTerm = new VariableTerm("Patch");
-      Term goal = ReactModule.crossModuleCall("diff", new CompoundTerm(AtomTerm.get("diff"), new Term[]{a, b, patchTerm}));
+      Term goal = Module.crossModuleCall("diff", new CompoundTerm(AtomTerm.get("diff"), new Term[]{a, b, patchTerm}));
       int undoPosition = interpreter.getUndoPosition();
       Interpreter.Goal g = interpreter.prepareGoal(goal);
       PrologCode.RC rc = interpreter.execute(g);
@@ -711,7 +711,7 @@ public class Engine
       //System.out.println("Patching tree from " + root + " AWT: " + javax.swing.SwingUtilities.isEventDispatchThread());
       VariableTerm newRoot = new VariableTerm("NewRoot");
       Term renderOptions = CompoundTerm.getList(new Term[]{new CompoundTerm("document", new Term[]{new JavaObjectTerm(root.getOwnerDocument())})});
-      Term goal = ReactModule.crossModuleCall("diff", new CompoundTerm(AtomTerm.get("patch"), new Term[]{new JavaObjectTerm(root),
+      Term goal = Module.crossModuleCall("diff", new CompoundTerm(AtomTerm.get("patch"), new Term[]{new JavaObjectTerm(root),
                                                                                                          patch,
                                                                                                          renderOptions,
                                                                                                          newRoot}));
@@ -736,7 +736,7 @@ public class Engine
    {
       //System.out.println("Rendering " + component + " with props " + props + " and state " + state);
       VariableTerm vDom = new VariableTerm("VDom");
-      Term goal = ReactModule.crossModuleCall(component, new CompoundTerm(AtomTerm.get("render"), new Term[]{state,
+      Term goal = Module.crossModuleCall(component, new CompoundTerm(AtomTerm.get("render"), new Term[]{state,
 													     props,
                                                                                                              vDom}));
       int undoPosition = interpreter.getUndoPosition();

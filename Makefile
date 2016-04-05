@@ -64,9 +64,6 @@ ENGINE= src/prolog/Predicate_remove_child.java                \
         src/prolog/PrologState.java                           \
         src/prolog/PrologObject.java                          \
         src/prolog/ReactEnvironment.java                      \
-        src/prolog/ReactLoaderState.java                      \
-        src/prolog/ReactModule.java                           \
-        src/prolog/ReactUserModule.java                       \
 	src/prolog/FluxDispatcher.java                        \
 	src/prolog/FluxStore.java                             \
 	src/prolog/Predicate_java_println.java                \
@@ -74,8 +71,7 @@ ENGINE= src/prolog/Predicate_remove_child.java                \
 	src/prolog/Predicate_findall.java                     \
 	src/prolog/Predicate_upcase_atom.java                 \
         src/prolog/Predicate_on_server.java                   \
-        src/prolog/Predicate_colon.java                       \
-        src/prolog/Predicate_raise_event.java                 \
+	src/prolog/Predicate_raise_event.java                 \
         src/prolog/Predicate_wait_for.java
 
 BOILERPLATE = src/boilerplate.pl                              \
