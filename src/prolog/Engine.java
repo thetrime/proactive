@@ -5,6 +5,8 @@ import org.proactive.ReactWidget;
 
 import gnu.prolog.database.PrologTextLoaderError;
 import gnu.prolog.database.Module;
+import gnu.prolog.database.MetaPredicateInfo;
+import gnu.prolog.database.Predicate;
 import gnu.prolog.io.ReadOptions;
 import gnu.prolog.io.ParseException;
 import gnu.prolog.io.TermReader;
@@ -64,7 +66,12 @@ public class Engine
       env.installBuiltin("java_println", 1);
       env.installBuiltin("upcase_atom", 2);
       env.installBuiltin("format", 3);
-      env.installBuiltin("findall", 4);
+      Predicate p = env.installBuiltin("findall", 4);
+      p.setMeta(new MetaPredicateInfo(new MetaPredicateInfo.MetaType[]{MetaPredicateInfo.MetaType.NORMAL,
+								       MetaPredicateInfo.MetaType.META,
+								       MetaPredicateInfo.MetaType.NORMAL,
+								       MetaPredicateInfo.MetaType.NORMAL}));
+
 
       env.installBuiltin("get_state", 3);
       env.installBuiltin("state_to_term", 2);

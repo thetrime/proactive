@@ -88,7 +88,7 @@ public class ReactEnvironment extends Environment
       }
    }
 
-   public void installBuiltin(String functor, int arity) throws PrologException
+   public Predicate installBuiltin(String functor, int arity) throws PrologException
    {
       Module module = getModule();
       CompoundTermTag head = CompoundTermTag.get(AtomTerm.get(functor), arity);
@@ -99,5 +99,6 @@ public class ReactEnvironment extends Environment
       else
          p.setJavaClassName("org.proactive.prolog.Predicate_" + functor);
       PrologCode q = loadPrologCode(head);
+      return p;
    }
 }
