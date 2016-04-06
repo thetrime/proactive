@@ -9,8 +9,10 @@ otherwise.
 jsx(Form, jsx(Form)):- !.
 jsx(Form, jsx(Form, Goals)):- Goals.
 
+:-meta_predicate(call(0,?)).
+
 call(A,B):-
-        ( A = Module:InGoal->
+	( A = Module:InGoal->
             InGoal =.. [Name|Args],
             append(Args, [B], NewArgs),
             Goal =.. [Name|NewArgs],
@@ -21,8 +23,10 @@ call(A,B):-
           call(Goal)
         ).
 
+:-meta_predicate(call(0,?,?)).
+
 call(A,B,C):-
-        ( A = Module:InGoal->
+	( A = Module:InGoal->
             InGoal =.. [Name|Args],
             append(Args, [B,C], NewArgs),
             Goal =.. [Name|NewArgs],
