@@ -3,6 +3,8 @@ package org.proactive.prolog;
 import gnu.prolog.term.Term;
 import gnu.prolog.term.AtomTerm;
 import gnu.prolog.term.FloatTerm;
+import gnu.prolog.term.RationalTerm;
+import gnu.prolog.term.BigIntegerTerm;
 import gnu.prolog.term.NumericTerm;
 import gnu.prolog.term.IntegerTerm;
 import gnu.prolog.term.CompoundTerm;
@@ -12,6 +14,7 @@ import gnu.prolog.vm.Interpreter;
 import gnu.prolog.vm.ExecuteOnlyCode;
 import gnu.prolog.vm.PrologException;
 import gnu.prolog.vm.Environment;
+import gnu.prolog.vm.Evaluate;
 import gnu.prolog.io.PrologStream;
 import java.util.Iterator;
 import java.util.List;
@@ -52,7 +55,7 @@ public class Predicate_format extends ExecuteOnlyCode
       CompoundTerm.toCollection(args[2], formatArgs);
       try
       {
-         Iterator a = formatArgs.iterator();
+	 Iterator<Term> a = formatArgs.iterator();
          byte[] input = formatString.value.getBytes("ISO-8859-1");
          int r = 0;
          for(int i = 0; i < input.length; i++)
@@ -78,32 +81,42 @@ public class Predicate_format extends ExecuteOnlyCode
                         }
                         case 'w':
                         case 'p':
-                        case 'q':
+			case 'q':
+			{
+			   Term arg = a.next();
+			   if (arg instanceof AtomTerm)
+			      ps.print(((AtomTerm)arg).value);
+			   else
+			      ps.print(arg.toString());
+			   break;
+			}
                         case 'f':
                         {
-                           Term arg = (Term)a.next();
-                           if (arg instanceof AtomTerm)
-                              ps.print(((AtomTerm)arg).value);
-                           else if (arg instanceof NumericTerm)
-                           {
-                              String s;
-                              if (r == 0)
-                                 s = "###,##0";
-                              else
-                              {
-                                 s = "###,##0.";
-                                 for (int k = 0; k < r; k++)
-                                    s = s + "0";
-                              }
-                              DecimalFormat df = new DecimalFormat(s);
-                              if (arg instanceof FloatTerm)
-                                 ps.print(df.format(((FloatTerm)arg).value));
-                              else if (arg instanceof IntegerTerm)
-                                 ps.print(df.format(((IntegerTerm)arg).value));
-                           }
-                           else
-                              ps.print(arg.toString());
-                        }
+			   Term arg = a.next();
+			   if (!(arg instanceof NumericTerm))
+			   {
+			      arg = Evaluate.evaluate(arg); // raises an exception if not evaluable
+			   }
+			   NumericTerm numeric = (NumericTerm)arg;
+			   String s;
+			   if (r == 0)
+			      s = "###,##0";
+			   else
+			   {
+			      s = "###,##0.";
+			      for (int k = 0; k < r; k++)
+				 s = s + "0";
+			   }
+			   DecimalFormat df = new DecimalFormat(s);
+			   if (numeric instanceof FloatTerm)
+			      ps.print(df.format(((FloatTerm)numeric).value));
+			   else if (arg instanceof IntegerTerm)
+			      ps.print(df.format(((IntegerTerm)numeric).value));
+			   else if (arg instanceof BigIntegerTerm)
+			      ps.print(df.format(((BigIntegerTerm)numeric).value));
+			   else if (arg instanceof RationalTerm)
+			      ps.print(df.format(((RationalTerm)numeric).value.doubleValue()));
+			}
                         break;
                         case 'n':
                            ps.println();
@@ -128,7 +141,7 @@ public class Predicate_format extends ExecuteOnlyCode
                         }
                         case 'X':
                         {
-                           Term arg = (Term)a.next();
+			   Term arg = a.next();
                            double val = 0;
                            if (arg instanceof IntegerTerm)
                               val = ((IntegerTerm)arg).value;

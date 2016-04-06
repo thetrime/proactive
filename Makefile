@@ -106,5 +106,5 @@ run-server:
 
 clean:
 	rm -rf build
-	rm dist/react.jar
-	rm .src
+	rm -f dist/react.jar
+	rm -f .src
