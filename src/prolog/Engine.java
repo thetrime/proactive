@@ -91,7 +91,7 @@ public class Engine
       env.installBuiltin("create_text_node", 3);
       env.installBuiltin("parent_node", 2);
       env.installBuiltin("node_type", 2);
-      env.installBuiltin("set_properties", 2);
+      env.installBuiltin("set_vdom_properties", 2);
       env.installBuiltin("replace_node_data", 2);
       env.installBuiltin("destroy_widget", 2);
       env.installBuiltin("init_widget", 3);

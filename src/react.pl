@@ -73,7 +73,7 @@ notify_react_loop(Websocket):-
                            retractall(react_listener(Self))).
 
 ws_notify_slave(Websocket, Owner):-
-        ws_receive(Websocket, Message),
+	ws_receive(Websocket, Message),
         ( Message.opcode == close->
             thread_send_message(Owner, close)
         ; otherwise->
@@ -167,7 +167,7 @@ react_cleanup(Goal, !, WebSocket):-
 
 send_reply(WebSocket, Term):-
         format(atom(Text), '~k', [Term]),
-        ws_send(WebSocket, text(Text)).
+	ws_send(WebSocket, text(Text)).
 
 trigger_react_recompile(Module):-
         forall(react_listener(Queue),
