@@ -131,14 +131,14 @@ init_widget(_, VNode, DomNode):-
         Tag:render(State, Attributes, VDom),
         diff(VNode, VDom, Patches),
         create_element(Document, div, FakeDom),
-        patch(FakeDom, Patches, [document(Document)], DomNode).
+	vpatch(FakeDom, Patches, [document(Document)], DomNode).
 
 update_widget(_Widget, VNode, DomNode, NewNode):-
         VNode = element(Tag, Attributes, _),
         State = ?, % FIXME: Need to recover this from DomNode, I guess
         Tag:render(State, Attributes, VDom),
-        diff(VNode, VDom, Patches),
-        patch(DomNode, Patches, [document(_Document)], NewNode).
+	vdiff(VNode, VDom, Patches),
+	vpatch(DomNode, Patches, [document(_Document)], NewNode).
 
 node_type(DomNode, Type):-
         DomNode = dom_element(Attributes),
@@ -170,14 +170,14 @@ test:-
         Tree2 = element('Panel', [], [element('Field', [label=hello], []),
                                       element('Field', [label=second], []),
                                       element('Button', [label=submit], [])]),
-        diff(InitialTree, Tree1, Patch1),
-        diff(Tree1, Tree2, Patch2),
-        writeln(patch:Patch1),
-        writeln(patch:Patch2),
-        patch(InitialRoot, Patch1, [document(Document)], IntermediateRoot),
-        patch(IntermediateRoot, Patch2, [document(Document)], FinalRoot),
+	vdiff(InitialTree, Tree1, Patch1),
+	vdiff(Tree1, Tree2, Patch2),
+	debug_message(patch:Patch1),
+	debug_message(patch:Patch2),
+	vpatch(InitialRoot, Patch1, [document(Document)], IntermediateRoot),
+	vpatch(IntermediateRoot, Patch2, [document(Document)], FinalRoot),
         crystalize([FinalRoot]),
-        writeln(FinalRoot).
+	debug_message(FinalRoot).
 
 crystalize([]):- !.
 crystalize([DomNode|DomNodes]):-

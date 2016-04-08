@@ -1,8 +1,8 @@
-:-module(diff, [create_element_from_vdom/3,
-                diff/3,
-                patch/4]).
+:-module(vdiff, [create_element_from_vdom/3,
+		 vdiff/3,
+		 vpatch/4]).
 
-diff(A, B, [a-A|PatchSet]):-
+vdiff(A, B, [a-A|PatchSet]):-
         ( setof(Index-Patches,
                 bagof(Patch,
                       walk(A, B, 0, Index-Patch),
@@ -428,7 +428,7 @@ has_descendent_hooks(_):- fail. % FIXME: Stub
 is_widget(widget(_, _, _)).
 
 %----------------------------------------------------------------------------
-patch(RootNode, Patches, Options, NewRoot):-
+vpatch(RootNode, Patches, Options, NewRoot):-
         patch_recursive(RootNode, Patches, Options, NewRoot).
 
 patch_recursive(RootNode, PatchSet, Options, NewRoot):-
@@ -463,7 +463,7 @@ apply_patch(RootNode, _DomNode, [], _Options, RootNode):- !.
 apply_patch(RootNode, DomNode, [Patch|Patches], Options, NewRoot):-
         ( patch_op(Patch, DomNode, Options, NewNode)->
             true
-        ; writeln(failed_to_apply_patch(Patch)), fail
+	; vdiff_warning(failed_to_apply_patch(Patch)), fail
         ),
         ( DomNode == RootNode->
             R1 = NewNode
@@ -576,7 +576,7 @@ patch_op(widget_patch(LeftVNode, Widget), DomNode, Options, NewNode):-
             Updating = true,
             update_widget(Widget, LeftVNode, DomNode, NewNode)
         ; otherwise->
-            writeln(cannot_update_widget(LeftVNode)),
+	    vdiff_warning(cannot_update_widget(LeftVNode)),
             Updating = false,
             render(Options, Widget, NewNode)
         ),
@@ -648,7 +648,7 @@ render(Options, VNodeIn, DomNode):-
         ( VNode = widget(Tag, Attributes, Children)->
             init_widget(Document, widget(Tag, [children=Children|Attributes], []), DomNode)
         ; atom(VNode)->  % Text node
-            writeln(text_node(VNode)),
+	    vdiff_warning(text_node(VNode)),
             create_text_node(Document, VNode, DomNode)
         ; VNode = element(Tag, Properties, Children)->
             create_element(Document, Tag, DomNode),

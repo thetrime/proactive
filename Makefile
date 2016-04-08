@@ -75,7 +75,7 @@ ENGINE= src/prolog/Predicate_remove_child.java                \
         src/prolog/Predicate_wait_for.java
 
 BOILERPLATE = src/boilerplate.pl                              \
-	      src/diff.pl
+	      src/vdiff.pl
 
 JAVA_SRC=$(BASE) $(UI) $(ENGINE)
 
@@ -96,7 +96,7 @@ client: dist/react.jar
 
 dist/react.jar:	.src build $(BOILERPLATE)
 	javac -cp dist/gpj.jar:dist/java_websocket.jar -Xlint:unchecked @.src -d build
-	jar cvf dist/react.jar -C build/ . -C src boilerplate.pl -C src diff.pl
+	jar cvf dist/react.jar -C build/ . -C src boilerplate.pl -C src vdiff.pl
 
 run-client:	client
 	java -cp dist/gpj.jar:dist/java_websocket.jar:dist/react.jar org.proactive.React "http://localhost:${PORT}/react" "App"

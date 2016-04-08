@@ -99,7 +99,7 @@ public class Engine
 
 
       env.ensureLoaded(new CompoundTerm(CompoundTermTag.get("resource", 1), AtomTerm.get("/boilerplate.pl")));
-      env.ensureLoaded(new CompoundTerm(CompoundTermTag.get("resource", 1), AtomTerm.get("/diff.pl")));
+      env.ensureLoaded(new CompoundTerm(CompoundTermTag.get("resource", 1), AtomTerm.get("/vdiff.pl")));
       interpreter = env.createInterpreter();      
       env.ensureLoaded(componentURL, rootElementId);
       env.runInitialization(interpreter);
@@ -378,7 +378,7 @@ public class Engine
    {
       VariableTerm resultValue = new VariableTerm("Result");
       Term renderOptions = CompoundTerm.getList(new Term[]{new CompoundTerm("document", new Term[]{new JavaObjectTerm(context)})});
-      Term goal = Module.crossModuleCall("diff", new CompoundTerm(AtomTerm.get("create_element_from_vdom"), new Term[]{renderOptions,
+      Term goal = Module.crossModuleCall("vdiff", new CompoundTerm(AtomTerm.get("create_element_from_vdom"), new Term[]{renderOptions,
                                                                                                                             vDOM,
                                                                                                                             resultValue}));
       int undoPosition = interpreter.getUndoPosition();
@@ -698,7 +698,7 @@ public class Engine
    public Term diff(Term a, Term b) throws PrologException
    {
       VariableTerm patchTerm = new VariableTerm("Patch");
-      Term goal = Module.crossModuleCall("diff", new CompoundTerm(AtomTerm.get("diff"), new Term[]{a, b, patchTerm}));
+      Term goal = Module.crossModuleCall("vdiff", new CompoundTerm(AtomTerm.get("vdiff"), new Term[]{a, b, patchTerm}));
       int undoPosition = interpreter.getUndoPosition();
       Interpreter.Goal g = interpreter.prepareGoal(goal);
       PrologCode.RC rc = interpreter.execute(g);
@@ -718,7 +718,7 @@ public class Engine
       //System.out.println("Patching tree from " + root + " AWT: " + javax.swing.SwingUtilities.isEventDispatchThread());
       VariableTerm newRoot = new VariableTerm("NewRoot");
       Term renderOptions = CompoundTerm.getList(new Term[]{new CompoundTerm("document", new Term[]{new JavaObjectTerm(root.getOwnerDocument())})});
-      Term goal = Module.crossModuleCall("diff", new CompoundTerm(AtomTerm.get("patch"), new Term[]{new JavaObjectTerm(root),
+      Term goal = Module.crossModuleCall("vdiff", new CompoundTerm(AtomTerm.get("vpatch"), new Term[]{new JavaObjectTerm(root),
                                                                                                          patch,
                                                                                                          renderOptions,
                                                                                                          newRoot}));
