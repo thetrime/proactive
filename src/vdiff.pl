@@ -673,7 +673,7 @@ render_children([Child|Children], Options, DomNode):-
         render_children(Children, Options, DomNode).
 
 apply_properties(Node, Attributes, _Previous):-
-        set_properties(Node, Attributes).
+	set_vdom_properties(Node, Attributes).
 
 /*
 apply_properties(_Node, [], _Previous):- !.

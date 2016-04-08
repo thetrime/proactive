@@ -8,7 +8,7 @@
           create_text_node/3,
           parent_node/2,
           node_type/2,
-          set_properties/2,
+	  set_vdom_properties/2,
           replace_node_data/2,
           init_widget/3,
           update_widget/4,
@@ -66,7 +66,7 @@ create_element(Document, TagName, DomNode):-
         put_attr(PropertiesPtr, react, []),
         put_attr(ParentPtr, react, {null}).
 
-set_properties(DomNode, NewProperties):-
+set_vdom_properties(DomNode, NewProperties):-
         DomNode = dom_element(Attributes),
         memberchk(properties-PropertiesPtr, Attributes),
         %get_attr(PropertiesPtr, react, Properties),

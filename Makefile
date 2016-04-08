@@ -50,7 +50,7 @@ ENGINE= src/prolog/Predicate_remove_child.java                \
         src/prolog/Predicate_create_text_node.java            \
         src/prolog/Predicate_parent_node.java                 \
         src/prolog/Predicate_node_type.java                   \
-        src/prolog/Predicate_set_properties.java              \
+	src/prolog/Predicate_set_vdom_properties.java         \
         src/prolog/Predicate_replace_node_data.java           \
         src/prolog/Predicate_destroy_widget.java              \
         src/prolog/Predicate_update_widget.java               \

@@ -12,12 +12,11 @@ import org.proactive.ReactComponent;
 import org.proactive.prolog.Engine;
 import java.util.HashMap;
 
-public class Predicate_set_properties extends ExecuteOnlyCode
+public class Predicate_set_vdom_properties extends ExecuteOnlyCode
 {
    public RC execute(Interpreter interpreter, boolean backtrackMode, gnu.prolog.term.Term args[]) throws PrologException
    {
       ReactComponent domNode = (ReactComponent)((JavaObjectTerm)args[0]).value;
-      //System.out.println("Applying propsPatch: " + args[1]);
       domNode.setProperties(Engine.termToProperties(args[1]));
       return RC.SUCCESS_LAST;
    }
