@@ -2,8 +2,9 @@ package org.proactive.prolog;
 
 import gnu.prolog.term.Term;
 import gnu.prolog.term.AtomTerm;
+import gnu.prolog.database.MetaPredicateInfo;
 import gnu.prolog.vm.Interpreter;
-import gnu.prolog.vm.ExecuteOnlyCode;
+import gnu.prolog.vm.ExecuteOnlyMetaCode;
 import gnu.prolog.vm.PrologException;
 import gnu.prolog.vm.interpreter.Predicate_call;
 import gnu.prolog.vm.BacktrackInfoWithCleanup;
@@ -11,7 +12,7 @@ import gnu.prolog.vm.Environment;
 import gnu.prolog.io.PrologStream;
 import java.io.IOException;
 
-public class Predicate_on_server extends ExecuteOnlyCode
+public class Predicate_on_server extends ExecuteOnlyMetaCode
 {
    public class ServerBacktrackInfo extends BacktrackInfoWithCleanup
    {
@@ -81,8 +82,15 @@ public class Predicate_on_server extends ExecuteOnlyCode
          }
          return bi.nextSolution(interpreter);
       }
-         
    }
+
+	private static MetaPredicateInfo metaPredicateInfo = new MetaPredicateInfo(new MetaPredicateInfo.MetaType[]{MetaPredicateInfo.MetaType.META});
+	public MetaPredicateInfo getMetaPredicateInfo()
+	{
+		return metaPredicateInfo;
+	}
+
+
 }
 
 // FIXME: on cut, close the connection!

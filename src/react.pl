@@ -97,14 +97,29 @@ notify_react_loop_1(Websocket, Slave):-
 :-dynamic(react_listener/1).
 
 execute_react(Request):-
-        http_upgrade_to_websocket(execute_react_ws, [], Request).
+	http_upgrade_to_websocket(execute_react_ws_guarded, [], Request).
 
 :-multifile(react:goal_is_safe/1).
+
+% SWI uses message_to_string/2 to print the message if there is an error
+% This is fine, bug RFC-6455 says that no control packet may be > 125 bytes, or fragmented
+% and the error can easily be much longer than that. So we just suppress it here and use 'error' instead
+execute_react_ws_guarded(WebSocket):-
+	( catch(execute_react_ws(WebSocket), E, true)->
+	    ( var(E)->
+		Msg = "bye", Code = 1000
+	    ; otherwise->
+		Msg = "error", Code = 1011
+	    )
+	; Msg = "failed", Code = 1011
+	),
+	catch(ws_close(WebSocket, Code, Msg), Error, print_message(error, Error)).
+
 execute_react_ws(WebSocket):-
         ws_receive(WebSocket, Message, []),
         ( Message.opcode == text->
             Data = Message.data,
-            read_term_from_atom(Data, Goal, []),
+	    read_term_from_atom(Data, Goal, []),
             ( goal_is_safe(Goal)->
                 execute_react_ws(WebSocket, Goal, Goal)
             ; permission_error(execute, goal, Goal)
@@ -130,8 +145,8 @@ execute_react_ws(WebSocket, ReplyGoal, Goal):-
 
 :-meta_predicate(execute_react_goal(0, +, +)).
 execute_react_goal(Goal, ReplyGoal, WebSocket):-
-        setup_call_catcher_cleanup(true,
-                                   Goal,
+	setup_call_catcher_cleanup(true,
+				   Goal,
                                    Catcher,
                                    react_cleanup(ReplyGoal, Catcher, WebSocket)),
         ( var(Catcher)->            
@@ -153,11 +168,21 @@ execute_react_goal(Goal, ReplyGoal, WebSocket):-
 react_cleanup(Goal, exit, WebSocket):-
         send_reply(WebSocket, cut(Goal)).
 
-react_cleanup(_Goal, exception(E), WebSocket):-
-        send_reply(WebSocket, exception(E)).
+react_cleanup(Goal, external_exception(E), WebSocket):-
+	react_cleanup(Goal, WebSocket, exception(E)).
 
-react_cleanup(_Goal, external_exception(E), WebSocket):-
-        send_reply(WebSocket, exception(E)).
+react_cleanup(_Goal, exception(E), WebSocket):-
+	( E = error(Error, Context)->
+	    format(atom(ContextAtom), '~p', [Context]),
+	    send_reply(WebSocket, exception(error(Error, ContextAtom)))
+	; E = application_error(Error, Cause, Context)->
+	    format(atom(ContextAtom), '~p', [Context]),
+	    format(atom(CauseAtom), '~p', [Cause]),
+	    send_reply(WebSocket, exception(application_error(Error, CauseAtom, ContextAtom)))
+	; otherwise->
+	    send_reply(WebSocket, exception(E))
+	).
+
 
 react_cleanup(_Goal, fail, WebSocket):-
         send_reply(WebSocket, fail).

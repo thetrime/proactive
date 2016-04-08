@@ -619,8 +619,8 @@ public class Engine
       }
       public RC nextSolution() throws InterruptedException
       {
-         send(";");
-         Term reply = replies.take();
+	 send(";");
+	 Term reply = replies.take();
          if (reply instanceof AtomTerm && ((AtomTerm)reply).value.equals("fail"))
          {
             close();
@@ -630,14 +630,14 @@ public class Engine
          {
             CompoundTerm c = (CompoundTerm)reply;
             if (c.tag.functor.value.equals("exception"))
-            {
-               close();
+	    {
+	       close();
                state = RC.EXCEPTION;
                exception = c.args[0];
             }
             else
-            {
-               if (c.tag.functor.value.equals("cut"))
+	    {
+	       if (c.tag.functor.value.equals("cut"))
                {
                   close();
                   state = RC.SUCCESS_LAST;
@@ -659,15 +659,23 @@ public class Engine
       @Override
       public void onMessage(String message)
       {
-         try
-         {
-            replies.put(TermReader.stringToTerm(options, message, environment));
-         }
-         catch(InterruptedException | ParseException e)
-         {
-            // FIXME: Should actually poke an exception term onto the queue, but... that could just raise another exception. hmm.
-            e.printStackTrace();
-         }
+	 try
+	 {
+	    try
+	    {
+	       replies.put(TermReader.stringToTerm(options, message, environment));
+	    }
+	    catch(ParseException e)
+	    {
+	       e.printStackTrace();
+	       replies.put(new CompoundTerm(AtomTerm.get("exception"), new Term[]{new JavaObjectTerm(e)}));
+	    }
+	 }
+	 catch(InterruptedException interrupted)
+	 {
+	    // If this happens I guess the result is just lost
+	    interrupted.printStackTrace();
+	 }
       }
       
       @Override
