@@ -168,6 +168,16 @@ You can use `on_server/1` to call goals on the server. On the server side, `on_s
 
 The `on_server/1` goal supports nondeterminism. You can backtrack onto the server, but be aware of the consequences in latency this may introduce.
 
+
+##### Shipping parts of your code to the client
+You can use the directive :-table_predicate(+Indicator) in your module to make that predicate available to the client. For example,
+```
+:-table_predicate(country_name/1).
+:-table_predicate(country_population/2).
+```
+
+Note that these will be available in the module where you put the directive.
+
 ##### Data flow
 Like in React, data always flows down the tree. You CAN use the this pointer to get events to flow up the tree, or you can use the implementation of the Flux dispatcher.
 

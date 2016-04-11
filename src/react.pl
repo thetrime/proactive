@@ -8,6 +8,8 @@
 %       You MUST provide an implementation of react:goal_is_safe/1 or on_server/1 will always fail on the client.
 %       This is because an unscrupulous user could easily execute on_server with whatever goal they want! 
 
+user:term_expansion(:-table_predicate(Module:Indicator), tabled_predicate(Module, Indicator)).
+user:term_expansion(:-table_predicate(Indicator), tabled_predicate(user, Indicator)).
 
 :- use_module(library(http/websocket)).
 :- use_module(library(http/thread_httpd)).
