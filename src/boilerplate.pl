@@ -39,7 +39,7 @@ call(A,B,C):-
 
 
 bubble_event(List, Key, Event):-
-	get_state(List, Key, Handler),
+	'.'(List, Key, Handler),
 	( Handler \== {null}->
             bubble_event(Handler, Event)
         ; otherwise->
@@ -53,45 +53,3 @@ between(Low, High, I):-
           between(II, High, I)
         ).
 
-/*
-get_state({null}, _, {null}):- !.
-get_state(Object, Key, Value):-
-        ( atom(Key)->
-            ( memberchk(Key=Value, Object)->
-                true
-            ; otherwise->
-                Value = {null}
-            )
-        ; otherwise->
-            Key =.. [Atom|Args],
-            ( memberchk(Atom=ValueWithLessArgs, Object)->
-                glue_args(ValueWithLessArgs, Args, Value)
-            ; otherwise->
-                Value = {null}
-            )
-        ).
-
-glue_args('$this'(Context, Goal), Args, '$this'(Context, NewGoal)):- !,
-        ( Goal = Module:ActualGoal->
-            ActualGoal =.. [Name|ExistingArgs],
-            append(ExistingArgs, Args, NewArgs),
-            NewActualGoal =.. [Name|NewArgs],
-            NewGoal = Module:NewActualGoal
-        ; otherwise->
-            Goal =.. [Name|ExistingArgs],
-            append(ExistingArgs, Args, NewArgs),
-            NewGoal =.. [Name|NewArgs]
-        ).
-
-glue_args(Goal, Args, NewGoal):- !,
-        ( Goal = Module:ActualGoal->
-            ActualGoal =.. [Name|ExistingArgs],
-            append(ExistingArgs, Args, NewArgs),
-            NewActualGoal =.. [Name|NewArgs],
-            NewGoal = Module:NewActualGoal
-        ; otherwise->
-            Goal =.. [Name|ExistingArgs],
-            append(ExistingArgs, Args, NewArgs),
-            NewGoal =.. [Name|NewArgs]
-	).
-*/

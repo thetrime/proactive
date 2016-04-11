@@ -15,8 +15,7 @@
           destroy_widget/2,
 
           get_store_state/2,
-          get_state/3,
-          state_to_term/2,
+	  state_to_term/2,
           get_this/1
          ]).
 
@@ -25,35 +24,35 @@
 remove_child(DomNode, Child):-
         DomNode = dom_element(Attributes),
         memberchk(children-ChildrenPtr, Attributes),
-        get_attr(ChildrenPtr, react, ChildNodes),
+        get_attr(ChildrenPtr, react_dom, ChildNodes),
         subtract(ChildNodes, [Child], NewChildNodes),
         move_child_to(Child, {null}),
-        put_attr(ChildrenPtr, react, NewChildNodes).
+        put_attr(ChildrenPtr, react_dom, NewChildNodes).
 
 append_child(DomNode, Child):-
         DomNode = dom_element(Attributes),
         memberchk(children-ChildrenPtr, Attributes),
         move_child_to(Child, DomNode),
-        get_attr(ChildrenPtr, react, ChildNodes),
+        get_attr(ChildrenPtr, react_dom, ChildNodes),
         append(ChildNodes, [Child], NewChildNodes),
-        put_attr(ChildrenPtr, react, NewChildNodes).
+        put_attr(ChildrenPtr, react_dom, NewChildNodes).
 
 insert_before(DomNode, Child, Sibling):-
         DomNode = dom_element(Attributes),
         memberchk(children-ChildrenPtr, Attributes),
-        get_attr(ChildrenPtr, react, ChildNodes),
+        get_attr(ChildrenPtr, react_dom, ChildNodes),
         move_child_to(Child, DomNode),
         insert_child_ptr(ChildNodes, Child, Sibling, NewChildNodes),
-        put_attr(ChildrenPtr, react, NewChildNodes).
+        put_attr(ChildrenPtr, react_dom, NewChildNodes).
 
 
 replace_child(DomNode, New, Old):-
         DomNode = dom_element(Attributes),
         memberchk(children-ChildrenPtr, Attributes),
-        get_attr(ChildrenPtr, react, ChildNodes),
+        get_attr(ChildrenPtr, react_dom, ChildNodes),
         move_child_to(New, DomNode),
         replace_child_ptr(ChildNodes, New, Old, NewChildNodes),
-        put_attr(ChildrenPtr, react, NewChildNodes).
+        put_attr(ChildrenPtr, react_dom, NewChildNodes).
 
 create_element(Document, TagName, DomNode):-
         DomNode = dom_element([tag-TagName,
@@ -62,16 +61,16 @@ create_element(Document, TagName, DomNode):-
                                document-Document,
                                properties-PropertiesPtr,
                                parent-ParentPtr]),
-        put_attr(ChildrenPtr, react, []),
-        put_attr(PropertiesPtr, react, []),
-        put_attr(ParentPtr, react, {null}).
+        put_attr(ChildrenPtr, react_dom, []),
+        put_attr(PropertiesPtr, react_dom, []),
+        put_attr(ParentPtr, react_dom, {null}).
 
 set_vdom_properties(DomNode, NewProperties):-
         DomNode = dom_element(Attributes),
         memberchk(properties-PropertiesPtr, Attributes),
-        %get_attr(PropertiesPtr, react, Properties),
+        %get_attr(PropertiesPtr, react_dom, Properties),
         %change_attributes(Properties, Name, Value, NewProperties),
-        put_attr(PropertiesPtr, react, NewProperties).
+        put_attr(PropertiesPtr, react_dom, NewProperties).
 
 create_text_node(Document, Data, DomNode):-
         DomNode = dom_element([type-text,
@@ -79,14 +78,14 @@ create_text_node(Document, Data, DomNode):-
                                parent-ParentPtr,
                                document-Document,
                                data-DataPtr]),
-        put_attr(ChildrenPtr, react, []),
-        put_attr(ParentPtr, react, {null}),
-        put_attr(DataPtr, react, Data).
+        put_attr(ChildrenPtr, react_dom, []),
+        put_attr(ParentPtr, react_dom, {null}),
+        put_attr(DataPtr, react_dom, Data).
 
 move_child_to(Child, DomNode):-
         Child = dom_element(ChildAttributes),
         memberchk(parent-ParentPtr, ChildAttributes),
-        put_attr(ParentPtr, react, DomNode).
+        put_attr(ParentPtr, react_dom, DomNode).
 
 change_attributes([Name=_|Properties], Name, Value, [Name=Value|Properties]):- !.
 change_attributes([], Name, Value, [Name=Value]):- !.
@@ -106,12 +105,12 @@ insert_child_ptr([X|In], Child, Sibling, [X|Out]):-
 child_nodes(DomNode, ChildNodes):-
         DomNode = dom_element(Attributes),
         memberchk(children-ChildrenPtr, Attributes),
-        get_attr(ChildrenPtr, react, ChildNodes).
+        get_attr(ChildrenPtr, react_dom, ChildNodes).
 
 parent_node(DomNode, ParentNode):-
         DomNode = dom_element(Attributes),
         memberchk(parent-ParentPtr, Attributes),
-        ( get_attr(ParentPtr, react, ParentNode)->
+        ( get_attr(ParentPtr, react_dom, ParentNode)->
             true
         ; otherwise->
             ParentNode = {null}
@@ -120,7 +119,7 @@ parent_node(DomNode, ParentNode):-
 replace_node_data(DomNode, NewData):-
         DomNode = dom_element(Attributes),
         memberchk(data-DataPtr, Attributes),
-        put_attr(DataPtr, react, NewData).
+        put_attr(DataPtr, react_dom, NewData).
 
 
 destroy_widget(_DomNode, _Widget).
@@ -191,19 +190,19 @@ crystalize_attributes([parent-_|Attributes]):-
         crystalize_attributes(Attributes).
 crystalize_attributes([children-Ptr|Attributes]):-
         !,
-        get_attr(Ptr, react, ChildNodes),
+        get_attr(Ptr, react_dom, ChildNodes),
         Ptr = ChildNodes,
         crystalize(ChildNodes),
         crystalize_attributes(Attributes).
 crystalize_attributes([_-Value|Attributes]):-
         ( attvar(Value)->
-            get_attr(Value, react, Value)
+            get_attr(Value, react_dom, Value)
         ; otherwise->
             true
         ),
         crystalize_attributes(Attributes).
 
-react:attr_unify_hook(X, X).
+react_dom:attr_unify_hook(X, X).
 
 get_state({null}, _, {null}):- !.
 get_state(Object, Key, Value):-
@@ -249,3 +248,12 @@ glue_args(Goal, Args, NewGoal):- !,
 get_store_state(_, []). % FIXME: Implement Flux!
 
 state_to_term(X, X). % FIXME: This should copy X and instantiate all the vars
+
+
+:-redefine_system_predicate('.'(_,_,_)).
+'.'(State,Key,Value):-
+	( is_list(State)->
+	    get_state(State, Key, Value)
+	; '$dicts':'.'(State, Key, Value)
+	).
+

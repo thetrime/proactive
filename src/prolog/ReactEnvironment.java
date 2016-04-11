@@ -94,8 +94,8 @@ public class ReactEnvironment extends Environment
       CompoundTermTag head = CompoundTermTag.get(AtomTerm.get(functor), arity);
       Predicate p = module.createDefinedPredicate(head);
       p.setType(Predicate.TYPE.BUILD_IN);
-      if (functor.equals(":"))
-         p.setJavaClassName("org.proactive.prolog.Predicate_colon");
+      if (functor.equals("."))
+	 p.setJavaClassName("org.proactive.prolog.Predicate_get_state");
       else
          p.setJavaClassName("org.proactive.prolog.Predicate_" + functor);
       PrologCode q = loadPrologCode(head);

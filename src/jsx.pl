@@ -234,7 +234,7 @@ expand_goals(Map, '$this'(This, Value), (get_this(This), Tail), Tail):-
         functor(Map, '.', 2),
         Map =.. ['.', Key, Value],
         Key == this, !.
-expand_goals(Map, Value, (T1, get_state(Source, Key, Value)), Tail):-
+expand_goals(Map, Value, (T1, '.'(Source, Key, Value)), Tail):-
         functor(Map, '.', 2), !,
         % Object could also be a ./3 term
         Map =.. ['.', Object, Key],

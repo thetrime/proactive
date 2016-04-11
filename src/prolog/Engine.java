@@ -73,7 +73,7 @@ public class Engine
 								       MetaPredicateInfo.MetaType.NORMAL}));
 
 
-      env.installBuiltin("get_state", 3);
+      env.installBuiltin(".", 3);
       env.installBuiltin("state_to_term", 2);
       env.installBuiltin("on_server", 1);
       env.installBuiltin("raise_event", 2);

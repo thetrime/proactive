@@ -24,9 +24,9 @@ raiseAnEvent(_Event, _State, _Props, {}):-
         raise_event(bing, bong).
 
 render(State, _Props, Form):-
-	get_state(State, buttons, Buttons),
+	Buttons = State.buttons,
 	get_some_fields(Buttons, Fields),
-	get_state(State, event_triggered, EventTriggered),
+	EventTriggered = State.event_triggered,
 	{|jsx(Form)||
         <Panel>
           <Label label={Label}/>
@@ -65,7 +65,7 @@ render(State, _Props, Form):-
 
 list_item(State, ListItem):-
 	member(Label, [foo, bar, baz, qux]),
-	( get_state(State, Label, selected)->
+	( State.label == selected->
 	    Selected = true
         ; otherwise->
             Selected = false

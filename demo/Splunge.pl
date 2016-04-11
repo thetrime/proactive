@@ -3,7 +3,7 @@
 :- quasi_quotation_syntax(jsx).
 
 render(State, _Props, Form):-
-	get_state(State, order, Order),
+	Order = State.order,
         ( Order == default->
             Label1 = top,
             Label2 = bottom,
@@ -25,11 +25,11 @@ render(State, _Props, Form):-
 getInitialState(_, {order: default}).
 
 swap_labels(_, State, _, {order: swapped}):-
-	get_state(State, order, default),
+	State.order == default,
         some_local_goal,
         on_server(member(A, [a,b,c])), writeln(A), A == c.
 swap_labels(_, State, _, {order: default}):-
-	get_state(State, order, swapped).
+	State.order == swapped.
 
 
 some_local_goal:-
