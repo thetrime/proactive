@@ -105,7 +105,7 @@ This looks obtuse, but it means you can write states like {foo: bar, qux: {baz: 
 
 Note that the empty state is {}, but an unbound state is simply ignored. This may come in handy if your version of GNU Prolog for Java does not support {} as a term due to https://github.com/drt24/gnuprologjava/issues/6
 
-You can get at these elements using get_state(+State, +Key, -Value). This has some slightly unusual behaviour:
+You can get at these elements using '.'(+State, +Key, -Value). '.' is already defined by SWI-Prolog to mean something different, but the translation is taken care of between instances. Note that the behaviour is different to SWI-Prolog's definition:
    * The functor of Key is used as the lookup
    * If there is no match in the state, then {null} is returned
    * {null} is a valid state, and always returns {null} for any key. This means you can write State.foo.bar.baz, and if State has no foo, then you'll just get {null} rather than a Prolog version of a null pointer exception.
