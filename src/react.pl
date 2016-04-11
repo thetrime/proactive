@@ -51,6 +51,12 @@ react_clause(Module, Head:-Body):-
         predicate_property(Module:Head, interpreted),
         \+predicate_property(Module:Head, imported_from(_)),
         clause(Module:Head, Body, _).
+react_clause(Module, Head:-Body):-
+        current_predicate(_, Module:tabled_predicate(_, _)),
+        clause(Module:tabled_predicate(SourceModule, Name/Arity), true),
+        functor(Head, Name, Arity),
+        clause(SourceModule:Head, Body, _).
+
 
 related_modules(Root, Root).
 related_modules(Module, Related):-
@@ -119,7 +125,7 @@ execute_react_ws(WebSocket):-
         ws_receive(WebSocket, Message, []),
         ( Message.opcode == text->
             Data = Message.data,
-	    read_term_from_atom(Data, Goal, []),
+            read_term_from_atom(Data, Goal, []),
             ( goal_is_safe(Goal)->
                 execute_react_ws(WebSocket, Goal, Goal)
             ; permission_error(execute, goal, Goal)
@@ -146,7 +152,7 @@ execute_react_ws(WebSocket, ReplyGoal, Goal):-
 :-meta_predicate(execute_react_goal(0, +, +)).
 execute_react_goal(Goal, ReplyGoal, WebSocket):-
 	setup_call_catcher_cleanup(true,
-				   Goal,
+                                   Goal,
                                    Catcher,
                                    react_cleanup(ReplyGoal, Catcher, WebSocket)),
         ( var(Catcher)->            
