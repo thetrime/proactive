@@ -107,13 +107,13 @@ execute_react(Request):-
 execute_react_ws_guarded(WebSocket):-
 	( catch(execute_react_ws(WebSocket), E, true)->
 	    ( var(E)->
-		Msg = "bye", Code = 1000
+		Msg = bye, Code = 1000
 	    ; otherwise->
-		Msg = "error", Code = 1011
+		Msg = error, Code = 1011
 	    )
-	; Msg = "failed", Code = 1011
+	; Msg = failed, Code = 1011
 	),
-	catch(ws_close(WebSocket, Code, Msg), Error, print_message(error, Error)).
+	catch(ws_close(WebSocket, Code, text(Msg)), Error, print_message(error, Error)).
 
 execute_react_ws(WebSocket):-
         ws_receive(WebSocket, Message, []),
