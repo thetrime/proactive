@@ -53,11 +53,11 @@ react_clause(Module, Head:-Body):-
         predicate_property(Module:Head, interpreted),
         \+predicate_property(Module:Head, imported_from(_)),
         clause(Module:Head, Body, _).
-react_clause(Module, Head:-Body):-
+react_clause(Module, Head):-
         current_predicate(_, Module:tabled_predicate(_, _)),
         clause(Module:tabled_predicate(SourceModule, Name/Arity), true),
         functor(Head, Name, Arity),
-        clause(SourceModule:Head, Body, _).
+        call(SourceModule:Head).
 
 
 related_modules(Root, Root).
