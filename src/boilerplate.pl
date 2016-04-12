@@ -53,3 +53,8 @@ between(Low, High, I):-
           between(II, High, I)
         ).
 
+vdiff_warning(X):-
+        java_println(X).
+
+debug_message(X):-
+        writeln(X).
