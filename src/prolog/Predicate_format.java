@@ -121,6 +121,16 @@ public class Predicate_format extends ExecuteOnlyCode
                         case 'n':
                            ps.println();
                            break;
+                        case '*':
+                        {
+                           Term arg = a.next();
+                           if (arg instanceof IntegerTerm)
+                              r = ((IntegerTerm)arg).value;
+                           else
+                              PrologException.typeError(TermConstants.integerAtom, arg);
+                           i++;
+                           continue;
+                        }
                         case '0':
                         case '1':
                         case '2':
