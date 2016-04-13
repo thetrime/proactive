@@ -626,7 +626,12 @@ public class Engine
             close();
             state = RC.FAIL;
          }
-         else if (reply instanceof CompoundTerm)
+	 else if (reply instanceof AtomTerm && ((AtomTerm)reply).value.equals("$aborted"))
+         {
+            close();
+            state = RC.FAIL;
+	 }
+	 else if (reply instanceof CompoundTerm)
          {
             CompoundTerm c = (CompoundTerm)reply;
             if (c.tag.functor.value.equals("exception"))
@@ -687,7 +692,15 @@ public class Engine
       @Override
       public void onClose(int code, String reason, boolean remote)
       {
-         System.out.println("closed connection");
+	 System.out.println("closed connection");
+	 try
+	 {
+	    replies.put(AtomTerm.get("$aborted"));
+	 }
+	 catch(Exception e)
+	 {
+	    e.printStackTrace();
+	 }
       }
       
       @Override

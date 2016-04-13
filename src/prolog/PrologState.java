@@ -1,5 +1,7 @@
 package org.proactive.prolog;
 
+import gnu.prolog.io.TermWriter;
+import gnu.prolog.io.WriteOptions;
 import gnu.prolog.term.Term;
 import gnu.prolog.term.AtomTerm;
 import gnu.prolog.term.VariableTerm;
@@ -12,6 +14,7 @@ import gnu.prolog.vm.PrologException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.List;
+import java.util.Iterator;
 import java.util.LinkedList;
 
 public class PrologState extends AtomicTerm
@@ -195,6 +198,21 @@ public class PrologState extends AtomicTerm
       if (value == null)
 	 return nullTerm;
       return value;
+   }
+
+   public void displayTerm(WriteOptions o, TermWriter writer)
+   {
+      writer.print("[");
+      for (Iterator<Map.Entry<AtomTerm, Term>> i = map.entrySet().iterator(); i.hasNext();)
+      {
+	 Map.Entry<AtomTerm, Term> entry = i.next();
+	 writer.print(o, entry.getKey());
+	 writer.print("=");
+	 writer.print(o, entry.getValue());
+	 if (i.hasNext())
+	    writer.print(",");
+      }
+      writer.print("]");
    }
 
 
