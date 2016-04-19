@@ -40,7 +40,7 @@ public class TextField implements InputWidget
       {
          JPanel panel = new JPanel();
          panel.setLayout(new BorderLayout());
-         panel.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
+         panel.setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4));
          panel.add(field, BorderLayout.CENTER);
          panel.setOpaque(false);
          component = panel;
