@@ -37,7 +37,7 @@ public class ComboBox extends ReactComponent
       {
          JPanel panel = new JPanel();
          panel.setLayout(new BorderLayout());
-         panel.setBorder(BorderFactory.createEmptyBorder(0, 2, 0, 2));
+         panel.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
          panel.add(field, BorderLayout.CENTER);
          panel.setOpaque(false);
          component = panel;
