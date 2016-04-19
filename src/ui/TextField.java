@@ -1,6 +1,7 @@
 package org.proactive.ui;
 
 import org.proactive.prolog.PrologObject;
+import org.proactive.React;
 import java.awt.Component;
 import javax.swing.JTextField;
 import javax.swing.text.DocumentFilter;
@@ -11,10 +12,14 @@ import javax.swing.text.Document;
 import java.util.HashMap;
 import javax.swing.InputVerifier;
 import javax.swing.JComponent;
+import javax.swing.BorderFactory;
+import javax.swing.JPanel;
+import java.awt.BorderLayout;
 
 public class TextField implements InputWidget
 {
    JTextField field = new JTextField();
+   JComponent component = null;
    private DocumentFilter documentFilter = null;
    private DocumentFilter.FilterBypass bypass = null;
    private enum BypassType
@@ -27,11 +32,24 @@ public class TextField implements InputWidget
    private int bypass_replacement_len = 0;
    public TextField()
    {
+      if ("Mac OS X".equals(React.currentLaf))
+      {
+         component = field;
+      }
+      else
+      {
+         JPanel panel = new JPanel();
+         panel.setLayout(new BorderLayout());
+         panel.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
+         panel.add(field, BorderLayout.CENTER);
+         panel.setOpaque(false);
+         component = panel;
+      }
    }
 
    public Component getAWTComponent()
    {
-      return field;
+      return component;
    }
 
    public Object getValue()

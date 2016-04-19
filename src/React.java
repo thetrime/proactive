@@ -14,13 +14,29 @@ public class React
 {
    // Prevent instantiation
    private React() {}
-
+   private static String requestedLaf = null;
+   public static String currentLaf = null;
+   private static String uri = null;
+   private static String component = null;
    public static void main(String[] args) throws Exception
    {
-      if (args.length != 2)
+      if (args.length < 2)
       {
-         System.err.println("Usage: React <URI> <Component>");
+         System.err.println("Usage: React [Options] <URI> <Component>");
+         System.err.println("       Options include:");
+         System.err.println("       --laf <LAF>");
       }
+      int i;
+      for (i = 0; i < args.length-2; i++)
+      {
+         if (args[i].equals("--laf") && i+1 < args.length-2)
+         {
+            requestedLaf = args[i+1];
+            i++;
+         }
+      }
+      uri = args[i++];
+      component = args[i++];
       SwingUtilities.invokeLater(new Runnable()
          {
             public void run()
@@ -50,17 +66,22 @@ public class React
                */
                try
                {
-                  for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels())
+                  if (requestedLaf != null)
                   {
-                     System.out.println(info.getName());
-                     if ("-put-laf-here-".equals(info.getName()))
+                     for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels())
                      {
-                        javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                        break;
+                        System.out.println(info.getName());
+                        if (requestedLaf.equals(info.getName()))
+                        {
+                           javax.swing.UIManager.setLookAndFeel(info.getClassName());
+                           break;
+                        }
                      }
                   }
+                  currentLaf = javax.swing.UIManager.getLookAndFeel().getName();
+
                   long startTime = System.currentTimeMillis();
-                  new org.proactive.ui.ReactApp(args[0], args[1]);
+                  new org.proactive.ui.ReactApp(uri, component);
                   System.out.println("Render time: " + (System.currentTimeMillis() - startTime ) + "ms");
                }
                catch(Exception e)

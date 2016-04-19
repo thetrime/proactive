@@ -1,6 +1,7 @@
 package org.proactive.ui;
 
 import org.proactive.prolog.PrologObject;
+import org.proactive.React;
 import org.proactive.ReactComponent;
 import java.awt.Component;
 import javax.swing.JComboBox;
@@ -15,15 +16,32 @@ import java.util.List;
 import javax.swing.JComponent;
 import java.awt.event.FocusListener;
 import java.awt.event.FocusEvent;
+import javax.swing.BorderFactory;
+import javax.swing.JPanel;
+import java.awt.BorderLayout;
 
 public class ComboBox extends ReactComponent
 {
    JComboBox<ComboItem> field = null;
+   JComponent component = null;
    private boolean stillConstructing = false;
 
    public ComboBox()
    {
       field = new JComboBox<ComboItem>(new ReactComboBoxModel());
+      if ("Mac OS X".equals(React.currentLaf))
+      {
+         component = field;
+      }
+      else
+      {
+         JPanel panel = new JPanel();
+         panel.setLayout(new BorderLayout());
+         panel.setBorder(BorderFactory.createEmptyBorder(0, 2, 0, 2));
+         panel.add(field, BorderLayout.CENTER);
+         panel.setOpaque(false);
+         component = panel;
+      }
    }
    public class ReactComboBoxModel extends DefaultComboBoxModel<ComboItem>
    {
@@ -123,7 +141,7 @@ public class ComboBox extends ReactComponent
 
    public Component getAWTComponent()
    {
-      return field;
+      return component;
    }
 
    public void insertChildBefore(ReactComponent child, ReactComponent sibling)
