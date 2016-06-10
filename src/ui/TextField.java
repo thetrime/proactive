@@ -15,6 +15,8 @@ import javax.swing.JComponent;
 import javax.swing.BorderFactory;
 import javax.swing.JPanel;
 import java.awt.BorderLayout;
+import java.awt.event.FocusListener;
+import java.awt.event.MouseListener;
 
 public class TextField implements InputWidget
 {
@@ -38,7 +40,25 @@ public class TextField implements InputWidget
       }
       else
       {
-         JPanel panel = new JPanel();
+         JPanel panel = new JPanel()
+         {
+            public void addFocusListener(FocusListener fl)
+            {
+               field.addFocusListener(fl);
+            }
+            public void removeFocusListener(FocusListener fl)
+            {
+               field.removeFocusListener(fl);
+            }
+            public void addMouseListener(MouseListener ml)
+            {
+               field.addMouseListener(ml);
+            }
+            public void removeMouseListener(MouseListener ml)
+            {
+               field.removeMouseListener(ml);
+            }
+         };
          panel.setLayout(new BorderLayout());
          panel.setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4));
          panel.add(field, BorderLayout.CENTER);
