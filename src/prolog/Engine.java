@@ -46,9 +46,16 @@ public class Engine
 
    public Engine(String baseURL, String rootElementId) throws Exception
    {
-      this.goalURI = new URI(baseURL + "/goal");
+      goalURI = new URI(baseURL + "/goal");
+
+      String scheme = "ws";
+      if (goalURI.getScheme().toLowerCase().equals("https"))
+         scheme = "wss";
+
+      goalURI = new URI(scheme, goalURI.getUserInfo(), goalURI.getHost(), goalURI.getPort(), goalURI.getPath(), goalURI.getQuery(), goalURI.getFragment());
       this.componentURL = baseURL + "/component/";
       this.listenURI = new URI(baseURL + "/listen");
+      listenURI = new URI(scheme, listenURI.getUserInfo(), listenURI.getHost(), listenURI.getPort(), listenURI.getPath(), listenURI.getQuery(), listenURI.getFragment());
       this.rootElementId = rootElementId;
       make();
    }
