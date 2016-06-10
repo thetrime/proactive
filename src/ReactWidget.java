@@ -50,7 +50,6 @@ public class ReactWidget extends ReactComponent implements CodeChangeListener
 
       // First, get the state
       this.state = engine.getInitialState(elementId, props);
-
       // Then render the initial vDOM
       vDom = engine.render(this, elementId, state, props);
 
@@ -105,8 +104,11 @@ public class ReactWidget extends ReactComponent implements CodeChangeListener
 
    public int getFill()
    {
-      if (internalComponent != null)
-         return internalComponent.getFill();
+      // Originally, we would allow the child to provide the fill, but this is a bit weird in reality
+      // and it sort of breaks the encapsulation paradigm since things can 'leak out' and take control
+      // of the next level up.
+      //      if (internalComponent != null)
+      //         return internalComponent.getFill();
       return super.getFill();
    }
 
