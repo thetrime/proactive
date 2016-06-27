@@ -2,6 +2,8 @@ package org.proactive.prolog;
 
 import gnu.prolog.term.Term;
 import gnu.prolog.term.AtomTerm;
+import gnu.prolog.term.VariableTerm;
+import gnu.prolog.term.CompoundTerm;
 import gnu.prolog.database.MetaPredicateInfo;
 import gnu.prolog.vm.Interpreter;
 import gnu.prolog.vm.ExecuteOnlyMetaCode;
@@ -42,8 +44,15 @@ public class Predicate_on_server extends ExecuteOnlyMetaCode
             return RC.FAIL;
          if (rc == Engine.ExecutionState.RC.EXCEPTION)
             throw new PrologException(state.getException(), null);
-         // Otherwise it succeeded, possibly with a choicepoint. Unify the result with args[0] and return the right value         
-         interpreter.simpleUnify(goal, state.getResponse());
+         // Otherwise it succeeded, possibly with a choicepoint. Unify the result with args[0] and return the right value
+         Term response = state.getResponse();
+         // Since any PrologState objects in the goal will never unify with the response, replace them all with variables
+         goal = deleteStates(goal);
+         if (interpreter.simpleUnify(goal, response) == RC.FAIL)
+         {
+            // This is not good!
+            return RC.FAIL;
+         }
          if (rc == Engine.ExecutionState.RC.SUCCESS_LAST)
             return RC.SUCCESS_LAST;
          interpreter.pushBacktrackInfo(this);
@@ -54,7 +63,23 @@ public class Predicate_on_server extends ExecuteOnlyMetaCode
       {
          state.cut();
       }
+
+      private Term deleteStates(Term t)
+      {
+         if (t instanceof PrologState)
+            return new VariableTerm("State");
+         else if (t instanceof CompoundTerm)
+         {
+            CompoundTerm c = (CompoundTerm)t;
+            Term[] args = new Term[c.tag.arity];
+            for (int i = 0; i < c.tag.arity; i++)
+               args[i] = deleteStates(c.args[i]);
+            return new CompoundTerm(c.tag, args);
+         }
+         return t;
+      }
    }
+
 
    
    public RC execute(Interpreter interpreter, boolean backtrackMode, gnu.prolog.term.Term args[]) throws PrologException
