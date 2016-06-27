@@ -251,7 +251,7 @@ state_to_term(X, X). % FIXME: This should copy X and instantiate all the vars
 
 
 :-redefine_system_predicate('.'(_,_,_)).
-'.'(State,Key,Value):-
+user:'.'(State,Key,Value):-
 	( is_list(State)->
 	    get_state(State, Key, Value)
 	; State == {null}->
