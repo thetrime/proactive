@@ -1,6 +1,3 @@
 [submodule "reactive-prolog"]
 	path = reactive-prolog
 	url = https://github.com/thetrime/reactive-prolog.git
-[submodule "proscript"]
-	path = proscript
-	url = https://github.com/thetrime/proscript
