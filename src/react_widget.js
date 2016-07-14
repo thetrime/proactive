@@ -25,4 +25,9 @@ ReactWidget.prototype.getDOMNode = function()
     return this.internalComponent.getDOMNode();
 }
 
+ReactWidget.prototype.getEngine = function()
+{
+    return this.engine;
+}
+
 module.exports = ReactWidget;

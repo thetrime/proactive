@@ -2,6 +2,7 @@
 
 var Prolog = require('../lib/proscript2/build/proscript.js');
 var PrologState = require('./prolog_state');
+var ReactWidget = require('./react_widget');
 
 var gluableAtom = new Prolog.AtomTerm("gluable");
 var colonFunctor = new Prolog.Functor(new Prolog.AtomTerm(":"), 2);
@@ -26,6 +27,7 @@ function addArgs(goal, glueArgs)
     Prolog.Errors.typeError(Prolog.Constants.callableAtom, goal);
 }
 
+/* First, Prolog-type stuff */
 module.exports["."] = function(state, key, value)
 {
     if (isNull(state))
@@ -63,5 +65,117 @@ module.exports["."] = function(state, key, value)
         }
     }
     Prolog.Errors.typeError(PrologState.prologStateKeyAtom, state);
+}
+
+
+module.exports["state_to_term"] = function(state, term)
+{
+    throw new Error("FIXME: state_to_term not implemented");
+}
+
+module.exports["on_server"] = function(goal)
+{
+    throw new Error("FIXME: on_server not implemented");
+}
+
+module.exports["raise_event"] = function(a, b)
+{
+    throw new Error("FIXME: raise_event not implemented");
+}
+
+module.exports["wait_for"] = function(fluxion)
+{
+    throw new Error("FIXME: wait_for not implemented");
+}
+
+module.exports["get_this"] = function(t)
+{
+    throw new Error("FIXME: get_this not implemented");
+}
+
+module.exports["get_store_state"] = function(fluxion, state)
+{
+    throw new Error("FIXME: get_store_state not implemented");
+}
+
+module.exports["bubble_event"] = function(a, b)
+{
+    throw new Error("FIXME: bubble_event not implemented");
+}
+
+/* And now the DOM glue */
+module.exports["remove_child"] = function(parent, child)
+{
+    throw new Error("FIXME: remove_child not implemented");
+}
+
+module.exports["append_child"] = function(parent, child)
+{
+    throw new Error("FIXME: append_child not implemented");
+}
+
+module.exports["insert_before"] = function(parent, child, sibling)
+{
+    throw new Error("FIXME: insert_before not implemented");
+}
+
+module.exports["replace_child"] = function(parent, newChild, oldChild)
+{
+    throw new Error("FIXME: replace_child not implemented");
+}
+
+module.exports["child_nodes"] = function(parent, children)
+{
+    throw new Error("FIXME: child_nodes not implemented");
+}
+
+module.exports["create_element"] = function(context, tagname, domnode)
+{
+    throw new Error("FIXME: create_element not implemented");
+}
+
+module.exports["create_text_node"] = function(context, text, domnode)
+{
+    throw new Error("FIXME: create_text_node not implemented");
+}
+
+module.exports["parent_node"] = function(node, parent)
+{
+    throw new Error("FIXME: parent_node not implemented");
+}
+
+module.exports["node_type"] = function(node, type)
+{
+    throw new Error("FIXME: node_type not implemented");
+}
+
+module.exports["set_vdom_properties"] = function(domNode, properties)
+{
+    throw new Error("FIXME: set_vdom_properties not implemented");
+}
+
+module.exports["replace_node_data"] = function(domNode, properties)
+{
+    throw new Error("FIXME: replace_node_data not implemented");
+}
+
+module.exports["destroy_widget"] = function(domNode)
+{
+    throw new Error("FIXME: destroy_widget not implemented");
+}
+
+module.exports["init_widget"] = function(context, properties, domNode)
+{
+    Prolog.Utils.must_be_blob("react_context", context);
+    var parentContext = context.value;
+    console.log(parentContext);
+    console.log(properties.dereference_recursive().toString());
+    var widget = new ReactWidget(parentContext, parentContext.getEngine(), element.args[0].value, PrologState.fromList(element.args[1]));
+    return this.unify(domNode, new Prolog.BlobTerm("react_widget", widget));
+}
+
+module.exports["update_widget"] = function(newVDom, oldVDom, domNode, newDomNode)
+{
+    throw new Error("FIXME: update_widget not implemented");
 }
 
