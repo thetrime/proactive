@@ -143,15 +143,12 @@ PrologEngine.prototype.triggerEvent = function(handler, event, context)
         console.log("Invalid handler: " + handler);
         return false;
     }
-    var b = this.env.pushContext();
-    console.log("Raising event: " + goal.toString());
+    this.env.pushContext();
     try
     {
         if (this.env.execute(goal))
         {
-            console.log("Event OK: " + goal.toString());
             context.setState(context.getState().cloneWith(newState.dereference()));
-            console.log("Event OK2: " + goal.toString());
             return true;
         }
     }
@@ -161,7 +158,7 @@ PrologEngine.prototype.triggerEvent = function(handler, event, context)
     }
     finally
     {
-        this.env.popContext(b);
+        this.env.popContext();
     }
     return false;
 }
@@ -175,7 +172,6 @@ PrologEngine.prototype.diff = function(a, b)
     {
         if (this.env.execute(goal))
         {
-            console.log("OK: " + patchTerm.toString());
             return patchTerm.dereference_recursive();
         }
         else
@@ -200,14 +196,11 @@ PrologEngine.prototype.applyPatch = function(patch, root)
     var renderOptions = new Prolog.CompoundTerm(Prolog.Constants.listFunctor, [new Prolog.CompoundTerm(documentFunctor, [new Prolog.BlobTerm("react_context", root.getOwnerDocument())]), Prolog.Constants.emptyListAtom]);
     var goal = crossModuleCall("vdiff", new Prolog.CompoundTerm(vPatchFunctor, [new Prolog.BlobTerm("react_component", root), patch, renderOptions, newRoot]));
     var b = this.env.pushContext();
-    console.log("About to vPatch: ");
-    console.log(goal);
     try
     {
         if (this.env.execute(goal))
         {
-            console.log("vPatch OK");
-            return patchTerm.dereference_recursive();
+            return newRoot.dereference().value;
         }
         else
             console.log("vPatch failed");

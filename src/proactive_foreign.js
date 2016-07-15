@@ -104,29 +104,85 @@ module.exports["bubble_event"] = function(a, b)
 /* And now the DOM glue */
 module.exports["remove_child"] = function(parent, child)
 {
-    throw new Error("FIXME: remove_child not implemented");
+    var p = parent.dereference();
+    var c = child.dereference();
+    var found = false;
+    for (var i = 0; i < p.value.children.length; i++)
+    {
+        if (p.value.children[i] == c.value)
+        {
+            p.value.children.splice(i, 1);
+            found = true;
+            break;
+        }
+    }
+    if (!found)
+        throw new Error("Attempt to remove non-existent child");
+    p.value.removeChild(c.value);
+    return true;
 }
 
 module.exports["append_child"] = function(parent, child)
 {
-    parent.value.appendChild(child.value);
+    var p = parent.dereference();
+    var c = child.dereference();
+    p.value.children.push(c.value);
+    p.value.appendChild(c.value);
     return true;
 }
 
 module.exports["insert_before"] = function(parent, child, sibling)
 {
-    throw new Error("FIXME: insert_before not implemented");
+    var p = parent.dereference();
+    var c = child.dereference();
+    var s = sibling.dereference();
+    var found = false;
+    for (var i = 0; i < p.value.children.length; i++)
+    {
+        if (p.value.children[i] == s.value)
+        {
+            p.value.children.splice(i, 0, c.value);
+            found = true;
+            break;
+        }
+    }
+    if (!found)
+        throw new Error("Attempt to insert before non-existent sibling");
+    p.value.insertBefore(c.value, s.value);
+    return true;
 }
 
 module.exports["replace_child"] = function(parent, newChild, oldChild)
 {
-    throw new Error("FIXME: replace_child not implemented");
-}
+    var p = parent.dereference();
+    var n = newChild.dereference();
+    var o = oldChild.dereference();
+    var found = false;
+    for (var i = 0; i < p.value.children.length; i++)
+    {
+        if (p.value.children[i] == o.value)
+        {
+            p.value.children[i] = n.value;
+            found = true;
+            break;
+        }
+    }
+    if (!found)
+        throw new Error("Attempt to replace non-existent child");
+    p.value.replaceChild(n.value, o.value);
+    return true;}
 
 module.exports["child_nodes"] = function(parent, children)
 {
-    console.log(parent.value);
-    throw new Error("FIXME: child_nodes not implemented");
+    var childNodes = parent.dereference().value.getChildren();
+    var result = Prolog.Constants.emptyListAtom;
+    var i = childNodes.length;
+    while(i--)
+        result = new Prolog.CompoundTerm(Prolog.Constants.listFunctor, [new Prolog.BlobTerm("react_component", childNodes[i]), result]);
+    var v = this.unify(result, children);
+    if (!v)
+        console.log("Failed to unify children");
+    return v;
 }
 
 module.exports["create_element"] = function(context, tagname, domnode)

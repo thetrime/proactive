@@ -6,6 +6,7 @@ function ReactComponent()
     this.fill = "none";
     this.layout = "vertical";
     this.baseClassName = "";
+    this.children = [];
 }
 
 ReactComponent.prototype.setDOMNode = function(n)
@@ -71,10 +72,33 @@ ReactComponent.prototype.getOwnerDocument = function()
     return this.owner;
 }
 
+ReactComponent.prototype.getChildren = function()
+{
+    return this.children;
+}
 
 ReactComponent.prototype.appendChild = function(t)
 {
     this.domNode.appendChild(t.getDOMNode());
 }
+
+ReactComponent.prototype.insertBefore = function(t, s)
+{
+    this.domNode.insertBefore(t.getDOMNode(), s.getDOMNode());
+}
+
+ReactComponent.prototype.replaceChild = function(n, o)
+{
+    this.domNode.replaceChild(n.getDOMNode(), o.getDOMNode());
+}
+
+
+
+ReactComponent.prototype.removeChild = function(t)
+{
+    this.domNode.removeChild(t.getDOMNode());
+}
+
+
 
 module.exports = ReactComponent;

@@ -53,7 +53,6 @@ ReactWidget.prototype.setState = function(newState)
 
 ReactWidget.prototype.reRender = function()
 {
-    console.log("About to re-render");
     var newVDom = this.engine.render(this, this.elementId, this.state, this.props);
     var patches = this.engine.diff(this.vDom, newVDom.dereference());
     this.internalComponent = this.engine.applyPatch(patches, this.internalComponent);
