@@ -128,7 +128,7 @@ init_widget(_, VNode, DomNode):-
         VNode = element(Tag, Attributes, _),
         Tag:getInitialState(Attributes, State),
         Tag:render(State, Attributes, VDom),
-        diff(VNode, VDom, Patches),
+        vdiff(VNode, VDom, Patches),
         create_element(Document, div, FakeDom),
 	vpatch(FakeDom, Patches, [document(Document)], DomNode).
 

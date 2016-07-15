@@ -9,7 +9,7 @@
 :-ensure_loaded(user:testing).
 :-ensure_loaded(user:react).
 :-ensure_loaded(user:jsx).
-:-ensure_loaded(user:diff).
+:-ensure_loaded(user:vdiff).
 :-ensure_loaded(user:dom).
 
 user:term_expansion(end_of_file, _) :-
