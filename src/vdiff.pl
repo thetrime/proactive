@@ -261,13 +261,13 @@ reorder(AChildren, BChildren, Ordered, Moves):-
 simulate([], _, _, _, [], [], []):- !.
 
 % remove all the remaining nodes from simulate
-simulate([], K, BKeys, SimulateIndex, [SimulateItem|SimulateItems], [remove(SimulateItem, SimulateIndex, Key)|Removes], Inserts):-
+simulate([], K, BKeys, SimulateIndex, [SimulateItem|SimulateItems], [remove(SimulateIndex, Key)|Removes], Inserts):-
         !,
         get_key_or_null(SimulateItem, Key),
         simulate([], K, BKeys, SimulateIndex, SimulateItems, Removes, Inserts).
 
 % Remove items
-simulate([WantedItem|BChildren], K, BKeys, SimulateIndex, [{null}|Simulations], [remove({null}, SimulateIndex, {null})|Removes], Inserts):-
+simulate([WantedItem|BChildren], K, BKeys, SimulateIndex, [{null}|Simulations], [remove(SimulateIndex, {null})|Removes], Inserts):-
         !,
         simulate([WantedItem|BChildren], K, BKeys, SimulateIndex, Simulations, Removes, Inserts).
 
