@@ -58,5 +58,15 @@
     display: -moz-flex;
     display: -o-flex;
     display: -ms-flex;
-    display: flex;    
+    display: flex;
+    -webkit-box-pack: center;
+    -moz-box-pack: center;
+    -webkit-justify-content: center;
+    -ms-flex-pack: center;
+    justify-content: center;
+}
+
+body
+{
+    background: rgb(150,168,200);
 }
