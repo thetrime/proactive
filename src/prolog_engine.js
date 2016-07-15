@@ -54,18 +54,19 @@ PrologEngine.prototype.getInitialState = function(component, props)
         return PrologState.emptyState;
     var replyTerm = new Prolog.VariableTerm();
     var goal = crossModuleCall(component, new Prolog.CompoundTerm(getInitialStateFunctor, [props, replyTerm]));
+    var b = this.env.openForeignFrame();
     try
     {
         if (this.env.execute(goal))
-        {
-            var result = new PrologState(replyTerm.dereference());
-            this.env.reset();
-        }
-        this.env.reset();
+            return new PrologState(replyTerm.dereference());
     }
     catch(e)
     {
         console.log(e);
+    }
+    finally
+    {
+        this.env.discardForeignFrame(b);
     }
     return PrologState.emptyState;
 }
@@ -76,24 +77,21 @@ PrologEngine.prototype.render = function(widget, component, state, props)
     console.log(state.toString());
     var goal = crossModuleCall(component, new Prolog.CompoundTerm(renderFunctor, [state, props, vDom]));
     this.env.pushContext(widget);
+    var b = this.env.openForeignFrame();
     try
     {
         console.log("Calling render:" + goal.toString());
-        if (this.env.execute(goal));
+        if (this.env.execute(goal))
         {
-            console.log("rendered to: ");
-            console.log(vDom);
-            console.log(vDom.value === null);
-            console.log(vDom.toString());
-            console.log(util.inspect(vDom, {depth:null}));
-            throw(0);
+            //console.log("rendered to: " + vDom.toString());
             return vDom.dereference_recursive();
         }
+        console.log("render/3 failed");
     }
     finally
     {
         this.env.popContext();
-        this.env.reset();
+        this.env.discardForeignFrame(b);
     }
     return null;
 }
@@ -103,19 +101,27 @@ PrologEngine.prototype.createElementFromVDom = function(vDOM, context)
     var resultValue = new Prolog.VariableTerm();
     var renderOptions = new Prolog.CompoundTerm(Prolog.Constants.listFunctor, [new Prolog.CompoundTerm(documentFunctor, [new Prolog.BlobTerm("react_context", context)]), Prolog.Constants.emptyListAtom]);
     var goal = crossModuleCall("vdiff", new Prolog.CompoundTerm(createElementFromVDomFunctor, [renderOptions, vDOM, resultValue]));
+    var b = this.env.openForeignFrame();
     try
     {
-        if (this.env.execute(goal));
+        console.log("About to try and create an element from vDOM");
+        if (this.env.execute(goal))
         {
-            return vDom.dereference_recursive();
+            console.log("Created this element:");
+            console.log(resultValue.dereference());
+            return resultValue.dereference().value;
         }
     }
     finally
     {
-        this.env.reset();
+        this.env.discardForeignFrame(b);
     }
-    console.log("create_element_from_vdom/3 failed on " + vDOM);
     return null;
+}
+
+PrologEngine.prototype.checkForFluxListeners = function(context)
+{
+    // FIXME: implement
 }
 
 module.exports = PrologEngine;

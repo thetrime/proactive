@@ -3,9 +3,12 @@
 var Prolog = require('../lib/proscript2/build/proscript.js');
 var PrologState = require('./prolog_state');
 var ReactWidget = require('./react_widget');
+var ProactiveComponentFactory = require('./proactive_component_factory');
 
 var gluableAtom = new Prolog.AtomTerm("gluable");
+var attributeAtom = new Prolog.AtomTerm("attribute");
 var colonFunctor = new Prolog.Functor(new Prolog.AtomTerm(":"), 2);
+var equalsFunctor = new Prolog.Functor(new Prolog.AtomTerm("="), 2);
 var thisFunctor = new Prolog.Functor(new Prolog.AtomTerm("$this"), 2);
 
 function crossModuleCall(module, goal)
@@ -90,7 +93,7 @@ module.exports["wait_for"] = function(fluxion)
 
 module.exports["get_this"] = function(t)
 {
-    throw new Error("FIXME: get_this not implemented");
+    return this.unify(t, new Prolog.BlobTerm("react_context", this.proactive_context[this.proactive_context.length-1]));
 }
 
 module.exports["get_store_state"] = function(fluxion, state)
@@ -111,7 +114,8 @@ module.exports["remove_child"] = function(parent, child)
 
 module.exports["append_child"] = function(parent, child)
 {
-    throw new Error("FIXME: append_child not implemented");
+    parent.value.appendChild(child.value);
+    return true;
 }
 
 module.exports["insert_before"] = function(parent, child, sibling)
@@ -131,7 +135,7 @@ module.exports["child_nodes"] = function(parent, children)
 
 module.exports["create_element"] = function(context, tagname, domnode)
 {
-    throw new Error("FIXME: create_element not implemented");
+    return this.unify(domnode, new Prolog.BlobTerm("dom_node", ProactiveComponentFactory.createElement(tagname.value, context.value)));
 }
 
 module.exports["create_text_node"] = function(context, text, domnode)
@@ -149,9 +153,29 @@ module.exports["node_type"] = function(node, type)
     throw new Error("FIXME: node_type not implemented");
 }
 
-module.exports["set_vdom_properties"] = function(domNode, properties)
+module.exports["set_vdom_properties"] = function(domNode, list)
 {
-    throw new Error("FIXME: set_vdom_properties not implemented");
+    console.log("set vdom: " + list);
+    if (Prolog.Constants.emptyListAtom.equals(list))
+        return true;
+    var l = list;
+    while (l instanceof Prolog.CompoundTerm && l.functor.equals(Prolog.Constants.listFunctor))
+    {
+        var head = l.args[0].dereference();
+        l = l.args[1].dereference();
+        if (head instanceof Prolog.CompoundTerm && head.functor.equals(equalsFunctor))
+        {
+            var name = head.args[0];
+            var value = head.args[1];
+            Prolog.Utils.must_be_atom(name);
+            console.log("Should have set " + name.value + " = " + value.toString() + " on " + domNode);
+        }
+        else
+            Prolog.Errors.typeError(attributeAtom, head);
+    }
+    if (!Prolog.Constants.emptyListAtom.equals(l))
+        Prolog.Errors.typeError(Prolog.Constants.listAtom, list);
+    return true;
 }
 
 module.exports["replace_node_data"] = function(domNode, properties)
@@ -170,7 +194,9 @@ module.exports["init_widget"] = function(context, properties, domNode)
     var parentContext = context.value;
     console.log(parentContext);
     console.log(properties.dereference_recursive().toString());
-    var widget = new ReactWidget(parentContext, parentContext.getEngine(), element.args[0].value, PrologState.fromList(element.args[1]));
+    var widget = new ReactWidget(parentContext, parentContext.getEngine(), properties.args[0].value, PrologState.fromList(properties.args[1]));
+    console.log("Created a widget:");
+    console.log(widget);
     return this.unify(domNode, new Prolog.BlobTerm("react_widget", widget));
 }
 

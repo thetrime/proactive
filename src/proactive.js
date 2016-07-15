@@ -8,7 +8,9 @@ function render(url, rootElementId, container)
 {
     var engine = new PrologEngine(url, rootElementId, function()
                                   {
-                                      container.appendChild(new ReactWidget(null, engine, rootElementId, PrologState.emptyState).getDOMNode());
+                                      var widget = new ReactWidget(null, engine, rootElementId, PrologState.emptyState).getDOMNode();
+                                      console.log("Finished with root widget");
+                                      container.appendChild(widget);
                                   });
 }
 

@@ -1,9 +1,6 @@
 memberchk(A, B):-
         once(member(A, B)).
 
-writeln(X):-
-        java_println(X).
-
 otherwise.
 
 jsx(Form, jsx(Form)):- !.
@@ -54,7 +51,7 @@ between(Low, High, I):-
         ).
 
 vdiff_warning(X):-
-        java_println(X).
+        writeln(X).
 
 debug_message(X):-
         writeln(X).
