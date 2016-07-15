@@ -14,7 +14,6 @@ Table.prototype = new ReactComponent;
 
 Table.prototype.appendChild = function(t)
 {
-    console.log("Hello?");
     this.table.appendChild(t.getDOMNode());
 }
 

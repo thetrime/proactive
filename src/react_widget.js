@@ -30,4 +30,42 @@ ReactWidget.prototype.getEngine = function()
     return this.engine;
 }
 
+ReactWidget.prototype.getState = function()
+{
+    return this.state;
+}
+
+ReactWidget.prototype.getProps = function()
+{
+    return this.props;
+}
+
+ReactWidget.prototype.getComponentName = function()
+{
+    return this.elementId;
+}
+
+ReactWidget.prototype.setState = function(newState)
+{
+    this.state = newState;
+    this.reRender();
+}
+
+ReactWidget.prototype.reRender = function()
+{
+    console.log("About to re-render");
+    var newVDom = this.engine.render(this, this.elementId, this.state, this.props);
+    var patches = this.engine.diff(this.vDom, newVDom.dereference());
+    this.internalComponent = this.engine.applyPatch(patches, this.internalComponent);
+    this.internalComponent.setOwnerDocument(this);
+    this.vDom = newVDom;
+}
+
+
+
+ReactWidget.prototype.triggerEvent = function(handler, event)
+{
+    this.engine.triggerEvent(handler, event, this);
+}
+
 module.exports = ReactWidget;

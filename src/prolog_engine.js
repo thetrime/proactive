@@ -4,6 +4,7 @@ var Prolog = require('../lib/proscript2/build/proscript.js');
 var fs = require('fs');
 var util = require('util');
 var PrologState = require('./prolog_state');
+var ProactiveConstants = require('./proactive_constants');
 
 var foreign_module = require('./proactive_foreign.js');
 
@@ -11,6 +12,8 @@ var getInitialStateFunctor = new Prolog.Functor(new Prolog.AtomTerm("getInitialS
 var renderFunctor = new Prolog.Functor(new Prolog.AtomTerm("render"), 3);
 var documentFunctor = new Prolog.Functor(new Prolog.AtomTerm("document"), 1);
 var createElementFromVDomFunctor = new Prolog.Functor(new Prolog.AtomTerm("create_element_from_vdom"), 3);
+var vDiffFunctor = new Prolog.Functor(new Prolog.AtomTerm("vdiff"), 3);
+var vPatchFunctor = new Prolog.Functor(new Prolog.AtomTerm("vpatch"), 4);
 
 function crossModuleCall(module, goal)
 {
@@ -116,6 +119,111 @@ PrologEngine.prototype.createElementFromVDom = function(vDOM, context)
 PrologEngine.prototype.checkForFluxListeners = function(context)
 {
     // FIXME: implement
+}
+
+PrologEngine.prototype.triggerEvent = function(handler, event, context)
+{
+    var state, props;
+    if (handler instanceof Prolog.CompoundTerm && handler.functor.equals(ProactiveConstants.thisFunctor))
+    {
+        var target = handler.args[0].value;
+        var newHandler = handler.args[1];
+        return triggerEvent(newHandler, event, target);
+    }
+    state = context.getState();
+    props = context.getProps();
+    var goal;
+    var newState = new Prolog.VariableTerm("NewState");
+    if (handler instanceof Prolog.AtomTerm)
+        goal = crossModuleCall(context.getComponentName(), new Prolog.CompoundTerm(handler, [event, state, props, newState]));
+    else if (handler instanceof Prolog.CompoundTerm)
+        goal = crossModuleCall(context.getComponentName(), new Prolog.CompoundTerm(handler.functor.name, handler.args.concat([event, state, props, newState])));
+    else
+    {
+        console.log("Invalid handler: " + handler);
+        return false;
+    }
+    var b = this.env.pushContext();
+    console.log("Raising event: " + goal.toString());
+    try
+    {
+        if (this.env.execute(goal))
+        {
+            console.log("Event OK: " + goal.toString());
+            context.setState(context.getState().cloneWith(newState.dereference()));
+            console.log("Event OK2: " + goal.toString());
+            return true;
+        }
+    }
+    catch(error)
+    {
+        console.log(error);
+    }
+    finally
+    {
+        this.env.popContext(b);
+    }
+    return false;
+}
+
+PrologEngine.prototype.diff = function(a, b)
+{
+    var patchTerm = new Prolog.VariableTerm("Patch");
+    var goal = crossModuleCall("vdiff", new Prolog.CompoundTerm(vDiffFunctor, [a, b, patchTerm]));
+    this.env.pushContext();
+    try
+    {
+        if (this.env.execute(goal))
+        {
+            console.log("OK: " + patchTerm.toString());
+            return patchTerm.dereference_recursive();
+        }
+        else
+            console.log("vdiff failed");
+    }
+    catch(error)
+    {
+        console.log("vdiff raised an error!");
+        console.log(error.toString());
+        console.log(error.stack);
+    }
+    finally
+    {
+        this.env.popContext();
+    }
+    return Prolog.Constants.emptyListAtom;
+}
+
+PrologEngine.prototype.applyPatch = function(patch, root)
+{
+    var newRoot = new Prolog.VariableTerm("NewRoot");
+    var renderOptions = new Prolog.CompoundTerm(Prolog.Constants.listFunctor, [new Prolog.CompoundTerm(documentFunctor, [new Prolog.BlobTerm("react_context", root.getOwnerDocument())]), Prolog.Constants.emptyListAtom]);
+    var goal = crossModuleCall("vdiff", new Prolog.CompoundTerm(vPatchFunctor, [new Prolog.BlobTerm("react_component", root), patch, renderOptions, newRoot]));
+    var b = this.env.pushContext();
+    console.log("About to vPatch: ");
+    console.log(goal);
+    try
+    {
+        if (this.env.execute(goal))
+        {
+            console.log("vPatch OK");
+            return patchTerm.dereference_recursive();
+        }
+        else
+            console.log("vPatch failed");
+    }
+    catch(error)
+    {
+        console.log("vPatch error");
+        console.log(error.toString());
+        console.log(error.stack);
+    }
+    finally
+    {
+        this.env.popContext(b);
+    }
+    console.log("*********************** patch/4 failed: " + patch.toString());
+    throw new Error("Fatal error");
 }
 
 module.exports = PrologEngine;

@@ -4,12 +4,7 @@ var Prolog = require('../lib/proscript2/build/proscript.js');
 var PrologState = require('./prolog_state');
 var ReactWidget = require('./react_widget');
 var ProactiveComponentFactory = require('./proactive_component_factory');
-
-var gluableAtom = new Prolog.AtomTerm("gluable");
-var attributeAtom = new Prolog.AtomTerm("attribute");
-var colonFunctor = new Prolog.Functor(new Prolog.AtomTerm(":"), 2);
-var equalsFunctor = new Prolog.Functor(new Prolog.AtomTerm("="), 2);
-var thisFunctor = new Prolog.Functor(new Prolog.AtomTerm("$this"), 2);
+var ProactiveConstants = require('./proactive_constants');
 
 function crossModuleCall(module, goal)
 {
@@ -48,9 +43,9 @@ module.exports["."] = function(state, key, value)
             return this.unify(value, result);
         if (result instanceof Prolog.CompoundTerm)
         {
-            if (result.functor.equals(thisFunctor))
+            if (result.functor.equals(ProactiveConstants.thisFunctor))
             {
-                if (key.args[1] instanceof CompoundTerm && key.args[1].functor.equals(colonFunctor))
+                if (key.args[1] instanceof CompoundTerm && key.args[1].functor.equals(ProactiveConstants.colonFunctor))
                 {
                     var module = key.args[1].args[0];
                     var goal = key.args[1].args[1];
@@ -64,7 +59,7 @@ module.exports["."] = function(state, key, value)
                     return this.unify(value, new Prolog.CompoundTerm(result.functor, [term.args[0], newGoal]));
                 }
             }
-            Prolog.Errors.typeError(gluableAtom, term);
+            Prolog.Errors.typeError(ProactiveConstants.gluableAtom, term);
         }
     }
     Prolog.Errors.typeError(PrologState.prologStateKeyAtom, state);
@@ -130,12 +125,15 @@ module.exports["replace_child"] = function(parent, newChild, oldChild)
 
 module.exports["child_nodes"] = function(parent, children)
 {
+    console.log(parent.value);
     throw new Error("FIXME: child_nodes not implemented");
 }
 
 module.exports["create_element"] = function(context, tagname, domnode)
 {
-    return this.unify(domnode, new Prolog.BlobTerm("dom_node", ProactiveComponentFactory.createElement(tagname.value, context.value)));
+    var node = ProactiveComponentFactory.createElement(tagname.value, context.value);
+    node.setOwnerDocument(context.value);
+    return this.unify(domnode, new Prolog.BlobTerm("dom_node", node));
 }
 
 module.exports["create_text_node"] = function(context, text, domnode)
@@ -163,7 +161,7 @@ module.exports["set_vdom_properties"] = function(domNode, list)
     {
         var head = l.args[0].dereference();
         l = l.args[1].dereference();
-        if (head instanceof Prolog.CompoundTerm && head.functor.equals(equalsFunctor))
+        if (head instanceof Prolog.CompoundTerm && head.functor.equals(ProactiveConstants.equalsFunctor))
         {
             var name = head.args[0];
             var value = head.args[1];
@@ -171,7 +169,7 @@ module.exports["set_vdom_properties"] = function(domNode, list)
             properties[name.value] = value;
         }
         else
-            Prolog.Errors.typeError(attributeAtom, head);
+            Prolog.Errors.typeError(ProactiveConstants.attributeAtom, head);
     }
     if (!Prolog.Constants.emptyListAtom.equals(l))
         Prolog.Errors.typeError(Prolog.Constants.listAtom, list);

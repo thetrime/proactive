@@ -118,6 +118,23 @@ PrologState.prototype.getProperties = function()
     return this.map;
 }
 
+PrologState.prototype.cloneWith = function(t)
+{
+    var newState = new PrologState(new Prolog.VariableTerm());
+    var keys = Object.keys(this.map);
+    for (var i = 0; i < keys.length; i++)
+        newState.map[keys[i]] = this.map[keys[i]];
+    if (t instanceof PrologState)
+    {
+        keys = Object.keys(t.map);
+        for (var i = 0; i < keys.length; i++)
+            newState.processElement(keys[i], t.map[keys[i]], colonFunctor);
+    }
+    else
+        newState.processElements(t);
+    return newState;
+}
+
 // Expects key to be an AtomTerm
 PrologState.prototype.get = function(key)
 {
@@ -138,6 +155,7 @@ PrologState.fromList = function(t)
     }
     return prologState;
 }
+
 
 PrologState.emptyState = new PrologState(new Prolog.VariableTerm());
 PrologState.nullTerm = nullTerm;

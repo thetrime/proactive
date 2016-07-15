@@ -66,6 +66,12 @@ ReactComponent.prototype.setOwnerDocument = function(d)
     this.owner = d;
 }
 
+ReactComponent.prototype.getOwnerDocument = function()
+{
+    return this.owner;
+}
+
+
 ReactComponent.prototype.appendChild = function(t)
 {
     this.domNode.appendChild(t.getDOMNode());

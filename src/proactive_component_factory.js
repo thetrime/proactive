@@ -7,7 +7,7 @@ var ListItem = require('./list_item');
 var Table = require('./table');
 var TableHeader = require('./table_header');
 var Row = require('./row');
-module.exports.createElement = function(name, doc)
+module.exports.createElement = function(name)
 {
     var element;
     switch(name)
