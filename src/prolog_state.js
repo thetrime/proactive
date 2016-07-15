@@ -126,7 +126,6 @@ PrologState.prototype.get = function(key)
 
 PrologState.fromList = function(t)
 {
-    console.log("here");
     // This is used for parsing the attributes list into a state
     var prologState = new PrologState(new Prolog.VariableTerm());
     while (t instanceof Prolog.CompoundTerm)
@@ -137,7 +136,6 @@ PrologState.fromList = function(t)
             prologState.processElement(t.args[0].dereference(), equalsFunctor);
         t = t.args[1].dereference();
     }
-    console.log("Got state: " + prologState);
     return prologState;
 }
 

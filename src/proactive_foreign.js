@@ -155,10 +155,10 @@ module.exports["node_type"] = function(node, type)
 
 module.exports["set_vdom_properties"] = function(domNode, list)
 {
-    console.log("set vdom: " + list);
     if (Prolog.Constants.emptyListAtom.equals(list))
         return true;
     var l = list;
+    var properties = {};
     while (l instanceof Prolog.CompoundTerm && l.functor.equals(Prolog.Constants.listFunctor))
     {
         var head = l.args[0].dereference();
@@ -168,13 +168,14 @@ module.exports["set_vdom_properties"] = function(domNode, list)
             var name = head.args[0];
             var value = head.args[1];
             Prolog.Utils.must_be_atom(name);
-            console.log("Should have set " + name.value + " = " + value.toString() + " on " + domNode);
+            properties[name.value] = value;
         }
         else
             Prolog.Errors.typeError(attributeAtom, head);
     }
     if (!Prolog.Constants.emptyListAtom.equals(l))
         Prolog.Errors.typeError(Prolog.Constants.listAtom, list);
+    domNode.value.setProperties(properties);
     return true;
 }
 
@@ -192,12 +193,9 @@ module.exports["init_widget"] = function(context, properties, domNode)
 {
     Prolog.Utils.must_be_blob("react_context", context);
     var parentContext = context.value;
-    console.log(parentContext);
-    console.log(properties.dereference_recursive().toString());
     var widget = new ReactWidget(parentContext, parentContext.getEngine(), properties.args[0].value, PrologState.fromList(properties.args[1]));
-    console.log("Created a widget:");
-    console.log(widget);
     return this.unify(domNode, new Prolog.BlobTerm("react_widget", widget));
+    return q;
 }
 
 module.exports["update_widget"] = function(newVDom, oldVDom, domNode, newDomNode)

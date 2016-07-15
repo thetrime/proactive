@@ -23,8 +23,8 @@ function PrologEngine(baseURL, rootElementId, callback)
     this.env = new Prolog.Environment();
     // Set up a few of our own properties
     this.env.proactive_context = [];
-    this.env.pushContext = function(p) { this.proactive_context.push(p); };
-    this.env.popContext = function(p) { this.proactive_context.pop(); };
+    this.env.pushProactiveContext = function(p) { this.proactive_context.push(p); };
+    this.env.popProactiveContext = function(p) { this.proactive_context.pop(); };
 
     // Now load in the proactive foreign predicates
     var foreign_predicates = Object.keys(foreign_module);
@@ -54,7 +54,7 @@ PrologEngine.prototype.getInitialState = function(component, props)
         return PrologState.emptyState;
     var replyTerm = new Prolog.VariableTerm();
     var goal = crossModuleCall(component, new Prolog.CompoundTerm(getInitialStateFunctor, [props, replyTerm]));
-    var b = this.env.openForeignFrame();
+    var b = this.env.pushContext();
     try
     {
         if (this.env.execute(goal))
@@ -66,7 +66,7 @@ PrologEngine.prototype.getInitialState = function(component, props)
     }
     finally
     {
-        this.env.discardForeignFrame(b);
+        this.env.popContext();
     }
     return PrologState.emptyState;
 }
@@ -74,24 +74,21 @@ PrologEngine.prototype.getInitialState = function(component, props)
 PrologEngine.prototype.render = function(widget, component, state, props)
 {
     var vDom = new Prolog.VariableTerm();
-    console.log(state.toString());
     var goal = crossModuleCall(component, new Prolog.CompoundTerm(renderFunctor, [state, props, vDom]));
-    this.env.pushContext(widget);
-    var b = this.env.openForeignFrame();
+    var b = this.env.pushContext();
+    this.env.pushProactiveContext(widget);
     try
     {
-        console.log("Calling render:" + goal.toString());
         if (this.env.execute(goal))
         {
-            //console.log("rendered to: " + vDom.toString());
             return vDom.dereference_recursive();
         }
         console.log("render/3 failed");
     }
     finally
     {
+        this.env.popProactiveContext();
         this.env.popContext();
-        this.env.discardForeignFrame(b);
     }
     return null;
 }
@@ -101,20 +98,17 @@ PrologEngine.prototype.createElementFromVDom = function(vDOM, context)
     var resultValue = new Prolog.VariableTerm();
     var renderOptions = new Prolog.CompoundTerm(Prolog.Constants.listFunctor, [new Prolog.CompoundTerm(documentFunctor, [new Prolog.BlobTerm("react_context", context)]), Prolog.Constants.emptyListAtom]);
     var goal = crossModuleCall("vdiff", new Prolog.CompoundTerm(createElementFromVDomFunctor, [renderOptions, vDOM, resultValue]));
-    var b = this.env.openForeignFrame();
+    var b = this.env.pushContext();
     try
     {
-        console.log("About to try and create an element from vDOM");
         if (this.env.execute(goal))
         {
-            console.log("Created this element:");
-            console.log(resultValue.dereference());
             return resultValue.dereference().value;
         }
     }
     finally
     {
-        this.env.discardForeignFrame(b);
+        this.env.popContext(b);
     }
     return null;
 }
