@@ -7,4 +7,5 @@ module.exports.attributeAtom = new Prolog.AtomTerm("attribute");
 module.exports.colonFunctor = new Prolog.Functor(new Prolog.AtomTerm(":"), 2);
 module.exports.equalsFunctor = new Prolog.Functor(new Prolog.AtomTerm("="), 2);
 module.exports.thisFunctor = new Prolog.Functor(new Prolog.AtomTerm("$this"), 2);
-
+module.exports.nullAtom = new Prolog.AtomTerm("null");
+module.exports.nodeAtom = new Prolog.AtomTerm("node");

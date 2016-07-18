@@ -3,12 +3,6 @@
 var Prolog = require('../lib/proscript2/build/proscript.js');
 var ReactComponent = require('./react_component');
 
-var nullAtom = new Prolog.AtomTerm("null");
-
-function isNull(t)
-{
-    return t == null || (t instanceof Prolog.CompoundTerm && t.functor.equals(Prolog.Constants.curlyFunctor) && !(t.args[0].equals(nullAtom)));
-}
 
 function Button()
 {
@@ -37,7 +31,7 @@ Button.prototype.setProperties = function(t)
 
 Button.prototype.setClickHandler = function(value)
 {
-    if (isNull(value))
+    if (ReactComponent.isNull(value))
     {
         if (this.domNode.onClick !== undefined)
             this.domNode.onClick = undefined;

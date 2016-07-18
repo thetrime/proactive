@@ -1,3 +1,4 @@
+/* Layout */
 .horizontal_layout
 {
     -webkit-box-orient: horizontal;
@@ -59,12 +60,65 @@
     display: -o-flex;
     display: -ms-flex;
     display: flex;
+    /*
     -webkit-box-pack: center;
     -moz-box-pack: center;
     -webkit-justify-content: center;
     -ms-flex-pack: center;
     justify-content: center;
+*/
 }
+
+/* Tabs */
+.tabs 
+{
+    position: relative;   
+    box-sizing: border-box;
+    clear: both;
+    margin: 5px 0;
+}
+ 
+.tab 
+{
+    float: left;
+}
+
+.tab > label
+{
+    background: #eee; 
+    padding: 4px; 
+    border: 1px solid #ccc; 
+    margin-left: -1px; 
+    position: relative;
+    left: 1px; 
+}
+
+.content 
+{
+    position: absolute;
+    top: 22px;
+    left: 0;
+    background: white;
+    right: 0;
+    bottom: 5px;
+    padding: 5px 5px 20px 20px;
+    box-sizing: border-box;
+    border: 1px solid #ccc;
+    overflow: scroll;
+}
+
+.tab > input:checked ~ label 
+{
+    background: white;
+    border-bottom: 1px solid white;
+    z-index: 2;
+}
+
+.tab > input:checked ~ label ~ .content 
+{
+    z-index: 1;
+}
+
 
 body
 {

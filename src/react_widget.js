@@ -9,19 +9,26 @@ function ReactWidget(parentContext, engine, elementId, props)
     this.props = props;
     this.owner = parentContext;
 
-    this.setProperties(props.getProperties())
+    this.internalComponent = null;
+
+    this.setProperties(props.getProperties());
     // FIXME: Create a CodeChangeListener
     this.state = engine.getInitialState(elementId, props);
+    //console.log("Rendering: " + this.elementId);
     this.vDom = engine.render(this, this.elementId, this.state, this.props);
+    //console.log("Done rendering: " + this.elementId);
     this.internalComponent = engine.createElementFromVDom(this.vDom, this);
     this.internalComponent.setOwnerDocument(this);
     this.hasFluxListeners = engine.checkForFluxListeners(this);
+    this.internalComponent.restyle();
 }
 
 ReactWidget.prototype = new ReactComponent;
 
 ReactWidget.prototype.getDOMNode = function()
 {
+    if (this.internalComponent == null)
+        return null;
     return this.internalComponent.getDOMNode();
 }
 
@@ -49,6 +56,14 @@ ReactWidget.prototype.setState = function(newState)
 {
     this.state = newState;
     this.reRender();
+}
+
+ReactWidget.prototype.updateWidget = function(newProps)
+{
+    this.props = newProps;
+    if (!this.engine.componentWillReceiveProps(this.elementId, this))
+        this.reRender();
+    return this;
 }
 
 ReactWidget.prototype.reRender = function()

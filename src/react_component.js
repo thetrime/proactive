@@ -1,3 +1,6 @@
+var ProactiveConstants = require('./proactive_constants');
+var Prolog = require('../lib/proscript2/build/proscript.js');
+
 function ReactComponent()
 {
     this.owner = null;
@@ -7,6 +10,7 @@ function ReactComponent()
     this.layout = "vertical";
     this.baseClassName = "";
     this.children = [];
+    this.parent = ProactiveConstants.nullAtom;
 }
 
 ReactComponent.prototype.setDOMNode = function(n)
@@ -35,7 +39,7 @@ ReactComponent.prototype.setProperties = function(t)
         this.layout = t.layout;
         restyleRequired = true;
     }
-    if (restyleRequired)
+    if (restyleRequired && this.getDOMNode() != null) // react_widget will restyle itself later once it has actually instantiated the DOM
         this.restyle();
 }
 
@@ -58,7 +62,9 @@ ReactComponent.prototype.restyle = function()
     if (this.layout == "vertical")
         newClassName += " vertical_layout";
     else if (this.layout == "horizontal")
+    {
         newClassName += " horizontal_layout";
+    }
     this.getDOMNode().className = newClassName;
 }
 
@@ -80,25 +86,51 @@ ReactComponent.prototype.getChildren = function()
 ReactComponent.prototype.appendChild = function(t)
 {
     this.domNode.appendChild(t.getDOMNode());
+    t.parent = this;
 }
 
 ReactComponent.prototype.insertBefore = function(t, s)
 {
     this.domNode.insertBefore(t.getDOMNode(), s.getDOMNode());
+    t.parent = this;
 }
 
 ReactComponent.prototype.replaceChild = function(n, o)
 {
     this.domNode.replaceChild(n.getDOMNode(), o.getDOMNode());
+    n.parent = this;
+    o.parent = null;
 }
 
-
+ReactComponent.prototype.getParent = function()
+{
+    return this.parent;
+}
 
 ReactComponent.prototype.removeChild = function(t)
 {
     this.domNode.removeChild(t.getDOMNode());
+    t.parent = null;
 }
 
+ReactComponent.isNull = function(t)
+{
+    return t == null || (t instanceof Prolog.CompoundTerm && t.functor.equals(Prolog.Constants.curlyFunctor) && (t.args[0].equals(ProactiveConstants.nullAtom)));
+}
+
+ReactComponent.serialize = function(properties)
+{
+    var result = Prolog.Constants.emptyListAtom;
+    var keys = Object.keys(properties);
+    for (var i = 0; i < keys.length; i++)
+        result = new Prolog.CompoundTerm(Prolog.Constants.listFunctor, [new Prolog.CompoundTerm(ProactiveConstants.equalsFunctor, [new Prolog.AtomTerm(keys[i]), properties[keys[i]]]), result]);
+    return result;
+}
+
+ReactComponent.booleanValue = function(t)
+{
+    return (t instanceof Prolog.AtomTerm && t.value == "true");
+}
 
 
 module.exports = ReactComponent;

@@ -13,7 +13,7 @@ function crossModuleCall(module, goal)
 
 function isNull(t)
 {
-    return (t instanceof Prolog.CompoundTerm && t.functor.equals(Prolog.Constants.curlyFunctor) && t.args[0].equals(nullAtom));
+    return (t instanceof Prolog.CompoundTerm && t.functor.equals(Prolog.Constants.curlyFunctor) && t.args[0].equals(ProactiveConstants.nullAtom));
 }
 
 function addArgs(goal, glueArgs)
@@ -73,32 +73,70 @@ module.exports["state_to_term"] = function(state, term)
 
 module.exports["on_server"] = function(goal)
 {
-    throw new Error("FIXME: on_server not implemented");
+    var ws = new WebSocket(this.engine.goalURI);
+    ws.onmessage = function(event)
+    {
+        console.log("Got a message: " + event);
+    }
+    ws.onerror = function(event)
+    {
+        console.log("WS error: " + event);
+    }
+    ws.send(TermWriter.formatTerm({}, 1200, goal));
+    return true;
+
 }
 
 module.exports["raise_event"] = function(a, b)
 {
+    // FLUX
     throw new Error("FIXME: raise_event not implemented");
 }
 
 module.exports["wait_for"] = function(fluxion)
 {
+    // FLUX
     throw new Error("FIXME: wait_for not implemented");
 }
+
+module.exports["get_store_state"] = function(fluxion, state)
+{
+    // FLUX
+    throw new Error("FIXME: get_store_state not implemented");
+}
+
 
 module.exports["get_this"] = function(t)
 {
     return this.unify(t, new Prolog.BlobTerm("react_context", this.proactive_context[this.proactive_context.length-1]));
 }
 
-module.exports["get_store_state"] = function(fluxion, state)
-{
-    throw new Error("FIXME: get_store_state not implemented");
-}
 
-module.exports["bubble_event"] = function(a, b)
+module.exports["bubble_event"] = function(handler, event)
 {
-    throw new Error("FIXME: bubble_event not implemented");
+    if (handler instanceof Prolog.CompoundTerm && handler.functor.equals(ProactiveConstants.thisFunctor))
+    {
+        var target = handler.args[0].value;
+        target.triggerEvent(handler.args[1], event);
+        return true;
+    }
+    // Otherwise it is just a goal - go ahead and call it with one extra arg
+    var goal;
+    if (handler instanceof Prolog.AtomTerm)
+        goal = new Prolog.CompoundTerm(handler, [event]);
+    else if (handler instanceof Prolog.CompoundTerm)
+        goal = new Prolog.CompoundTerm(handler.functor, handler.args.concat([event]));
+    else
+        Prolog.Errors.typeError(Prolog.Constants.callableAtom, goal);
+    this.pushContext();
+    try
+    {
+        return this.execute(goal);
+    }
+    finally
+    {
+        this.popContext();
+    }
 }
 
 /* And now the DOM glue */
@@ -194,17 +232,17 @@ module.exports["create_element"] = function(context, tagname, domnode)
 
 module.exports["create_text_node"] = function(context, text, domnode)
 {
-    throw new Error("FIXME: create_text_node not implemented");
+    throw new Error("create_text_node/3 is not implemented and probably never will be. Do not create text nodes!");
 }
 
 module.exports["parent_node"] = function(node, parent)
 {
-    throw new Error("FIXME: parent_node not implemented");
+    return this.unify(parent, new Prolog.BlobTerm("react_component", node.value.getParent()));
 }
 
 module.exports["node_type"] = function(node, type)
 {
-    throw new Error("FIXME: node_type not implemented");
+    return this.unify(type, ProactiveConstants.nodeAtom);
 }
 
 module.exports["set_vdom_properties"] = function(domNode, list)
@@ -252,8 +290,15 @@ module.exports["init_widget"] = function(context, properties, domNode)
     return q;
 }
 
-module.exports["update_widget"] = function(newVDom, oldVDom, domNode, newDomNode)
+module.exports["update_widget"] = function(newVDom, oldVDom, widget, newDomNode)
 {
-    throw new Error("FIXME: update_widget not implemented");
+    var newProperties = PrologState.fromList(newVDom.args[1]);
+    newProperties.children = newVDom.args[2];
+    var newWidget = widget.value.updateWidget(newProperties);
+    if (newWidget === widget.value)
+        return this.unify(newDomNode, widget);
+    console.log("Widget is not the same");
+
+    return this.unify(newDomNode, new Prolog.BlobTerm("react_component", newWidget));
 }
 

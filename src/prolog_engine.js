@@ -9,6 +9,7 @@ var ProactiveConstants = require('./proactive_constants');
 var foreign_module = require('./proactive_foreign.js');
 
 var getInitialStateFunctor = new Prolog.Functor(new Prolog.AtomTerm("getInitialState"), 2);
+var componentWillReceiveProps = new Prolog.Functor(new Prolog.AtomTerm("componentWillReceiveProps"), 3);
 var renderFunctor = new Prolog.Functor(new Prolog.AtomTerm("render"), 3);
 var documentFunctor = new Prolog.Functor(new Prolog.AtomTerm("document"), 1);
 var createElementFromVDomFunctor = new Prolog.Functor(new Prolog.AtomTerm("create_element_from_vdom"), 3);
@@ -26,6 +27,7 @@ function PrologEngine(baseURL, rootElementId, callback)
     this.env = new Prolog.Environment();
     // Set up a few of our own properties
     this.env.proactive_context = [];
+    this.env.engine = this;
     this.env.pushProactiveContext = function(p) { this.proactive_context.push(p); };
     this.env.popProactiveContext = function(p) { this.proactive_context.pop(); };
 
@@ -35,7 +37,10 @@ function PrologEngine(baseURL, rootElementId, callback)
         this.env.userModule.defineForeignPredicate(foreign_predicates[p], foreign_module[foreign_predicates[p]]);
 
     this.baseURL = baseURL;
-    this.goalURI = baseURL + "/goal";
+    if (this.baseURL.substring(0, 5).toLowerCase() == "https")
+        this.goalURI = "wss" + this.baseURL.substring(5) + "/goal";
+    else
+        this.goalURI = "ws" + this.baseURL.substring(4) + "/goal";
     this.listenURI = baseURL + "/listen";
     this.componentURL = baseURL + "/component/";
     this.rootElementId = rootElementId;
@@ -72,6 +77,35 @@ PrologEngine.prototype.getInitialState = function(component, props)
         this.env.popContext();
     }
     return PrologState.emptyState;
+}
+
+PrologEngine.prototype.componentWillReceiveProps = function(component, context)
+{
+    var module = this.env.getModule(component);
+    if (module === undefined || !module.predicateExists(componentWillReceiveProps))
+        return PrologState.emptyState;
+    var state = context.getState();
+    var props = context.getProps();
+    var newState = new Prolog.VariableTerm("NewState");
+    var goal = crossModuleCall(component, new Prolog.CompoundTerm(componentWillReceiveProps, [state, props, newState]));
+    var b = this.env.pushContext();
+    try
+    {
+        if (this.env.execute(goal))
+        {
+            context.setState(context.getState().cloneWith(newState.dereference()));
+            return true;
+        }
+    }
+    catch(e)
+    {
+        console.log(e.toString());
+    }
+    finally
+    {
+        this.env.popContext();
+    }
+    return false;
 }
 
 PrologEngine.prototype.render = function(widget, component, state, props)
@@ -128,7 +162,7 @@ PrologEngine.prototype.triggerEvent = function(handler, event, context)
     {
         var target = handler.args[0].value;
         var newHandler = handler.args[1];
-        return triggerEvent(newHandler, event, target);
+        return this.triggerEvent(newHandler, event, target);
     }
     state = context.getState();
     props = context.getProps();
@@ -146,6 +180,7 @@ PrologEngine.prototype.triggerEvent = function(handler, event, context)
     this.env.pushContext();
     try
     {
+        console.log("Executing: " + goal.toString());
         if (this.env.execute(goal))
         {
             context.setState(context.getState().cloneWith(newState.dereference()));
@@ -154,7 +189,7 @@ PrologEngine.prototype.triggerEvent = function(handler, event, context)
     }
     catch(error)
     {
-        console.log(error);
+        console.log(error.toString());
     }
     finally
     {
