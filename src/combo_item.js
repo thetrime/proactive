@@ -18,7 +18,20 @@ ComboItem.prototype.setProperties = function(t)
     if (t.label !== undefined)
         this.domNode.textContent = t.label;
     if (t.value !== undefined)
+    {
         this.domNode.value = t.value;
+        this.value = t.value;
+    }
+}
+
+ComboItem.prototype.getValue = function()
+{
+    return this.value;
+}
+
+ComboItem.prototype.setSelected = function(t)
+{
+    this.domNode.selected = t;
 }
 
 module.exports = ComboItem;

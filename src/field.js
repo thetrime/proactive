@@ -41,6 +41,15 @@ function keydownHandler(event)
         //console.log(this.domNode.value + "-keydown>" + newValue);
         return false;
     }
+    else if (event.keyCode == 32 && (this.type == "radio" || this.type == "checkbox")) // space
+    {
+        event.preventDefault();
+        if (this.value == "true")
+            this.valueWouldChange("false");
+        else
+            this.valueWouldChange("true");
+        return false;
+    }
     return true;
 }
 
@@ -84,9 +93,37 @@ function cutHandler(event)
     this.valueWouldChange(newValue);
 }
 
+function clickHandler(event)
+{
+    if ((this.type == "checkbox" || this.type == "radio") && !this.domNode.disabled)
+    {
+        event.preventDefault();
+        if (this.value == "true")
+            this.valueWouldChange("false");
+        else
+            this.valueWouldChange("true");
+        return false;
+    }
+}
+
 function blurHandler(event)
 {
-    this.getOwnerDocument().triggerEvent(this.changeHandler, ReactComponent.serialize({value: new Prolog.AtomTerm(this.domNode.value)}));
+    if (this.verifyValue != null)
+    {
+        this.getOwnerDocument().triggerEvent(this.verifyValue, ReactComponent.serialize({value: new Prolog.AtomTerm(this.domNode.value)}),
+                                             function(success)
+                                             {
+                                                 if (!success)
+                                                     this.domNode.focus();
+                                                 else if (this.blurHandler != null)
+                                                     this.getOwnerDocument().triggerEvent(this.blurHandler, ReactComponent.serialize({value: new Prolog.AtomTerm(this.domNode.value)}), function() {});
+                                             }.bind(this));
+    }
+    else if (this.blurHandler != null)
+    {
+        this.getOwnerDocument().triggerEvent(this.blurHandler, ReactComponent.serialize({value: new Prolog.AtomTerm(this.domNode.value)}), function() {});
+    }
+
 }
 
 function Field()
@@ -96,6 +133,9 @@ function Field()
     var node = document.createElement("input");
     this.setDOMNode(node);
     this.type = "text";
+
+    this.domNode.onblur = blurHandler.bind(this);
+
     // What a mess :(
     // onInput is no good for our requirements, since it is not cancellable (it is fired /after/ the field has changed)
     // onKeyPress is broken in Firefox: It fires even for keypresses that do not change the field, like tab and arrow keys. It does not fire at all in Safari.
@@ -115,13 +155,16 @@ function Field()
         this.domNode.addEventListener("keypress", keypressHandler.bind(this), false);
         this.domNode.addEventListener("paste", pasteHandler.bind(this), false);
     }
+
+    // Finally, we must deal with checkboxes and radios
+    this.domNode.onclick = clickHandler.bind(this);
 }
 Field.prototype = new ReactComponent;
 
 Field.prototype.valueWouldChange = function(newValue)
 {
     if (this.changeHandler != null)
-        this.getOwnerDocument().triggerEvent(this.changeHandler, ReactComponent.serialize({value: new Prolog.AtomTerm(newValue)}));
+        this.getOwnerDocument().triggerEvent(this.changeHandler, ReactComponent.serialize({value: new Prolog.AtomTerm(newValue)}), function() {});
     else
         console.log("No change handler. Field will not be able to be changed");
 }
@@ -129,13 +172,8 @@ Field.prototype.valueWouldChange = function(newValue)
 Field.prototype.setBlurHandler = function(value)
 {
     if (ReactComponent.isNull(value))
-    {
         this.blurHandler = null;
-        this.domNode.onBlur = undefined;
-        return;
-    }
     this.blurHandler = value;
-    this.domNode.onBlur = blurHandler.bind(this);
 }
 
 Field.prototype.setProperties = function(t)
@@ -146,10 +184,12 @@ Field.prototype.setProperties = function(t)
         {
             this.type = t.type;
             this.domNode.type = this.type;
+            this.setValue(this.value);
         }
     }
     if (t.value !== undefined)
     {
+        this.value = t.value;
         this.setValue(t.value);
     }
     if (t.onBlur !== undefined)
@@ -168,7 +208,7 @@ Field.prototype.setProperties = function(t)
     }
     if (t.verifyValue !== undefined)
     {
-        // FIXME: implement
+        this.verifyValue = t.verifyValue;
     }
     if (t.onChange !== undefined)
     {
@@ -185,12 +225,33 @@ Field.prototype.setProperties = function(t)
 
 Field.prototype.setValue = function(text)
 {
-    if (text === null)
-        this.domNode.value = "";
-    if (ReactComponent.isNull(text))
-        this.domNode.value = "";
+    if (text === null || ReactComponent.isNull(text))
+    {
+        if (this.type == "radio" || this.type == "checkbox")
+        {
+            // For some reason, Chrom will NOT change the value of .checked if we are executing the onclick handler. Since this is when we USUALLY want to change it
+            // we have to employ a slightly weird workaround here
+            setTimeout(function() {this.domNode.checked = false}.bind(this), 0);
+        }
+        else
+            this.domNode.value = "";
+    }
     else
-        this.domNode.value = text;
+    {
+        if (this.type == "radio" || this.type == "checkbox")
+        {
+            if (text == "true")
+            {
+                setTimeout(function() {this.domNode.checked = true}.bind(this), 0);
+            }
+            else
+            {
+                setTimeout(function() {this.domNode.checked = false}.bind(this), 0);
+            }
+        }
+        else
+            this.domNode.value = text;
+    }
 }
 
 

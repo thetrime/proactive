@@ -8,6 +8,7 @@ var commaFunctor = new Prolog.Functor(new Prolog.AtomTerm(","), 2);
 var nullAtom = new Prolog.AtomTerm("null");
 var nullTerm = new Prolog.CompoundTerm(Prolog.Constants.curlyFunctor, [nullAtom]);
 
+var util = require('util');
 
 function PrologState(t)
 {
@@ -75,7 +76,9 @@ PrologState.prototype.processKeyPair = function(key, value, functor)
         else if (value instanceof Prolog.VariableTerm)
             this.map[key.value] = nullTerm;
         else
+        {
             this.map[key.value] = value.dereference_recursive();
+        }
     }
     else
     {
@@ -103,7 +106,9 @@ PrologState.prototype.processKeyPair = function(key, value, functor)
             else if (value instanceof Prolog.VariableTerm)
                 this.map[key.value] = nullTerm;
             else
+            {
                 this.map[key.value] = value.dereference_recursive();
+            }
         }
     }
 }

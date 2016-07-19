@@ -14,7 +14,7 @@ function clickHandler(event)
 {
     console.log("Event: " + event);
     console.log(this);
-    this.getOwnerDocument().triggerEvent(this.clickHandler, Prolog.Constants.emptyListAtom);
+    this.getOwnerDocument().triggerEvent(this.clickHandler, Prolog.Constants.emptyListAtom, function() {});
 }
 
 

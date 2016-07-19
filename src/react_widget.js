@@ -2,7 +2,7 @@
 
 var ReactComponent = require('./react_component');
 
-function ReactWidget(parentContext, engine, elementId, props)
+function ReactWidget(parentContext, engine, elementId, props, callback)
 {
     this.engine = engine;
     this.elementId = elementId;
@@ -13,14 +13,22 @@ function ReactWidget(parentContext, engine, elementId, props)
 
     this.setProperties(props.getProperties());
     // FIXME: Create a CodeChangeListener
-    this.state = engine.getInitialState(elementId, props);
-    //console.log("Rendering: " + this.elementId);
-    this.vDom = engine.render(this, this.elementId, this.state, this.props);
-    //console.log("Done rendering: " + this.elementId);
-    this.internalComponent = engine.createElementFromVDom(this.vDom, this);
-    this.internalComponent.setOwnerDocument(this);
-    this.hasFluxListeners = engine.checkForFluxListeners(this);
-    this.internalComponent.restyle();
+    engine.getInitialState(elementId, props, function(state)
+                           {
+                               this.state = state;
+                               this.engine.render(this, this.elementId, this.state, this.props, function(vDom)
+                                                  {
+                                                      this.vDom = vDom;
+                                                      engine.createElementFromVDom(this.vDom, this, function(internalComponent)
+                                                                                   {
+                                                                                       this.internalComponent = internalComponent;
+                                                                                       this.internalComponent.setOwnerDocument(this);
+                                                                                       this.hasFluxListeners = engine.checkForFluxListeners(this);
+                                                                                       this.internalComponent.restyle();
+                                                                                       callback(this);
+                                                                                   }.bind(this));
+                                                  }.bind(this));
+                           }.bind(this));
 }
 
 ReactWidget.prototype = new ReactComponent;
@@ -52,34 +60,46 @@ ReactWidget.prototype.getComponentName = function()
     return this.elementId;
 }
 
-ReactWidget.prototype.setState = function(newState)
+ReactWidget.prototype.setState = function(newState, callback)
 {
     this.state = newState;
-    this.reRender();
+    this.reRender(callback);
 }
 
-ReactWidget.prototype.updateWidget = function(newProps)
+ReactWidget.prototype.updateWidget = function(newProps, callback)
 {
     this.props = newProps;
-    if (!this.engine.componentWillReceiveProps(this.elementId, this))
-        this.reRender();
-    return this;
-}
-
-ReactWidget.prototype.reRender = function()
-{
-    var newVDom = this.engine.render(this, this.elementId, this.state, this.props);
-    var patches = this.engine.diff(this.vDom, newVDom.dereference());
-    this.internalComponent = this.engine.applyPatch(patches, this.internalComponent);
-    this.internalComponent.setOwnerDocument(this);
-    this.vDom = newVDom;
+    this.engine.componentWillReceiveProps(this.elementId, this, function(didReceive)
+                                          {
+                                              if (!didReceive)
+                                                  this.reRender(callback);
+                                          }.bind(this));
 }
 
 
-
-ReactWidget.prototype.triggerEvent = function(handler, event)
+ReactWidget.prototype.reRender = function(callback)
 {
-    this.engine.triggerEvent(handler, event, this);
+    //console.log("Re-rendering " + this.elementId);
+    this.engine.render(this, this.elementId, this.state, this.props, function(newVDom)
+                       {
+                           this.engine.diff(this.vDom, newVDom.dereference(), function(patches)
+                                            {
+                                                this.engine.applyPatch(patches, this.internalComponent, function()
+                                                                       {
+                                                                           this.internalComponent.setOwnerDocument(this);
+                                                                           this.vDom = newVDom;
+                                                                           //console.log("All patches applied");
+                                                                           callback(this);
+                                                                       }.bind(this));
+                                            }.bind(this));
+                       }.bind(this));
+}
+
+
+
+ReactWidget.prototype.triggerEvent = function(handler, event, callback)
+{
+    this.engine.triggerEvent(handler, event, this, callback);
 }
 
 module.exports = ReactWidget;

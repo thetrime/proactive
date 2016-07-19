@@ -73,18 +73,74 @@ module.exports["state_to_term"] = function(state, term)
 
 module.exports["on_server"] = function(goal)
 {
-    var ws = new WebSocket(this.engine.goalURI);
+    // This is quite complicated because we must mix all kinds of paradigms together :(
+
+    // Later we must yield execution. Prepare the resume code
+    var resume = this.yield_control();
+    var ws;
+    if (this.foreign)
+    {
+        // We are backtracking. Try to get another solution by sending a ; and then yielding
+        ws = this.foreign;
+        ws.send(";");
+        return "yield";
+    }
+    // First, create the websocket
+    ws = new WebSocket(this.engine.goalURI);
+    ws.onopen = function()
+    {
+        ws.send(Prolog.TermWriter.formatTerm({}, 1200, goal) + ".\n");
+        ws.send(";");
+        // This is all we do for now. Either we will get an error, find out that the goal failed, or that it succeeded
+    }
     ws.onmessage = function(event)
     {
-        console.log("Got a message: " + event);
-    }
+        console.log("Got a message: " + util.inspect(event.data));
+        var term = Prolog.Parser.stringToTerm(event.data);
+        if (term.equals(Prolog.Constants.failAtom))
+        {
+            ws.close();
+            resume(false);
+        }
+        else if (term instanceof Prolog.AtomTerm && term.value == "$aborted")
+        {
+            ws.close();
+            resume(false);
+        }
+        else if (term instanceof Prolog.CompoundTerm)
+        {
+            if (term.functor.equals(ProactiveConstants.exceptionFunctor))
+            {
+                ws.close();
+                resume(term.args[0]);
+            }
+            else if (term.functor.equals(ProactiveConstants.cutFunctor))
+            {
+                ws.close();
+                resume(this.unify(goal, term.args[0]));
+            }
+            else
+            {
+                // OK, we need a backtrack point here so we can retry
+                this.create_choicepoint(ws, function() { ws.close(); });
+                resume(this.unify(goal, term.args[0]));
+            }
+        }
+    }.bind(this);
     ws.onerror = function(event)
     {
         console.log("WS error: " + event);
+        ws.close();
+        try
+        {
+            Errors.systemError(new Prolog.AtomTerm(event.toString()));
+        }
+        catch(error)
+        {
+            resume(error);
+        }
     }
-    ws.send(TermWriter.formatTerm({}, 1200, goal));
-    return true;
-
+    return "yield";
 }
 
 module.exports["raise_event"] = function(a, b)
@@ -117,7 +173,7 @@ module.exports["bubble_event"] = function(handler, event)
     if (handler instanceof Prolog.CompoundTerm && handler.functor.equals(ProactiveConstants.thisFunctor))
     {
         var target = handler.args[0].value;
-        target.triggerEvent(handler.args[1], event);
+        target.triggerEvent(handler.args[1], event, function(){});
         return true;
     }
     // Otherwise it is just a goal - go ahead and call it with one extra arg
@@ -128,15 +184,11 @@ module.exports["bubble_event"] = function(handler, event)
         goal = new Prolog.CompoundTerm(handler.functor, handler.args.concat([event]));
     else
         Prolog.Errors.typeError(Prolog.Constants.callableAtom, goal);
-    this.pushContext();
-    try
-    {
-        return this.execute(goal);
-    }
-    finally
-    {
-        this.popContext();
-    }
+    var savedState = this.saveState();
+    var resume = this.yield_control();
+    var resumeAlways = function(){this.restoreState(savedState); resume(true);};
+    this.execute(goal, resumeAlways, resumeAlways, resumeAlways);
+    return "yield";
 }
 
 /* And now the DOM glue */
@@ -283,22 +335,32 @@ module.exports["destroy_widget"] = function(domNode)
 
 module.exports["init_widget"] = function(context, properties, domNode)
 {
+    console.log("Creating widget " + properties.args[0].value);
     Prolog.Utils.must_be_blob("react_context", context);
     var parentContext = context.value;
-    var widget = new ReactWidget(parentContext, parentContext.getEngine(), properties.args[0].value, PrologState.fromList(properties.args[1]));
-    return this.unify(domNode, new Prolog.BlobTerm("react_widget", widget));
-    return q;
+    var resume = this.yield_control();
+    var widget = new ReactWidget(parentContext, parentContext.getEngine(), properties.args[0].value, PrologState.fromList(properties.args[1]),
+                                 function(widget)
+                                 {
+                                     resume(this.unify(domNode, new Prolog.BlobTerm("react_component", widget)));
+                                 }.bind(this));
+    return "yield";
 }
 
 module.exports["update_widget"] = function(newVDom, oldVDom, widget, newDomNode)
 {
+    console.log("Must update widget");
     var newProperties = PrologState.fromList(newVDom.args[1]);
     newProperties.children = newVDom.args[2];
-    var newWidget = widget.value.updateWidget(newProperties);
-    if (newWidget === widget.value)
-        return this.unify(newDomNode, widget);
-    console.log("Widget is not the same");
+    var resume = this.yield_control();
+    widget.value.updateWidget(newProperties, function(newWidget)
+                              {
+                                  if (newWidget === widget.value)
+                                      resume(this.unify(newDomNode, widget));
+                                  else
+                                      resume(this.unify(newDomNode, new Prolog.BlobTerm("react_component", newWidget)));
+                              }.bind(this));
 
-    return this.unify(newDomNode, new Prolog.BlobTerm("react_component", newWidget));
+    return "yield";
 }
 

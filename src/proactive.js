@@ -8,10 +8,11 @@ function render(url, rootElementId, container)
 {
     var engine = new PrologEngine(url, rootElementId, function()
                                   {
-                                      var widget = new ReactWidget(null, engine, rootElementId, PrologState.emptyState).getDOMNode();
-                                      console.log("Finished with root widget");
-                                      container.className += " proactive_container vertical_layout vertical_fill horizontal_fill";
-                                      container.appendChild(widget);
+                                      new ReactWidget(null, engine, rootElementId, PrologState.emptyState, function(widget)
+                                                      {
+                                                          container.className += " proactive_container vertical_layout vertical_fill horizontal_fill";
+                                                          container.appendChild(widget.getDOMNode());
+                                                      })
                                   });
 }
 
