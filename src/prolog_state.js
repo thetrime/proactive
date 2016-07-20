@@ -58,7 +58,15 @@ PrologState.prototype.processElement = function(t, functor)
 
 PrologState.prototype.toString = function()
 {
-    return "{prolog-state}";
+    var mapinfo = ""
+    var keys = Object.keys(this.map);
+    for (var i = 0 ; i < keys.length; i++)
+    {
+        mapinfo += keys[i] + ":" + this.map[keys[i]].toString();
+        if (i+1 < keys.length)
+            mapinfo += ",";
+    }
+    return "{prolog-state: " + mapinfo + "}";
 }
 
 function isState(t)
