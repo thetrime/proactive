@@ -106,22 +106,43 @@ function clickHandler(event)
     }
 }
 
+function handlerCallback(success)
+{
+    if (success == true)
+    {
+    }
+    else if (success == false)
+    {
+        console.log("Event failed");
+    }
+    else
+    {
+        console.log("Event raised: " + success.toString());
+    }
+
+}
+
 function blurHandler(event)
 {
     if (this.verifyValue != null)
     {
-        this.getOwnerDocument().triggerEvent(this.verifyValue, ReactComponent.serialize({value: new Prolog.AtomTerm(this.domNode.value)}),
-                                             function(success)
+        this.getOwnerDocument().triggerEvent(this.verifyValue, ReactComponent.serialize({value: new Prolog.AtomTerm(this.domNode.value)}), function(success)
                                              {
-                                                 if (!success)
+                                                 if (success != true)
+                                                 {
+                                                     if (success == false)
+                                                         console.log("Verification failed");
+                                                     else
+                                                         console.log("Verification raised error: " + success.toString());
                                                      this.domNode.focus();
+                                                 }
                                                  else if (this.blurHandler != null)
-                                                     this.getOwnerDocument().triggerEvent(this.blurHandler, ReactComponent.serialize({value: new Prolog.AtomTerm(this.domNode.value)}), function() {});
+                                                     this.getOwnerDocument().triggerEvent(this.blurHandler, ReactComponent.serialize({value: new Prolog.AtomTerm(this.domNode.value)}), handlerCallback);
                                              }.bind(this));
     }
     else if (this.blurHandler != null)
     {
-        this.getOwnerDocument().triggerEvent(this.blurHandler, ReactComponent.serialize({value: new Prolog.AtomTerm(this.domNode.value)}), function() {});
+        this.getOwnerDocument().triggerEvent(this.blurHandler, ReactComponent.serialize({value: new Prolog.AtomTerm(this.domNode.value)}), handlerCallback);
     }
 
 }
@@ -164,7 +185,7 @@ Field.prototype = new ReactComponent;
 Field.prototype.valueWouldChange = function(newValue)
 {
     if (this.changeHandler != null)
-        this.getOwnerDocument().triggerEvent(this.changeHandler, ReactComponent.serialize({value: new Prolog.AtomTerm(newValue)}), function() {});
+        this.getOwnerDocument().triggerEvent(this.changeHandler, ReactComponent.serialize({value: new Prolog.AtomTerm(newValue)}), handlerCallback);
     else
         console.log("No change handler. Field will not be able to be changed");
 }
