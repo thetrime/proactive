@@ -83,7 +83,6 @@ PrologEngine.prototype.getInitialState = function(component, props, callback)
                          //console.log(error.toString());
                          this.env.restoreState(savePoint);
                          callback(PrologState.emptyState);
-
                      }.bind(this));
 }
 
@@ -91,13 +90,15 @@ PrologEngine.prototype.componentWillReceiveProps = function(component, context, 
 {
     var module = this.env.getModule(component);
     if (module === undefined || !module.predicateExists(componentWillReceiveProps))
-        return PrologState.emptyState;
+    {
+        callback(false);
+        return;
+    }
     var state = context.getState();
     var props = context.getProps();
     var newState = new Prolog.VariableTerm("NewState");
     var goal = crossModuleCall(component, new Prolog.CompoundTerm(componentWillReceiveProps, [state, props, newState]));
     var savePoint = this.env.saveState();
-    console.log("componentWillReceiveProps: Executing: " + goal);
     this.env.execute(goal,
                      function()
                      {
@@ -107,13 +108,12 @@ PrologEngine.prototype.componentWillReceiveProps = function(component, context, 
                      }.bind(this),
                      function()
                      {
-                         console.log("componentWillReceiveProps failed");
                          this.env.restoreState(savePoint);
                          callback(false);
                      }.bind(this),
                      function(error)
                      {
-                         console.log("componentWillReceiveProps raised:" + error.toString());
+                         console.log(error.toString());
                          this.env.restoreState(savePoint);
                          callback(false);
                      }.bind(this));
@@ -137,7 +137,7 @@ PrologEngine.prototype.render = function(widget, component, state, props, callba
                      {
                          this.env.popProactiveContext();
                          this.env.restoreState(savePoint);
-                         console.log("render/3 failed");
+                         console.log(component + " render/3 failed");
                          callback(null);
                      }.bind(this),
                      function(error)
@@ -172,7 +172,6 @@ PrologEngine.prototype.createElementFromVDom = function(vDOM, context, callback)
                          console.log(error.toString());
                          this.env.restoreState(savePoint);
                          callback(null);
-
                      }.bind(this));
 }
 
@@ -200,7 +199,8 @@ PrologEngine.prototype.triggerEvent = function(handler, event, context, callback
     else
     {
         console.log("Invalid handler: " + handler);
-        return false;
+        callback(false);
+        return;
     }
     //console.log("Triggering " + goal.toString());
     var savePoint = this.env.saveState();
