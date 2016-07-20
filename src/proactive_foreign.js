@@ -90,7 +90,7 @@ module.exports["on_server"] = function(goal)
     ws = new WebSocket(this.engine.goalURI);
     ws.onopen = function()
     {
-        ws.send(Prolog.TermWriter.formatTerm({}, 1200, goal) + ".\n");
+        ws.send(Prolog.TermWriter.formatTerm({quoted:true}, 1200, goal) + ".\n");
         ws.send(";");
         // This is all we do for now. Either we will get an error, find out that the goal failed, or that it succeeded
     }
