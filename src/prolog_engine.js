@@ -80,7 +80,7 @@ PrologEngine.prototype.getInitialState = function(component, props, callback)
                      }.bind(this),
                      function(error)
                      {
-                         //console.log(error.toString());
+                         console.log("getInitialState raised: " + error.toString());
                          this.env.restoreState(savePoint);
                          callback(PrologState.emptyState);
                      }.bind(this));
@@ -113,7 +113,7 @@ PrologEngine.prototype.componentWillReceiveProps = function(component, context, 
                      }.bind(this),
                      function(error)
                      {
-                         console.log(error.toString());
+                         console.log("componentWillReceiveProps raised: " + error.toString());
                          this.env.restoreState(savePoint);
                          callback(false);
                      }.bind(this));
@@ -142,9 +142,9 @@ PrologEngine.prototype.render = function(widget, component, state, props, callba
                      }.bind(this),
                      function(error)
                      {
+                         console.log("render/3 raised: " + error.toString());
                          this.env.popProactiveContext();
                          this.env.restoreState(savePoint);
-                         console.log("render/3 raised: " + error.toString());
                          callback(null);
                      }.bind(this));
 }
@@ -169,7 +169,7 @@ PrologEngine.prototype.createElementFromVDom = function(vDOM, context, callback)
                      }.bind(this),
                      function(error)
                      {
-                         console.log(error.toString());
+                         console.log("createElementFromVDomFunctor raised: " + error.toString());
                          this.env.restoreState(savePoint);
                          callback(null);
                      }.bind(this));
@@ -202,7 +202,7 @@ PrologEngine.prototype.triggerEvent = function(handler, event, context, callback
         callback(false);
         return;
     }
-    //console.log("Triggering " + goal.toString());
+    //console.log("Triggering in " + context.getComponentName() + " with props " + props.toString());
     var savePoint = this.env.saveState();
     this.env.execute(goal,
                      function()
@@ -219,9 +219,9 @@ PrologEngine.prototype.triggerEvent = function(handler, event, context, callback
                      }.bind(this),
                      function(error)
                      {
-                         console.log(error.toString());
+                         //console.log("Event raised: " + error.toString());
                          this.env.restoreState(savePoint);
-                         callback(false);
+                         callback(error);
                      }.bind(this));
 }
 
@@ -244,7 +244,7 @@ PrologEngine.prototype.diff = function(a, b, callback)
                      }.bind(this),
                      function(error)
                      {
-                         console.log(error.toString());
+                         console.log("diff raised: " + error.toString());
                          this.env.restoreState(savePoint);
                          callback(Prolog.Constants.emptyListAtom);
                      }.bind(this));
@@ -270,7 +270,7 @@ PrologEngine.prototype.applyPatch = function(patch, root, callback)
                      }.bind(this),
                      function(error)
                      {
-                         console.log(error.toString());
+                         console.log("applyPatch raised: " + error.toString());
                          this.env.restoreState(savePoint);
                          // Do not call callback
                      }.bind(this));
