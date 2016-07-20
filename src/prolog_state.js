@@ -56,6 +56,19 @@ PrologState.prototype.processElement = function(t, functor)
     }
 }
 
+PrologState.prototype.formatTerm = function(options, precedence)
+{
+    var output = "[";
+    var keys = Object.keys(this.map);
+    for (var i = 0 ; i < keys.length; i++)
+    {
+        output += Prolog.TermWriter.formatTerm(options, precedence, new Prolog.CompoundTerm(colonFunctor, [new Prolog.AtomTerm(keys[i]), this.map[keys[i]]]));
+        if (i+1 < keys.length)
+            output += ",";
+    }
+    return output + "]";
+}
+
 PrologState.prototype.toString = function()
 {
     var mapinfo = ""
