@@ -96,7 +96,7 @@ module.exports["on_server"] = function(goal)
     }
     ws.onmessage = function(event)
     {
-        console.log("Got a message: " + util.inspect(event.data));
+        //console.log("Got a message: " + util.inspect(event.data));
         var term = Prolog.Parser.stringToTerm(event.data);
         if (term.equals(Prolog.Constants.failAtom))
         {
@@ -188,8 +188,12 @@ module.exports["bubble_event"] = function(handler, event)
         Prolog.Errors.typeError(Prolog.Constants.callableAtom, goal);
     var savedState = this.saveState();
     var resume = this.yield_control();
-    var resumeAlways = function(){this.restoreState(savedState); resume(true);};
-    this.execute(goal, resumeAlways, resumeAlways, resumeAlways);
+    //var resumeAlways = function(){this.restoreState(savedState); resume(true);};
+    this.execute(goal,
+                 function() {this.restoreState(savedState); resume(true);}.bind(this),
+                 function() {this.restoreState(savedState); resume(false);}.bind(this),
+                 function(e) {this.restoreState(savedState); resume(e);}.bind(this));
+                 //resumeAlways, resumeAlways, resumeAlways);
     return "yield";
 }
 
