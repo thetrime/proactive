@@ -69,17 +69,19 @@ ReactWidget.prototype.setState = function(newState, callback)
 ReactWidget.prototype.updateWidget = function(newProps, callback)
 {
     this.props = newProps;
-    this.engine.componentWillReceiveProps(this.elementId, this, function(didReceive)
+    this.engine.componentWillReceiveProps(this.elementId, this,
+                                          function(didReceive)
                                           {
                                               if (!didReceive)
                                                   this.reRender(callback);
+                                              else
+                                                  callback(this);
                                           }.bind(this));
 }
 
 
 ReactWidget.prototype.reRender = function(callback)
 {
-    //console.log("Re-rendering " + this.elementId);
     this.engine.render(this, this.elementId, this.state, this.props, function(newVDom)
                        {
                            this.engine.diff(this.vDom, newVDom.dereference(), function(patches)
