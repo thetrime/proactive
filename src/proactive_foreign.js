@@ -5,6 +5,7 @@ var PrologState = require('./prolog_state');
 var ReactWidget = require('./react_widget');
 var ProactiveComponentFactory = require('./proactive_component_factory');
 var ProactiveConstants = require('./proactive_constants');
+var util = require('util');
 
 function crossModuleCall(module, goal)
 {
@@ -173,8 +174,9 @@ module.exports["bubble_event"] = function(handler, event)
     if (handler instanceof Prolog.CompoundTerm && handler.functor.equals(ProactiveConstants.thisFunctor))
     {
         var target = handler.args[0].value;
-        target.triggerEvent(handler.args[1], event, function(){});
-        return true;
+        var resume = this.yield_control();
+        target.triggerEvent(handler.args[1], event, resume);
+        return "yield";
     }
     // Otherwise it is just a goal - go ahead and call it with one extra arg
     var goal;
@@ -335,7 +337,6 @@ module.exports["destroy_widget"] = function(domNode)
 
 module.exports["init_widget"] = function(context, properties, domNode)
 {
-    console.log("Creating widget " + properties.args[0].value);
     Prolog.Utils.must_be_blob("react_context", context);
     var parentContext = context.value;
     var resume = this.yield_control();
@@ -349,16 +350,19 @@ module.exports["init_widget"] = function(context, properties, domNode)
 
 module.exports["update_widget"] = function(newVDom, oldVDom, widget, newDomNode)
 {
-    console.log("Must update widget");
     var newProperties = PrologState.fromList(newVDom.args[1]);
-    newProperties.children = newVDom.args[2];
+    newProperties.map.children = newVDom.args[2];
     var resume = this.yield_control();
     widget.value.updateWidget(newProperties, function(newWidget)
                               {
                                   if (newWidget === widget.value)
+                                  {
                                       resume(this.unify(newDomNode, widget));
+                                  }
                                   else
-                                      resume(this.unify(newDomNode, new Prolog.BlobTerm("react_component", newWidget)));
+                                  {
+                                      resume(this.unify(newDomNode, new Prolog.BlobTerm("react_component", newWidget)))
+                                  };
                               }.bind(this));
 
     return "yield";
