@@ -184,8 +184,17 @@ Field.prototype = new ReactComponent;
 
 Field.prototype.valueWouldChange = function(newValue)
 {
+    var d0 = new Date().getTime();
     if (this.changeHandler != null)
-        this.getOwnerDocument().triggerEvent(this.changeHandler, ReactComponent.serialize({value: new Prolog.AtomTerm(newValue)}), handlerCallback);
+    {
+        //this.getOwnerDocument().triggerEvent(this.changeHandler, ReactComponent.serialize({value: new Prolog.AtomTerm(newValue)}), handlerCallback);
+        this.getOwnerDocument().triggerEvent(this.changeHandler, ReactComponent.serialize({value: new Prolog.AtomTerm(newValue)}),
+                                             function(result)
+                                             {
+                                                 var d1 = new Date().getTime();
+                                                 console.log("Processing time: " + (d1-d0) + "ms");
+                                             });
+    }
     else
         console.log("No change handler. Field will not be able to be changed");
 }
