@@ -13,6 +13,11 @@ function ReactWidget(parentContext, engine, elementId, props, callback)
 
     this.setProperties(props.getProperties());
     // FIXME: Create a CodeChangeListener
+    /*
+    console.log("Creating widget " + elementId + " with props " + props);
+    try { throw new Error()} catch(qxy) {console.log("Stack depth: " + qxy.stack.split('\n').length);}
+    console.log("Getting initial state for " + elementId + " with props " + props);
+*/
     engine.getInitialState(elementId, props, function(state)
                            {
                                this.state = state;
@@ -25,7 +30,7 @@ function ReactWidget(parentContext, engine, elementId, props, callback)
                                                                                        this.internalComponent.setOwnerDocument(this);
                                                                                        this.hasFluxListeners = engine.checkForFluxListeners(this);
                                                                                        this.internalComponent.restyle();
-                                                                                       callback(this);
+                                                                                       setTimeout(function(){callback(this)}.bind(this), 0);
                                                                                    }.bind(this));
                                                   }.bind(this));
                            }.bind(this));
