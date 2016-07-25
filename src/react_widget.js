@@ -109,4 +109,9 @@ ReactWidget.prototype.triggerEvent = function(handler, event, callback)
     this.engine.triggerEvent(handler, event, this, callback);
 }
 
+ReactWidget.prototype.debugStuff = function()
+{
+    this.engine.debugStuff();
+}
+
 module.exports = ReactWidget;

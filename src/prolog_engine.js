@@ -1,6 +1,6 @@
 "use strict";
 
-var Prolog = require('../lib/proscript2/build/proscript.js');
+var Prolog = require('../lib/proscript2/src/core.js');
 var fs = require('fs');
 var util = require('util');
 var PrologState = require('./prolog_state');
@@ -274,6 +274,24 @@ PrologEngine.prototype.applyPatch = function(patch, root, callback)
                          this.env.restoreState(savePoint);
                          // Do not call callback
                      }.bind(this));
+}
+
+PrologEngine.prototype.debugStuff = function()
+{
+    console.log("Total instructions: " + this.env.debugger_steps);
+    var k = Object.keys(this.env.debug_ops);
+    for (var i = 0; i < k.length; i++)
+    {
+        var opcode = Prolog.Opcodes[k[i]].label;
+        console.log("   " + opcode + ": " + this.env.debug_ops[k[i]] + " executions taking a total of " + this.env.debug_times[k[i]] + "ms");
+        this.env.debug_ops[k[i]] = 0;
+        this.env.debug_times[k[i]] = 0;
+    }
+    var k = Object.keys(this.env.debug_times);
+
+    console.log("Backtracks: " + this.env.debug_backtracks);
+    console.log("Max size of the trail: " + this.env.trail.length);
+
 }
 
 module.exports = PrologEngine;
