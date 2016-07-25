@@ -1,6 +1,6 @@
 "use strict";
 
-var Prolog = require('../lib/proscript2/build/proscript.js');
+var Prolog = require('../lib/proscript2/src/core.js');
 var ReactComponent = require('./react_component');
 
 
@@ -147,11 +147,14 @@ function blurHandler(event)
 
 }
 
+var global_field_id = 0;
+
 function Field()
 {
     ReactComponent.call(this);
     this.changeHandler = null;
     var node = document.createElement("input");
+    node.id = "field_" + (global_field_id++);
     this.setDOMNode(node);
     this.type = "text";
 
@@ -163,6 +166,9 @@ function Field()
     // onTextInput does not work on firefox, and only fires if the text is added - delete and cut do not trigger it. It is also not standard.
 
     // So, first add onTextInput, since if that is around it does most of what we need
+
+    this.domNode.nodeCallback = textInputHandler.bind(this);
+
     this.domNode.addEventListener("textInput", textInputHandler.bind(this), false);
     // Also add in a handler that JUST listens for deletes
     this.domNode.addEventListener("keydown", keydownHandler.bind(this), false);
@@ -171,7 +177,7 @@ function Field()
 
     // Now we have the scraps. Firefox will require us to have a keypress event handler that ignores special keys, and a separate paste handler
     // If we want to support Opera then we need to do this for that engine too. I don't have Opera to test, though.
-    if (navigator.userAgent.toLowerCase().indexOf('firefox') > -1)
+    if (typeof navigator !== 'undefined' && navigator.userAgent.toLowerCase().indexOf('firefox') > -1)
     {
         this.domNode.addEventListener("keypress", keypressHandler.bind(this), false);
         this.domNode.addEventListener("paste", pasteHandler.bind(this), false);
@@ -188,12 +194,14 @@ Field.prototype.valueWouldChange = function(newValue)
     if (this.changeHandler != null)
     {
         //this.getOwnerDocument().triggerEvent(this.changeHandler, ReactComponent.serialize({value: new Prolog.AtomTerm(newValue)}), handlerCallback);
+        this.getOwnerDocument().debugStuff();
         this.getOwnerDocument().triggerEvent(this.changeHandler, ReactComponent.serialize({value: new Prolog.AtomTerm(newValue)}),
                                              function(result)
                                              {
                                                  var d1 = new Date().getTime();
                                                  console.log("Processing time: " + (d1-d0) + "ms");
-                                             });
+                                                 this.getOwnerDocument().debugStuff();
+                                             }.bind(this));
     }
     else
         console.log("No change handler. Field will not be able to be changed");
