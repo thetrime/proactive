@@ -1,28 +1,36 @@
 "use strict";
 
-var Prolog = require('../lib/proscript2/build/proscript.js');
+var Prolog = require('../lib/proscript2/src/core.js');
 var PrologState = require('./prolog_state');
 var ReactWidget = require('./react_widget');
 var ProactiveComponentFactory = require('./proactive_component_factory');
 var ProactiveConstants = require('./proactive_constants');
 var util = require('util');
 
+var abortedAtom = Prolog.AtomTerm.get("$aborted");
+
 function crossModuleCall(module, goal)
 {
-    return new Prolog.CompoundTerm(Prolog.Constants.crossModuleCallFunctor, [new Prolog.AtomTerm(module), goal]);
+    return Prolog.CompoundTerm.create(Prolog.Constants.crossModuleCallFunctor, [Prolog.AtomTerm.get(module), goal]);
 }
 
 function isNull(t)
 {
-    return (t instanceof Prolog.CompoundTerm && t.functor.equals(Prolog.Constants.curlyFunctor) && t.args[0].equals(ProactiveConstants.nullAtom));
+    return (TAGOF(t) == CompoundTag && FUNCTOROF(t) == Prolog.Constants.curlyFunctor && ARGOF(t, 0) == ProactiveConstants.nullAtom);
 }
 
 function addArgs(goal, glueArgs)
 {
-    if (goal instanceof Prolog.AtomTerm)
-        return new Prolog.CompoundTerm(goal, glueArgs);
-    else if (goal instanceof Prolog.CompoundTerm)
-        return new Prolog.CompoundTerm(goal.functor.name, goal.args.concat(glueArgs));
+    if (TAGOF(goal) == ConstantTag && Prolog.CTable.get(goal) instanceof Prolog.AtomTerm)
+        return Prolog.CompoundTerm.create(goal, glueArgs);
+    else if (TAGOF(goal) == CompoundTag)
+    {
+        var args = [];
+        var functor = Prolog.CTable.get(FUNCTOROF(goal));
+        for (var i = 0; i < functor.arity; i++)
+            args[i] = ARGOF(goal,i);
+        return Prolog.CompoundTerm.create(functor.name, args.concat(glueArgs));
+    }
     Prolog.Errors.typeError(Prolog.Constants.callableAtom, goal);
 }
 
@@ -31,33 +39,39 @@ module.exports["."] = function(state, key, value)
 {
     if (isNull(state))
         return this.unify(value, PrologState.nullTerm);
-    if (!(state instanceof PrologState))
+    if (!(TAGOF(state) == ConstantTag && Prolog.CTable.get(state) instanceof PrologState))
         Prolog.Errors.typeError(PrologState.prologStateAtom, state);
-    if (key instanceof Prolog.AtomTerm)
-        return this.unify(value, state.get(key));
-    if (key instanceof Prolog.CompoundTerm)
+    if (TAGOF(key) == ConstantTag && Prolog.CTable.get(key) instanceof Prolog.AtomTerm)
+    {
+        return this.unify(value, Prolog.CTable.get(state).get(Prolog.CTable.get(key)));
+    }
+    if (TAGOF(key) == CompoundTag)
     {
         var term = key;
-        var glueArgs = term.args;
-        var result = state.get(term.functor);
+        var functor = Prolog.CTable.get(FUNCTOROF(key));
+        var glueArgs = [];
+        state = Prolog.CTable.get(state);
+        for (var i = 0; i < functor.arity; i++)
+            glueArgs[i] = ARGOF(key, i);
+        var result = state.get(FUNCTOROF(key));
         if (isNull(result))
             return this.unify(value, result);
-        if (result instanceof Prolog.CompoundTerm)
+        if (TAGOF(result) == CompoundTag)
         {
-            if (result.functor.equals(ProactiveConstants.thisFunctor))
+            if (FUNCTOROF(result) == ProactiveConstants.thisFunctor)
             {
-                if (key.args[1] instanceof CompoundTerm && key.args[1].functor.equals(ProactiveConstants.colonFunctor))
+                if (TAGOF(ARGOF(key, 1)) == CompoundTag && FUNCTOROF(ARGOF(key, 1)) == ProactiveConstants.colonFunctor)
                 {
-                    var module = key.args[1].args[0];
-                    var goal = key.args[1].args[1];
+                    var module = ARGOF(ARGOF(key, 1), 0);
+                    var goal = ARGOF(ARGOF(key, 1), 1);
                     var newGoal = addArgs(goal, glueArgs);
-                    return this.unify(value, new Prolog.CompoundTerm(result.functor, [term.args[0], new Prolog.CompoundTerm(Prolog.Constants.crossModuleCallFunctor, [module, newGoal])]));
+                    return this.unify(value, Prolog.CompoundTerm.create(FUNCTOROF(result), [ARGOF(term, 0), Prolog.CompoundTerm.create(Prolog.Constants.crossModuleCallFunctor, [module, newGoal])]));
                 }
                 else
                 {
                     // No module
-                    var newGoal = addArgs(term.args[1], glueArgs);
-                    return this.unify(value, new Prolog.CompoundTerm(result.functor, [term.args[0], newGoal]));
+                    var newGoal = addArgs(ARGOF(term, 1), glueArgs);
+                    return this.unify(value, Prolog.CompoundTerm.create(FUNCTOROF(result), [ARGOF(term, 0), newGoal]));
                 }
             }
             Prolog.Errors.typeError(ProactiveConstants.gluableAtom, term);
@@ -98,33 +112,33 @@ module.exports["on_server"] = function(goal)
     {
         //console.log("Got a message: " + util.inspect(event.data));
         var term = Prolog.Parser.stringToTerm(event.data);
-        if (term.equals(Prolog.Constants.failAtom))
+        if (term == Prolog.Constants.failAtom)
         {
             ws.close();
             resume(false);
         }
-        else if (term instanceof Prolog.AtomTerm && term.value == "$aborted")
+        else if (term == abortedAtom)
         {
             ws.close();
             resume(false);
         }
-        else if (term instanceof Prolog.CompoundTerm)
+        else if (TAGOF(term) == CompoundTag)
         {
-            if (term.functor.equals(ProactiveConstants.exceptionFunctor))
+            if (FUNCTOROF(term) == ProactiveConstants.exceptionFunctor)
             {
                 ws.close();
-                resume(term.args[0]);
+                resume(ARGOF(term, 0));
             }
-            else if (term.functor.equals(ProactiveConstants.cutFunctor))
+            else if (FUNCTOROF(term) == ProactiveConstants.cutFunctor)
             {
                 ws.close();
-                resume(this.unify(goal, term.args[0]));
+                resume(this.unify(goal, ARGOF(term, 0)));
             }
             else
             {
                 // OK, we need a backtrack point here so we can retry
                 this.create_choicepoint(ws, function() { ws.close(); });
-                resume(this.unify(goal, term.args[0]));
+                resume(this.unify(goal, ARGOF(term, 0)));
             }
         }
     }.bind(this);
@@ -134,7 +148,7 @@ module.exports["on_server"] = function(goal)
         ws.close();
         try
         {
-            Errors.systemError(new Prolog.AtomTerm(event.toString()));
+            Errors.systemError(Prolog.AtomTerm.get(event.toString()));
         }
         catch(error)
         {
@@ -165,25 +179,31 @@ module.exports["get_store_state"] = function(fluxion, state)
 
 module.exports["get_this"] = function(t)
 {
-    return this.unify(t, new Prolog.BlobTerm("react_context", this.proactive_context[this.proactive_context.length-1]));
+    return this.unify(t, Prolog.BlobTerm.get("react_context", this.proactive_context[this.proactive_context.length-1]));
 }
 
 
 module.exports["bubble_event"] = function(handler, event)
 {
-    if (handler instanceof Prolog.CompoundTerm && handler.functor.equals(ProactiveConstants.thisFunctor))
+    if (TAGOF(handler) == CompoundTag && FUNCTOROF(handler) == ProactiveConstants.thisFunctor)
     {
-        var target = handler.args[0].value;
+        var target = Prolog.CTable.get(ARGOF(handler, 0)).value;
         var resume = this.yield_control();
-        target.triggerEvent(handler.args[1], event, resume);
+        target.triggerEvent(ARGOF(handler, 1), event, resume);
         return "yield";
     }
     // Otherwise it is just a goal - go ahead and call it with one extra arg
     var goal;
-    if (handler instanceof Prolog.AtomTerm)
-        goal = new Prolog.CompoundTerm(handler, [event]);
-    else if (handler instanceof Prolog.CompoundTerm)
-        goal = new Prolog.CompoundTerm(handler.functor, handler.args.concat([event]));
+    if (TAGOF(handler) == ConstantTag && Prolog.CTable.get(handler) instanceof Prolog.AtomTerm)
+        goal = Prolog.CompoundTerm.create(handler, [event]);
+    else if (TAGOF(handler) == CompoundTag)
+    {
+        var args = [];
+        var functor = Prolog.CTable.get(FUNCTOROF(handler));
+        for (var i = 0; i < functor.arity; i++)
+            args[i] = ARGOF(handler, i);
+        goal = Prolog.CompoundTerm.create(FUNCTOROF(handler), args.concat([event]));
+    }
     else
         Prolog.Errors.typeError(Prolog.Constants.callableAtom, goal);
     var savedState = this.saveState();
@@ -200,8 +220,8 @@ module.exports["bubble_event"] = function(handler, event)
 /* And now the DOM glue */
 module.exports["remove_child"] = function(parent, child)
 {
-    var p = parent.dereference();
-    var c = child.dereference();
+    var p = Prolog.CTable.get(DEREF(parent));
+    var c = Prolog.CTable.get(DEREF(child));
     var found = false;
     for (var i = 0; i < p.value.children.length; i++)
     {
@@ -220,8 +240,8 @@ module.exports["remove_child"] = function(parent, child)
 
 module.exports["append_child"] = function(parent, child)
 {
-    var p = parent.dereference();
-    var c = child.dereference();
+    var p = Prolog.CTable.get(DEREF(parent));
+    var c = Prolog.CTable.get(DEREF(child));
     p.value.children.push(c.value);
     p.value.appendChild(c.value);
     return true;
@@ -229,9 +249,9 @@ module.exports["append_child"] = function(parent, child)
 
 module.exports["insert_before"] = function(parent, child, sibling)
 {
-    var p = parent.dereference();
-    var c = child.dereference();
-    var s = sibling.dereference();
+    var p = Prolog.CTable.get(DEREF(parent));
+    var c = Prolog.CTable.get(DEREF(child));
+    var s = Prolog.CTable.get(DEREF(sibling));
     var found = false;
     for (var i = 0; i < p.value.children.length; i++)
     {
@@ -250,9 +270,9 @@ module.exports["insert_before"] = function(parent, child, sibling)
 
 module.exports["replace_child"] = function(parent, newChild, oldChild)
 {
-    var p = parent.dereference();
-    var n = newChild.dereference();
-    var o = oldChild.dereference();
+    var p = Prolog.CTable.get(DEREF(parent));
+    var n = Prolog.CTable.get(DEREF(newChild));
+    var o = Prolog.CTable.get(DEREF(oldChild));
     var found = false;
     for (var i = 0; i < p.value.children.length; i++)
     {
@@ -270,11 +290,11 @@ module.exports["replace_child"] = function(parent, newChild, oldChild)
 
 module.exports["child_nodes"] = function(parent, children)
 {
-    var childNodes = parent.dereference().value.getChildren();
+    var childNodes = Prolog.CTable.get(DEREF(parent)).value.getChildren();
     var result = Prolog.Constants.emptyListAtom;
     var i = childNodes.length;
     while(i--)
-        result = new Prolog.CompoundTerm(Prolog.Constants.listFunctor, [new Prolog.BlobTerm("react_component", childNodes[i]), result]);
+        result = Prolog.CompoundTerm.create(Prolog.Constants.listFunctor, [Prolog.BlobTerm.get("react_component", childNodes[i]), result]);
     var v = this.unify(result, children);
     if (!v)
         console.log("Failed to unify children");
@@ -283,19 +303,22 @@ module.exports["child_nodes"] = function(parent, children)
 
 module.exports["create_element"] = function(context, tagname, domnode)
 {
-    var node = ProactiveComponentFactory.createElement(tagname.value, context.value);
-    node.setOwnerDocument(context.value);
-    return this.unify(domnode, new Prolog.BlobTerm("dom_node", node));
+    var node = ProactiveComponentFactory.createElement(Prolog.CTable.get(tagname).value, Prolog.CTable.get(context).value);
+    node.setOwnerDocument(Prolog.CTable.get(context).value);
+    return this.unify(domnode, Prolog.BlobTerm.get("dom_node", node));
 }
 
 module.exports["create_text_node"] = function(context, text, domnode)
 {
-    throw new Error("create_text_node/3 is not implemented and probably never will be. Do not create text nodes!");
+    var node = ProactiveComponentFactory.createElement('Broken', Prolog.CTable.get(context).value);
+    node.setOwnerDocument(Prolog.CTable.get(context).value);
+    return this.unify(domnode, Prolog.BlobTerm.get("dom_node", node));
+    //throw new Error("create_text_node/3 is not implemented and probably never will be. Do not create text nodes!");
 }
 
 module.exports["parent_node"] = function(node, parent)
 {
-    return this.unify(parent, new Prolog.BlobTerm("react_component", node.value.getParent()));
+    return this.unify(parent, Prolog.BlobTerm.get("react_component", Prolog.CTable.get(node).value.getParent()));
 }
 
 module.exports["node_type"] = function(node, type)
@@ -305,27 +328,27 @@ module.exports["node_type"] = function(node, type)
 
 module.exports["set_vdom_properties"] = function(domNode, list)
 {
-    if (Prolog.Constants.emptyListAtom.equals(list))
+    if (list == Prolog.Constants.emptyListAtom)
         return true;
     var l = list;
     var properties = {};
-    while (l instanceof Prolog.CompoundTerm && l.functor.equals(Prolog.Constants.listFunctor))
+    while (TAGOF(l) == CompoundTag && FUNCTOROF(l) == Prolog.Constants.listFunctor)
     {
-        var head = l.args[0].dereference();
-        l = l.args[1].dereference();
-        if (head instanceof Prolog.CompoundTerm && head.functor.equals(ProactiveConstants.equalsFunctor))
+        var head = ARGOF(l, 0);
+        l = ARGOF(l, 1);
+        if (TAGOF(head) == CompoundTag && FUNCTOROF(head) == ProactiveConstants.equalsFunctor)
         {
-            var name = head.args[0];
-            var value = head.args[1];
+            var name = ARGOF(head, 0);
+            var value = ARGOF(head, 1);
             Prolog.Utils.must_be_atom(name);
-            properties[name.value] = value;
+            properties[Prolog.CTable.get(name).value] = value;
         }
         else
             Prolog.Errors.typeError(ProactiveConstants.attributeAtom, head);
     }
-    if (!Prolog.Constants.emptyListAtom.equals(l))
+    if (l != Prolog.Constants.emptyListAtom)
         Prolog.Errors.typeError(Prolog.Constants.listAtom, list);
-    domNode.value.setProperties(properties);
+    Prolog.CTable.get(domNode).value.setProperties(properties);
     return true;
 }
 
@@ -342,30 +365,33 @@ module.exports["destroy_widget"] = function(domNode)
 module.exports["init_widget"] = function(context, properties, domNode)
 {
     Prolog.Utils.must_be_blob("react_context", context);
-    var parentContext = context.value;
+    var parentContext = Prolog.CTable.get(context).value;
     var resume = this.yield_control();
-    var widget = new ReactWidget(parentContext, parentContext.getEngine(), properties.args[0].value, PrologState.fromList(properties.args[1]),
+    var widget = new ReactWidget(parentContext,
+                                 parentContext.getEngine(),
+                                 Prolog.CTable.get(ARGOF(properties, 0)).value,
+                                 PrologState.fromList(ARGOF(properties, 1)),
                                  function(widget)
                                  {
-                                     resume(this.unify(domNode, new Prolog.BlobTerm("react_component", widget)));
+                                     resume(this.unify(domNode, Prolog.BlobTerm.get("react_component", widget)));
                                  }.bind(this));
     return "yield";
 }
 
 module.exports["update_widget"] = function(newVDom, oldVDom, widget, newDomNode)
 {
-    var newProperties = PrologState.fromList(newVDom.args[1]);
-    newProperties.map.children = newVDom.args[2];
+    var newProperties = PrologState.fromList(ARGOF(newVDom, 1));
+    newProperties.map.children = ARGOF(newVDom, 2);
     var resume = this.yield_control();
-    widget.value.updateWidget(newProperties, function(newWidget)
+    Prolog.CTable.get(widget).value.updateWidget(newProperties, function(newWidget)
                               {
-                                  if (newWidget === widget.value)
+                                  if (newWidget === Prolog.CTable.get(widget).value)
                                   {
                                       resume(this.unify(newDomNode, widget));
                                   }
                                   else
                                   {
-                                      resume(this.unify(newDomNode, new Prolog.BlobTerm("react_component", newWidget)))
+                                      resume(this.unify(newDomNode, Prolog.BlobTerm.get("react_component", newWidget)))
                                   };
                               }.bind(this));
 

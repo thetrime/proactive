@@ -1,5 +1,5 @@
 var ProactiveConstants = require('./proactive_constants');
-var Prolog = require('../lib/proscript2/build/proscript.js');
+var Prolog = require('../lib/proscript2/src/core.js');
 
 function ReactComponent()
 {
@@ -115,7 +115,7 @@ ReactComponent.prototype.removeChild = function(t)
 
 ReactComponent.isNull = function(t)
 {
-    return t == null || (t instanceof Prolog.CompoundTerm && t.functor.equals(Prolog.Constants.curlyFunctor) && (t.args[0].equals(ProactiveConstants.nullAtom)));
+    return t == null || (TAGOF(t) == CompoundTag && FUNCTOROF(t) == Prolog.Constants.curlyFunctor && (ARGOF(t, 0) == ProactiveConstants.nullAtom));
 }
 
 ReactComponent.serialize = function(properties)
@@ -123,13 +123,13 @@ ReactComponent.serialize = function(properties)
     var result = Prolog.Constants.emptyListAtom;
     var keys = Object.keys(properties);
     for (var i = 0; i < keys.length; i++)
-        result = new Prolog.CompoundTerm(Prolog.Constants.listFunctor, [new Prolog.CompoundTerm(ProactiveConstants.equalsFunctor, [new Prolog.AtomTerm(keys[i]), properties[keys[i]]]), result]);
+        result = Prolog.CompoundTerm.create(Prolog.Constants.listFunctor, [Prolog.CompoundTerm.create(ProactiveConstants.equalsFunctor, [Prolog.AtomTerm.get(keys[i]), properties[keys[i]]]), result]);
     return result;
 }
 
 ReactComponent.booleanValue = function(t)
 {
-    return (t instanceof Prolog.AtomTerm && t.value == "true");
+    return t == ProactiveConstants.trueAtom;
 }
 
 

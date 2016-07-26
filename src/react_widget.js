@@ -89,7 +89,7 @@ ReactWidget.prototype.reRender = function(callback)
 {
     this.engine.render(this, this.elementId, this.state, this.props, function(newVDom)
                        {
-                           this.engine.diff(this.vDom, newVDom.dereference(), function(patches)
+                           this.engine.diff(this.vDom, DEREF(newVDom), function(patches)
                                             {
                                                 this.engine.applyPatch(patches, this.internalComponent, function()
                                                                        {

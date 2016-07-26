@@ -1,6 +1,6 @@
 "use strict";
 
-var Prolog = require('../lib/proscript2/build/proscript.js');
+var Prolog = require('../lib/proscript2/src/core.js');
 var ReactComponent = require('./react_component');
 
 

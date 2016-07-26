@@ -1,6 +1,6 @@
 "use strict";
 
-var Prolog = require('../lib/proscript2/build/proscript.js');
+var Prolog = require('../lib/proscript2/src/core.js');
 var ReactComponent = require('./react_component');
 var ComboItem = require('./combo_item');
 
@@ -73,7 +73,7 @@ ComboBox.prototype.setChangeHandler = function(value)
 ComboBox.prototype.appendChild = function(t)
 {
     ReactComponent.prototype.appendChild.call(this, t);
-    if (t instanceof ComboItem && t.getValue().equals(this.value))
+    if (t instanceof ComboItem && t.getValue() == this.value)
         this.selectCurrentIndex();
     else
         t.setSelected(false);
@@ -82,7 +82,7 @@ ComboBox.prototype.appendChild = function(t)
 ComboBox.prototype.replaceChild = function(n, o)
 {
     ReactComponent.prototype.replaceChild.call(this, n, o);
-    if (n instanceof ComboItem && n.getValue().equals(this.value))
+    if (n instanceof ComboItem && n.getValue() == this.value)
         this.selectCurrentIndex();
     else
         n.setSelected(false);
@@ -91,7 +91,7 @@ ComboBox.prototype.replaceChild = function(n, o)
 ComboBox.prototype.insertBefore = function(n, s)
 {
     ReactComponent.prototype.insertBefore.call(this, n, s);
-    if (n instanceof ComboItem && n.getValue().equals(this.value))
+    if (n instanceof ComboItem && n.getValue() == this.value)
         this.selectCurrentIndex();
     else
         n.setSelected(false);
@@ -107,7 +107,7 @@ ComboBox.prototype.selectCurrentIndex = function()
 {
     for (var i = 0; i < this.children.length; i++)
     {
-        if (this.children[i] instanceof ComboItem && this.children[i].getValue().equals(this.value))
+        if (this.children[i] instanceof ComboItem && this.children[i].getValue() == this.value)
         {
             this.currentIndex = i;
             this.children[i].setSelected(true);

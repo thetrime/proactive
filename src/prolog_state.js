@@ -1,36 +1,40 @@
 "use strict";
 
-var Prolog = require('../lib/proscript2/build/proscript.js');
+var Prolog = require('../lib/proscript2/src/core.js');
 
-var colonFunctor = new Prolog.Functor(new Prolog.AtomTerm(":"), 2);
-var equalsFunctor = new Prolog.Functor(new Prolog.AtomTerm("="), 2);
-var commaFunctor = new Prolog.Functor(new Prolog.AtomTerm(","), 2);
-var nullAtom = new Prolog.AtomTerm("null");
-var nullTerm = new Prolog.CompoundTerm(Prolog.Constants.curlyFunctor, [nullAtom]);
+var colonFunctor = Prolog.Functor.get(Prolog.AtomTerm.get(":"), 2);
+var equalsFunctor = Prolog.Functor.get(Prolog.AtomTerm.get("="), 2);
+var commaFunctor = Prolog.Functor.get(Prolog.AtomTerm.get(","), 2);
+var nullAtom = Prolog.AtomTerm.get("null");
+var nullTerm = Prolog.CompoundTerm.create(Prolog.Constants.curlyFunctor, [nullAtom]);
 
 var util = require('util');
 
+var global_state_id = 0;
+
 function PrologState(t)
 {
+    this.id = global_state_id++;
     this.map = {};
-    this.processElements(t);
+    if (arguments.length > 0)
+        this.processElements(t);
 }
 
-PrologState.prototype = new Prolog.AtomTerm;
+PrologState.prototype = new Prolog.AtomTerm();
 PrologState.prototype.processElements = function(t)
 {
-    if (t instanceof Prolog.VariableTerm)
+    if (TAGOF(t) == VariableTag)
         return;
-    else if (t.equals(Prolog.Constants.curlyAtom))
+    else if (t == Prolog.Constants.curlyAtom)
         return;
-    if (t instanceof Prolog.CompoundTerm && t.functor.equals(Prolog.Constants.curlyFunctor))
+    if (TAGOF(t) == CompoundTag && FUNCTOROF(t) == Prolog.Constants.curlyFunctor)
     {
-        var list = t.args[0].dereference();
-        while (list instanceof Prolog.CompoundTerm && list.functor.equals(commaFunctor))
+        var list = ARGOF(t, 0);
+        while (TAGOF(list) == CompoundTag && FUNCTOROF(list) == commaFunctor)
         {
-            var head = list.args[0].dereference();
+            var head = ARGOF(list, 0);
             this.processElement(head, colonFunctor);
-            list = list.args[1].dereference();
+            list = ARGOF(list, 1);
         }
         this.processElement(list, colonFunctor);
         return;
@@ -42,12 +46,12 @@ PrologState.prototype.processElements = function(t)
 
 PrologState.prototype.processElement = function(t, functor)
 {
-    if (t instanceof Prolog.CompoundTerm && t.functor.equals(functor))
+    if (TAGOF(t) == CompoundTag && FUNCTOROF(t) == functor)
     {
-        var key = t.args[0].dereference();
-        var value = t.args[1].dereference();
+        var key = ARGOF(t, 0);
+        var value = ARGOF(t, 1);
         Prolog.Utils.must_be_atom(key);
-        this.processKeyPair(key, value, functor);
+        this.processKeyPair(Prolog.CTable.get(key), value, functor);
     }
     else
     {
@@ -62,7 +66,7 @@ PrologState.prototype.formatTerm = function(options, precedence)
     var keys = Object.keys(this.map);
     for (var i = 0 ; i < keys.length; i++)
     {
-        output += Prolog.TermWriter.formatTerm(options, precedence, new Prolog.CompoundTerm(equalsFunctor, [new Prolog.AtomTerm(keys[i]), this.map[keys[i]]]));
+        output += Prolog.TermWriter.formatTerm(options, precedence, Prolog.CompoundTerm.create(equalsFunctor, [Prolog.AtomTerm.get(keys[i]), this.map[keys[i]]]));
         if (i+1 < keys.length)
             output += ",";
     }
@@ -71,20 +75,45 @@ PrologState.prototype.formatTerm = function(options, precedence)
 
 PrologState.prototype.toString = function()
 {
-    var mapinfo = ""
+    var mapinfo = "["
+    var options = {};
     var keys = Object.keys(this.map);
     for (var i = 0 ; i < keys.length; i++)
     {
-        mapinfo += keys[i] + ":" + this.map[keys[i]].toString();
+        mapinfo += Prolog.TermWriter.formatTerm(options, 1200, Prolog.CompoundTerm.create(equalsFunctor, [Prolog.AtomTerm.get(keys[i]), this.map[keys[i]]]));
         if (i+1 < keys.length)
             mapinfo += ",";
     }
-    return "{prolog-state: " + mapinfo + "}";
+    return "{prolog-state: " + mapinfo + "]}";
+}
+
+PrologState.prototype.hashCode = function()
+{
+    return this.id;
 }
 
 function isState(t)
 {
-    return (t instanceof Prolog.CompoundTerm && t.functor.equals(Prolog.Constants.curlyFunctor) && !(t.args[0].equals(nullAtom)));
+    return (TAGOF(t) == CompoundTag && FUNCTOROF(t) == Prolog.Constants.curlyFunctor) && (ARGOF(t, 0) != nullAtom);
+}
+
+function reify(t)
+{
+    t = DEREF(t);
+    if (TAGOF(t) == ConstantTag || TAGOF(t) == VariableTag)
+        return t;
+    if (TAGOF(t) == CompoundTag)
+    {
+        return t;
+        /*
+        var args = [];
+        var functor = Prolog.CTable.get(FUNCTOROF(t));
+        for (var i = 0; i < functor.arity; i++)
+            args[i] = ARGOF(t, i);
+        return {functor: FUNCTOROF(t),
+                args: args};
+        */
+    }
 }
 
 PrologState.prototype.processKeyPair = function(key, value, functor)
@@ -94,16 +123,16 @@ PrologState.prototype.processKeyPair = function(key, value, functor)
     {
         if (isState(value))
             this.map[key.value] = new PrologState(value);
-        else if (value instanceof Prolog.VariableTerm)
+        else if (TAGOF(value) == VariableTag)
             this.map[key.value] = nullTerm;
         else
         {
-            this.map[key.value] = value.dereference_recursive();
+            this.map[key.value] = reify(value);
         }
     }
     else
     {
-        existingValue = existingValue.dereference();
+        existingValue = DEREF(existingValue);
         if (existingValue instanceof PrologState)
         {
             if (isState(value))
@@ -113,22 +142,22 @@ PrologState.prototype.processKeyPair = function(key, value, functor)
             }
             else
             {
-               // Changing {foo: {bar: .....}} -> {foo: atomic-type}
-               if (value instanceof Prolog.VariableTerm)
-                   this.map[key.value] = nullTerm;
-               else
-                   this.map[key.value], value.dereference_recursive();
+                // Changing {foo: {bar: .....}} -> {foo: atomic-type}
+                if (TAGOF(value) == VariableTag)
+                    this.map[key.value] = nullTerm;
+                else
+                    this.map[key.value], reify(value);
             }
         }
         else
         {
             if (isState(value))
                 this.map[key.value] = new PrologState(value);
-            else if (value instanceof Prolog.VariableTerm)
+            else if (TAGOF(value) == VariableTag)
                 this.map[key.value] = nullTerm;
             else
             {
-                this.map[key.value] = value.dereference_recursive();
+                this.map[key.value] = reify(value);
             }
         }
     }
@@ -146,7 +175,7 @@ PrologState.prototype.getProperties = function()
 
 PrologState.prototype.cloneWith = function(t)
 {
-    var newState = new PrologState(new Prolog.VariableTerm());
+    var newState = new PrologState();
     var keys = Object.keys(this.map);
     for (var i = 0; i < keys.length; i++)
         newState.map[keys[i]] = this.map[keys[i]];
@@ -170,22 +199,22 @@ PrologState.prototype.get = function(key)
 PrologState.fromList = function(t)
 {
     // This is used for parsing the attributes list into a state
-    var prologState = new PrologState(new Prolog.VariableTerm());
-    while (t instanceof Prolog.CompoundTerm)
+    var prologState = new PrologState();
+    while (TAGOF(t) == CompoundTag)
     {
-        if (!t.functor.equals(Prolog.Constants.listFunctor))
+        if (FUNCTOROF(t) != Prolog.Constants.listFunctor)
             Prolog.Errors.typeError(Prolog.Constants.listAtom, t);
         else
-            prologState.processElement(t.args[0].dereference(), equalsFunctor);
-        t = t.args[1].dereference();
+            prologState.processElement(ARGOF(t, 0), equalsFunctor);
+        t = ARGOF(t, 1);
     }
     return prologState;
 }
 
 
-PrologState.emptyState = new PrologState(new Prolog.VariableTerm());
+PrologState.emptyState = new PrologState();
 PrologState.nullTerm = nullTerm;
-PrologState.prologStateAtom = new Prolog.AtomTerm("prolog_state");
-PrologState.prologStateKeyAtom = new Prolog.AtomTerm("prolog_state_key");
+PrologState.prologStateAtom = Prolog.AtomTerm.get("prolog_state");
+PrologState.prologStateKeyAtom = Prolog.AtomTerm.get("prolog_state_key");
 
 module.exports = PrologState;
