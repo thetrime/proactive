@@ -168,6 +168,7 @@ function Field()
     // So, first add onTextInput, since if that is around it does most of what we need
 
     this.domNode.nodeCallback = textInputHandler.bind(this);
+    this.domNode.debugStuff = this.debugStuff.bind(this);
 
     this.domNode.addEventListener("textInput", textInputHandler.bind(this), false);
     // Also add in a handler that JUST listens for deletes
@@ -194,17 +195,21 @@ Field.prototype.valueWouldChange = function(newValue)
     if (this.changeHandler != null)
     {
         //this.getOwnerDocument().triggerEvent(this.changeHandler, ReactComponent.serialize({value: Prolog.AtomTerm.get(newValue)}), handlerCallback);
-        this.getOwnerDocument().debugStuff();
         this.getOwnerDocument().triggerEvent(this.changeHandler, ReactComponent.serialize({value: Prolog.AtomTerm.get(newValue)}),
                                              function(result)
                                              {
                                                  var d1 = new Date().getTime();
+                                                 GLOBAL.total += (d1 - d0);
                                                  console.log("Processing time: " + (d1-d0) + "ms");
-                                                 this.getOwnerDocument().debugStuff();
                                              }.bind(this));
     }
     else
         console.log("No change handler. Field will not be able to be changed");
+}
+
+Field.prototype.debugStuff = function()
+{
+    this.getOwnerDocument().debugStuff();
 }
 
 Field.prototype.setBlurHandler = function(value)
