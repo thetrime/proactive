@@ -1,5 +1,3 @@
-memberchk(A, B):-
-        once(member(A, B)).
 
 otherwise.
 
