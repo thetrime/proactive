@@ -179,7 +179,7 @@ module.exports["get_store_state"] = function(fluxion, state)
 
 module.exports["get_this"] = function(t)
 {
-    return this.unify(t, Prolog.BlobTerm.get("react_context", this.proactive_context[this.proactive_context.length-1]));
+    return this.unify(t, this.proactive_context[this.proactive_context.length-1]);
 }
 
 

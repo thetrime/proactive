@@ -131,7 +131,7 @@ PrologEngine.prototype.render = function(widget, component, state, props, callba
                                                                                      intern(props),
                                                                                      vDom]));
     var savePoint = this.env.saveState();
-    this.env.pushProactiveContext(widget);
+    this.env.pushProactiveContext(widget.blob);
     this.env.execute(goal,
                      function()
                      {
@@ -192,11 +192,9 @@ PrologEngine.prototype.triggerEvent = function(handler, event, context, callback
     var state, props;
     while (TAGOF(handler) == CompoundTag && FUNCTOROF(handler) == ProactiveConstants.thisFunctor)
     {
-        console.log("Handler refers to this");
         context = Prolog.CTable.get(ARGOF(handler, 0)).value;
         handler = ARGOF(handler, 1);
     }
-    console.log("Final Handler: " + PORTRAY(handler));
     state = context.getState();
     props = context.getProps();
     var goal;
@@ -219,8 +217,6 @@ PrologEngine.prototype.triggerEvent = function(handler, event, context, callback
         args[i++] = newState;
 
         goal = crossModuleCall(context.getComponentName(), Prolog.CompoundTerm.create(functor.name, args));
-        console.log("Goal");
-        console.log(PORTRAY(goal));
     }
     else
     {
@@ -228,7 +224,6 @@ PrologEngine.prototype.triggerEvent = function(handler, event, context, callback
         callback(false);
         return;
     }
-    //console.log("Triggering in " + context.getComponentName() + " with props " + props.toString());
     //console.log(PORTRAY(goal));
     var savePoint = this.env.saveState();
     this.env.execute(goal,
@@ -318,6 +313,7 @@ PrologEngine.prototype.debugStuff = function()
 
     console.log("Backtracks: " + this.env.debug_backtracks);
     console.log("Max size of the trail: " + this.env.trail.length);
+    console.log("Current size of the heap: " + HTOP);
 
 }
 

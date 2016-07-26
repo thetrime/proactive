@@ -1,6 +1,7 @@
 "use strict";
 
 var ReactComponent = require('./react_component');
+var Prolog = require('../lib/proscript2/src/core.js');
 
 function ReactWidget(parentContext, engine, elementId, props, callback)
 {
@@ -12,6 +13,7 @@ function ReactWidget(parentContext, engine, elementId, props, callback)
     this.internalComponent = null;
 
     this.setProperties(props.getProperties());
+    this.blob = Prolog.BlobTerm.get("react_context", this);
     // FIXME: Create a CodeChangeListener
     /*
     console.log("Creating widget " + elementId + " with props " + props);
