@@ -1,6 +1,6 @@
 "use strict";
 
-var Prolog = require('../lib/proscript2/src/core.js');
+var Constants = require('./constants.js');
 var ReactComponent = require('./react_component');
 
 
@@ -14,7 +14,7 @@ function clickHandler(event)
 {
     console.log("Event: " + event);
     console.log(this);
-    this.getOwnerDocument().triggerEvent(this.clickHandler, Prolog.Constants.emptyListAtom, function() {});
+    this.getOwnerDocument().triggerEvent(this.clickHandler, Constants.emptyListAtom, function() {});
 }
 
 

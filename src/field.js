@@ -1,7 +1,7 @@
 "use strict";
 
-var Prolog = require('../lib/proscript2/src/core.js');
 var ReactComponent = require('./react_component');
+var Prolog = require('../lib/proscript2/build/proscript.js');
 
 
 function textInputHandler(event)
@@ -126,7 +126,7 @@ function blurHandler(event)
 {
     if (this.verifyValue != null)
     {
-        this.getOwnerDocument().triggerEvent(this.verifyValue, ReactComponent.serialize({value: Prolog.AtomTerm.get(this.domNode.value)}), function(success)
+        this.getOwnerDocument().triggerEvent(this.verifyValue, ReactComponent.serialize({value: Prolog._make_atom(this.domNode.value)}), function(success)
                                              {
                                                  if (success != true)
                                                  {
@@ -137,12 +137,12 @@ function blurHandler(event)
                                                      this.domNode.focus();
                                                  }
                                                  else if (this.blurHandler != null)
-                                                     this.getOwnerDocument().triggerEvent(this.blurHandler, ReactComponent.serialize({value: Prolog.AtomTerm.get(this.domNode.value)}), handlerCallback);
+                                                     this.getOwnerDocument().triggerEvent(this.blurHandler, ReactComponent.serialize({value: Prolog._make_atom(this.domNode.value)}), handlerCallback);
                                              }.bind(this));
     }
     else if (this.blurHandler != null)
     {
-        this.getOwnerDocument().triggerEvent(this.blurHandler, ReactComponent.serialize({value: Prolog.AtomTerm.get(this.domNode.value)}), handlerCallback);
+        this.getOwnerDocument().triggerEvent(this.blurHandler, ReactComponent.serialize({value: Prolog._make_atom(this.domNode.value)}), handlerCallback);
     }
 
 }
@@ -195,7 +195,7 @@ Field.prototype.valueWouldChange = function(newValue)
     if (this.changeHandler != null)
     {
         //this.getOwnerDocument().triggerEvent(this.changeHandler, ReactComponent.serialize({value: Prolog.AtomTerm.get(newValue)}), handlerCallback);
-        this.getOwnerDocument().triggerEvent(this.changeHandler, ReactComponent.serialize({value: Prolog.AtomTerm.get(newValue)}),
+        this.getOwnerDocument().triggerEvent(this.changeHandler, ReactComponent.serialize({value: Prolog._make_atom(newValue)}),
                                              function(result)
                                              {
                                                  var d1 = new Date().getTime();
@@ -235,7 +235,7 @@ Field.prototype.setProperties = function(t)
         if (ReactComponent.isNull(t.value))
             this.value = '';
         else
-            this.value = Prolog.CTable.get(DEREF(t.value)).value;
+            this.value = _atom_chars(t.value);
         this.setValue(this.value);
     }
     if (t.onBlur !== undefined)

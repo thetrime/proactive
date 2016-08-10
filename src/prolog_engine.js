@@ -1,33 +1,29 @@
 "use strict";
 
-var Prolog = require('../lib/proscript2/src/core.js');
 var fs = require('fs');
 var util = require('util');
 var PrologState = require('./prolog_state');
-var ProactiveConstants = require('./proactive_constants');
+var Constants = require('./constants');
 var foreign_module = require('./proactive_foreign.js');
+var Prolog = require('../lib/proscript2/build/proscript.js');
 
-var getInitialStateFunctor = Prolog.Functor.get(Prolog.AtomTerm.get("getInitialState"), 2);
-var componentWillReceiveProps = Prolog.Functor.get(Prolog.AtomTerm.get("componentWillReceiveProps"), 3);
-var renderFunctor = Prolog.Functor.get(Prolog.AtomTerm.get("render"), 3);
-var documentFunctor = Prolog.Functor.get(Prolog.AtomTerm.get("document"), 1);
-var createElementFromVDomFunctor = Prolog.Functor.get(Prolog.AtomTerm.get("create_element_from_vdom"), 3);
-var vDiffFunctor = Prolog.Functor.get(Prolog.AtomTerm.get("vdiff"), 3);
-var vPatchFunctor = Prolog.Functor.get(Prolog.AtomTerm.get("vpatch"), 4);
+var getInitialStateFunctor = Prolog._make_functor(Prolog._make_atom("getInitialState"), 2);
+var componentWillReceivePropsFunctor = Prolog._make_functor(Prolog._make_atom("componentWillReceiveProps"), 3);
+var renderFunctor = Prolog._make_functor(Prolog._make_atom("render"), 3);
+var documentFunctor = Prolog._make_functor(Prolog._make_atom("document"), 1);
+var createElementFromVDomFunctor = Prolog._make_functor(Prolog._make_atom("create_element_from_vdom"), 3);
+var vDiffFunctor = Prolog._make_functor(Prolog._make_atom("vdiff"), 3);
+var vPatchFunctor = Prolog._make_functor(Prolog._make_atom("vpatch"), 4);
 
 function crossModuleCall(module, goal)
 {
-    return Prolog.CompoundTerm.create(Prolog.Constants.crossModuleCallFunctor, [Prolog.AtomTerm.get(module), goal]);
+    return Prolog._make_compound(Constants.crossModuleCallFunctor, [Prolog._make_atom(module), goal]);
 }
 
-function intern(t)
-{
-    return (Prolog.CTable.intern(t) | 0xc0000000) | 0;
-}
 
 function PrologEngine(baseURL, rootElementId, callback)
 {
-    this.env = new Prolog.Environment();
+    this.env = {};
     // Set up a few of our own properties
     this.env.proactive_context = [];
     this.env.engine = this;
@@ -37,7 +33,7 @@ function PrologEngine(baseURL, rootElementId, callback)
     // Now load in the proactive foreign predicates
     var foreign_predicates = Object.keys(foreign_module);
     for (var p = 0; p < foreign_predicates.length; p++)
-        this.env.userModule.defineForeignPredicate(foreign_predicates[p], foreign_module[foreign_predicates[p]]);
+        Prolog.define_foreign(foreign_predicates[p], foreign_module[foreign_predicates[p]]);
 
     this.baseURL = baseURL;
     if (this.baseURL.substring(0, 5).toLowerCase() == "https")
@@ -52,134 +48,118 @@ function PrologEngine(baseURL, rootElementId, callback)
 
 PrologEngine.prototype.make = function(callback)
 {
-    this.env.consultString(fs.readFileSync(__dirname + '/boilerplate.pl', 'utf8'));
-    this.env.consultString(fs.readFileSync(__dirname + '/vdiff.pl', 'utf8'));
+    Prolog._consult_string(fs.readFileSync(__dirname + '/boilerplate.pl', 'utf8'));
+    Prolog._consult_string(fs.readFileSync(__dirname + '/vdiff.pl', 'utf8'));
     console.log("Loading " + this.componentURL + this.rootElementId);
-    this.env.consultURL(this.componentURL + this.rootElementId, callback);
+    Prolog._consult_url(this.componentURL + this.rootElementId, callback);
 }
 
 PrologEngine.prototype.getInitialState = function(component, props, callback)
 {
-    var module = this.env.getModule(component);
-    if (module === undefined || !module.predicateExists(getInitialStateFunctor))
+    if (!Prolog._exists_predicate(Prolog._make_atom(component), getInitialStateFunctor))
     {
         callback(PrologState.emptyState);
         return;
     }
-    var replyTerm = Prolog.VariableTerm.create();
-    var goal = crossModuleCall(component, Prolog.CompoundTerm.create(getInitialStateFunctor, [intern(props), replyTerm]));
-    var savePoint = this.env.saveState();
-    this.env.execute(goal,
-                     function()
-                     {
-                         var state = new PrologState(DEREF(replyTerm));
-                         this.env.restoreState(savePoint);
-                         callback(state);
-                     }.bind(this),
-                     function()
-                     {
-                         this.env.restoreState(savePoint);
-                         callback(PrologState.emptyState);
-                     }.bind(this),
-                     function(error)
-                     {
-                         console.log("getInitialState raised: " + PORTRAY(error));
-                         this.env.restoreState(savePoint);
-                         callback(PrologState.emptyState);
-                     }.bind(this));
+    var replyTerm = Prolog._make_variable();
+    var goal = crossModuleCall(component, Prolog._make_compound(getInitialStateFunctor, [Prolog._make_blob("state", props), replyTerm]));
+    var savePoint = Prolog._save_state();
+    Prolog._execute(goal, function(result)
+                    {
+                        if (result == 1)
+                        {
+                            var state = new PrologState(replyTerm);
+                            Prolog._restore_state(savePoint);
+                            callback(state);
+                        }
+                        else
+                        {
+                            if (result == 2)
+                                console.log("getInitialState raised an error");
+                            Prolog._restore_state(savePoint);
+                            callback(PrologState.emptyState);
+                        }
+                    }.bind(this));
 }
 
 PrologEngine.prototype.componentWillReceiveProps = function(component, context, callback)
 {
-    var module = this.env.getModule(component);
-    if (module === undefined || !module.predicateExists(componentWillReceiveProps))
+    if (!Prolog._exists_predicate(Prolog._make_atom(component), componentWillReceivePropsFunctor))
     {
         callback(false);
         return;
     }
     var state = context.getState();
     var props = context.getProps();
-    var newState = Prolog.VariableTerm.create("NewState");
-    var goal = crossModuleCall(component, Prolog.CompoundTerm.create(componentWillReceiveProps, [intern(state),
-                                                                                                 intern(props),
-                                                                                                 newState]));
-    var savePoint = this.env.saveState();
-    this.env.execute(goal,
-                     function()
-                     {
-                         var ss = DEREF(newState);
-                         this.env.restoreState(savePoint);
-                         context.setState(context.getState().cloneWith(ss), function() { callback(true)}.bind(this));
-                     }.bind(this),
-                     function()
-                     {
-                         this.env.restoreState(savePoint);
-                         callback(false);
-                     }.bind(this),
-                     function(error)
-                     {
-                         console.log("componentWillReceiveProps raised: " + PORTRAY(error));
-                         this.env.restoreState(savePoint);
-                         callback(false);
-                     }.bind(this));
+    var newState = Prolog._make_variable();
+    var goal = crossModuleCall(component, Prolog._make_compound(componentWillReceivePropsFunctor, [Prolog._make_blob("state", state),
+                                                                                                   Prolog._make_blob("state", props),
+                                                                                                   newState]));
+    var savePoint = Prolog._save_state();
+    Prolog._execute(goal, function(result)
+                    {
+                        if (result == 1)
+                        {
+                            var ss = context.getState().cloneWith(newState);
+                            Prolog._restore_state(savePoint);
+                            context.setState(ss, function() { callback(true)});
+                        }
+                        else
+                        {
+                            if (result == 2)
+                                console.log("componentWillReceiveProps raised an error");
+                            Prolog._restore_state(savePoint);
+                            callback(false);
+                        }
+                    }.bind(this));
 }
 
 PrologEngine.prototype.render = function(widget, component, state, props, callback)
 {
-    var vDom = Prolog.VariableTerm.create();
-    var goal = crossModuleCall(component, Prolog.CompoundTerm.create(renderFunctor, [intern(state),
-                                                                                     intern(props),
-                                                                                     vDom]));
-    var savePoint = this.env.saveState();
+    var vDom = Prolog._make_variable();
+    var goal = crossModuleCall(component, Prolog._make_compound(renderFunctor, [Prolog._make_blob("state", state),
+                                                                                Prolog._make_blob("state", props),
+                                                                                vDom]));
+    var savePoint = Prolog._save_state();
     this.env.pushProactiveContext(widget.blob);
-    this.env.execute(goal,
-                     function()
-                     {
-                         this.env.popProactiveContext();
-                         var result = DEREF(vDom);
-                         this.env.restoreState(savePoint);
-                         callback(result);
-                     }.bind(this),
-                     function()
-                     {
-                         this.env.popProactiveContext();
-                         this.env.restoreState(savePoint);
-                         console.log(component + " render/3 failed");
-                         callback(Prolog.Constants.emptyListAtom);
-                     }.bind(this),
-                     function(error)
-                     {
-                         console.log("render/3 raised: " + PORTRAY(error));
-                         this.env.popProactiveContext();
-                         this.env.restoreState(savePoint);
-                         callback(Prolog.Constants.emptyListAtom);
-                     }.bind(this));
+    Prolog._execute(goal,
+                    function(result)
+                    {
+                        this.env.popProactiveContext();
+                        if (result == 1)
+                            callback(vDom);
+                        else
+                        {
+                            if (result == 2)
+                                console.log("render/3 raised an error")
+                            else
+                                console.log("render/3 failed")
+                            callback(Constants.emptyListAtom)
+                        }
+                        Prolog._restore_state(savePoint);
+                    }.bind(this))
 }
 
 PrologEngine.prototype.createElementFromVDom = function(vDOM, context, callback)
 {
-    var resultValue = Prolog.VariableTerm.create();
-    var renderOptions = Prolog.CompoundTerm.create(Prolog.Constants.listFunctor, [Prolog.CompoundTerm.create(documentFunctor, [Prolog.BlobTerm.get("react_context", context)]), Prolog.Constants.emptyListAtom]);
-    var goal = crossModuleCall("vdiff", Prolog.CompoundTerm.create(createElementFromVDomFunctor, [renderOptions, vDOM, resultValue]));
-    var savePoint = this.env.saveState();
-    this.env.execute(goal,
-                     function()
-                     {
-                         var result = Prolog.CTable.get(DEREF(resultValue)).value;
-                         this.env.restoreState(savePoint);
-                         callback(result);
-                     }.bind(this),
-                     function()
-                     {
-                         this.env.restoreState(savePoint);
-                         callback(null);
-                     }.bind(this),
-                     function(error)
-                     {
-                         console.log("createElementFromVDomFunctor raised: " + PORTRAY(error))
-                         this.env.restoreState(savePoint);
-                         callback(null);
-                     }.bind(this));
+    var resultValue = Prolog._make_variable();
+    var renderOptions = Prolog._make_compound(Constants.listFunctor, [Prolog._make_compound(documentFunctor, [Prolog._make_blob("react_context", context)]), Constants.emptyListAtom]);
+    var goal = crossModuleCall("vdiff", Prolog._make_compound(createElementFromVDomFunctor, [renderOptions, vDOM, resultValue]));
+    var savePoint = Prolog._save_state();
+    Prolog._execute(goal,
+                    function(result)
+                    {
+                        var element = null;
+                        if (result == 1)
+                            element = _get_blob("dom_node", resultValue);
+                        else
+                        {
+                            if (resultValue == 2)
+                                console.log("createElementFromVDomFunctor raised an error");
+                        }
+                        Prolog._restore_state(savePoint);
+                        callback(element);
+                    }.bind(this));
 }
 
 PrologEngine.prototype.checkForFluxListeners = function(context)
@@ -190,33 +170,33 @@ PrologEngine.prototype.checkForFluxListeners = function(context)
 PrologEngine.prototype.triggerEvent = function(handler, event, context, callback)
 {
     var state, props;
-    while (TAGOF(handler) == CompoundTag && FUNCTOROF(handler) == ProactiveConstants.thisFunctor)
+    while (_is_compound(handler) && _term_functor(handler) == Constants.thisFunctor)
     {
-        context = Prolog.CTable.get(ARGOF(handler, 0)).value;
-        handler = ARGOF(handler, 1);
+        context = _get_blob("react_context", _term_arg(handler, 0));
+        handler = _term_arg(handler, 1);
     }
     state = context.getState();
     props = context.getProps();
     var goal;
-    var newState = Prolog.VariableTerm.create("NewState");
-    if (TAGOF(handler) == ConstantTag && Prolog.CTable.get(handler) instanceof Prolog.AtomTerm)
-        goal = crossModuleCall(context.getComponentName(), Prolog.CompoundTerm.create(handler, [event,
-                                                                                                intern(state),
-                                                                                                intern(props),
-                                                                                                newState]));
-    else if (TAGOF(handler) == CompoundTag)
+    var newState = Prolog._make_variable();
+    if (_is_atom(handler))
+        goal = crossModuleCall(context.getComponentName(), Prolog._make_compound(handler, [event,
+                                                                                           Prolog._make_blob("state", state),
+                                                                                           Prolog._make_blob("state", props),
+                                                                                           newState]));
+    else if (_is_compound(handler))
     {
-        var functor = Prolog.CTable.get(FUNCTOROF(handler));
+        var functor = _term_functor(handler);
+        var arity = _term_functor_arity(handler);
         var args = [];
         var i;
-        for (i = 0 ; i < functor.arity; i++)
-            args[i] = ARGOF(handler, i);
+        for (i = 0 ; i < arity; i++)
+            args[i] = _term_arg(handler, i);
         args[i++] = event;
-        args[i++] = intern(state);
-        args[i++] = intern(props);
+        args[i++] = Prolog._make_blob("state", state);
+        args[i++] = Prolog._make_blob("state", props);
         args[i++] = newState;
-
-        goal = crossModuleCall(context.getComponentName(), Prolog.CompoundTerm.create(functor.name, args));
+        goal = crossModuleCall(context.getComponentName(), Prolog._make_compound(_term_functor_name(handler), args));
     }
     else
     {
@@ -224,97 +204,76 @@ PrologEngine.prototype.triggerEvent = function(handler, event, context, callback
         callback(false);
         return;
     }
-    //console.log(PORTRAY(goal));
-    var savePoint = this.env.saveState();
+    var savePoint = Prolog._save_state();
     this.env.execute(goal,
-                     function()
+                     function(result)
                      {
-                         var ss = context.getState().cloneWith(DEREF(newState))
-                         this.env.restoreState(savePoint);
-                         context.setState(ss, function() {callback(true);}.bind(this));
-                     }.bind(this),
-                     function()
-                     {
-                         console.log("Event failed");
-                         this.env.restoreState(savePoint);
-                         callback(false);
-                     }.bind(this),
-                     function(error)
-                     {
-                         console.log("Event raised: " + PORTRAY(error));
-                         this.env.restoreState(savePoint);
-                         callback(error);
+                         var ss = null;
+                         if (result == 1)
+                         {
+                             ss = context.getState().cloneWith(newState)
+                         }
+                         Prolog._restore_state(savePoint);
+                         if (result == 1)
+                             context.setState(ss, function() {callback(true);}.bind(this));
+                         else
+                         {
+                             if (result == 0)
+                             {
+                                 callback(false);
+                                 console.log("Event failed");
+                             }
+                             else if (result == 2)
+                             {
+                                 callback(_get_exception());
+                                 console.log("Event raised an error");
+                             }
+                         }
                      }.bind(this));
 }
 
 PrologEngine.prototype.diff = function(a, b, callback)
 {
-    var patchTerm = Prolog.VariableTerm.create("Patch");
-    var goal = crossModuleCall("vdiff", Prolog.CompoundTerm.create(vDiffFunctor, [a, b, patchTerm]));
-    var savePoint = this.env.saveState();
-    this.env.execute(goal,
-                     function()
-                     {
-                         var patch = DEREF(patchTerm);
-                         this.env.restoreState(savePoint);
-                         callback(patch);
-                     }.bind(this),
-                     function()
-                     {
-                         this.env.restoreState(savePoint);
-                         callback(Prolog.Constants.emptyListAtom);
-                     }.bind(this),
-                     function(error)
-                     {
-                         console.log("diff raised: " + error.toString());
-                         this.env.restoreState(savePoint);
-                         callback(Prolog.Constants.emptyListAtom);
-                     }.bind(this));
+    var patchTerm = Prolog._make_variable();
+    var goal = crossModuleCall("vdiff", Prolog._make_compound(vDiffFunctor, [a, b, patchTerm]));
+    var savePoint = Prolog._save_state();
+    Prolog._execute(goal,
+                    function(result)
+                    {
+                        if (result == 1)
+                        {
+                            callback(patch);
+                        }
+                        else
+                        {
+                            if (result == 2)
+                                console.log("diff/3 raised an error");
+                            callback(Constants.emptyListAtom);
+                        }
+                        restore_state(savePoint);
+                    }.bind(this));
 }
 
 PrologEngine.prototype.applyPatch = function(patch, root, callback)
 {
-    var newRoot = Prolog.VariableTerm.create("NewRoot");
-    var renderOptions = Prolog.CompoundTerm.create(Prolog.Constants.listFunctor, [Prolog.CompoundTerm.create(documentFunctor, [Prolog.BlobTerm.get("react_context", root.getOwnerDocument())]), Prolog.Constants.emptyListAtom]);
-    var goal = crossModuleCall("vdiff", Prolog.CompoundTerm.create(vPatchFunctor, [Prolog.BlobTerm.get("react_component", root), patch, renderOptions, newRoot]));
-    var savePoint = this.env.saveState();
+    var newRoot = Prolog._make_variable();
+    var renderOptions = Prolog._make_compound(Constants.listFunctor, [Prolog._make_compound(documentFunctor, [Prolog._make_blob("react_context", root.getOwnerDocument())]), Constants.emptyListAtom]);
+    var goal = crossModuleCall("vdiff", Prolog._make_compound(vPatchFunctor, [Prolog._make_blob("react_component", root), patch, renderOptions, newRoot]));
+    var savePoint = Prolog._save_state();
     this.env.execute(goal,
-                     function()
+                     function(result)
                      {
-                         var value = Prolog.CTable.get(DEREF(newRoot)).value;
-                         this.env.restoreState(savePoint);
-                         callback(value);
-                     }.bind(this),
-                     function()
-                     {
-                         this.env.restoreState(savePoint);
-                         // Do not call callback
-                     }.bind(this),
-                     function(error)
-                     {
-                         console.log("applyPatch raised: " + error.toString());
-                         this.env.restoreState(savePoint);
-                         // Do not call callback
+                         var element = null;
+                         if (result == 1)
+                             element = _get_blob("dom_node", newRoot);
+                         Prolog._restore_state(savePoint);
+                         if (result == 1)
+                             callback(element);
+                         /* Do not call the callback if we did not succeed */
+                         else if (result == 2)
+                             console.log("applyPatch/4 raised an error");
                      }.bind(this));
 }
 
-PrologEngine.prototype.debugStuff = function()
-{
-    console.log("Total instructions: " + this.env.debugger_steps);
-    var k = Object.keys(this.env.debug_ops);
-    for (var i = 0; i < k.length; i++)
-    {
-        var opcode = Prolog.Opcodes[k[i]].label;
-        console.log("   " + opcode + ": " + this.env.debug_ops[k[i]] + " executions taking a total of " + this.env.debug_times[k[i]] + "ms");
-        this.env.debug_ops[k[i]] = 0;
-        this.env.debug_times[k[i]] = 0;
-    }
-    var k = Object.keys(this.env.debug_times);
-
-    console.log("Backtracks: " + this.env.debug_backtracks);
-    console.log("Max size of the trail: " + this.env.trail.length);
-    console.log("Current size of the heap: " + HTOP);
-
-}
 
 module.exports = PrologEngine;

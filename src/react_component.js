@@ -1,5 +1,4 @@
-var ProactiveConstants = require('./proactive_constants');
-var Prolog = require('../lib/proscript2/src/core.js');
+var Constants = require('./constants');
 
 function ReactComponent()
 {
@@ -10,7 +9,7 @@ function ReactComponent()
     this.layout = "vertical";
     this.baseClassName = "";
     this.children = [];
-    this.parent = ProactiveConstants.nullAtom;
+    this.parent = Constants.nullAtom;
 }
 
 ReactComponent.prototype.setDOMNode = function(n)
@@ -115,21 +114,23 @@ ReactComponent.prototype.removeChild = function(t)
 
 ReactComponent.isNull = function(t)
 {
-    return t == null || (TAGOF(t) == CompoundTag && FUNCTOROF(t) == Prolog.Constants.curlyFunctor && (ARGOF(t, 0) == ProactiveConstants.nullAtom));
+    return t == null || (_is_compound(t) && _term_functor(t) == Constants.curlyFunctor && (_term_arg(t, 0) == Constants.nullAtom));
 }
 
 ReactComponent.serialize = function(properties)
 {
-    var result = Prolog.Constants.emptyListAtom;
+    var result = Constants.emptyListAtom;
     var keys = Object.keys(properties);
     for (var i = 0; i < keys.length; i++)
-        result = Prolog.CompoundTerm.create(Prolog.Constants.listFunctor, [Prolog.CompoundTerm.create(ProactiveConstants.equalsFunctor, [Prolog.AtomTerm.get(keys[i]), properties[keys[i]]]), result]);
+    {
+        result = _make_compound(Constants.listFunctor, [_make_compound(Constants.equalsFunctor, [_make_atom(keys[i]), properties[keys[i]]]), result]);
+    }
     return result;
 }
 
 ReactComponent.booleanValue = function(t)
 {
-    return t == ProactiveConstants.trueAtom;
+    return t == Constants.trueAtom;
 }
 
 

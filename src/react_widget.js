@@ -1,7 +1,7 @@
 "use strict";
 
 var ReactComponent = require('./react_component');
-var Prolog = require('../lib/proscript2/src/core.js');
+var Prolog = require('../lib/proscript2/build/proscript.js');
 
 function ReactWidget(parentContext, engine, elementId, props, callback)
 {
@@ -13,7 +13,7 @@ function ReactWidget(parentContext, engine, elementId, props, callback)
     this.internalComponent = null;
 
     this.setProperties(props.getProperties());
-    this.blob = Prolog.BlobTerm.get("react_context", this);
+    this.blob = Prolog._make_blob("react_context", this);
     // FIXME: Create a CodeChangeListener
     /*
     console.log("Creating widget " + elementId + " with props " + props);
@@ -91,7 +91,7 @@ ReactWidget.prototype.reRender = function(callback)
 {
     this.engine.render(this, this.elementId, this.state, this.props, function(newVDom)
                        {
-                           this.engine.diff(this.vDom, DEREF(newVDom), function(patches)
+                           this.engine.diff(this.vDom, newVDom, function(patches)
                                             {
                                                 this.engine.applyPatch(patches, this.internalComponent, function()
                                                                        {

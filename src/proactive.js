@@ -1,5 +1,4 @@
 "use strict";
-var Prolog = require('../lib/proscript2/src/core.js');
 var PrologEngine = require('./prolog_engine');
 var ReactWidget = require('./react_widget');
 var PrologState = require('./prolog_state');
