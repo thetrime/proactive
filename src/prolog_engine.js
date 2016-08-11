@@ -222,29 +222,22 @@ PrologEngine.prototype.triggerEvent = function(handler, event, context, callback
         return;
     }
     var savePoint = Prolog._save_state();
-    this.env.execute(goal,
-                     function(result)
+    Prolog._execute(goal,
+                     function(success)
                      {
                          var ss = null;
-                         if (result == 1)
-                         {
+                         if (success)
                              ss = context.getState().cloneWith(newState)
-                         }
                          Prolog._restore_state(savePoint);
-                         if (result == 1)
+                         if (success)
                              context.setState(ss, function() {callback(true);}.bind(this));
                          else
                          {
-                             if (result == 0)
-                             {
-                                 callback(false);
-                                 console.log("Event failed");
-                             }
-                             else if (result == 2)
-                             {
-                                 callback(Prolog._get_exception());
-                                 console.log("Event raised an error");
-                             }
+                             var ex = Prolog._get_exception();
+                             if (ex != 0)
+                                 console.log("trigger_event/4 raised an error: " + ex  + Prolog._format_term(null, 1200, ex));
+                             else
+                                 console.log("trigger_event/4 failed");
                          }
                      }.bind(this));
 }
@@ -256,19 +249,21 @@ PrologEngine.prototype.diff = function(a, b, callback)
     var savePoint = Prolog._save_state();
     Prolog._execute(this.env,
                     goal,
-                    function(result)
+                    function(success)
                     {
-                        if (result == 1)
+                        if (success)
                         {
                             callback(patch);
                         }
                         else
-                        {
-                            if (result == 2)
-                                console.log("diff/3 raised an error");
-                            callback(Constants.emptyListAtom);
-                        }
-                        restore_state(savePoint);
+                         {
+                             var ex = Prolog._get_exception();
+                             if (ex != 0)
+                                 console.log("vdiff/3 raised an error: " + ex  + Prolog._format_term(null, 1200, ex));
+                             else
+                                 console.log("vdiff/3 failed");
+                         }
+                        Prolog._restore_state(savePoint);
                     }.bind(this));
 }
 
