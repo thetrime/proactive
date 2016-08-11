@@ -152,7 +152,7 @@ PrologEngine.prototype.render = function(widget, component, state, props, callba
 PrologEngine.prototype.createElementFromVDom = function(vDOM, context, callback)
 {
     var resultValue = Prolog._make_variable();
-    var renderOptions = Prolog._make_compound(Constants.listFunctor, [Prolog._make_compound(documentFunctor, [Prolog._make_blob("react_component", context)]), Constants.emptyListAtom]);
+    var renderOptions = Prolog._make_compound(Constants.listFunctor, [Prolog._make_compound(documentFunctor, [context.blob]), Constants.emptyListAtom]);
     var goal = crossModuleCall("vdiff", Prolog._make_compound(createElementFromVDomFunctor, [renderOptions, vDOM, resultValue]));
     var savePoint = Prolog._save_state();
     Prolog._execute(this.env,
@@ -270,8 +270,8 @@ PrologEngine.prototype.diff = function(a, b, callback)
 PrologEngine.prototype.applyPatch = function(patch, root, callback)
 {
     var newRoot = Prolog._make_variable();
-    var renderOptions = Prolog._make_compound(Constants.listFunctor, [Prolog._make_compound(documentFunctor, [Prolog._make_blob("react_component", root.getOwnerDocument())]), Constants.emptyListAtom]);
-    var goal = crossModuleCall("vdiff", Prolog._make_compound(vPatchFunctor, [Prolog._make_blob("react_component", root), patch, renderOptions, newRoot]));
+    var renderOptions = Prolog._make_compound(Constants.listFunctor, [Prolog._make_compound(documentFunctor, [root.getOwnerDocument().blob]), Constants.emptyListAtom]);
+    var goal = crossModuleCall("vdiff", Prolog._make_compound(vPatchFunctor, [root.blob, patch, renderOptions, newRoot]));
     var savePoint = Prolog._save_state();
     Prolog._execute(this.env,
                     goal,

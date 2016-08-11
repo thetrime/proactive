@@ -11,6 +11,8 @@ function ReactComponent()
     this.baseClassName = "";
     this.children = [];
     this.parent = Constants.nullAtom;
+    this.blob = Prolog._make_blob("react_component", this);
+
 }
 
 ReactComponent.prototype.setDOMNode = function(n)

@@ -297,7 +297,7 @@ module.exports["child_nodes"] = function(parent, children)
     var result = Constants.emptyListAtom;
     var i = childNodes.length;
     while(i--)
-        result = Prolog._make_compound(Constants.listFunctor, [Prolog._make_blob("react_component", childNodes[i]), result]);
+        result = Prolog._make_compound(Constants.listFunctor, [childNodes[i].blob, result]);
     var v = Prolog._unify(result, children);
     if (!v)
         console.log("Failed to unify children");
@@ -308,19 +308,19 @@ module.exports["create_element"] = function(context, tagname, domnode)
 {
     var node = ProactiveComponentFactory.createElement(Prolog._atom_chars(tagname), Prolog._get_blob("react_component", context));
     node.setOwnerDocument(Prolog._get_blob("react_component", context));
-    return Prolog._unify(domnode, Prolog._make_blob("react_component", node));
+    return Prolog._unify(domnode, node.blob);
 }
 
 module.exports["create_text_node"] = function(context, text, domnode)
 {
     var node = ProactiveComponentFactory.createElement('Broken', Prolog._get_blob("react_component", context));
     node.setOwnerDocument(Prolog._get_blob("react_component", context));
-    return Prolog._unify(domnode, Prolog._make_blob("react_component", node));
+    return Prolog._unify(domnode, node.blob);
 }
 
 module.exports["parent_node"] = function(node, parent)
 {
-    return _Prolog.unify(parent, Prolog._make_blob("react_component", Prolog._get_blob("react_component", node).getParent()));
+    return _Prolog.unify(parent, Prolog._get_blob("react_component", node).getParent().blob);
 }
 
 module.exports["node_type"] = function(node, type)
@@ -379,7 +379,7 @@ module.exports["init_widget"] = function(context, properties, domNode)
                                  PrologState.fromList(Prolog._term_arg(properties, 1)),
                                  function(widget)
                                  {
-                                     resume(Prolog._unify(domNode, Prolog._make_blob("react_component", widget)));
+                                     resume(Prolog._unify(domNode, widget.blob));
                                  }.bind(this));
     return 3; // YIELD
 }
@@ -397,7 +397,7 @@ module.exports["update_widget"] = function(newVDom, oldVDom, widget, newDomNode)
                                                                }
                                                                else
                                                                {
-                                                                   resume(Prolog._unify(newDomNode, Prolog._make_blob("react_component", newWidget)))
+                                                                   resume(Prolog._unify(newDomNode, newWidget.blob))
                                                                };
                                                            }.bind(this));
 

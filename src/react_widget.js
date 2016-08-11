@@ -5,6 +5,7 @@ var Prolog = require('../lib/proscript2/build/proscript.js');
 
 function ReactWidget(parentContext, engine, elementId, props, callback)
 {
+    ReactComponent.call(this);
     this.engine = engine;
     this.elementId = elementId;
     this.props = props;
@@ -13,7 +14,6 @@ function ReactWidget(parentContext, engine, elementId, props, callback)
     this.internalComponent = null;
 
     this.setProperties(props.getProperties());
-    this.blob = Prolog._make_blob("react_component", this);
     // FIXME: Create a CodeChangeListener
     //console.log("Creating widget " + elementId + " with props " + props);
     /*
