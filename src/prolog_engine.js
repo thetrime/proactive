@@ -127,23 +127,24 @@ PrologEngine.prototype.render = function(widget, component, state, props, callba
     this.env.pushProactiveContext(widget.blob);
     Prolog._execute(this.env,
                     goal,
-                    function(result)
+                    function(success)
                     {
                         this.env.popProactiveContext();
                         vDom = Prolog._make_local(vDom);
                         Prolog._restore_state(savePoint);
-                        if (result == 1)
+                        if (success)
                         {
                             console.log("Render of " + component + " succeeded!");
                             callback(vDom);
                         }
                         else
                         {
-                            if (result == 2)
-                                console.log("render/3 raised an error");
+                            var ex = Prolog._get_exception();
+                            if (ex != 0)
+                                console.log("render/3 raised an error: " + ex  + Prolog._format_term(null, 1200, ex));
                             else
                                 console.log("render/3 failed");
-                            throw new Error("Stop");
+                            throw new Error("Stop: Render fail");
                             callback(Constants.emptyListAtom)
                         }
                     }.bind(this))
@@ -163,14 +164,12 @@ PrologEngine.prototype.createElementFromVDom = function(vDOM, context, callback)
                         console.log("Result: " + success);
                         var element = null;
                         if (success)
-                            element = Prolog._get_blob("dom_node", resultValue);
+                            element = Prolog._get_blob("react_component", resultValue);
                         else
                         {
                             var ex = Prolog._get_exception();
                             if (ex != 0)
-                            {
                                 console.log("createElementFromVDomFunctor Raised:" + Prolog._format_term(null, 1200, ex));
-                            }
                             else
                                 console.log("createElementFromVDomFunctor did not succeed");
                         }
@@ -285,7 +284,7 @@ PrologEngine.prototype.applyPatch = function(patch, root, callback)
                     {
                         var element = null;
                         if (result == 1)
-                            element = Prolog._get_blob("dom_node", newRoot);
+                            element = Prolog._get_blob("react_component", newRoot);
                         Prolog._restore_state(savePoint);
                         if (result == 1)
                             callback(element);

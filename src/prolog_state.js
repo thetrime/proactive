@@ -103,17 +103,7 @@ function reify(t)
     if (Prolog._is_constant(t) || Prolog._is_variable(t))
         return t;
     if (Prolog._is_compound(t))
-    {
-        return t;
-        /*
-        var args = [];
-        var functor = Prolog.CTable.get(Prolog._term_functor(t));
-        for (var i = 0; i < functor.arity; i++)
-            args[i] = Prolog._term_arg(t, i);
-        return {functor: Prolog._term_functor(t),
-                args: args};
-        */
-    }
+        return Prolog._make_local(t);
 }
 
 PrologState.prototype.processKeyPair = function(key, value, functor)
@@ -150,6 +140,8 @@ PrologState.prototype.processKeyPair = function(key, value, functor)
         }
         else
         {
+            if (Prolog._is_compound(existingValue))
+                Prolog._free_local(existingValue);
             if (isState(value))
                 this.map[Prolog._atom_chars(key)] = new PrologState(value);
             else if (Prolog._is_variable(value))

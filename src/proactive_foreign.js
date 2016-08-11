@@ -39,18 +39,21 @@ function addArgs(goal, glueArgs)
 /* First, Prolog-type stuff */
 module.exports["."] = function(state, key, value)
 {
+
     if (isNull(state))
     {
         return Prolog._unify(value, Prolog._make_compound(Constants.curlyFunctor, [Constants.nullAtom]));
     }
     if (!Prolog._is_blob(state, "state"))
     {
-        console.log(state);
         return Errors.typeError(Constants.prologStateAtom, state);
     }
     if (Prolog._is_atom(key))
     {
-        return Prolog._unify(value, Prolog._get_blob("state", state).get(Prolog._atom_chars(key)));
+        //console.log("looking for: " + Prolog._atom_chars(key));
+        //console.log(Prolog._get_blob("state", state).toString());
+        //console.log(Prolog._format_term(null, 1200, Prolog._get_blob("state", state).get(key)));
+        return Prolog._unify(value, Prolog._get_blob("state", state).get(key));
     }
     if (Prolog._is_compound(key))
     {
@@ -219,8 +222,8 @@ module.exports["bubble_event"] = function(handler, event)
 /* And now the DOM glue */
 module.exports["remove_child"] = function(parent, child)
 {
-    var p = Prolog._get_blob("dom_node", parent);
-    var c = Prolog._get_blob("dom_node", child);
+    var p = Prolog._get_blob("react_component", parent);
+    var c = Prolog._get_blob("react_component", child);
     var found = false;
     for (var i = 0; i < p.children.length; i++)
     {
@@ -234,23 +237,23 @@ module.exports["remove_child"] = function(parent, child)
     if (!found)
         throw new Error("Attempt to remove non-existent child");
     p.removeChild(c);
-    return SUCCESS;
+    return 1;
 }
 
 module.exports["append_child"] = function(parent, child)
 {
-    var p = Prolog._get_blob("dom_node", parent);
-    var c = Prolog._get_blob("dom_node", child);
+    var p = Prolog._get_blob("react_component", parent);
+    var c = Prolog._get_blob("react_component", child);
     p.children.push(c);
     p.appendChild(c);
-    return SUCCESS;
+    return 1;
 }
 
 module.exports["insert_before"] = function(parent, child, sibling)
 {
-    var p = Prolog._get_blob("dom_node", parent);
-    var c = Prolog._get_blob("dom_node", child);
-    var s = Prolog._get_blob("dom_node", sibling);
+    var p = Prolog._get_blob("react_component", parent);
+    var c = Prolog._get_blob("react_component", child);
+    var s = Prolog._get_blob("react_component", sibling);
     var found = false;
     for (var i = 0; i < p.children.length; i++)
     {
@@ -264,14 +267,14 @@ module.exports["insert_before"] = function(parent, child, sibling)
     if (!found)
         throw new Error("Attempt to insert before non-existent sibling");
     p.insertBefore(c, s);
-    return SUCCESS;
+    return 1;
 }
 
 module.exports["replace_child"] = function(parent, newChild, oldChild)
 {
-    var p = Prolog._get_blob("dom_node", parent);
-    var n = Prolog._get_blob("dom_node", newChild);
-    var o = Prolog._get_blob("dom_node", oldChild);
+    var p = Prolog._get_blob("react_component", parent);
+    var n = Prolog._get_blob("react_component", newChild);
+    var o = Prolog._get_blob("react_component", oldChild);
     var found = false;
     for (var i = 0; i < p.children.length; i++)
     {
@@ -285,12 +288,12 @@ module.exports["replace_child"] = function(parent, newChild, oldChild)
     if (!found)
         throw new Error("Attempt to replace non-existent child");
     p.replaceChild(n, o);
-    return SUCCESS;
+    return 1;
 }
 
 module.exports["child_nodes"] = function(parent, children)
 {
-    var childNodes = Prolog._get_blob("dom_node", parent).getChildren();
+    var childNodes = Prolog._get_blob("react_component", parent).getChildren();
     var result = Constants.emptyListAtom;
     var i = childNodes.length;
     while(--i >= 0)
@@ -305,19 +308,19 @@ module.exports["create_element"] = function(context, tagname, domnode)
 {
     var node = ProactiveComponentFactory.createElement(Prolog._atom_chars(tagname), Prolog._get_blob("react_component", context));
     node.setOwnerDocument(Prolog._get_blob("react_component", context));
-    return Prolog._unify(domnode, Prolog._make_blob("dom_node", node));
+    return Prolog._unify(domnode, Prolog._make_blob("react_component", node));
 }
 
 module.exports["create_text_node"] = function(context, text, domnode)
 {
     var node = ProactiveComponentFactory.createElement('Broken', Prolog._get_blob("react_component", context));
     node.setOwnerDocument(Prolog._get_blob("react_component", context));
-    return Prolog._unify(domnode, Prolog._make_blob("dom_node", node));
+    return Prolog._unify(domnode, Prolog._make_blob("react_component", node));
 }
 
 module.exports["parent_node"] = function(node, parent)
 {
-    return _Prolog.unify(parent, Prolog._make_blob("dom_node", Prolog._get_blob("dom_node", node).getParent()));
+    return _Prolog.unify(parent, Prolog._make_blob("react_component", Prolog._get_blob("react_component", node).getParent()));
 }
 
 module.exports["node_type"] = function(node, type)
@@ -328,7 +331,7 @@ module.exports["node_type"] = function(node, type)
 module.exports["set_vdom_properties"] = function(domNode, list)
 {
     if (list == Constants.emptyListAtom)
-        return SUCCESS;
+        return 1;
     var l = list;
     var properties = {};
     while (Prolog._is_compound(l) && Prolog._term_functor(l) == Constants.listFunctor)
@@ -350,7 +353,7 @@ module.exports["set_vdom_properties"] = function(domNode, list)
     }
     if (l != Constants.emptyListAtom)
         return Errors.typeError(Constants.listAtom, list);
-    Prolog._get_blob("dom_node", domNode).setProperties(properties);
+    Prolog._get_blob("react_component", domNode).setProperties(properties);
     return true;
 }
 

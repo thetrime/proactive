@@ -1,4 +1,5 @@
 var Constants = require('./constants');
+var Prolog = require('../lib/proscript2/build/proscript.js');
 
 function ReactComponent()
 {
@@ -114,7 +115,7 @@ ReactComponent.prototype.removeChild = function(t)
 
 ReactComponent.isNull = function(t)
 {
-    return t == null || (_is_compound(t) && _term_functor(t) == Constants.curlyFunctor && (_term_arg(t, 0) == Constants.nullAtom));
+    return t == null || (Prolog._is_compound(t) && Prolog._term_functor(t) == Constants.curlyFunctor && (Prolog._term_arg(t, 0) == Constants.nullAtom));
 }
 
 ReactComponent.serialize = function(properties)
@@ -123,7 +124,7 @@ ReactComponent.serialize = function(properties)
     var keys = Object.keys(properties);
     for (var i = 0; i < keys.length; i++)
     {
-        result = _make_compound(Constants.listFunctor, [_make_compound(Constants.equalsFunctor, [_make_atom(keys[i]), properties[keys[i]]]), result]);
+        result = Prolog._make_compound(Constants.listFunctor, [Prolog._make_compound(Constants.equalsFunctor, [Prolog._make_atom(keys[i]), properties[keys[i]]]), result]);
     }
     return result;
 }
