@@ -235,7 +235,7 @@ Field.prototype.setProperties = function(t)
         if (ReactComponent.isNull(t.value))
             this.value = '';
         else
-            this.value = _atom_chars(t.value);
+            this.value = Prolog._atom_chars(t.value);
         this.setValue(this.value);
     }
     if (t.onBlur !== undefined)
