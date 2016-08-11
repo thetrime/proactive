@@ -15,7 +15,7 @@ function ReactWidget(parentContext, engine, elementId, props, callback)
     this.setProperties(props.getProperties());
     this.blob = Prolog._make_blob("react_component", this);
     // FIXME: Create a CodeChangeListener
-    console.log("Creating widget " + elementId + " with props " + props);
+    //console.log("Creating widget " + elementId + " with props " + props);
     /*
     try { throw new Error()} catch(qxy) {console.log("Stack depth: " + qxy.stack.split('\n').length);}
     console.log("Getting initial state for " + elementId + " with props " + props);

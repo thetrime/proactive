@@ -14,5 +14,4 @@ Proactive.render("http://localhost:8080/react", "trade_entry_proactive", documen
                      for (var i = 0; i < 16; i++)
                          field.nodeCallback({data:'q', preventDefault:function() {}});
                      console.log("Average: " + GLOBAL.total / 16);
-                     field.debugStuff();
                  });

@@ -27,8 +27,8 @@ function PrologEngine(baseURL, rootElementId, callback)
     // Set up a few of our own properties
     this.env.proactive_context = [];
     this.env.engine = this;
-    this.env.pushProactiveContext = function(p) { this.proactive_context.push(p); };
-    this.env.popProactiveContext = function(p) { this.proactive_context.pop(); };
+    this.env.pushProactiveContext = function(p) { this.proactive_context.push(p); }.bind(this.env);
+    this.env.popProactiveContext = function(p) { this.proactive_context.pop(); }.bind(this.env);
 
     // Now load in the proactive foreign predicates
     var foreign_predicates = Object.keys(foreign_module);
@@ -64,7 +64,6 @@ PrologEngine.prototype.getInitialState = function(component, props, callback)
     var replyTerm = Prolog._make_variable();
     var goal = crossModuleCall(component, Prolog._make_compound(getInitialStateFunctor, [Prolog._make_blob("state", props), replyTerm]));
     var savePoint = Prolog._save_state();
-    console.log("Save point: " + savePoint);
     Prolog._execute(this.env,
                     goal,
                     function(success)
@@ -73,7 +72,7 @@ PrologEngine.prototype.getInitialState = function(component, props, callback)
                         {
                             var state = new PrologState(replyTerm);
                             Prolog._restore_state(savePoint);
-                            console.log("getInitialState has succeeded: " + state);
+                            //console.log("getInitialState has succeeded: " + state);
                             callback(state);
                         }
                         else
@@ -134,7 +133,7 @@ PrologEngine.prototype.render = function(widget, component, state, props, callba
                         Prolog._restore_state(savePoint);
                         if (success)
                         {
-                            console.log("Render of " + component + " succeeded!");
+                            //console.log("Render of " + component + " succeeded!");
                             callback(vDom);
                         }
                         else
@@ -156,12 +155,10 @@ PrologEngine.prototype.createElementFromVDom = function(vDOM, context, callback)
     var renderOptions = Prolog._make_compound(Constants.listFunctor, [Prolog._make_compound(documentFunctor, [Prolog._make_blob("react_component", context)]), Constants.emptyListAtom]);
     var goal = crossModuleCall("vdiff", Prolog._make_compound(createElementFromVDomFunctor, [renderOptions, vDOM, resultValue]));
     var savePoint = Prolog._save_state();
-    console.log("Before calling createElementFromVDom, the save point is " + savePoint);
     Prolog._execute(this.env,
                     goal,
                     function(success)
                     {
-                        console.log("Result: " + success);
                         var element = null;
                         if (success)
                             element = Prolog._get_blob("react_component", resultValue);
@@ -173,7 +170,6 @@ PrologEngine.prototype.createElementFromVDom = function(vDOM, context, callback)
                             else
                                 console.log("createElementFromVDomFunctor did not succeed");
                         }
-                        console.log("Restoring point saved before createElementFromVDom: " + savePoint);
                         Prolog._restore_state(savePoint);
                         callback(element);
                     }.bind(this));
@@ -197,10 +193,12 @@ PrologEngine.prototype.triggerEvent = function(handler, event, context, callback
     var goal;
     var newState = Prolog._make_variable();
     if (Prolog._is_atom(handler))
+    {
         goal = crossModuleCall(context.getComponentName(), Prolog._make_compound(handler, [event,
                                                                                            Prolog._make_blob("state", state),
                                                                                            Prolog._make_blob("state", props),
                                                                                            newState]));
+    }
     else if (Prolog._is_compound(handler))
     {
         var functor = Prolog._term_functor(handler);
@@ -213,6 +211,7 @@ PrologEngine.prototype.triggerEvent = function(handler, event, context, callback
         args[i++] = Prolog._make_blob("state", state);
         args[i++] = Prolog._make_blob("state", props);
         args[i++] = newState;
+        console.log("Here: " + Prolog._format_term(null, 1200, handler));
         goal = crossModuleCall(context.getComponentName(), Prolog._make_compound(Prolog._term_functor_name(handler), args));
     }
     else
@@ -222,7 +221,8 @@ PrologEngine.prototype.triggerEvent = function(handler, event, context, callback
         return;
     }
     var savePoint = Prolog._save_state();
-    Prolog._execute(goal,
+    Prolog._execute(this.env,
+                    goal,
                      function(success)
                      {
                          var ss = null;
@@ -235,7 +235,7 @@ PrologEngine.prototype.triggerEvent = function(handler, event, context, callback
                          {
                              var ex = Prolog._get_exception();
                              if (ex != 0)
-                                 console.log("trigger_event/4 raised an error: " + ex  + Prolog._format_term(null, 1200, ex));
+                                 console.log("trigger_event/4 raised an error: "+ Prolog._format_term(null, 1200, ex));
                              else
                                  console.log("trigger_event/4 failed");
                          }
@@ -253,13 +253,13 @@ PrologEngine.prototype.diff = function(a, b, callback)
                     {
                         if (success)
                         {
-                            callback(patch);
+                            callback(patchTerm);
                         }
                         else
                          {
                              var ex = Prolog._get_exception();
                              if (ex != 0)
-                                 console.log("vdiff/3 raised an error: " + ex  + Prolog._format_term(null, 1200, ex));
+                                 console.log("vdiff/3 raised an error: " + Prolog._format_term(null, 1200, ex));
                              else
                                  console.log("vdiff/3 failed");
                          }

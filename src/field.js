@@ -168,7 +168,7 @@ function Field()
     // So, first add onTextInput, since if that is around it does most of what we need
 
     this.domNode.nodeCallback = textInputHandler.bind(this);
-    this.domNode.debugStuff = this.debugStuff.bind(this);
+    //this.domNode.debugStuff = this.debugStuff.bind(this);
 
     this.domNode.addEventListener("textInput", textInputHandler.bind(this), false);
     // Also add in a handler that JUST listens for deletes
@@ -207,10 +207,12 @@ Field.prototype.valueWouldChange = function(newValue)
         console.log("No change handler. Field will not be able to be changed");
 }
 
+/*
 Field.prototype.debugStuff = function()
 {
     this.getOwnerDocument().debugStuff();
 }
+*/
 
 Field.prototype.setBlurHandler = function(value)
 {
@@ -258,10 +260,14 @@ Field.prototype.setProperties = function(t)
     }
     if (t.onChange !== undefined)
     {
+        if (this.changeHandler != null)
+            Prolog._free_local(this.changeHandler);
         if (ReactComponent.isNull(t.onChange))
             this.changeHandler = null;
         else
-            this.changeHandler = t.onChange;
+        {
+            this.changeHandler = Prolog._make_local(t.onChange);
+        }
     }
     if (t.align !== undefined)
     {

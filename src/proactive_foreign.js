@@ -190,9 +190,9 @@ module.exports["get_this"] = function(t)
 
 module.exports["bubble_event"] = function(handler, event)
 {
-    if (Prolog._is_compound(handler) == CompoundTag && Prolog._term_functor(handler) == Constants.thisFunctor)
+    if (Prolog._is_compound(handler) && Prolog._term_functor(handler) == Constants.thisFunctor)
     {
-        var target = atom_chars(Prolog._term_arg(handler, 0));
+        var target = Prolog._get_blob("react_component", Prolog._term_arg(handler, 0));
         var resume = Prolog._yield();
         target.triggerEvent(Prolog._term_arg(handler, 1), event, resume);
         return YIELD;
@@ -296,8 +296,8 @@ module.exports["child_nodes"] = function(parent, children)
     var childNodes = Prolog._get_blob("react_component", parent).getChildren();
     var result = Constants.emptyListAtom;
     var i = childNodes.length;
-    while(--i >= 0)
-        result = Prolog._make_compound(Constants.listFunctor, [Prolog._get_blob("react_component", childNodes[i]), result]);
+    while(i--)
+        result = Prolog._make_compound(Constants.listFunctor, [Prolog._make_blob("react_component", childNodes[i]), result]);
     var v = Prolog._unify(result, children);
     if (!v)
         console.log("Failed to unify children");
@@ -389,7 +389,7 @@ module.exports["update_widget"] = function(newVDom, oldVDom, widget, newDomNode)
     var newProperties = PrologState.fromList(Prolog._term_arg(newVDom, 1));
     newProperties.map.children = Prolog._term_arg(newVDom, 2);
     var resume = Prolog._yield();
-    Prolog.Prolog._get_blob("react_component", widget).updateWidget(newProperties, function(newWidget)
+    Prolog._get_blob("react_component", widget).updateWidget(newProperties, function(newWidget)
                                                            {
                                                                if (newWidget === Prolog._get_blob("react_component", widget))
                                                                {
