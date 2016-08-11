@@ -10,6 +10,7 @@ Proactive.render("http://localhost:8080/react", "trade_entry_proactive", documen
                      console.log("Rendered in " + (new Date().getTime() - d0) + "ms");
                      GLOBAL.total = 0;
                      var field = document.getElementById("field_0");
+                     console.log(field);
                      for (var i = 0; i < 16; i++)
                          field.nodeCallback({data:'q', preventDefault:function() {}});
                      console.log("Average: " + GLOBAL.total / 16);

@@ -9,14 +9,14 @@ function ReactWidget(parentContext, engine, elementId, props, callback)
     this.elementId = elementId;
     this.props = props;
     this.owner = parentContext;
-
+    this.vDom = null;
     this.internalComponent = null;
 
     this.setProperties(props.getProperties());
-    this.blob = Prolog._make_blob("react_context", this);
+    this.blob = Prolog._make_blob("react_component", this);
     // FIXME: Create a CodeChangeListener
-    /*
     console.log("Creating widget " + elementId + " with props " + props);
+    /*
     try { throw new Error()} catch(qxy) {console.log("Stack depth: " + qxy.stack.split('\n').length);}
     console.log("Getting initial state for " + elementId + " with props " + props);
 */
@@ -96,6 +96,8 @@ ReactWidget.prototype.reRender = function(callback)
                                                 this.engine.applyPatch(patches, this.internalComponent, function()
                                                                        {
                                                                            this.internalComponent.setOwnerDocument(this);
+                                                                           if (this.vDom != null)
+                                                                               Prolog._free_local(this.vDom);
                                                                            this.vDom = newVDom;
                                                                            //console.log("All patches applied");
                                                                            callback(this);

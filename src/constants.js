@@ -2,8 +2,6 @@
 
 var Prolog = require('../lib/proscript2/build/proscript.js');
 
-console.log(Prolog);
-
 module.exports = {emptyListAtom: Prolog._make_atom("[]"),
                   curlyFunctor: Prolog._make_functor(Prolog._make_atom("{}"), 1),
                   curlyAtom: Prolog._make_atom("{}"),
@@ -12,7 +10,9 @@ module.exports = {emptyListAtom: Prolog._make_atom("[]"),
                   blobAtom: Prolog._make_atom("blob"),
                   attributeAtom: Prolog._make_atom("attribute"),
                   colonFunctor : Prolog._make_functor(Prolog._make_atom(":"), 2),
-                  equalsFunctor : Prolog._make_functor(Prolog._make_atom(":"), 2),
+                  equalsFunctor : Prolog._make_functor(Prolog._make_atom("="), 2),
+                  typeErrorFunctor: Prolog._make_functor(Prolog._make_atom("type_error"), 2),
+                  errorFunctor: Prolog._make_functor(Prolog._make_atom("error"), 2),
                   thisFunctor : Prolog._make_functor(Prolog._make_atom("$this"), 2),
                   commaFunctor : Prolog._make_functor(Prolog._make_atom(","), 2),
                   cutFunctor : Prolog._make_functor(Prolog._make_atom("cut"), 1),

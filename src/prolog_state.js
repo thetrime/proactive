@@ -1,7 +1,9 @@
 "use strict";
 
 var Errors = require('./errors.js');
+var Constants = require('./constants.js');
 var Prolog = require('../lib/proscript2/build/proscript.js');
+
 
 function make_null()
 {
@@ -22,18 +24,18 @@ function PrologState(t)
 
 PrologState.prototype.processElements = function(t)
 {
-    if (_is_variable(t))
+    if (Prolog._is_variable(t))
         return;
     else if (t == Constants.curlyAtom)
         return;
-    if (_is_compound(t) && _term_functor(t) == Constants.curlyFunctor)
+    if (Prolog._is_compound(t) && Prolog._term_functor(t) == Constants.curlyFunctor)
     {
-        var list = _term_arg(t, 0);
-        while (_is_compound(list) && _term_functor(list) == Constants.commaFunctor)
+        var list = Prolog._term_arg(t, 0);
+        while (Prolog._is_compound(list) && Prolog._term_functor(list) == Constants.commaFunctor)
         {
-            var head = _term_arg(list, 0);
+            var head = Prolog._term_arg(list, 0);
             this.processElement(head, Constants.colonFunctor);
-            list = _term_arg(list, 1);
+            list = Prolog._term_arg(list, 1);
         }
         this.processElement(list, Constants.colonFunctor);
         return;
@@ -45,13 +47,13 @@ PrologState.prototype.processElements = function(t)
 
 PrologState.prototype.processElement = function(t, functor)
 {
-    if (_is_compound(t) && _term_functor(t) == functor)
+    if (Prolog._is_compound(t) && Prolog._term_functor(t) == functor)
     {
-        var key = _term_arg(t, 0);
-        var value = _term_arg(t, 1);
-        if (!_is_atom(key))
+        var key = Prolog._term_arg(t, 0);
+        var value = Prolog._term_arg(t, 1);
+        if (!Prolog._is_atom(key))
             return Errors.typeError(Constants.atomAtom, key);
-        this.processKeyPair(_atom_chars(key), value, functor);
+        this.processKeyPair(key, value, functor);
     }
     else
     {
@@ -66,7 +68,7 @@ PrologState.prototype.formatTerm = function(options, precedence)
     var keys = Object.keys(this.map);
     for (var i = 0 ; i < keys.length; i++)
     {
-        output += Prolog.TermWriter.formatTerm(options, precedence, Prolog.CompoundTerm.create(Constants.equalsFunctor, [Prolog._make_atom(keys[i]), this.map[keys[i]]]));
+        output += Prolog._format_term(options, precedence, Prolog._make_compound(Constants.equalsFunctor, [Prolog._make_atom(keys[i]), this.map[keys[i]]]));
         if (i+1 < keys.length)
             output += ",";
     }
@@ -76,11 +78,10 @@ PrologState.prototype.formatTerm = function(options, precedence)
 PrologState.prototype.toString = function()
 {
     var mapinfo = "["
-    var options = {};
     var keys = Object.keys(this.map);
     for (var i = 0 ; i < keys.length; i++)
     {
-        mapinfo += Prolog.TermWriter.formatTerm(options, 1200, Prolog.CompoundTerm.create(Constants.equalsFunctor, [Prolog._make_atom(keys[i]), this.map[keys[i]]]));
+        mapinfo += Prolog._format_term(null, 1200, Prolog._make_compound(Constants.equalsFunctor, [Prolog._make_atom(keys[i]), this.map[keys[i]]]));
         if (i+1 < keys.length)
             mapinfo += ",";
     }
@@ -94,22 +95,22 @@ PrologState.prototype.hashCode = function()
 
 function isState(t)
 {
-    return (_is_compound(t) && _term_functor(t) == Constants.curlyFunctor) && (_term_arg(t, 0) != nullAtom);
+    return (Prolog._is_compound(t) && Prolog._term_functor(t) == Constants.curlyFunctor) && (Prolog._term_arg(t, 0) != Constants.nullAtom);
 }
 
 function reify(t)
 {
-    if (_is_constant(t) || _is_variable(t))
+    if (Prolog._is_constant(t) || Prolog._is_variable(t))
         return t;
-    if (_is_compound(t))
+    if (Prolog._is_compound(t))
     {
         return t;
         /*
         var args = [];
-        var functor = Prolog.CTable.get(_term_functor(t));
+        var functor = Prolog.CTable.get(Prolog._term_functor(t));
         for (var i = 0; i < functor.arity; i++)
-            args[i] = _term_arg(t, i);
-        return {functor: _term_functor(t),
+            args[i] = Prolog._term_arg(t, i);
+        return {functor: Prolog._term_functor(t),
                 args: args};
         */
     }
@@ -117,16 +118,16 @@ function reify(t)
 
 PrologState.prototype.processKeyPair = function(key, value, functor)
 {
-    var existingValue = this.map[key.value];
+    var existingValue = this.map[Prolog._atom_chars(key)];
     if (existingValue === undefined)
     {
         if (isState(value))
-            this.map[key.value] = new PrologState(value);
-        else if (_is_variable(value))
-            this.map[key.value] = nullTerm;
+            this.map[Prolog._atom_chars(key)] = new PrologState(value);
+        else if (Prolog._is_variable(value))
+            this.map[Prolog._atom_chars(key)] = nullTerm;
         else
         {
-            this.map[key.value] = reify(value);
+            this.map[Prolog._atom_chars(key)] = reify(value);
         }
     }
     else
@@ -136,26 +137,26 @@ PrologState.prototype.processKeyPair = function(key, value, functor)
             if (isState(value))
             {
                 // Merge
-                this.map[key.value] = existingValue.cloneWith(value);
+                this.map[Prolog._atom_chars(key)] = existingValue.cloneWith(value);
             }
             else
             {
                 // Changing {foo: {bar: .....}} -> {foo: atomic-type}
-                if (_is_variable(value))
-                    this.map[key.value] = nullTerm;
+                if (Prolog._is_variable(value))
+                    this.map[Prolog._atom_chars(key)] = nullTerm;
                 else
-                    this.map[key.value], reify(value);
+                    this.map[Prolog._atom_chars(key)], reify(value);
             }
         }
         else
         {
             if (isState(value))
-                this.map[key.value] = new PrologState(value);
-            else if (_is_variable(value))
-                this.map[key.value] = nullTerm;
+                this.map[Prolog._atom_chars(key)] = new PrologState(value);
+            else if (Prolog._is_variable(value))
+                this.map[Prolog._atom_chars(key)] = nullTerm;
             else
             {
-                this.map[key.value] = reify(value);
+                this.map[Prolog._atom_chars(key)] = reify(value);
             }
         }
     }
@@ -191,20 +192,20 @@ PrologState.prototype.cloneWith = function(t)
 // Expects key to be an AtomTerm
 PrologState.prototype.get = function(key)
 {
-    return this.map[key.value] || make_null();
+    return this.map[Prolog._atom_chars(key)] || make_null();
 }
 
 PrologState.fromList = function(t)
 {
     // This is used for parsing the attributes list into a state
     var prologState = new PrologState();
-    while (_is_compound(t))
+    while (Prolog._is_compound(t))
     {
-        if (_term_functor(t) != Constants.listFunctor)
+        if (Prolog._term_functor(t) != Constants.listFunctor)
             Errors.typeError(Constants.listAtom, t);
         else
-            prologState.processElement(_term_arg(t, 0), Constants.equalsFunctor);
-        t = _term_arg(t, 1);
+            prologState.processElement(Prolog._term_arg(t, 0), Constants.equalsFunctor);
+        t = Prolog._term_arg(t, 1);
     }
     return prologState;
 }
