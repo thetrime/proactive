@@ -4,6 +4,9 @@ var Errors = require('./errors.js');
 var Constants = require('./constants.js');
 var Prolog = require('../lib/proscript2/build/proscript.js');
 
+// NB:
+// A PrologState is basically a map of Javascript strings (keys) to PROLOG OBJECTS.
+
 
 function make_null()
 {
@@ -17,6 +20,7 @@ var global_state_id = 0;
 function PrologState(t)
 {
     this.id = global_state_id++;
+    this.blob = Prolog._make_blob("state", this);
     this.map = {};
     if (arguments.length > 0)
         this.processElements(t);
@@ -115,9 +119,8 @@ PrologState.prototype.processKeyPair = function(key, value, functor)
     var existingValue = this.map[key];
     if (existingValue === undefined)
     {
-
         if (isState(value))
-            this.map[key] = new PrologState(value);
+            this.map[key] = new PrologState(value).blob;
         else if (Prolog._is_variable(value))
             this.map[key] = make_null();
         else
@@ -127,8 +130,9 @@ PrologState.prototype.processKeyPair = function(key, value, functor)
     }
     else
     {
-        if (existingValue instanceof PrologState)
+        if (Prolog._is_blob(existingValue, "state"))
         {
+            existingValue = Prolog._get_blob(existingValue, "state");
             if (isState(value))
             {
                 // Merge
@@ -150,7 +154,7 @@ PrologState.prototype.processKeyPair = function(key, value, functor)
                 Prolog._free_local(existingValue);
             }
             if (isState(value))
-                this.map[key] = new PrologState(value);
+                this.map[key] = new PrologState(value).blob;
             else if (Prolog._is_variable(value))
                 this.map[key] = make_null();
             else
@@ -177,8 +181,9 @@ PrologState.prototype.cloneWith = function(t)
     var keys = Object.keys(this.map);
     for (var i = 0; i < keys.length; i++)
         newState.map[keys[i]] = this.map[keys[i]]; // Maybe here?
-    if (t instanceof PrologState)
+    if (Prolog._is_blob(t, "state"))
     {
+        t = Prolog._get_blob("state", t);
         keys = Object.keys(t.map);
         for (var i = 0; i < keys.length; i++)
             newState.processElement(keys[i], t.map[keys[i]], Constants.colonFunctor);

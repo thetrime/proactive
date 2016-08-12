@@ -62,7 +62,7 @@ PrologEngine.prototype.getInitialState = function(component, props, callback)
         return;
     }
     var replyTerm = Prolog._make_variable();
-    var goal = crossModuleCall(component, Prolog._make_compound(getInitialStateFunctor, [Prolog._make_blob("state", props), replyTerm]));
+    var goal = crossModuleCall(component, Prolog._make_compound(getInitialStateFunctor, [props.blob, replyTerm]));
     var savePoint = Prolog._save_state();
     Prolog._execute(this.env,
                     goal,
@@ -93,9 +93,7 @@ PrologEngine.prototype.componentWillReceiveProps = function(component, context, 
     var state = context.getState();
     var props = context.getProps();
     var newState = Prolog._make_variable();
-    var goal = crossModuleCall(component, Prolog._make_compound(componentWillReceivePropsFunctor, [Prolog._make_blob("state", state),
-                                                                                                   Prolog._make_blob("state", props),
-                                                                                                   newState]));
+    var goal = crossModuleCall(component, Prolog._make_compound(componentWillReceivePropsFunctor, [state.blob, props.blob, newState]));
     var savePoint = Prolog._save_state();
     Prolog._execute(this.env,
                     goal, function(result)
@@ -116,22 +114,12 @@ PrologEngine.prototype.componentWillReceiveProps = function(component, context, 
                     }.bind(this));
 }
 
-var qqq = 0;
-
 PrologEngine.prototype.render = function(widget, component, state, props, callback)
 {
     var vDom = Prolog._make_variable();
-    var stateblob = Prolog._make_blob("state", state);
-    var propsblob = Prolog._make_blob("state", props);
-    var goal = crossModuleCall(component, Prolog._make_compound(renderFunctor, [stateblob,
-                                                                                propsblob,
-                                                                                vDom]));
+    var goal = crossModuleCall(component, Prolog._make_compound(renderFunctor, [state.blob, props.blob, vDom]));
     var savePoint = Prolog._save_state();
     this.env.pushProactiveContext(widget.blob);
-    qqq++;
-//    if (qqq == 145)
-//        Prolog._qqq();
-    console.log("Render( " + qqq + ": " + stateblob + "," + propsblob + "): " + Prolog._format_term(null, 1200, goal));
     Prolog._execute(this.env,
                     goal,
                     function(success)
@@ -202,10 +190,7 @@ PrologEngine.prototype.triggerEvent = function(handler, event, context, callback
     var newState = Prolog._make_variable();
     if (Prolog._is_atom(handler))
     {
-        goal = crossModuleCall(context.getComponentName(), Prolog._make_compound(handler, [event,
-                                                                                           Prolog._make_blob("state", state),
-                                                                                           Prolog._make_blob("state", props),
-                                                                                           newState]));
+        goal = crossModuleCall(context.getComponentName(), Prolog._make_compound(handler, [event, state.blob, props.blob, newState]));
     }
     else if (Prolog._is_compound(handler))
     {
@@ -216,10 +201,9 @@ PrologEngine.prototype.triggerEvent = function(handler, event, context, callback
         for (i = 0 ; i < arity; i++)
             args[i] = Prolog._term_arg(handler, i);
         args[i++] = event;
-        args[i++] = Prolog._make_blob("state", state);
-        args[i++] = Prolog._make_blob("state", props);
+        args[i++] = state.blob;
+        args[i++] = props.blob;
         args[i++] = newState;
-        //console.log("Here: " + Prolog._format_term(null, 1200, handler));
         goal = crossModuleCall(context.getComponentName(), Prolog._make_compound(Prolog._term_functor_name(handler), args));
     }
     else
@@ -228,27 +212,21 @@ PrologEngine.prototype.triggerEvent = function(handler, event, context, callback
         callback(false);
         return;
     }
-    console.log("Calling " + Prolog._format_term(null, 1200, goal));
     var savePoint = Prolog._save_state();
     Prolog._execute(this.env,
                     goal,
                     function(success)
                     {
-                        console.log("Result of " + Prolog._format_term(null, 1200, goal) + ": " + success);
                          var ss = null;
                          if (success)
                              ss = context.getState().cloneWith(Prolog._deref(newState))
                         Prolog._restore_state(savePoint);
                         if (success)
                         {
-                            console.log("After event, state is " + Prolog._format_term(null, 1200, newState));
-                            console.log("Which SHOULD be the same as " + ss.toString());
                             context.setState(ss, function()
                                              {
-                                                 console.log("setState has succeeded");
                                                  callback(true);
                                              }.bind(this));
-                            console.log("Successfully set the state");
                         }
                         else
                         {

@@ -70,7 +70,6 @@ ReactWidget.prototype.getComponentName = function()
 ReactWidget.prototype.setState = function(newState, callback)
 {
     this.state = newState;
-    console.log("The state of " + this.elementId + " has been set to " + this.state.toString());
     this.reRender(callback);
 }
 
@@ -90,16 +89,12 @@ ReactWidget.prototype.updateWidget = function(newProps, callback)
 
 ReactWidget.prototype.reRender = function(callback)
 {
-    console.log("Re-rendering: " + this.state.toString());
     this.engine.render(this, this.elementId, this.state, this.props, function(newVDom)
                        {
-                           console.log("re-diff");
                            this.engine.diff(this.vDom, newVDom, function(patches)
                                             {
-                                                console.log("re-patch");
                                                 this.engine.applyPatch(patches, this.internalComponent, function()
                                                                        {
-                                                                           console.log("all done");
                                                                            this.internalComponent.setOwnerDocument(this);
                                                                            if (this.vDom != null)
                                                                                Prolog._free_local(this.vDom);
