@@ -1,4 +1,5 @@
 var ReactComponent = require('./react_component');
+var Prolog = require('../lib/proscript2/build/proscript.js');
 
 var global_tab_id = 0;
 
@@ -33,7 +34,7 @@ Tab.prototype.setProperties = function(t)
 {
     ReactComponent.prototype.setProperties.call(this, t);
     if (t.label !== undefined)
-        this.label.textContent = t.label;
+        this.label.textContent = Prolog._portray(t.label);
 }
 
 Tab.prototype.setTabpaneOwner = function(ownerId)

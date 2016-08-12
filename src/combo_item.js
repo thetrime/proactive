@@ -1,7 +1,7 @@
 "use strict";
 
 var ReactComponent = require('./react_component');
-
+var Prolog = require('../lib/proscript2/build/proscript.js');
 
 function ComboItem()
 {
@@ -15,7 +15,7 @@ ComboItem.prototype.setProperties = function(t)
 {
    ReactComponent.prototype.setProperties.call(this, t);
     if (t.label !== undefined)
-        this.domNode.textContent = t.label;
+        this.domNode.textContent = Prolog._portray(t.label);
     if (t.value !== undefined)
     {
         this.domNode.value = t.value;

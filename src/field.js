@@ -137,7 +137,9 @@ function blurHandler(event)
                                                      this.domNode.focus();
                                                  }
                                                  else if (this.blurHandler != null)
+                                                 {
                                                      this.getOwnerDocument().triggerEvent(this.blurHandler, ReactComponent.serialize({value: Prolog._make_atom(this.domNode.value)}), handlerCallback);
+                                                 }
                                              }.bind(this));
     }
     else if (this.blurHandler != null)
@@ -157,6 +159,9 @@ function Field()
     node.id = "field_" + (global_field_id++);
     this.setDOMNode(node);
     this.type = "text";
+    this.verifyValue = null;
+    this.blurHandler = null;
+    this.changeHandler = null;
 
     this.domNode.onblur = blurHandler.bind(this);
 
@@ -194,40 +199,31 @@ Field.prototype.valueWouldChange = function(newValue)
     var d0 = new Date().getTime();
     if (this.changeHandler != null)
     {
-        //this.getOwnerDocument().triggerEvent(this.changeHandler, ReactComponent.serialize({value: Prolog.AtomTerm.get(newValue)}), handlerCallback);
+        this.getOwnerDocument().triggerEvent(this.changeHandler, ReactComponent.serialize({value: Prolog._make_atom(newValue)}), handlerCallback);
+        /*
         this.getOwnerDocument().triggerEvent(this.changeHandler, ReactComponent.serialize({value: Prolog._make_atom(newValue)}),
                                              function(result)
                                              {
                                                  var d1 = new Date().getTime();
-                                                 GLOBAL.total += (d1 - d0);
+                                                 if (typeof(GLOBAL) != undefined)
+                                                    GLOBAL.total += (d1 - d0);
                                                  console.log("Processing time: " + (d1-d0) + "ms");
                                              }.bind(this));
+        */
     }
     else
         console.log("No change handler. Field will not be able to be changed");
 }
 
-/*
-Field.prototype.debugStuff = function()
-{
-    this.getOwnerDocument().debugStuff();
-}
-*/
-
-Field.prototype.setBlurHandler = function(value)
-{
-    if (ReactComponent.isNull(value))
-        this.blurHandler = null;
-    this.blurHandler = value;
-}
 
 Field.prototype.setProperties = function(t)
 {
     if (t.type !== undefined)
     {
-        if (t.type != this.type)
+        var newType = Prolog._atom_chars(t.type);
+        if (newType != this.type)
         {
-            this.type = t.type;
+            this.type = newType;
             this.domNode.type = this.type;
             this.setValue(this.value);
         }
@@ -240,12 +236,10 @@ Field.prototype.setProperties = function(t)
             this.value = Prolog._atom_chars(t.value);
         this.setValue(this.value);
     }
-    if (t.onBlur !== undefined)
-    {
-        this.setBlurHandler(t.onBlur);
-    }
     if (t.disabled !== undefined)
+    {
         this.domNode.disabled = ReactComponent.booleanValue(t.disabled);
+    }
     if (t.renderContextMenu !== undefined)
     {
         // FIXME: implement
@@ -254,9 +248,23 @@ Field.prototype.setProperties = function(t)
     {
         // FIXME: implement
     }
+    if (t.onBlur !== undefined)
+    {
+        if (this.blurHandler != null)
+            Prolog._free_local(this.blurHandler);
+        if (ReactComponent.isNull(t.onBlur))
+            this.blurHandler = null;
+        else
+            this.blurHandler = Prolog._make_local(t.onBlur);
+    }
     if (t.verifyValue !== undefined)
     {
-        this.verifyValue = t.verifyValue;
+        if (this.verifyValue != null)
+            Prolog._free_local(this.verifyValue);
+        if (ReactComponent.isNull(t.verifyValue))
+            this.verifyValue = null;
+        else
+            this.verifyValue = Prolog._make_local(t.verifyValue);
     }
     if (t.onChange !== undefined)
     {
@@ -265,13 +273,11 @@ Field.prototype.setProperties = function(t)
         if (ReactComponent.isNull(t.onChange))
             this.changeHandler = null;
         else
-        {
             this.changeHandler = Prolog._make_local(t.onChange);
-        }
     }
     if (t.align !== undefined)
     {
-        this.domNode.style["text-align"] = t.align;
+        this.domNode.style["text-align"] = Prolog._atom_chars(t.align);
     }
 }
 

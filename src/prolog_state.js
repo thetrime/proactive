@@ -42,7 +42,8 @@ PrologState.prototype.processElements = function(t)
     }
     // FIXME: use real error?
     console.log(t);
-    throw("Bad state 1");
+    console.log(Prolog._format_term(null, 1200, t));
+    throw new Error("Bad state 1");
 }
 
 PrologState.prototype.processElement = function(t, functor)
@@ -62,7 +63,7 @@ PrologState.prototype.processElement = function(t, functor)
     }
 }
 
-PrologState.prototype.formatTerm = function(options, precedence)
+PrologState.prototype.portray = function(options, precedence)
 {
     var output = "[";
     var keys = Object.keys(this.map);
@@ -118,10 +119,9 @@ PrologState.prototype.processKeyPair = function(key, value, functor)
         if (isState(value))
             this.map[key] = new PrologState(value);
         else if (Prolog._is_variable(value))
-            this.map[key] = nullTerm;
+            this.map[key] = make_null();
         else
         {
-            
             this.map[key] = reify(value);
         }
     }
@@ -138,7 +138,7 @@ PrologState.prototype.processKeyPair = function(key, value, functor)
             {
                 // Changing {foo: {bar: .....}} -> {foo: atomic-type}
                 if (Prolog._is_variable(value))
-                    this.map[key] = nullTerm;
+                    this.map[key] = make_null();
                 else
                     this.map[key] = reify(value);
             }
@@ -152,7 +152,7 @@ PrologState.prototype.processKeyPair = function(key, value, functor)
             if (isState(value))
                 this.map[key] = new PrologState(value);
             else if (Prolog._is_variable(value))
-                this.map[key] = nullTerm;
+                this.map[key] = make_null();
             else
             {
                 this.map[key] = reify(value);
@@ -176,7 +176,7 @@ PrologState.prototype.cloneWith = function(t)
     var newState = new PrologState();
     var keys = Object.keys(this.map);
     for (var i = 0; i < keys.length; i++)
-        newState.map[keys[i]] = this.map[keys[i]];
+        newState.map[keys[i]] = this.map[keys[i]]; // Maybe here?
     if (t instanceof PrologState)
     {
         keys = Object.keys(t.map);

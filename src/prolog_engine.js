@@ -102,7 +102,7 @@ PrologEngine.prototype.componentWillReceiveProps = function(component, context, 
                     {
                         if (result == 1)
                         {
-                            var ss = context.getState().cloneWith(newState);
+                            var ss = context.getState().cloneWith(Prolog._deref(newState));
                             Prolog._restore_state(savePoint);
                             context.setState(ss, function() { callback(true)});
                         }
@@ -116,14 +116,22 @@ PrologEngine.prototype.componentWillReceiveProps = function(component, context, 
                     }.bind(this));
 }
 
+var qqq = 0;
+
 PrologEngine.prototype.render = function(widget, component, state, props, callback)
 {
     var vDom = Prolog._make_variable();
-    var goal = crossModuleCall(component, Prolog._make_compound(renderFunctor, [Prolog._make_blob("state", state),
-                                                                                Prolog._make_blob("state", props),
+    var stateblob = Prolog._make_blob("state", state);
+    var propsblob = Prolog._make_blob("state", props);
+    var goal = crossModuleCall(component, Prolog._make_compound(renderFunctor, [stateblob,
+                                                                                propsblob,
                                                                                 vDom]));
     var savePoint = Prolog._save_state();
     this.env.pushProactiveContext(widget.blob);
+    qqq++;
+//    if (qqq == 145)
+//        Prolog._qqq();
+    console.log("Render( " + qqq + ": " + stateblob + "," + propsblob + "): " + Prolog._format_term(null, 1200, goal));
     Prolog._execute(this.env,
                     goal,
                     function(success)
@@ -220,25 +228,36 @@ PrologEngine.prototype.triggerEvent = function(handler, event, context, callback
         callback(false);
         return;
     }
+    console.log("Calling " + Prolog._format_term(null, 1200, goal));
     var savePoint = Prolog._save_state();
     Prolog._execute(this.env,
                     goal,
-                     function(success)
-                     {
+                    function(success)
+                    {
+                        console.log("Result of " + Prolog._format_term(null, 1200, goal) + ": " + success);
                          var ss = null;
                          if (success)
-                             ss = context.getState().cloneWith(newState)
-                         Prolog._restore_state(savePoint);
-                         if (success)
-                             context.setState(ss, function() {callback(true);}.bind(this));
-                         else
-                         {
-                             var ex = Prolog._get_exception();
-                             if (ex != 0)
-                                 console.log("trigger_event/4 raised an error: "+ Prolog._format_term(null, 1200, ex));
-                             else
-                                 console.log("trigger_event/4 failed");
-                         }
+                             ss = context.getState().cloneWith(Prolog._deref(newState))
+                        Prolog._restore_state(savePoint);
+                        if (success)
+                        {
+                            console.log("After event, state is " + Prolog._format_term(null, 1200, newState));
+                            console.log("Which SHOULD be the same as " + ss.toString());
+                            context.setState(ss, function()
+                                             {
+                                                 console.log("setState has succeeded");
+                                                 callback(true);
+                                             }.bind(this));
+                            console.log("Successfully set the state");
+                        }
+                        else
+                        {
+                            var ex = Prolog._get_exception();
+                            if (ex != 0)
+                                console.log("trigger_event/4 raised an error: "+ Prolog._format_term(null, 1200, ex));
+                            else
+                                console.log("trigger_event/4 failed");
+                        }
                      }.bind(this));
 }
 

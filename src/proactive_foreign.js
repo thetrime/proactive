@@ -39,13 +39,14 @@ function addArgs(goal, glueArgs)
 /* First, Prolog-type stuff */
 module.exports["."] = function(state, key, value)
 {
-
     if (isNull(state))
     {
         return Prolog._unify(value, Prolog._make_compound(Constants.curlyFunctor, [Constants.nullAtom]));
     }
     if (!Prolog._is_blob(state, "state"))
     {
+        console.log("Here: Failed to get state: " +  state + " isvar: " + Prolog._is_variable(state) + " vs " + Prolog._deref(state));
+        throw new Error("Oops");
         return Errors.typeError(Constants.prologStateAtom, state);
     }
     if (Prolog._is_atom(key))
@@ -64,7 +65,7 @@ module.exports["."] = function(state, key, value)
         state = Prolog._get_blob("state", state);
         for (var i = 0; i < arity; i++)
             glueArgs[i] = Prolog._term_arg(key, i);
-        var result = state.get(functor); // Really/
+        var result = state.get(functor); // Really?
         if (isNull(result))
             return Prolog._unify(value, result);
         if (Prolog._is_compound(result))
@@ -97,13 +98,30 @@ module.exports["state_to_term"] = function(state, term)
     throw new Error("FIXME: state_to_term not implemented");
 }
 
+var qOp = null;
+
+function delete_states(t)
+{
+    if (Prolog._is_blob(t, "state"))
+        return Prolog._make_variable();
+    else if (Prolog._is_compound(t))
+    {
+        var arity = Prolog._term_functor_arity(t);
+        var new_args = Array(arity);
+        for (var i = 0; i < arity; i++)
+            new_args[i] = delete_states(Prolog._term_arg(t, i));
+        return Prolog._make_compound(Prolog._term_functor(t), new_args);
+    }
+    return t;
+}
+
 module.exports["on_server"] = function(goal)
 {
     // This is quite complicated because we must mix all kinds of paradigms together :(
-    throw new Error("Not migrated yet");
     // Later we must yield execution. Prepare the resume code
     var resume = Prolog._yield();
     var ws;
+    console.log("on_server: " + this.foreign);
     if (this.foreign)
     {
         // We are backtracking. Try to get another solution by sending a ; and then yielding
@@ -113,17 +131,29 @@ module.exports["on_server"] = function(goal)
     }
     // First, create the websocket
     ws = new WebSocket(this.engine.goalURI);
+    if (qOp == null)
+    {
+        qOp = Prolog._create_options();
+        Prolog._set_option(qOp, Prolog._make_atom("quoted"), Prolog._make_atom("true"));
+    }
     ws.onopen = function()
     {
-        ws.send(Prolog.TermWriter.formatTerm({quoted:true}, 1200, goal) + ".\n");
+        ws.send(Prolog._format_term(qOp, 1200, goal) + ".\n");
+        // Since any PrologState objects in the goal will never unify with the response, replace them all with variables
+        goal = delete_states(goal);
         ws.send(";");
         // This is all we do for now. Either we will get an error, find out that the goal failed, or that it succeeded
     }
     ws.onmessage = function(event)
     {
-        //console.log("Got a message: " + util.inspect(event.data));
-        var term = Prolog.Parser.stringToTerm(event.data);
-        if (term == Prolog.Constants.failAtom)
+        console.log("Got a message: " + util.inspect(event.data));
+        var term = Prolog._string_to_local_term(event.data);
+        if (term == 0) // parse error
+        {
+            ws.close();
+            resume(false);
+        }
+        else if (term == Constants.failAtom)
         {
             ws.close();
             resume(false);
@@ -133,23 +163,29 @@ module.exports["on_server"] = function(goal)
             ws.close();
             resume(false);
         }
-        else if (TAGOF(term) == CompoundTag)
+        else if (Prolog._is_compound(term))
         {
             if (Prolog._term_functor(term) == Constants.exceptionFunctor)
             {
                 ws.close();
-                resume(Prolog._term_arg(term, 0));
+                Prolog._set_exception(Prolog._term_arg(term, 0));
+                Prolog._free_local(term);
+                resume(0);
             }
             else if (Prolog._term_functor(term) == Constants.cutFunctor)
             {
                 ws.close();
-                resume(Prolog._unify(goal, Prolog._term_arg(term, 0)));
+                var rc = Prolog._unify(goal, Prolog._term_arg(term, 0));
+                console.log("Resuming with " + Prolog._format_term(null, 1200, Prolog._term_arg(term, 0)) + ": " + rc);
+                resume(rc);
+                Prolog._free_local(term);
             }
             else
             {
                 // OK, we need a backtrack point here so we can retry
                 Prolog._create_choicepoint(ws, function() { ws.close(); });
                 resume(Prolog._unify(goal, Prolog._term_arg(term, 0)));
+                Prolog._free_local(term);
             }
         }
     }.bind(this);
@@ -157,8 +193,8 @@ module.exports["on_server"] = function(goal)
     {
         console.log("WS error: " + event);
         ws.close();
-        Errors.systemError(Prolog.AtomTerm.get(event.toString()));
-        resume(2);
+        Errors.systemError(Prolog._make_atom(event.toString()));
+        resume(0);
     }
     return 3; //  YIELD
 }

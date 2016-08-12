@@ -28,17 +28,17 @@ ReactComponent.prototype.setProperties = function(t)
         this.getDOMNode().id = t.id;
     if (t.className !== undefined)
     {
-        this.baseClassName = t.className;
+        this.baseClassName = Prolog._atom_chars(t.className);
         restyleRequired = true;
     }
     if (t.fill !== undefined)
     {
-        this.fill = t.fill;
+        this.fill = Prolog._atom_chars(t.fill);
         restyleRequired = true;
     }
     if (t.layout !== undefined)
     {
-        this.layout = t.layout;
+        this.layout = Prolog._atom_chars(t.layout);
         restyleRequired = true;
     }
     if (restyleRequired && this.getDOMNode() != null) // react_widget will restyle itself later once it has actually instantiated the DOM
