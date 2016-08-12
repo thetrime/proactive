@@ -193,9 +193,16 @@ module.exports["bubble_event"] = function(handler, event)
     if (Prolog._is_compound(handler) && Prolog._term_functor(handler) == Constants.thisFunctor)
     {
         var target = Prolog._get_blob("react_component", Prolog._term_arg(handler, 0));
+        var savedState = Prolog._save_state();
         var resume = Prolog._yield();
-        target.triggerEvent(Prolog._term_arg(handler, 1), event, resume);
-        return YIELD;
+        target.triggerEvent(Prolog._term_arg(handler, 1),
+                            event,
+                            function(t)
+                            {
+                                Prolog._restore_state(savedState);
+                                resume(t)
+                            });
+        return 3; // YIELD;
     }
     // Otherwise it is just a goal - go ahead and call it with one extra arg
     var goal;
@@ -215,8 +222,15 @@ module.exports["bubble_event"] = function(handler, event)
     var savedState = Prolog._save_state();
     var resume = Prolog._yield();
     //var resumeAlways = function(){this.restoreState(savedState); resume(true);};
-    Prolog._execute(goal, function(t) { _Prolog.restore_state(savedState); resume(t)}.bind(this));
-    return YIELD;
+    var that = this;
+    Prolog._execute(that,
+                    goal,
+                    function(t)
+                    {
+                        Prolog._restore_state(savedState);
+                        resume(t)
+                    });
+    return 3; // YIELD
 }
 
 /* And now the DOM glue */
@@ -320,7 +334,7 @@ module.exports["create_text_node"] = function(context, text, domnode)
 
 module.exports["parent_node"] = function(node, parent)
 {
-    return _Prolog.unify(parent, Prolog._get_blob("react_component", node).getParent().blob);
+    return Prolog._unify(parent, Prolog._get_blob("react_component", node).getParent().blob);
 }
 
 module.exports["node_type"] = function(node, type)
@@ -373,12 +387,14 @@ module.exports["init_widget"] = function(context, properties, domNode)
         return Errors.typeError(Constants.blobAtom, context);
     var parentContext = Prolog._get_blob("react_component", context);
     var resume = Prolog._yield();
+    var savedState = Prolog._save_state();
     var widget = new ReactWidget(parentContext,
                                  parentContext.getEngine(),
                                  Prolog._atom_chars(Prolog._term_arg(properties, 0)),
                                  PrologState.fromList(Prolog._term_arg(properties, 1)),
                                  function(widget)
                                  {
+                                     Prolog._restore_state(savedState);
                                      resume(Prolog._unify(domNode, widget.blob));
                                  }.bind(this));
     return 3; // YIELD
@@ -387,19 +403,22 @@ module.exports["init_widget"] = function(context, properties, domNode)
 module.exports["update_widget"] = function(newVDom, oldVDom, widget, newDomNode)
 {
     var newProperties = PrologState.fromList(Prolog._term_arg(newVDom, 1));
-    newProperties.map.children = Prolog._term_arg(newVDom, 2);
+    newProperties.processKeyPair("children", Prolog._term_arg(newVDom, 2));
     var resume = Prolog._yield();
+    var savedState = Prolog._save_state();
     Prolog._get_blob("react_component", widget).updateWidget(newProperties, function(newWidget)
-                                                           {
-                                                               if (newWidget === Prolog._get_blob("react_component", widget))
-                                                               {
-                                                                   resume(Prolog._unify(newDomNode, widget));
-                                                               }
-                                                               else
-                                                               {
-                                                                   resume(Prolog._unify(newDomNode, newWidget.blob))
-                                                               };
-                                                           }.bind(this));
+                                                             {
+                                                                 Prolog._restore_state(savedState);
+                                                                 if (newWidget === Prolog._get_blob("react_component", widget))
+                                                                 {
+                                                                     resume(Prolog._unify(newDomNode, widget));
+                                                                 }
+                                                                 else
+                                                                 {
+                                                                     console.log("Made a new widget");
+                                                                     resume(Prolog._unify(newDomNode, newWidget.blob))
+                                                                 };
+                                                             }.bind(this));
 
     return 3; // YIELD;
 }

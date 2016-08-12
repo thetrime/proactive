@@ -128,6 +128,7 @@ ReactComponent.serialize = function(properties)
     {
         result = Prolog._make_compound(Constants.listFunctor, [Prolog._make_compound(Constants.equalsFunctor, [Prolog._make_atom(keys[i]), properties[keys[i]]]), result]);
     }
+    //console.log("Made an event from " + keys[0] + ":" + properties[keys[0]] + "-> " + Prolog._format_term(null, 1200, result))
     return result;
 }
 

@@ -91,6 +91,9 @@ ReactWidget.prototype.reRender = function(callback)
 {
     this.engine.render(this, this.elementId, this.state, this.props, function(newVDom)
                        {
+                           var qOp = Prolog._create_options();
+                           Prolog._set_option(qOp, Prolog._make_atom("quoted"), Prolog._make_atom("true"));
+                           Prolog._free_options(qOp);
                            this.engine.diff(this.vDom, newVDom, function(patches)
                                             {
                                                 this.engine.applyPatch(patches, this.internalComponent, function()

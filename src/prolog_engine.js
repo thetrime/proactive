@@ -211,7 +211,7 @@ PrologEngine.prototype.triggerEvent = function(handler, event, context, callback
         args[i++] = Prolog._make_blob("state", state);
         args[i++] = Prolog._make_blob("state", props);
         args[i++] = newState;
-        console.log("Here: " + Prolog._format_term(null, 1200, handler));
+        //console.log("Here: " + Prolog._format_term(null, 1200, handler));
         goal = crossModuleCall(context.getComponentName(), Prolog._make_compound(Prolog._term_functor_name(handler), args));
     }
     else
@@ -253,17 +253,20 @@ PrologEngine.prototype.diff = function(a, b, callback)
                     {
                         if (success)
                         {
-                            callback(patchTerm);
+                            var copy = Prolog._make_local(patchTerm);
+                            Prolog._restore_state(savePoint);
+                            callback(copy);
+                            Prolog._free_local(copy);
                         }
                         else
-                         {
+                        {
+                            Prolog._restore_state(savePoint);
                              var ex = Prolog._get_exception();
                              if (ex != 0)
                                  console.log("vdiff/3 raised an error: " + Prolog._format_term(null, 1200, ex));
                              else
                                  console.log("vdiff/3 failed");
                          }
-                        Prolog._restore_state(savePoint);
                     }.bind(this));
 }
 

@@ -53,7 +53,7 @@ PrologState.prototype.processElement = function(t, functor)
         var value = Prolog._term_arg(t, 1);
         if (!Prolog._is_atom(key))
             return Errors.typeError(Constants.atomAtom, key);
-        this.processKeyPair(key, value, functor);
+        this.processKeyPair(Prolog._atom_chars(key), value, functor);
     }
     else
     {
@@ -104,25 +104,25 @@ function reify(t)
         return t;
     if (Prolog._is_compound(t))
     {
-        var result =  Prolog._make_local(t);
-        return result;
+        return Prolog._make_local(t);
     }
 }
 
+// key should be a Javascript string
 PrologState.prototype.processKeyPair = function(key, value, functor)
 {
-    var existingValue = this.map[Prolog._atom_chars(key)];
+    var existingValue = this.map[key];
     if (existingValue === undefined)
     {
 
         if (isState(value))
-            this.map[Prolog._atom_chars(key)] = new PrologState(value);
+            this.map[key] = new PrologState(value);
         else if (Prolog._is_variable(value))
-            this.map[Prolog._atom_chars(key)] = nullTerm;
+            this.map[key] = nullTerm;
         else
         {
             
-            this.map[Prolog._atom_chars(key)] = reify(value);
+            this.map[key] = reify(value);
         }
     }
     else
@@ -132,32 +132,30 @@ PrologState.prototype.processKeyPair = function(key, value, functor)
             if (isState(value))
             {
                 // Merge
-                this.map[Prolog._atom_chars(key)] = existingValue.cloneWith(value);
+                this.map[key] = existingValue.cloneWith(value);
             }
             else
             {
                 // Changing {foo: {bar: .....}} -> {foo: atomic-type}
                 if (Prolog._is_variable(value))
-                    this.map[Prolog._atom_chars(key)] = nullTerm;
+                    this.map[key] = nullTerm;
                 else
-                    this.map[Prolog._atom_chars(key)] = reify(value);
+                    this.map[key] = reify(value);
             }
         }
         else
         {
             if (Prolog._is_compound(existingValue))
             {
-                //console.log("Freeing value " + existingValue);
-                //Prolog._free_local(existingValue);
-                //console.log("Done");
+                Prolog._free_local(existingValue);
             }
             if (isState(value))
-                this.map[Prolog._atom_chars(key)] = new PrologState(value);
+                this.map[key] = new PrologState(value);
             else if (Prolog._is_variable(value))
-                this.map[Prolog._atom_chars(key)] = nullTerm;
+                this.map[key] = nullTerm;
             else
             {
-                this.map[Prolog._atom_chars(key)] = reify(value);
+                this.map[key] = reify(value);
             }
         }
     }
