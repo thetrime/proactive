@@ -113,6 +113,19 @@ function reify(t)
     }
 }
 
+PrologState.prototype.freeState = function()
+{
+    var keys = Object.keys(this.map);
+    for (var i = 0; i < keys.length; i++)
+    {
+        var value = this.map[keys[i]];
+        if (Prolog._is_compound(value))
+            Prolog._free_local(value);
+        else if (Prolog._is_blob(value, "state"))
+            Prolog._get_blob(value, "state").freeState();
+    }
+}
+
 // key should be a Javascript string
 PrologState.prototype.processKeyPair = function(key, value, functor)
 {
@@ -140,6 +153,7 @@ PrologState.prototype.processKeyPair = function(key, value, functor)
             }
             else
             {
+                existingValue.freeState();
                 // Changing {foo: {bar: .....}} -> {foo: atomic-type}
                 if (Prolog._is_variable(value))
                     this.map[key] = make_null();
@@ -180,7 +194,7 @@ PrologState.prototype.cloneWith = function(t)
     var newState = new PrologState();
     var keys = Object.keys(this.map);
     for (var i = 0; i < keys.length; i++)
-        newState.map[keys[i]] = this.map[keys[i]]; // Maybe here?
+        newState.map[keys[i]] = this.map[keys[i]];
     if (Prolog._is_blob(t, "state"))
     {
         t = Prolog._get_blob("state", t);

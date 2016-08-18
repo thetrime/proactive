@@ -75,6 +75,8 @@ ReactWidget.prototype.setState = function(newState, callback)
 
 ReactWidget.prototype.updateWidget = function(newProps, callback)
 {
+    if (this.props != undefined)
+        this.props.freeState();
     this.props = newProps;
     this.engine.componentWillReceiveProps(this.elementId, this,
                                           function(didReceive)
