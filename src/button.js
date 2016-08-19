@@ -39,7 +39,7 @@ Button.prototype.setClickHandler = function(value)
             this.domNode.onClick = undefined;
         return;
     }
-    this.clickHandler = value;
+    this.clickHandler = Prolog._make_local(value);
     console.log("Creating event handler on " + this.domNode.textContent);
     this.domNode.onclick = clickHandler.bind(this);
 }
