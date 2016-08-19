@@ -128,8 +128,8 @@ module.exports["on_server"] = function(goal)
     // Later we must yield execution. Prepare the resume code
     var resume = Prolog._yield();
     var ws;
-    console.log("Server goal: " + Prolog._format_term(null, 1200, goal));
-    console.log("on_server: " + this.foreign);
+    //console.log("Server goal: " + Prolog._format_term(null, 1200, goal));
+    //console.log("on_server: " + this.foreign);
     if (this.foreign)
     {
         // We are backtracking. Try to get another solution by sending a ; and then yielding
@@ -432,11 +432,19 @@ module.exports["replace_node_data"] = function(domNode, properties)
 module.exports["destroy_widget"] = function(domNode, vNode)
 {
     var widget = Prolog._get_blob("react_component", domNode);
-    console.log(widget);
-    console.log("Here: " + widget.destroyWidget);
+//    console.log(widget);
+//    console.log("Here: " + widget.destroyWidget);
     widget.destroyWidget(vNode);
     return true;
 }
+
+module.exports["destroy_component"] = function(domNode, vNode)
+{
+    var component = Prolog._get_blob("react_component", domNode);
+    component.freeComponent(vNode);
+    return true;
+}
+
 
 module.exports["init_widget"] = function(context, properties, domNode)
 {

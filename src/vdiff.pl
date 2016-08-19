@@ -544,7 +544,8 @@ patch_op(remove_patch(VNode, _), DomNode, _Options, NewNode):-
         ; otherwise->
             true
         ),
-        destroy_widget(DomNode, VNode),
+        writeln(case1),
+        destroy_component(DomNode, VNode),
         NewNode = {null}.
 
 patch_op(insert_patch(_ActualVNode, VNode), ParentNode, Options, ParentNode):-
@@ -590,7 +591,8 @@ patch_op(widget_patch(LeftVNode, Widget), DomNode, Options, NewNode):-
         ( Updating == true ->
             true
         ; otherwise->
-            destroy_widget(DomNode, LeftVNode)
+            writeln(case2(DomNode)),
+            destroy_component(DomNode, LeftVNode)
         ).
 
 
@@ -720,4 +722,6 @@ qnth0(I, [_|X], Y):-
 
 
 create_element_from_vdom(Options, VDom, Element):-
-        render(Options, VDom, Element).
+        render(Options, VDom, Element),
+        %writeln(rendered(VDom)).
+        true.
