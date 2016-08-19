@@ -5,6 +5,7 @@ var Prolog = require('../lib/proscript2/build/proscript.js');
 module.exports = {emptyListAtom: Prolog._make_atom("[]"),
                   curlyFunctor: Prolog._make_functor(Prolog._make_atom("{}"), 1),
                   curlyAtom: Prolog._make_atom("{}"),
+                  listAtom : Prolog._make_atom("list"),
                   gluableAtom: Prolog._make_atom("gluable"),
                   atomAtom: Prolog._make_atom("atom"),
                   blobAtom: Prolog._make_atom("blob"),
