@@ -70,7 +70,7 @@ PrologEngine.prototype.getInitialState = function(component, props, callback)
                     {
                         if (success)
                         {
-                            var state = new PrologState(replyTerm);
+                            var state = new PrologState(Prolog._deref(replyTerm));
                             Prolog._restore_state(savePoint);
                             //console.log("getInitialState has succeeded: " + state);
                             callback(state);
