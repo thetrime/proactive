@@ -2,7 +2,7 @@
 var PrologEngine = require('./prolog_engine');
 var ReactWidget = require('./react_widget');
 var PrologState = require('./prolog_state');
-
+var Prolog = require('../lib/proscript2/build/proscript.js');
 function render(url, rootElementId, container, callback)
 {
     var engine = new PrologEngine(url, rootElementId, function()
@@ -17,4 +17,5 @@ function render(url, rootElementId, container, callback)
 }
 
 
-module.exports = {render: render};
+module.exports = {render: render,
+                  _qqq: Prolog._qqq};
