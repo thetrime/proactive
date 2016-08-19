@@ -12,8 +12,6 @@ function Button()
 
 function clickHandler(event)
 {
-    console.log("Event: " + event);
-    console.log(this);
     this.getOwnerDocument().triggerEvent(this.clickHandler, Constants.emptyListAtom, function() {});
 }
 
