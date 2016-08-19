@@ -124,6 +124,7 @@ PrologState.prototype.freeState = function()
         else if (Prolog._is_blob(value, "state"))
             Prolog._get_blob(value, "state").freeState();
     }
+    Prolog._release_blob("state", this.blob);
 }
 
 // key should be a Javascript string
