@@ -69,6 +69,10 @@ ReactWidget.prototype.getComponentName = function()
 
 ReactWidget.prototype.setState = function(newState, callback)
 {
+    if (this.state != undefined && !this.state.is_global)
+    {
+        Prolog._release_blob("state", this.state.blob);
+    }
     this.state = newState;
     this.reRender(callback);
 }

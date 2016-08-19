@@ -21,6 +21,7 @@ function PrologState(t)
 {
     this.id = global_state_id++;
     this.blob = Prolog._make_blob("state", this);
+//    console.log("Created state " + this.blob + " at " + new Error().stack);
     this.map = {};
     if (arguments.length > 0)
         this.processElements(t);
@@ -124,6 +125,7 @@ PrologState.prototype.freeState = function()
         else if (Prolog._is_blob(value, "state"))
             Prolog._get_blob(value, "state").freeState();
     }
+//    console.log("Freed state " + this.blob);
     Prolog._release_blob("state", this.blob);
 }
 
@@ -205,6 +207,7 @@ PrologState.prototype.cloneWith = function(t)
     }
     else
         newState.processElements(t);
+
     return newState;
 }
 
@@ -231,5 +234,6 @@ PrologState.fromList = function(t)
 
 
 PrologState.emptyState = new PrologState();
+PrologState.emptyState.is_global = 1;
 
 module.exports = PrologState;
