@@ -100,7 +100,9 @@ module.exports["."] = function(state, key, value)
 
 module.exports["state_to_term"] = function(state, term)
 {
-    throw new Error("FIXME: state_to_term not implemented");
+    if (isNull(state))
+        return Prolog._unify(state, term);
+    return Prolog._unify(term, Prolog._get_blob("state", state).toTerm());
 }
 
 var qOp = null;
@@ -126,6 +128,7 @@ module.exports["on_server"] = function(goal)
     // Later we must yield execution. Prepare the resume code
     var resume = Prolog._yield();
     var ws;
+    console.log("Server goal: " + Prolog._format_term(null, 1200, goal));
     console.log("on_server: " + this.foreign);
     if (this.foreign)
     {
@@ -373,9 +376,18 @@ module.exports["create_text_node"] = function(context, text, domnode)
     return Prolog._unify(domnode, node.blob);
 }
 
+function make_null()
+{
+    return Prolog._make_compound(Constants.curlyFunctor, [Constants.nullAtom]);
+}
+
 module.exports["parent_node"] = function(node, parent)
 {
-    return Prolog._unify(parent, Prolog._get_blob("react_component", node).getParent().blob);
+    var p = Prolog._get_blob("react_component", node).getParent();
+    if (p == null)
+        return Prolog._unify(parent, make_null());
+    else
+        return Prolog._unify(parent, p.blob);
 }
 
 module.exports["node_type"] = function(node, type)
@@ -417,9 +429,13 @@ module.exports["replace_node_data"] = function(domNode, properties)
     throw new Error("FIXME: replace_node_data not implemented");
 }
 
-module.exports["destroy_widget"] = function(domNode)
+module.exports["destroy_widget"] = function(domNode, vNode)
 {
-    throw new Error("FIXME: destroy_widget not implemented");
+    var widget = Prolog._get_blob("react_component", domNode);
+    console.log(widget);
+    console.log("Here: " + widget.destroyWidget);
+    widget.destroyWidget(vNode);
+    return true;
 }
 
 module.exports["init_widget"] = function(context, properties, domNode)

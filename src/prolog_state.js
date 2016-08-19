@@ -94,6 +94,26 @@ PrologState.prototype.toString = function()
     return "{prolog-state: " + mapinfo + "]}";
 }
 
+PrologState.prototype.toTerm = function()
+{
+    var t = null;
+    var keys = Object.keys(this.map);
+    if (keys.length == 0)
+        return Constants.curlyAtom;
+    for (var i = 0; i < keys.length; i++)
+    {
+        var value = this.map[keys[i]];
+        if (Prolog._is_blob(value, "state"))
+            value = Prolog._get_blob("state", value).toTerm();
+        if (t == null)
+            t = Prolog._make_compound(Constants.colonFunctor, [Prolog._make_atom(keys[i]), value])
+        else
+            t = Prolog._make_compound(Constants.commaFunctor, [Prolog._make_compound(Constants.colonFunctor, [Prolog._make_atom(keys[i]), value]), t]);
+    }
+    return Prolog._make_compound(Constants.curlyFunctor, [t]);
+
+}
+
 PrologState.prototype.hashCode = function()
 {
     return this.id;

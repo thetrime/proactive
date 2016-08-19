@@ -92,6 +92,19 @@ ReactWidget.prototype.updateWidget = function(newProps, callback)
                                           }.bind(this));
 }
 
+ReactWidget.prototype.destroyWidget = function(vNode)
+{
+    console.log("ohai");
+    this.freeComponent(vNode);
+}
+
+ReactWidget.prototype.freeComponent = function(vNode)
+{
+    this.state.freeState();
+    this.props.freeState();
+    Prolog._release_blob("react_component", this.blob);
+    ReactComponent.prototype.freeComponent.call(this, vNode); //ie super.freeComponent(vNode)
+}
 
 ReactWidget.prototype.reRender = function(callback)
 {
@@ -111,8 +124,6 @@ ReactWidget.prototype.reRender = function(callback)
                                             }.bind(this));
                        }.bind(this));
 }
-
-
 
 ReactWidget.prototype.triggerEvent = function(handler, event, callback)
 {

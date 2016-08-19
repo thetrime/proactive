@@ -12,8 +12,15 @@ function ReactComponent()
     this.children = [];
     this.parent = Constants.nullAtom;
     this.blob = Prolog._make_blob("react_component", this);
-
 }
+
+ReactComponent.prototype.freeComponent = function(v)
+{
+    var children = this.getChildren();
+    for (var i = 0; i < children.length; i++)
+        children[i].freeComponent();
+}
+
 
 ReactComponent.prototype.setDOMNode = function(n)
 {
