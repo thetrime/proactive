@@ -136,6 +136,8 @@ function reify(t)
 
 PrologState.prototype.freeState = function()
 {
+    if (this.is_global)
+        return;
     var keys = Object.keys(this.map);
     for (var i = 0; i < keys.length; i++)
     {
