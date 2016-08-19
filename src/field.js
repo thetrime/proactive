@@ -172,8 +172,16 @@ function Field()
 
     // So, first add onTextInput, since if that is around it does most of what we need
 
-    this.domNode.nodeCallback = textInputHandler.bind(this);
-    //this.domNode.debugStuff = this.debugStuff.bind(this);
+    //this.domNode.nodeCallback = textInputHandler.bind(this);
+    this.qqq = 0;
+    this.domNode.nodeCallback = function()
+    {
+        if (((this.qqq++) % 2) == 0)
+            this.valueWouldChange("qqqqqqqq");
+        else
+            this.valueWouldChange("xxxxxxxx");
+    }.bind(this);
+
 
     this.domNode.addEventListener("textInput", textInputHandler.bind(this), false);
     // Also add in a handler that JUST listens for deletes
@@ -199,6 +207,7 @@ Field.prototype.valueWouldChange = function(newValue)
     var d0 = new Date().getTime();
     if (this.changeHandler != null)
     {
+
         this.getOwnerDocument().triggerEvent(this.changeHandler, ReactComponent.serialize({value: Prolog._make_atom(newValue)}), handlerCallback);
         /*
         this.getOwnerDocument().triggerEvent(this.changeHandler, ReactComponent.serialize({value: Prolog._make_atom(newValue)}),
@@ -207,7 +216,7 @@ Field.prototype.valueWouldChange = function(newValue)
                                                  var d1 = new Date().getTime();
                                                  if (typeof(GLOBAL) != undefined)
                                                     GLOBAL.total += (d1 - d0);
-                                                 console.log("Processing time: " + (d1-d0) + "ms");
+                                                 //console.log("Processing time: " + (d1-d0) + "ms");
                                              }.bind(this));
         */
     }
