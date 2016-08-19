@@ -58,6 +58,11 @@ module.exports["."] = function(state, key, value)
     }
     if (Prolog._is_compound(key))
     {
+        // For example foo={this.bar(x)} to mean
+        // A = this.bar
+        // B = A.x
+        // foo = {B}
+        // FIXME: Why not just put foo={this.bar.x} ?
         var term = key;
         var functor = Prolog._term_functor(key);
         var glueArgs = [];
@@ -65,7 +70,7 @@ module.exports["."] = function(state, key, value)
         state = Prolog._get_blob("state", state);
         for (var i = 0; i < arity; i++)
             glueArgs[i] = Prolog._term_arg(key, i);
-        var result = state.get(functor); // Really?
+        var result = state.get(Prolog._term_functor_name(key));
         if (isNull(result))
             return Prolog._unify(value, result);
         if (Prolog._is_compound(result))
@@ -77,13 +82,13 @@ module.exports["."] = function(state, key, value)
                     var module = Prolog._term_arg(Prolog._term_arg(key, 1), 0);
                     var goal = Prolog._term_arg(Prolog._term_arg(key, 1), 1);
                     var newGoal = addArgs(goal, glueArgs);
-                    return Prolog._unify(value, Prolog._make_compound(Prolog._term_functor(result), [_term_arg(term, 0), Prolog._make_compound(Constants.crossModuleCallFunctor, [module, newGoal])]));
+                    return Prolog._unify(value, Prolog._make_compound(Prolog._term_functor(result), [Prolog._term_arg(term, 0), Prolog._make_compound(Constants.crossModuleCallFunctor, [module, newGoal])]));
                 }
                 else
                 {
                     // No module
-                    var newGoal = addArgs(Prolog._term_arg(term, 1), glueArgs);
-                    return Prolog._unify(value, Prolog._make_compound(Prolog._term_functor(result), [_term_arg(term, 0), newGoal]));
+                    var newGoal = addArgs(term, glueArgs);
+                    return Prolog._unify(value, Prolog._make_compound(Prolog._term_functor(result), [Prolog._term_arg(term, 0), newGoal]));
                 }
             }
             return Errors.typeError(Constants.gluableAtom, term);
