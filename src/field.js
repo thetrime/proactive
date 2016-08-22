@@ -229,7 +229,11 @@ Field.prototype.setProperties = function(t)
 {
     if (t.type !== undefined)
     {
-        var newType = Prolog._atom_chars(t.type);
+        var newType;
+        if (ReactComponent.isNull(t.type))
+            newType = "text";
+        else
+            newType = Prolog._atom_chars(t.type);
         if (newType != this.type)
         {
             this.type = newType;
