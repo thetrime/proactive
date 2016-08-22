@@ -12,6 +12,8 @@ var Row = require('./row');
 var Field = require('./field');
 var ComboBox = require('./combo_box');
 var ComboItem = require('./combo_item');
+var Title = require('./title');
+
 module.exports.createElement = function(name)
 {
     var element;
@@ -23,6 +25,7 @@ module.exports.createElement = function(name)
         case "List": return new List();
         case "ListItem": return new ListItem();
         case "Table": return new Table();
+        case "Title": return new Title();
         case "TableHeader": return new TableHeader();
         case "Row": return new Row();
         case "Field": return new Field();
