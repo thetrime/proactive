@@ -4,7 +4,7 @@ var Prolog = require('../lib/proscript2/build/proscript.js');
 function Label()
 {
     ReactComponent.call(this);
-    this.setDOMNode(document.createElement("div"));
+    this.setDOMNode(document.createElement("label"));
 }
 Label.prototype = new ReactComponent;
 
@@ -12,7 +12,13 @@ Label.prototype.setProperties = function(t)
 {
     ReactComponent.prototype.setProperties.call(this, t);
     if (t.label !== undefined)
-        this.domNode.textContent = Prolog._portray(t.label);
+    {
+        var v = Prolog._portray(t.label);
+        if (v.startsWith("<html>"))
+            this.domNode.innerHTML = v;
+        else
+            this.domNode.textContent = v;
+    }
 }
 
 module.exports = Label;
