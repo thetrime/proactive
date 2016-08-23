@@ -19,6 +19,14 @@ Label.prototype.setProperties = function(t)
         else
             this.domNode.textContent = v;
     }
+    if (t["for"] !== undefined)
+    {
+        var f = t["for"];
+        if (ReactComponent.isNull(f))
+            this.domNode.htmlFor = '';
+        else
+            this.domNode.htmlFor = Prolog._portray(f);
+    }
 }
 
 module.exports = Label;
