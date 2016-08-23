@@ -11,6 +11,7 @@ function ReactComponent()
     this.baseClassName = "";
     this.children = [];
     this.parent = Constants.nullAtom;
+    this.align_children = "start";
     this.blob = Prolog._make_blob("react_component", this);
 }
 
@@ -31,7 +32,7 @@ ReactComponent.prototype.setDOMNode = function(n)
 ReactComponent.prototype.setProperties = function(t)
 {
     var restyleRequired = false;
-    if (t.id !== undefined)
+    if (t.id !== undefined && this.getDOMNode() != null)
         this.getDOMNode().id = t.id;
     if (t.className !== undefined)
     {
@@ -41,6 +42,11 @@ ReactComponent.prototype.setProperties = function(t)
     if (t.fill !== undefined)
     {
         this.fill = Prolog._atom_chars(t.fill);
+        restyleRequired = true;
+    }
+    if (t["align-children"] !== undefined)
+    {
+        this.align_children = Prolog._atom_chars(t["align-children"]);
         restyleRequired = true;
     }
     if (t.layout !== undefined)
@@ -71,10 +77,13 @@ ReactComponent.prototype.restyle = function()
     if (this.layout == "vertical")
         newClassName += " vertical_layout";
     else if (this.layout == "horizontal")
-    {
         newClassName += " horizontal_layout";
-    }
+    if (this.align_children == "center")
+        newClassName += " align_center";
+
+
     this.getDOMNode().className = newClassName;
+
 }
 
 ReactComponent.prototype.setOwnerDocument = function(d)
