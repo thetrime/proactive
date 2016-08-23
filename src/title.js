@@ -4,7 +4,7 @@ var Prolog = require('../lib/proscript2/build/proscript.js');
 function Title()
 {
     ReactComponent.call(this);
-    this.setDOMNode(document.createElement("h2"));
+    this.setDOMNode(document.createElement("h3"));
 }
 Title.prototype = new ReactComponent;
 
