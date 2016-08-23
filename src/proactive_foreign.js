@@ -122,13 +122,12 @@ function delete_states(t)
     return t;
 }
 
-module.exports["on_server"] = function(goal)
+module.exports["_on_server"] = function(goal)
 {
     // This is quite complicated because we must mix all kinds of paradigms together :(
     // Later we must yield execution. Prepare the resume code
     var resume = Prolog._yield();
     var ws;
-    //console.log("Server goal: " + Prolog._format_term(null, 1200, goal));
     //console.log("on_server: " + this.foreign);
     if (this.foreign)
     {
@@ -144,6 +143,7 @@ module.exports["on_server"] = function(goal)
         qOp = Prolog._create_options();
         Prolog._set_option(qOp, Prolog._make_atom("quoted"), Prolog._make_atom("true"));
     }
+    //console.log("Server goal: " + Prolog._format_term(qOp, 1200, goal));
     ws.onopen = function()
     {
         ws.send(Prolog._format_term(qOp, 1200, goal) + ".\n");
@@ -154,7 +154,7 @@ module.exports["on_server"] = function(goal)
     }
     ws.onmessage = function(event)
     {
-        console.log("Got a message: " + util.inspect(event.data));
+        //console.log("Got a message: " + util.inspect(event.data));
         var term = Prolog._string_to_local_term(event.data);
         if (term == 0) // parse error
         {
@@ -230,6 +230,13 @@ module.exports["get_this"] = function(t)
 {
     return Prolog._unify(t, this.proactive_context[this.proactive_context.length-1]);
 }
+
+module.exports["widget_id"] = function(t)
+{
+    var id = Prolog._get_blob("react_component", this.proactive_context[this.proactive_context.length-1]).id;
+    return Prolog._unify(t, Prolog._make_atom(id));
+}
+
 
 
 module.exports["bubble_event"] = function(handler, event)

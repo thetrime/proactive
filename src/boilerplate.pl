@@ -53,3 +53,8 @@ vdiff_warning(X):-
 
 debug_message(X):-
         writeln(X).
+
+:-meta_predicate(on_server(0)).
+
+on_server(Goal):-
+        '_on_server'(Goal).

@@ -3,6 +3,8 @@
 var ReactComponent = require('./react_component');
 var Prolog = require('../lib/proscript2/build/proscript.js');
 
+var global_widget_id = 0;
+
 function ReactWidget(parentContext, engine, elementId, props, callback)
 {
     ReactComponent.call(this);
@@ -12,6 +14,7 @@ function ReactWidget(parentContext, engine, elementId, props, callback)
     this.owner = parentContext;
     this.vDom = null;
     this.internalComponent = null;
+    this.id = "$widget" + (global_widget_id++);
 
     this.setProperties(props.getProperties());
     // FIXME: Create a CodeChangeListener
