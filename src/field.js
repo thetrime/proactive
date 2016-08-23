@@ -156,7 +156,7 @@ function Field()
     ReactComponent.call(this);
     this.changeHandler = null;
     var node = document.createElement("input");
-    node.id = "field_" + (global_field_id++);
+    //node.id = "field_" + (global_field_id++);
     this.setDOMNode(node);
     this.type = "text";
     this.verifyValue = null;
@@ -291,6 +291,13 @@ Field.prototype.setProperties = function(t)
     if (t.align !== undefined)
     {
         this.domNode.style["text-align"] = Prolog._atom_chars(t.align);
+    }
+    if (t.id !== undefined)
+    {
+        if (ReactComponent.isNull(t.id))
+            this.domNode.id = null;
+        else
+            this.domNode.id = Prolog._portray(t.id);
     }
 }
 
