@@ -1,9 +1,27 @@
 /* Layout */
+
+.scrollx
+{
+    overflow-x: scroll;
+}
+
+.scrolly
+{
+    overflow-y: scroll;
+}
+
+.scroll
+{
+    overflow: scroll;
+}
+
+
 .horizontal_layout
 {
     -webkit-box-orient: horizontal;
     -webkit-flex-direction: row;
     flex-direction: row;
+    box-sizing: border-box;
 }
 
 .vertical_layout
@@ -11,6 +29,7 @@
     -webkit-box-orient: vertical;
     -webkit-flex-direction: column;
     flex-direction: column;
+    box-sizing: border-box;
 
 }
 
@@ -25,6 +44,7 @@
     -webkit-flex: 1; 
     -webkit-box-flex: 1;
     flex: 1 0 auto;
+    /*min-height: -webkit-min-content;*/
 }
 
 .horizontal_layout > .horizontal_fill
@@ -32,12 +52,18 @@
     -webkit-flex: 1;  
     -webkit-box-flex: 1;
     flex: 1 0 auto;
+    min-height: -webkit-min-content;
 }
 
 .horizontal_layout > .vertical_fill
 {
     -webkit-align-self: stretch;
     align-self: stretch;
+}
+
+.proactive_container > .scrollpane
+{
+    flex: 1;
 }
 
 .no_fill
@@ -60,6 +86,7 @@
     display: -o-flex;
     display: -ms-flex;
     display: flex;
+    box-sizing: border-box;
     /*
     -webkit-box-pack: center;
     -moz-box-pack: center;
@@ -69,58 +96,97 @@
 */
 }
 
-/* Tabs */
-.tabs 
+
+
+.align_center
 {
-    position: relative;   
-    box-sizing: border-box;
-    clear: both;
-    margin: 5px 0;
+    -webkit-box-pack: center;
+    -moz-box-pack: center;
+    -webkit-justify-content: center;
+    -ms-flex-pack: center;
+    justify-content: center;
+
 }
- 
-.tab 
+
+.not_selected_tab
+{
+    display: none;
+}
+
+.selected_tab
+{
+    display: flex;
+    border: 2px groove threedface;
+}
+
+
+.title
+{
+    display: h2;
+}
+
+.fieldset
+{
+    border: 2px groove threedface;
+    border-top: none;
+    padding: 0.5em;
+    margin: 1em 2px;
+}
+
+.fieldset > h1
+{
+    font: 1em normal;
+    margin: -1em -0.5em 0;
+}   
+.fieldset > h1 > span
 {
     float: left;
 }
-
-.tab > label
+.fieldset > h1:before
 {
-    background: #eee; 
-    padding: 4px; 
-    border: 1px solid #ccc; 
-    margin-left: -1px; 
+    border-top: 2px groove threedface;
+    content: ' ';
+    float: left;
+    margin: 0.5em 2px 0 -1px;
+    width: 0.75em;
+}
+.fieldset > h1:after
+{
+    border-top: 2px groove threedface;
+    content: ' ';
+    display: block;
+    height: 1.5em;
+    left: 2px;
+    margin: 0 1px 0 0;
+    overflow: hidden;
     position: relative;
-    left: 1px; 
+    top: 0.5em;
 }
-
-.content 
-{
-    position: absolute;
-    top: 22px;
-    left: 0;
-    background: white;
-    right: 0;
-    bottom: 5px;
-    padding: 5px 5px 20px 20px;
-    box-sizing: border-box;
-    border: 1px solid #ccc;
-    overflow: scroll;
-}
-
-.tab > input:checked ~ label 
-{
-    background: white;
-    border-bottom: 1px solid white;
-    z-index: 2;
-}
-
-.tab > input:checked ~ label ~ .content 
-{
-    z-index: 1;
-}
-
 
 body
 {
-    background: rgb(150,168,200);
+    margin: 0;
+    height: 100%;
+    padding: 0;
+    box-sizing: border-box;
+    border: solid 1px green;
+    overflow: hidden;
+}
+
+.tabs
+{
+    display: flex;
+    box-sizing: border-box;
+}
+
+label
+{
+    padding-left: 5px;
+    padding-right: 5px;
+}
+
+.field
+{
+    padding-left: 5px;
+    padding-right: 5px;
 }
