@@ -31,14 +31,13 @@ Panel.prototype.setProperties = function(t)
         if (ReactComponent.isNull(t.scroll))
             this.baseClassName = "proactive_container";
         else if (Prolog._portray(t.scroll) == "both")
-            this.baseClassName = "proactive_container scrollx scrolly";
+            this.baseClassName = "proactive_container scrollpane scroll";
         else if (Prolog._portray(t.scroll) == "horizontal")
-            this.baseClassName = "proactive_container scrollx";
+            this.baseClassName = "proactive_container scrollpane scrollx";
         else if (Prolog._portray(t.scroll) == "vertical")
-            this.baseClassName = "proactive_container scrolly";
+            this.baseClassName = "proactive_container scrollpane scrolly";
         this.restyle();
     }
-
 }
 
 module.exports = Panel;
