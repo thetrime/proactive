@@ -2,7 +2,11 @@
 var PrologEngine = require('./prolog_engine');
 var ReactWidget = require('./react_widget');
 var PrologState = require('./prolog_state');
+var Constants = require('./constants');
 var Prolog = require('../lib/proscript2/build/proscript.js');
+var ReactComponent = require('./react_component.js');
+var ProactiveComponentFactory = require('./proactive_component_factory.js');
+
 function render(url, rootElementId, container, callback)
 {
     var engine = new PrologEngine(url, rootElementId, function()
@@ -18,4 +22,8 @@ function render(url, rootElementId, container, callback)
 
 
 module.exports = {render: render,
-                  _qqq: Prolog._qqq};
+                  registerComponent: ProactiveComponentFactory.registerComponent,
+                  ReactComponent: ReactComponent,
+                  Constants: Constants,
+                  make_atom: Prolog._make_atom,
+                  _qqqx: Prolog._qqq};

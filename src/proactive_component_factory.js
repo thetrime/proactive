@@ -14,9 +14,13 @@ var ComboBox = require('./combo_box');
 var ComboItem = require('./combo_item');
 var Title = require('./title');
 
+var overrides = {};
+
 module.exports.createElement = function(name)
 {
     var element;
+    if (overrides[name] != undefined)
+        return overrides[name]();
     switch(name)
     {
         case "Panel": return new Panel();
@@ -35,5 +39,10 @@ module.exports.createElement = function(name)
         case "ComboItem": return new ComboItem();
         default: return new Broken(name);
     }
+}
+
+module.exports.registerComponent = function(name, constructor)
+{
+    overrides[name] = constructor;
 }
 

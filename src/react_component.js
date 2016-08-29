@@ -74,10 +74,14 @@ ReactComponent.prototype.restyle = function()
         newClassName += " vertical_fill";
     else if (this.fill == "both")
         newClassName += " vertical_fill horizontal_fill";
+
     if (this.layout == "vertical")
         newClassName += " vertical_layout";
     else if (this.layout == "horizontal")
         newClassName += " horizontal_layout";
+    else if (this.layout == "grid") // FIXME: This is a hack for testing!
+        newClassName += " horizontal_layout";
+
     if (this.align_children == "center")
         newClassName += " align_center";
 
@@ -148,10 +152,27 @@ ReactComponent.serialize = function(properties)
     return result;
 }
 
+ReactComponent.arrayToList = function(array)
+{
+    var result = Constants.emptyListAtom;
+    for (var i = 0; i < array.length; i++)
+        result = Prolog._make_compound(Constants.listFunctor, [array[i], result]);
+    return result;
+}
+
 ReactComponent.booleanValue = function(t)
 {
     return t == Constants.trueAtom;
 }
 
+ReactComponent.make_local = function(t)
+{
+    return Prolog._make_local(t);
+}
+
+ReactComponent.free_local = function(t)
+{
+    Prolog._free_local(t);
+}
 
 module.exports = ReactComponent;
