@@ -9,6 +9,7 @@ function TabbedPane()
     this.tabpane_id = global_tabpane_id++;
     this.baseClassName = "tabs";
     this.setDOMNode(document.createElement("div"));
+    this.layout = "vertical";
     this.tabBar = document.createElement("div");
     this.contentPane = document.createElement("div");
     this.domNode.appendChild(this.tabBar);
@@ -34,14 +35,20 @@ TabbedPane.prototype.appendChild = function(t)
         this.tabBar.appendChild(button);
         this.tabs.push(t);
         this.tabButtons.push(button);
+        t.fill = this.fill;
         if (this.tabs.length == 1)
         {
             button.className = "selected";
-            console.log("Here");
             this.selectTab(t);
         }
     }
     ReactComponent.prototype.appendChild.call(this, t);
+}
+
+TabbedPane.prototype.setProperties = function(t)
+{
+    t.layout = undefined;
+    ReactComponent.prototype.setProperties.call(this, t);
 }
 
 TabbedPane.prototype.selectTab = function(t)
@@ -54,9 +61,7 @@ TabbedPane.prototype.selectTab = function(t)
         this.tabs[this.currentIndex].restyle();
     }
     this.currentIndex = index;
-    console.log("Index is now " + index);
     this.tabButtons[index].className = "selected"
-    console.log(this.tabButtons[index]);
     this.tabs[index].baseClassName = "selected_tab";
     this.tabs[index].restyle();
 }
