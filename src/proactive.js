@@ -28,6 +28,10 @@ window.onPrologReady = function(Prolog)
 			);
 }
 console.log("Waiting for Prolog...");
+if (typeof window.proactivePrefixURL !== 'undefined')
+    window.proscriptPrefixURL = window.proactivePrefixURL;
+else
+    window.proscriptPrefixURL = "/";
 require('../lib/proscript2/build/proscript.js');
 
 
