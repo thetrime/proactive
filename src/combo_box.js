@@ -2,24 +2,19 @@
 
 var ReactComponent = require('./react_component');
 var ComboItem = require('./combo_item');
+var Prolog = require('../lib/proscript2/build/proscript.js');
 
 
 function ComboBox()
 {
     ReactComponent.call(this);
     this.setDOMNode(document.createElement("select"));
-    this.domNode.onchange = function()
-    {
-        var proposedIndex = this.domNode.selectedIndex;
-        this.domNode.selectedIndex = this.currentIndex;
-        if (this.changeHandler != null)
-        {
-            this.getOwnerDocument().triggerEvent(this.changeHandler, ReactComponent.serialize({value: this.children[proposedIndex].getValue()}), function() {});
-        }
-    }.bind(this);
+    this.domNode.onblur = blurHandler.bind(this);
+    this.domNode.onchange = changeHandler.bind(this);
 }
 
 ComboBox.prototype = new ReactComponent;
+
 
 ComboBox.prototype.setProperties = function(t)
 {
@@ -30,7 +25,12 @@ ComboBox.prototype.setProperties = function(t)
     }
     if (t.onBlur !== undefined)
     {
-        this.setBlurHandler(t.onBlur);
+        if (this.blurHandler != null)
+            Prolog._free_local(this.blurHandler);
+        if (ReactComponent.isNull(t.onBlur))
+            this.blurHandler = null;
+        else
+            this.blurHandler = Prolog._make_local(t.onBlur);
     }
     if (t.disabled !== undefined)
     {
@@ -38,36 +38,52 @@ ComboBox.prototype.setProperties = function(t)
     }
     if (t.onChange !== undefined)
     {
-        this.setChangeHandler(t.onChange);
+        if (this.changeHandler != null)
+            Prolog._free_local(this.changeHandler);
+        if (ReactComponent.isNull(t.onChange))
+            this.changeHandler = null;
+        else
+            this.changeHandler = Prolog._make_local(t.onChange);
     }
+}
+
+
+function handlerCallback(success)
+{
+    if (success == true)
+    {
+    }
+    else if (success == false)
+    {
+        console.log("Event failed");
+    }
+    else
+    {
+        console.log("Event raised: " + success.toString());
+    }
+
 }
 
 function blurHandler(event)
 {
-    console.log("Triggering blur");
-    this.getOwnerDocument().triggerEvent(this.blurHandler, ReactComponent.serialize({value: this.children[this.currentIndex].getValue()}), function() {});
-}
-
-ComboBox.prototype.setBlurHandler = function(value)
-{
-    if (ReactComponent.isNull(value))
+    if (this.blurHandler != null)
     {
-        this.blurHandler = null;
-        this.domNode.onBlur = undefined;
-        return;
+	console.log("Child: " + this.children[this.currentIndex].getValue());
+	this.getOwnerDocument().triggerEvent(this.blurHandler, ReactComponent.serialize({value: this.children[this.currentIndex].getValue()}), handlerCallback);
     }
-    this.blurHandler = value;
-    this.domNode.onblur = blurHandler.bind(this);
-    console.log("Installed a blurhandler");
 }
 
-ComboBox.prototype.setChangeHandler = function(value)
+function changeHandler(event)
 {
-    if (ReactComponent.isNull(value))
-        this.changeHandler = null;
-    else
-        this.changeHandler = value;
+    var proposedIndex = this.domNode.selectedIndex;
+    this.domNode.selectedIndex = this.currentIndex;
+    if (this.changeHandler != null)
+    {
+	this.getOwnerDocument().triggerEvent(this.changeHandler, ReactComponent.serialize({value: this.children[proposedIndex].getValue()}), function() {});
+    }
 }
+
+
 
 ComboBox.prototype.appendChild = function(t)
 {
