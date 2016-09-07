@@ -110,6 +110,8 @@ public class TextField implements InputWidget
    {
       try
       {
+         // This is very odd. If we do not do this dance with the preferred size, for some reason it changes shape as you type into it!
+         java.awt.Dimension q = field.getPreferredSize();
          if (bypass_op == BypassType.INSERT)
          {
             // Simulate the insert and see if it gives the right value
@@ -155,6 +157,7 @@ public class TextField implements InputWidget
                bypass.replace(0, field.getText().length(), text, null);
             }
          }
+         field.setPreferredSize(q);
       }
       catch(Exception e)
       {
