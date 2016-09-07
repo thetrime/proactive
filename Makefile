@@ -1,4 +1,5 @@
 PORT=10080
+VERSION := $(shell cat VERSION)
 
 BASE=src/React.java                                           \
      src/ReactComponent.java                                  \
@@ -12,6 +13,7 @@ BASE=src/React.java                                           \
      src/ReactComponentFactoryConfiguration.java
 
 UI=  src/ui/Panel.java                                        \
+     src/ui/Broken.java                                       \
      src/ui/Button.java                                       \
      src/ui/Field.java                                        \
      src/ui/PopupMenu.java                                    \
@@ -39,6 +41,7 @@ UI=  src/ui/Panel.java                                        \
      src/ui/EditorPane.java                                   \
      src/ui/Frame.java                                        \
      src/ui/ReactApp.java                                     \
+     src/ui/ReactPanel.java                                   \
      src/ui/DefaultReactComponentFactoryConfiguration.java
 
 ENGINE= src/prolog/Predicate_remove_child.java                \
@@ -72,7 +75,8 @@ ENGINE= src/prolog/Predicate_remove_child.java                \
 	src/prolog/Predicate_upcase_atom.java                 \
         src/prolog/Predicate_on_server.java                   \
 	src/prolog/Predicate_raise_event.java                 \
-        src/prolog/Predicate_wait_for.java
+	src/prolog/Predicate_widget_id.java                   \
+	src/prolog/Predicate_wait_for.java
 
 BOILERPLATE = src/boilerplate.pl                              \
 	      src/vdiff.pl
@@ -90,7 +94,7 @@ all:	client
 build:
 	mkdir build
 
-.PHONY: client
+.PHONY: client package
 
 client: dist/proactive.jar
 
@@ -109,6 +113,13 @@ run-client:	client
 
 run-server:
 	swipl -f src/server.pl -g "start_react_server(${PORT}), ['demo/App']"
+
+package: dist/proactive.jar src/jsx.pl src/vdiff.pl src/react.pl src/dom.pl
+	mkdir -p package/lib package/src
+	cp dist/proactive.jar package/lib/proactive-${VERSION}.jar
+	cp src/jsx.pl src/vdiff.pl src/react.pl src/dom.pl package/src/
+	cd package && zip -r ../proactive-${VERSION}.zip lib src
+	rm -rf package
 
 clean:
 	rm -rf build
