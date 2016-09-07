@@ -23,8 +23,7 @@ public class ReactComponentFactory
       if (c != null)
          return c.newInstance();
       System.out.println("Could not construct element: " + tagName);
-      System.exit(-1);
-      return null;
+      return new org.proactive.ui.Broken();
    }
 
 
