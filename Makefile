@@ -92,7 +92,7 @@ build:
 
 .PHONY: client
 
-client: dist/react.jar
+client: dist/proactive.jar
 
 ifeq ($(OS), Windows_NT)
 CLASSPATH_SEPARATOR=\;
@@ -100,17 +100,17 @@ else
 CLASSPATH_SEPARATOR=:
 endif
 
-dist/react.jar:	.src build $(BOILERPLATE)
+dist/proactive.jar:	.src build $(BOILERPLATE)
 	javac -cp dist/gpj.jar${CLASSPATH_SEPARATOR}dist/java_websocket.jar -Xlint:unchecked @.src -d build
-	jar cvf dist/react.jar -C build/ . -C src boilerplate.pl -C src vdiff.pl
+	jar cvf dist/proactive.jar -C build/ . -C src boilerplate.pl -C src vdiff.pl
 
 run-client:	client
-	java -cp dist/gpj.jar${CLASSPATH_SEPARATOR}dist/java_websocket.jar${CLASSPATH_SEPARATOR}dist/react.jar org.proactive.React "http://localhost:${PORT}/react" "App"
+	java -cp dist/gpj.jar${CLASSPATH_SEPARATOR}dist/java_websocket.jar${CLASSPATH_SEPARATOR}dist/proactive.jar org.proactive.React "http://localhost:${PORT}/react" "App"
 
 run-server:
 	swipl -f src/server.pl -g "start_react_server(${PORT}), ['demo/App']"
 
 clean:
 	rm -rf build
-	rm -f dist/react.jar
+	rm -f dist/proactive.jar
 	rm -f .src
