@@ -23,6 +23,7 @@ user:term_expansion(:-table_predicate(Indicator), tabled_predicate(user, Indicat
 :-initialization(message_queue_create(react_reload_queue), restore).
 
 
+
 serve_react(Request):-
         memberchk(path(Path), Request),
         atomic_list_concat(['', react, component, Module], '/', Path),
@@ -36,6 +37,7 @@ serve_react(Request):-
                       react_clause(AModule, Clause)
                     ),
                     Clauses),
+            format(current_output, 'Access-Control-Allow-Origin: *~n', []),
             format(current_output, 'Content-Type: text/prolog~n~n', []),
             forall(member(Clause, Clauses),
                    ( numbervars(Clause, 0, _, [singletons(true)]),
@@ -43,6 +45,7 @@ serve_react(Request):-
                      writeln(current_output, '.')
                    ))
         ; otherwise->
+            format(current_output, 'Access-Control-Allow-Origin: *~n', []),
             format(current_output, 'Content-Type: text/prolog~n~n', [])
         ).
 
@@ -105,7 +108,7 @@ notify_react_loop_1(Websocket, Slave):-
 :-dynamic(react_listener/1).
 
 execute_react(Request):-
-	http_upgrade_to_websocket(execute_react_ws_guarded, [], Request).
+        http_upgrade_to_websocket(execute_react_ws_guarded, [], Request).
 
 :-multifile(react:goal_is_safe/1).
 
