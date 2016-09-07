@@ -34,7 +34,8 @@ public class ReactWidget extends ReactComponent implements CodeChangeListener
    protected PrologState props;
    protected Term vDom = null;
    private boolean hasFluxListeners = false;
-
+   private static int globalWidgetId = 0;
+   private String widgetId;
    private ReactComponent internalComponent;
 
    public ReactWidget(ReactWidget parentContext, Engine engine, String elementId, PrologState props) throws Exception
@@ -43,6 +44,7 @@ public class ReactWidget extends ReactComponent implements CodeChangeListener
       this.elementId = elementId;
       this.props = props;
       this.owner = parentContext;
+      this.widgetId = "$widget" + (globalWidgetId++);
 
       setProperties(props.getProperties());
 
@@ -59,6 +61,11 @@ public class ReactWidget extends ReactComponent implements CodeChangeListener
 
       // Next, check to see if the module needs any flux listeners
       hasFluxListeners = engine.checkForFluxListeners(this);
+   }
+
+   public String getWidgetId()
+   {
+      return widgetId;
    }
 
    public void handleCodeChange() 
