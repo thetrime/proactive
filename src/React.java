@@ -108,7 +108,7 @@ public class React
       catch(Exception e)
       {
          e.printStackTrace();
-         System.exit(-1);
+         //System.exit(-1);
       }
 /*
       synchronized(dispatchQueue)
