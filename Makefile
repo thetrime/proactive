@@ -115,11 +115,11 @@ run-server:
 	swipl -f src/server.pl -g "start_react_server(${PORT}), ['demo/App']"
 
 package: dist/proactive.jar src/jsx.pl src/vdiff.pl src/react.pl src/dom.pl
-	mkdir -p package/lib package/src
-	cp dist/proactive.jar package/lib/proactive-${VERSION}.jar
-	cp src/jsx.pl src/vdiff.pl src/react.pl src/dom.pl package/src/
-	cd package && zip -r ../proactive-${VERSION}.zip lib src
-	rm -rf package
+	mkdir -p proactive-${VERSION}/lib proactive-${VERSION}/src
+	cp dist/proactive.jar proactive-${VERSION}/lib/proactive-${VERSION}.jar
+	cp src/jsx.pl src/vdiff.pl src/react.pl src/dom.pl proactive-${VERSION}/src/
+	zip -r proactive-${VERSION}.zip proactive-${VERSION}
+	rm -rf proactive-${VERSION}
 
 clean:
 	rm -rf build
