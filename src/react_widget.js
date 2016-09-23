@@ -35,7 +35,8 @@ function ReactWidget(parentContext, engine, elementId, props, callback)
                                                                                        this.internalComponent.setOwnerDocument(this);
                                                                                        this.hasFluxListeners = engine.checkForFluxListeners(this);
                                                                                        this.internalComponent.restyle();
-                                                                                       setTimeout(function(){callback(this)}.bind(this), 0);
+                                                                                       callback.bind(this)(this);
+                                                                                       //setTimeout(function(){callback(this)}.bind(this), 0);
                                                                                    }.bind(this));
                                                   }.bind(this));
                            }.bind(this));
