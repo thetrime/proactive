@@ -108,14 +108,22 @@ notify_react_loop_1(Websocket, Slave):-
 :-dynamic(react_listener/1).
 
 execute_react(Request):-
-        http_upgrade_to_websocket(execute_react_ws_guarded, [], Request).
+        ( http_in_session(SessionID)->
+            true
+        ; SessionID = {null}
+        ),
+        http_upgrade_to_websocket(execute_react_ws_guarded(SessionID), [], Request).
 
 :-multifile(react:goal_is_safe/1).
 
 % SWI uses message_to_string/2 to print the message if there is an error
 % This is fine, bug RFC-6455 says that no control packet may be > 125 bytes, or fragmented
 % and the error can easily be much longer than that. So we just suppress it here and use 'error' instead
-execute_react_ws_guarded(WebSocket):-
+execute_react_ws_guarded(SessionID, WebSocket):-
+        ( SessionID == {null}->
+            true
+        ; b_setval(http_session_id, SessionID)
+        ),
 	( catch(execute_react_ws(WebSocket), E, true)->
 	    ( var(E)->
 		Msg = bye, Code = 1000
