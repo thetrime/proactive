@@ -20,11 +20,13 @@ window.onPrologReady = function(Prolog)
 											callback();
 										    })
 							      });
-			  },
+                          },
+                          registerPredicate: Prolog._define_foreign,
 			  registerComponent: ProactiveComponentFactory.registerComponent,
 			  ReactComponent: ReactComponent,
 			  Constants: Constants,
-			  make_atom: Prolog._make_atom}
+                          make_atom: Prolog._make_atom,
+                          atom_chars: Prolog._atom_chars}
 			);
 }
 console.log("Waiting for Prolog...");
