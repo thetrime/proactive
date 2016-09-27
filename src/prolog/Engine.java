@@ -2,6 +2,7 @@ package org.proactive.prolog;
 
 import org.proactive.ReactComponent;
 import org.proactive.ReactWidget;
+import org.proactive.React;
 
 import gnu.prolog.database.PrologTextLoaderError;
 import gnu.prolog.database.Module;
@@ -43,11 +44,12 @@ public class Engine
    private URI listenURI;
    private URI goalURI;
    private FluxDispatcher fluxDispatcher = new FluxDispatcher();
+   private List<String> cookies;
 
-   public Engine(String baseURL, String rootElementId) throws Exception
+   public Engine(String baseURL, String rootElementId, List<String> cookies) throws Exception
    {
       goalURI = new URI(baseURL + "/goal");
-
+      this.cookies = cookies;
       String scheme = "ws";
       if (goalURI.getScheme().toLowerCase().equals("https"))
          scheme = "wss";
@@ -68,7 +70,7 @@ public class Engine
    public void make() throws Exception
    {
       long t1 = System.currentTimeMillis();
-      env = new ReactEnvironment(this);
+      env = new ReactEnvironment(this, cookies);
       // FIXME: Move all this to boilerplate.pl
       env.installBuiltin("java_println", 1);
       env.installBuiltin("upcase_atom", 2);
@@ -402,7 +404,7 @@ public class Engine
          return returnValue;
       }
       System.out.println(" *********************** create_element_from_vdom/3 failed: " + vDOM);
-      System.exit(-1);
+      //System.exit(-1);
       return null;
    }
 
@@ -608,9 +610,9 @@ public class Engine
       private Term exception;
       private Term response;
       LinkedBlockingQueue<Term> replies = new LinkedBlockingQueue<Term>();
-      public ExecutionState(URI uri, Term t, Environment e) throws IOException, InterruptedException
+      public ExecutionState(URI uri, Term t, Environment e, Map<String, String> httpHeaders) throws IOException, InterruptedException
       {
-         super(uri, new Draft_17());
+         super(uri, new Draft_17(), httpHeaders);
          this.environment = e;
          options = new ReadOptions(e.getOperatorSet());
          connectBlocking();
@@ -720,7 +722,7 @@ public class Engine
    
    public ExecutionState prepareGoal(Term t, Environment e) throws IOException, InterruptedException
    {
-      return new ExecutionState(goalURI, t, e);
+      return new ExecutionState(goalURI, t, e, React.getHTTPHeaders());
    }
 
 
@@ -764,7 +766,7 @@ public class Engine
          return returnValue;
       }
       System.out.println(" *********************** patch/4 failed: " + patch);
-      System.exit(-1);
+      //System.exit(-1);
       return null;
    }
 

@@ -31,14 +31,14 @@ public class ReactApp extends JFrame implements StyleSheetListener
    String URL = null;
    private Engine engine;
    private ReactWidget context;
-   public ReactApp(String URL, String rootElementId) throws Exception
+   public ReactApp(String URL, String rootElementId, List<String> cookies) throws Exception
    {
       super("React Test");
       StyleSheet sheet = new StyleSheet();
       sheet.setValueForClass("title", "colour", java.awt.Color.WHITE);
       sheet.setValueForClass("title", "font-size", 24);
       React.setStyleSheet(sheet);
-      engine = new Engine(URL, rootElementId);
+      engine = new Engine(URL, rootElementId, cookies);
       context = new ReactWidget(null, engine, rootElementId, PrologState.emptyState);
       //React.addCodeChangeListener(new URI(URL + "/listen"), rootElementId, this);
       React.addStyleSheetListener(this);

@@ -16,7 +16,8 @@
 
           get_store_state/2,
 	  state_to_term/2,
-          get_this/1
+          get_this/1,
+          widget_id/1
          ]).
 
 % ----------------- the real DOM. Implemented in SWI by attributed variables
@@ -145,7 +146,7 @@ node_type(DomNode, Type):-
 
 
 get_this({this}).
-
+widget_id({widget}).
 
 % DOM node is represented as dom_node(Attributes)
 %  Attributes must contain:

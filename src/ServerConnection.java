@@ -20,7 +20,7 @@ public class ServerConnection extends WebSocketClient
    private boolean isReplacement;
    private ServerConnection(URI URI, boolean isReplacement) throws IOException
    {
-      super(URI, new Draft_17());
+      super(URI, new Draft_17(), React.getHTTPHeaders());
       this.isReplacement = isReplacement;
       this.uri = URI;
       connect();

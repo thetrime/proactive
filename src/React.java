@@ -4,6 +4,8 @@ package org.proactive;
 
 import java.util.List;
 import java.util.LinkedList;
+import java.util.Map;
+import java.util.HashMap;
 import javax.swing.SwingUtilities;
 import java.awt.BorderLayout;
 import java.net.URI;
@@ -18,13 +20,17 @@ public class React
    public static String currentLaf = null;
    private static String uri = null;
    private static String component = null;
+   private static Map<String, String> httpHeaders;
+
    public static void main(String[] args) throws Exception
    {
+      List<String> cookies = new LinkedList<String>();
       if (args.length < 2)
       {
          System.err.println("Usage: React [Options] <URI> <Component>");
          System.err.println("       Options include:");
          System.err.println("       --laf <LAF>");
+         System.err.println("       --cookie <cookie>");
       }
       int i;
       for (i = 0; i < args.length-2; i++)
@@ -34,36 +40,20 @@ public class React
             requestedLaf = args[i+1];
             i++;
          }
+         if (args[i].equals("--cookie") && i+1 < args.length-2)
+         {
+            cookies.add(args[i+1]);
+            i++;
+         }
       }
+      httpHeaders = new HashMap<String, String>();
+      httpHeaders.put("Cookie", String.join(";", cookies));
       uri = args[i++];
       component = args[i++];
       SwingUtilities.invokeLater(new Runnable()
          {
             public void run()
             {
-               /*
-               javax.swing.JButton button = new javax.swing.JButton("ohai");
-               javax.swing.JFrame frame = new javax.swing.JFrame();
-               frame.getContentPane().add(button);
-               frame.setVisible(true);
-               button.addActionListener(new java.awt.event.ActionListener()
-                  {
-                     public void actionPerformed(java.awt.event.ActionEvent ae)
-                     {
-                        try
-                        {
-                           long startTime = System.currentTimeMillis();
-                           new org.proactive.ui.ReactApp(args[0], args[1]);
-                           System.out.println("Render time: " + (System.currentTimeMillis() - startTime ) + "ms");
-                        }
-                        catch(Exception e)
-                        {
-                           e.printStackTrace();
-                           System.exit(-1);
-                        }
-                     }
-                  });
-               */
                try
                {
                   if (requestedLaf != null)
@@ -81,7 +71,8 @@ public class React
                   currentLaf = javax.swing.UIManager.getLookAndFeel().getName();
 
                   long startTime = System.currentTimeMillis();
-                  new org.proactive.ui.ReactApp(uri, component);
+
+                  new org.proactive.ui.ReactApp(uri, component, cookies);
                   System.out.println("Render time: " + (System.currentTimeMillis() - startTime ) + "ms");
                }
                catch(Exception e)
@@ -95,7 +86,11 @@ public class React
          });
    }
 
-   
+   public static Map<String, String> getHTTPHeaders()
+   {
+      return httpHeaders;
+   }
+
    private static LinkedList<TreePatch> dispatchQueue = new LinkedList<TreePatch>();   
 
    public static void queuePatch(Term p, ReactComponent root, Engine engine)

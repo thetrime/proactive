@@ -3,6 +3,7 @@ package org.proactive.prolog;
 import gnu.prolog.database.PredicateUpdatedEvent;
 import gnu.prolog.database.Predicate;
 import gnu.prolog.database.Module;
+import gnu.prolog.database.PrologTextLoaderState;
 import gnu.prolog.term.Term;
 import gnu.prolog.term.AtomTerm;
 import gnu.prolog.term.CompoundTerm;
@@ -15,17 +16,24 @@ import gnu.prolog.vm.Interpreter;
 import java.util.Stack;
 import java.util.Map;
 import java.util.List;
+import java.util.LinkedList;
 import java.util.HashMap;
 import java.lang.ref.WeakReference;
 import java.lang.ref.ReferenceQueue;
+import java.io.InputStream;
+import java.io.IOException;
+import java.net.URL;
+import java.net.URLConnection;
 
 public class ReactEnvironment extends Environment
 {
    private Engine engine;
    private HashMap<Interpreter, Stack<Object>> contextStack = new HashMap<Interpreter, Stack<Object>>();
-   public ReactEnvironment(Engine engine)
+   private List<String> cookies = new LinkedList<String>();
+   public ReactEnvironment(Engine engine, List<String> cookies)
    {
       super();
+      this.cookies = cookies;
       this.engine = engine;
    }
 
@@ -86,6 +94,27 @@ public class ReactEnvironment extends Environment
       {
          popModule();
       }
+   }
+
+   public void createTextLoader()
+   {
+      super.createTextLoader();
+      prologTextLoaderState = new PrologTextLoaderState(this, getModule())
+         {
+            protected InputStream getInputStream(Term term) throws IOException
+            {
+               if (term instanceof CompoundTerm && ((CompoundTerm)term).tag == urlTag && ((CompoundTerm)term).args[0] instanceof AtomTerm)
+               {
+                  URL url = new URL(((AtomTerm)((CompoundTerm)term).args[0]).value);
+                  URLConnection connection = url.openConnection();
+                  for (String cookie: cookies)
+                     connection.addRequestProperty("Cookie", cookie);
+                  return connection.getInputStream();
+               }
+               return super.getInputStream(term);
+            }
+         };
+
    }
 
    public Predicate installBuiltin(String functor, int arity) throws PrologException
