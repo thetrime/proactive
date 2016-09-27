@@ -5,7 +5,7 @@ var util = require('util');
 var PrologState = require('./prolog_state');
 var Constants = require('./constants');
 var foreign_module = require('./proactive_foreign.js');
-var Prolog = require('../lib/proscript2/build/proscript.js');
+var Prolog = require('proscript');
 
 var getInitialStateFunctor = Prolog._make_functor(Prolog._make_atom("getInitialState"), 2);
 var componentWillReceivePropsFunctor = Prolog._make_functor(Prolog._make_atom("componentWillReceiveProps"), 3);

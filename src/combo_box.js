@@ -2,7 +2,7 @@
 
 var ReactComponent = require('./react_component');
 var ComboItem = require('./combo_item');
-var Prolog = require('../lib/proscript2/build/proscript.js');
+var Prolog = require('proscript');
 
 
 function ComboBox()

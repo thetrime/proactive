@@ -1,6 +1,6 @@
 "use strict";
 
-var Prolog = require('../lib/proscript2/build/proscript.js');
+var Prolog = require('proscript');
 
 module.exports = {emptyListAtom: Prolog._make_atom("[]"),
                   curlyFunctor: Prolog._make_functor(Prolog._make_atom("{}"), 1),

@@ -1,6 +1,6 @@
 "use strict";
 
-var Prolog = require('../lib/proscript2/build/proscript.js');
+var Prolog = require('proscript');
 var Constants = require('./constants.js');
 
 

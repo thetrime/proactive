@@ -2,7 +2,7 @@
 
 var Errors = require('./errors.js');
 var Constants = require('./constants.js');
-var Prolog = require('../lib/proscript2/build/proscript.js');
+var Prolog = require('proscript');
 
 // NB:
 // A PrologState is basically a map of Javascript strings (keys) to PROLOG OBJECTS.

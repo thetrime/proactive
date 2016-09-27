@@ -4,7 +4,7 @@ var Constants = require('./constants.js');
 var PrologState = require('./prolog_state');
 var ReactWidget = require('./react_widget');
 var ProactiveComponentFactory = require('./proactive_component_factory');
-var Prolog = require('../lib/proscript2/build/proscript.js');
+var Prolog = require('proscript');
 var Errors = require('./errors.js');
 
 var util = require('util');

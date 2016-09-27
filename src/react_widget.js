@@ -1,7 +1,7 @@
 "use strict";
 
 var ReactComponent = require('./react_component');
-var Prolog = require('../lib/proscript2/build/proscript.js');
+var Prolog = require('proscript');
 
 var global_widget_id = 0;
 
