@@ -7,13 +7,13 @@
         "xmlhttprequest": "^1.8.0",
         "browserify": "^13.0.0",
         "brfs": "^1.4.3",
-        "proscript2": "git+https://github.com/thetrime/proscript2.git"
+        "proscript": "git+https://github.com/thetrime/proscript2.git#0fae0f6"
     },
     "devDependencies": {
     },
     "scripts": {
         "start": "STATIC_ROOT=./static watchify src/core.js --standalone Proactive -t brfs -v -o build/proactive.js",
-        "install": "STATIC_ROOT=./static browserify --standalone Proactive -t brfs src/core.js | uglifyjs -cm > build/proactive.js",
+        "install": "sh package.sh",
         "test": "echo 'No tests created yet'"
     },
     "repository": {
