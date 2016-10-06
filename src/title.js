@@ -14,7 +14,7 @@ Title.prototype.setProperties = function(t)
     if (t.label !== undefined)
     {
         var v = Prolog._portray(t.label);
-        if (v.startsWith("<html>"))
+        if (v.lastIndexOf("<html>", 0) == 0)
             this.domNode.innerHTML = v;
         else
             this.domNode.textContent = v;
