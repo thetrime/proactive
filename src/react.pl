@@ -24,6 +24,7 @@ user:term_expansion(:-table_predicate(Indicator), tabled_predicate(user, Indicat
 
 
 
+
 serve_react(Request):-
         memberchk(path(Path), Request),
         atomic_list_concat(['', react, component, Module], '/', Path),
@@ -38,16 +39,29 @@ serve_react(Request):-
                     ),
                     Clauses),
             format(current_output, 'Access-Control-Allow-Origin: *~n', []),
+            ( memberchk(accept_encoding(AcceptEncoding), Request),
+              sub_atom(AcceptEncoding, _, _, _, deflate)->
+                format(current_output, 'Content-Encoding: deflate~n', []),
+                zopen(current_output, TargetStream, [])
+            ; otherwise->
+                TargetStream = current_output
+            ),
             format(current_output, 'Content-Type: text/prolog~n~n', []),
             forall(member(Clause, Clauses),
                    ( numbervars(Clause, 0, _, [singletons(true)]),
-                     write_term(current_output, Clause, [numbervars(true), quoted(true), ignore_ops(true)]),
-                     writeln(current_output, '.')
-                   ))
+                     write_term(TargetStream, Clause, [numbervars(true), quoted(true), ignore_ops(true)]),
+                     writeln(TargetStream, '.')
+                   )),
+            ( TargetStream == current_output ->
+                true
+            ; otherwise->
+                close(TargetStream)
+            )
         ; otherwise->
             format(current_output, 'Access-Control-Allow-Origin: *~n', []),
             format(current_output, 'Content-Type: text/prolog~n~n', [])
         ).
+
 
 react_clause(Module, :-module(Module, Exports)):-
         module_property(Module, exports(Exports)).
