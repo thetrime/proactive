@@ -190,3 +190,8 @@ label
     padding-left: 5px;
     padding-right: 5px;
 }
+
+th > *
+{
+    width: 100%;
+}
