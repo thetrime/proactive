@@ -169,7 +169,6 @@ body
     height: 100%;
     padding: 0;
     box-sizing: border-box;
-    border: solid 1px green;
     overflow: hidden;
 }
 
