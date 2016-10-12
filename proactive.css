@@ -105,8 +105,15 @@
     -webkit-justify-content: center;
     -ms-flex-pack: center;
     justify-content: center;
-
 }
+
+.justify_space_between
+{
+    -webkit-justify-content: space-between;
+    -ms-flex-pack: justify;
+    justify-content: space-between;
+}
+
 
 .not_selected_tab
 {

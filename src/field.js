@@ -294,6 +294,11 @@ Field.prototype.setProperties = function(t)
     {
         this.domNode.style["text-align"] = Prolog._atom_chars(t.align);
     }
+    if (t.maxWidth !== undefined)
+    {
+        this.domNode.style["max-width"] = Prolog._atom_chars(t.maxWidth);
+    }
+
     if (t.id !== undefined)
     {
         if (ReactComponent.isNull(t.id))

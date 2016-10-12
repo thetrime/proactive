@@ -12,6 +12,7 @@ function ReactComponent()
     this.children = [];
     this.parent = Constants.nullAtom;
     this.align_children = "start";
+    this.justify_content = "start";
     this.blob = Prolog._make_blob("react_component", this);
 }
 
@@ -47,6 +48,11 @@ ReactComponent.prototype.setProperties = function(t)
     if (t["align-children"] !== undefined)
     {
         this.align_children = Prolog._atom_chars(t["align-children"]);
+        restyleRequired = true;
+    }
+    if (t["justify-content"] !== undefined)
+    {
+        this.justify_content = Prolog._atom_chars(t["justify-content"]);
         restyleRequired = true;
     }
     if (t.layout !== undefined)
@@ -85,6 +91,8 @@ ReactComponent.prototype.restyle = function()
     if (this.align_children == "center")
         newClassName += " align_center";
 
+    if (this.justify_content == "space-between")
+        newClassName += " justify_space_between";
 
     this.getDOMNode().className = newClassName;
 
