@@ -37,13 +37,31 @@ function PrologEngine(baseURL, rootElementId, callback)
 
     this.baseURL = baseURL;
     if (this.baseURL.substring(0, 5).toLowerCase() == "https")
+    {
         this.goalURI = "wss" + this.baseURL.substring(5) + "/goal";
+        this.listenURI = "wss" + this.baseURL.substring(5) + "/listen";
+    }
     else
+    {
         this.goalURI = "ws" + this.baseURL.substring(4) + "/goal";
-    this.listenURI = baseURL + "/listen";
+        this.listenURI = "ws" + this.baseURL.substring(4) + "/listen";
+    }
     this.componentURL = baseURL + "/component/";
     this.rootElementId = rootElementId;
+    getServerConnection(this.listenURI, this.onMessage.bind(this));
     this.make(callback);
+}
+
+function getServerConnection(URI, callback)
+{
+    var ws = new WebSocket(URI);
+    ws.onmessage = callback;
+    ws.onerror = function(event)
+    {
+        console.log("WS error: " + event);
+        ws.close();
+        getServerConnection(URI, callback);
+    }
 }
 
 PrologEngine.prototype.make = function(callback)
@@ -289,5 +307,21 @@ PrologEngine.prototype.applyPatch = function(patch, root, callback)
                     }.bind(this));
 }
 
+var changeListeners = {};
 
+PrologEngine.prototype.addCodeChangeListener = function(elementId, callback)
+{
+    if (changeListeners[elementId] === undefined)
+        changeListeners[elementId] = [callback];
+    else
+        changeListeners[elementId].push(callback);
+}
+
+PrologEngine.prototype.onMessage = function(event)
+{
+    var callbacks = changeListeners[event.data];
+    if (callbacks !== undefined)
+        for (var i = 0; i < callbacks.length; i++)
+            callbacks[i]();
+}
 module.exports = PrologEngine;

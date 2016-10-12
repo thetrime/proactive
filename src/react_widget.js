@@ -17,12 +17,7 @@ function ReactWidget(parentContext, engine, elementId, props, callback)
     this.id = "$widget" + (global_widget_id++);
 
     this.setProperties(props.getProperties());
-    // FIXME: Create a CodeChangeListener
-    //console.log("Creating widget " + elementId + " with props " + props);
-    /*
-    try { throw new Error()} catch(qxy) {console.log("Stack depth: " + qxy.stack.split('\n').length);}
-    console.log("Getting initial state for " + elementId + " with props " + props);
-*/
+    engine.addCodeChangeListener(elementId, this.codeChanged.bind(this));
     engine.getInitialState(elementId, props, function(state)
                            {
                                this.state = state;
@@ -137,6 +132,20 @@ ReactWidget.prototype.triggerEvent = function(handler, event, callback)
 ReactWidget.prototype.debugStuff = function()
 {
     this.engine.debugStuff();
+}
+
+ReactWidget.prototype.codeChanged = function()
+{
+    var t = this;
+    this.engine.make(function()
+                     {
+                         t.reRender(function()
+                                    {
+                                        //console.log("Reloaded " + t.elementId);
+                                    }
+                                   );
+                     }
+                    );
 }
 
 module.exports = ReactWidget;

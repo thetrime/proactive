@@ -228,6 +228,7 @@ Field.prototype.valueWouldChange = function(newValue)
 
 Field.prototype.setProperties = function(t)
 {
+    ReactComponent.prototype.setProperties.call(this, t);
     if (t.type !== undefined)
     {
         var newType;
