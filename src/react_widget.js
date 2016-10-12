@@ -136,16 +136,10 @@ ReactWidget.prototype.debugStuff = function()
 
 ReactWidget.prototype.codeChanged = function()
 {
-    var t = this;
-    this.engine.make(function()
-                     {
-                         t.reRender(function()
-                                    {
-                                        //console.log("Reloaded " + t.elementId);
-                                    }
-                                   );
-                     }
-                    );
+    this.reRender(function()
+                  {
+                      //console.log("Reloaded " + t.elementId);
+                  });
 }
 
 module.exports = ReactWidget;

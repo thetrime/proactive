@@ -320,8 +320,14 @@ PrologEngine.prototype.addCodeChangeListener = function(elementId, callback)
 PrologEngine.prototype.onMessage = function(event)
 {
     var callbacks = changeListeners[event.data];
+    console.log("Code change: " + event.data);
     if (callbacks !== undefined)
-        for (var i = 0; i < callbacks.length; i++)
-            callbacks[i]();
+    {
+        this.make(function()
+                  {
+                      for (var i = 0; i < callbacks.length; i++)
+                          callbacks[i]();
+                  });
+    }
 }
 module.exports = PrologEngine;
