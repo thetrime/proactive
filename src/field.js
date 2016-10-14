@@ -173,7 +173,7 @@ function Field()
 
     // So, first add onTextInput, since if that is around it does most of what we need
 
-    //this.domNode.nodeCallback = textInputHandler.bind(this);
+    /* This code is here so I can do some performance testing in nodejs directly
     this.qqq = 0;
     this.domNode.nodeCallback = function()
     {
@@ -182,7 +182,7 @@ function Field()
         else
             this.valueWouldChange("xxxxxxxx");
     }.bind(this);
-
+    */
 
     this.domNode.addEventListener("textInput", textInputHandler.bind(this), false);
     // Also add in a handler that JUST listens for deletes
