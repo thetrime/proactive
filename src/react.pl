@@ -6,7 +6,9 @@
           jsx/2]).
 
 %       You MUST provide an implementation of react:goal_is_safe/1 or on_server/1 will always fail on the client.
-%       This is because an unscrupulous user could easily execute on_server with whatever goal they want! 
+%       This is because an unscrupulous user could easily execute on_server with whatever goal they want!
+
+%       If react:allow_access_to_form(+FormId) has any clauses, a form will only be served if it succeeds
 
 user:term_expansion(:-table_predicate(Module:Indicator), tabled_predicate(Module, Indicator)).
 user:term_expansion(:-table_predicate(Indicator), tabled_predicate(user, Indicator)).
@@ -28,6 +30,14 @@ user:term_expansion(:-table_predicate(Indicator), tabled_predicate(user, Indicat
 serve_react(Request):-
         memberchk(path(Path), Request),
         atomic_list_concat(['', react, component, Module], '/', Path),
+        ( predicate_property(react:allow_access_to_form(_), number_of_clauses(_))->
+            ( allow_access_to_form(Module)->
+                true
+            ; otherwise->
+                throw(http_reply(forbidden(Path)))
+            )
+        ; true
+        ),
         ( current_module(Module)->
             findall(Candidate,
                     related_modules(Module, Candidate),
@@ -129,6 +139,7 @@ execute_react(Request):-
         http_upgrade_to_websocket(execute_react_ws_guarded(SessionID), [], Request).
 
 :-multifile(react:goal_is_safe/1).
+:-multifile(react:allow_access_to_form/1).
 
 % SWI uses message_to_string/2 to print the message if there is an error
 % This is fine, bug RFC-6455 says that no control packet may be > 125 bytes, or fragmented
