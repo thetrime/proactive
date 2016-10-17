@@ -10,17 +10,16 @@ import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.drafts.Draft_17;
 import org.java_websocket.handshake.ServerHandshake;
 
-
 public class ServerConnection extends WebSocketClient
 {
    private static List<URI> activeConnections = new LinkedList<URI>();
    private static Map<URI, Map<String, List<CodeChangeListener>>> allListeners = new HashMap<URI, Map<String, List<CodeChangeListener>>>();   
-
+   private static Map<String, String> emptyHTTPHeaders = new HashMap<String, String>();
    private URI uri;
    private boolean isReplacement;
    private ServerConnection(URI URI, boolean isReplacement) throws IOException
    {
-      super(URI, new Draft_17(), React.getHTTPHeaders());
+      super(URI, new Draft_17());
       this.isReplacement = isReplacement;
       this.uri = URI;
       connect();

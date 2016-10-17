@@ -24,16 +24,17 @@ import java.io.InputStream;
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLConnection;
+import org.proactive.HTTPContext;
 
 public class ReactEnvironment extends Environment
 {
    private Engine engine;
    private HashMap<Interpreter, Stack<Object>> contextStack = new HashMap<Interpreter, Stack<Object>>();
-   private List<String> cookies = new LinkedList<String>();
-   public ReactEnvironment(Engine engine, List<String> cookies)
+   private HTTPContext httpContext = null;
+   public ReactEnvironment(Engine engine, HTTPContext httpContext)
    {
       super();
-      this.cookies = cookies;
+      this.httpContext = httpContext;
       this.engine = engine;
    }
 
@@ -107,8 +108,11 @@ public class ReactEnvironment extends Environment
                {
                   URL url = new URL(((AtomTerm)((CompoundTerm)term).args[0]).value);
                   URLConnection connection = url.openConnection();
-                  for (String cookie: cookies)
-                     connection.addRequestProperty("Cookie", cookie);
+                  if (httpContext != null)
+                  {
+                     for (Map.Entry<String, String> header: httpContext.getHTTPHeaders().entrySet())
+                        connection.addRequestProperty(header.getKey(), header.getValue());
+                  }
                   return connection.getInputStream();
                }
                return super.getInputStream(term);

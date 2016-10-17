@@ -10,6 +10,10 @@
 
 %       If react:allow_access_to_form(+FormId) has any clauses, a form will only be served if it succeeds
 
+%       If you want to handle the execution of the goal yourself, you can define a clause of react:react_goal_hook/2
+%       If this has at least one clause defined, it will be passed any goals that on_server/1 is going to execute
+%       Otherwise, they will be exeucted directly.
+
 user:term_expansion(:-table_predicate(Module:Indicator), tabled_predicate(Module, Indicator)).
 user:term_expansion(:-table_predicate(Indicator), tabled_predicate(user, Indicator)).
 
@@ -136,7 +140,7 @@ execute_react(Request):-
             true
         ; SessionID = {null}
         ),
-        http_upgrade_to_websocket(execute_react_ws_guarded(SessionID), [], Request).
+        http_upgrade_to_websocket(execute_react_ws_guarded(SessionID, Request), [], Request).
 
 :-multifile(react:goal_is_safe/1).
 :-multifile(react:allow_access_to_form/1).
@@ -144,12 +148,12 @@ execute_react(Request):-
 % SWI uses message_to_string/2 to print the message if there is an error
 % This is fine, bug RFC-6455 says that no control packet may be > 125 bytes, or fragmented
 % and the error can easily be much longer than that. So we just suppress it here and use 'error' instead
-execute_react_ws_guarded(SessionID, WebSocket):-
+execute_react_ws_guarded(SessionID, OriginalRequest, WebSocket):-
         ( SessionID == {null}->
             true
         ; b_setval(http_session_id, SessionID)
         ),
-	( catch(execute_react_ws(WebSocket), E, true)->
+        ( catch(execute_react_ws(OriginalRequest, WebSocket), E, true)->
 	    ( var(E)->
 		Msg = bye, Code = 1000
 	    ; otherwise->
@@ -159,13 +163,13 @@ execute_react_ws_guarded(SessionID, WebSocket):-
 	),
 	catch(ws_close(WebSocket, Code, text(Msg)), Error, print_message(error, Error)).
 
-execute_react_ws(WebSocket):-
+execute_react_ws(OriginalRequest, WebSocket):-
         ws_receive(WebSocket, Message, []),
         ( Message.opcode == text->
             Data = Message.data,
             read_term_from_atom(Data, Goal, []),
             ( goal_is_safe(Goal)->
-                execute_react_ws(WebSocket, Goal, Goal)
+                execute_react_ws(OriginalRequest, WebSocket, Goal, Goal)
             ; permission_error(execute, goal, Goal)
             )
         ; Message.opcode == close->
@@ -175,22 +179,22 @@ execute_react_ws(WebSocket):-
 check:string_predicate(react:check_data/1).
 check_data(";").
 
-:-meta_predicate(execute_react_ws(+, +, 0)).
+:-meta_predicate(execute_react_ws(+, +, +, 0)).
 :-multifile(check:string_predicate/1).
-execute_react_ws(WebSocket, ReplyGoal, Goal):-
+execute_react_ws(OriginalRequest, WebSocket, ReplyGoal, Goal):-
         ws_receive(WebSocket, Message, []),
         ( Message.opcode == text->
             Data = Message.data,
             check_data(Data),
-            execute_react_goal(Goal, ReplyGoal, WebSocket)
+            execute_react_ws_1(OriginalRequest, Goal, ReplyGoal, WebSocket)
         ; Message.opcode == close->
             !
         ).
 
-:-meta_predicate(execute_react_goal(0, +, +)).
-execute_react_goal(Goal, ReplyGoal, WebSocket):-
+:-meta_predicate(execute_react_ws_1(+, 0, +, +)).
+execute_react_ws_1(OriginalRequest, Goal, ReplyGoal, WebSocket):-
 	setup_call_catcher_cleanup(true,
-                                   Goal,
+                                   execute_react_goal(OriginalRequest, Goal),
                                    Catcher,
                                    react_cleanup(ReplyGoal, Catcher, WebSocket)),
         ( var(Catcher)->            
@@ -207,6 +211,16 @@ execute_react_goal(Goal, ReplyGoal, WebSocket):-
             true
         ),
         !.
+
+:-multifile(react:react_goal_hook/2).
+:-meta_predicate(react:react_goal_hook(+, 0)).
+
+:-meta_predicate(execute_react_goal(+, 0)).
+execute_react_goal(OriginalRequest, Goal):-
+        ( predicate_property(react:react_goal_hook(_, _), number_of_clauses(_))->
+            react_goal_hook(OriginalRequest, Goal)
+        ; Goal
+        ).
         
 
 react_cleanup(Goal, exit, WebSocket):-

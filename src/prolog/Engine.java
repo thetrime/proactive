@@ -3,6 +3,7 @@ package org.proactive.prolog;
 import org.proactive.ReactComponent;
 import org.proactive.ReactWidget;
 import org.proactive.React;
+import org.proactive.HTTPContext;
 
 import gnu.prolog.database.PrologTextLoaderError;
 import gnu.prolog.database.Module;
@@ -44,12 +45,12 @@ public class Engine
    private URI listenURI;
    private URI goalURI;
    private FluxDispatcher fluxDispatcher = new FluxDispatcher();
-   private List<String> cookies;
-
-   public Engine(String baseURL, String rootElementId, List<String> cookies) throws Exception
+   private HTTPContext httpContext;
+   private Map<String, String> emptyHTTPHeaders = new HashMap<String, String>();
+   public Engine(String baseURL, String rootElementId, HTTPContext httpContext) throws Exception
    {
       goalURI = new URI(baseURL + "/goal");
-      this.cookies = cookies;
+      this.httpContext = httpContext;
       String scheme = "ws";
       if (goalURI.getScheme().toLowerCase().equals("https"))
          scheme = "wss";
@@ -70,7 +71,7 @@ public class Engine
    public void make() throws Exception
    {
       long t1 = System.currentTimeMillis();
-      env = new ReactEnvironment(this, cookies);
+      env = new ReactEnvironment(this, httpContext);
       // FIXME: Move all this to boilerplate.pl
       env.installBuiltin("java_println", 1);
       env.installBuiltin("upcase_atom", 2);
@@ -722,7 +723,10 @@ public class Engine
    
    public ExecutionState prepareGoal(Term t, Environment e) throws IOException, InterruptedException
    {
-      return new ExecutionState(goalURI, t, e, React.getHTTPHeaders());
+      if (httpContext != null)
+         return new ExecutionState(goalURI, t, e, httpContext.getHTTPHeaders());
+      else
+         return new ExecutionState(goalURI, t, e, emptyHTTPHeaders);
    }
 
 
@@ -783,7 +787,7 @@ public class Engine
       PrologCode.RC rc;
       try
       {
-	 //System.out.println("Rendering: " + g);
+         //System.out.println("Rendering: " + g);
          rc = interpreter.execute(g);
          //System.out.println("Rendering complete");
          if (rc == PrologCode.RC.SUCCESS)

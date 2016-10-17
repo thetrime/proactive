@@ -48,6 +48,13 @@ public class React
       }
       httpHeaders = new HashMap<String, String>();
       httpHeaders.put("Cookie", String.join(";", cookies));
+      HTTPContext httpContext = new HTTPContext()
+         {
+            public Map<String, String> getHTTPHeaders()
+            {
+               return httpHeaders;
+            }
+         };
       uri = args[i++];
       component = args[i++];
       SwingUtilities.invokeLater(new Runnable()
@@ -72,7 +79,7 @@ public class React
 
                   long startTime = System.currentTimeMillis();
 
-                  new org.proactive.ui.ReactApp(uri, component, cookies);
+                  new org.proactive.ui.ReactApp(uri, component, httpContext);
                   System.out.println("Render time: " + (System.currentTimeMillis() - startTime ) + "ms");
                }
                catch(Exception e)
@@ -84,11 +91,6 @@ public class React
             }
 
          });
-   }
-
-   public static Map<String, String> getHTTPHeaders()
-   {
-      return httpHeaders;
    }
 
    private static LinkedList<TreePatch> dispatchQueue = new LinkedList<TreePatch>();   

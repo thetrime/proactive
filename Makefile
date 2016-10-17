@@ -2,6 +2,7 @@ PORT=10080
 VERSION := $(shell cat VERSION)
 
 BASE=src/React.java                                           \
+     src/HTTPContext.java                                     \
      src/ReactComponent.java                                  \
      src/ReactWidget.java                                     \
      src/ReactComponentFactory.java                           \
