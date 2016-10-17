@@ -84,10 +84,7 @@ related_modules(Module, Related):-
         \+predicate_property(Module:depends_on(_), imported_from(_)),
         clause(Module:depends_on(SubModule), _, _),
         related_modules(SubModule, Related).
-related_modules(Module, Related):-
-        current_predicate(_, Module:Head),
-        predicate_property(Module:Head, imported_from(Related)),
-        Related \== system.
+
 
 
 notify_react(Request):-
