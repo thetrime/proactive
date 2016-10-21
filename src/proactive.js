@@ -26,7 +26,25 @@ window.onPrologReady = function(Prolog)
 			  ReactComponent: ReactComponent,
 			  Constants: Constants,
                           make_atom: Prolog._make_atom,
-                          atom_chars: Prolog._atom_chars}
+                          makeInteger: Prolog._make_integer,
+                          atom_chars: Prolog._atom_chars,
+                          numeric_value: Prolog._numeric_value,
+                          portray: Prolog._portray,
+                          forEach: Prolog._forEach,
+                          createHandler: Prolog._make_local,
+                          releaseHandler: Prolog._free_local,
+                          isCompound: function(t, name, arity)
+                          {
+                              if (!Prolog._is_compound(t))
+                                  return false;
+                              if (name != Prolog._atom_chars(Prolog._term_functor_name(t)))
+                                  return false;
+                              if (arity != Prolog._term_functor_arity(t))
+                                  return false;
+                              return true;
+                          },
+                          argOf: Prolog._term_arg
+                         }
 			);
 }
 console.log("Waiting for Prolog...");
