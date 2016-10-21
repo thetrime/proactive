@@ -30,6 +30,11 @@ ReactComponent.prototype.setDOMNode = function(n)
     this.restyle();
 }
 
+ReactComponent.prototype.setParent = function(p)
+{
+    this.parent = p;
+}
+
 ReactComponent.prototype.setProperties = function(t)
 {
     var restyleRequired = false;
@@ -116,20 +121,20 @@ ReactComponent.prototype.getChildren = function()
 ReactComponent.prototype.appendChild = function(t)
 {
     this.domNode.appendChild(t.getDOMNode());
-    t.parent = this;
+    t.setParent(this);
 }
 
 ReactComponent.prototype.insertBefore = function(t, s)
 {
     this.domNode.insertBefore(t.getDOMNode(), s.getDOMNode());
-    t.parent = this;
+    t.setParent(this);
 }
 
 ReactComponent.prototype.replaceChild = function(n, o)
 {
     this.domNode.replaceChild(n.getDOMNode(), o.getDOMNode());
-    n.parent = this;
-    o.parent = null;
+    n.setParent(this);
+    o.setParent(null);
 }
 
 ReactComponent.prototype.getParent = function()
@@ -140,7 +145,7 @@ ReactComponent.prototype.getParent = function()
 ReactComponent.prototype.removeChild = function(t)
 {
     this.domNode.removeChild(t.getDOMNode());
-    t.parent = null;
+    t.setParent(null);
 }
 
 ReactComponent.isNull = function(t)
