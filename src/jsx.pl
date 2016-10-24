@@ -26,7 +26,9 @@ tag_mismatch(Close, Tag, X, _):-
         atom_codes(Atom, Codes),
         throw(tag_mismatch(Close, Tag, Atom)).
 
-jsx_node(Dict, Node, Goals, GoalsTail, Singletons, SingletonsTail) -->
+:-multifile(jsx:jsx_expansion/2).
+
+jsx_node(Dict, FinalNode, Goals, GoalsTail, Singletons, SingletonsTail) -->
         optional_spaces,
         `<`,
         jsx_tag(Tag), optional_spaces, jsx_attributes(Dict, Attributes, Goals, G1),
@@ -51,7 +53,15 @@ jsx_node(Dict, Node, Goals, GoalsTail, Singletons, SingletonsTail) -->
         ; {otherwise}->
             garbage
         ),
-        optional_spaces.
+        optional_spaces,
+        expand_jsx(Node, FinalNode).
+
+expand_jsx(Node, FinalNode, T, T):-
+        ( jsx_expansion(Node, N1)->
+            FinalNode = N1 %expand_jsx(N1, FinalNode)
+        ; FinalNode = Node
+        ).
+
 
 comment --> `%`,
         !,

@@ -14,6 +14,7 @@
           update_widget/4,
           destroy_widget/2,
 
+          proactive_term_to_state/2,
           get_store_state/2,
 	  state_to_term/2,
           get_this/1,
@@ -69,8 +70,6 @@ create_element(Document, TagName, DomNode):-
 set_vdom_properties(DomNode, NewProperties):-
         DomNode = dom_element(Attributes),
         memberchk(properties-PropertiesPtr, Attributes),
-        %get_attr(PropertiesPtr, react_dom, Properties),
-        %change_attributes(Properties, Name, Value, NewProperties),
         put_attr(PropertiesPtr, react_dom, NewProperties).
 
 create_text_node(Document, Data, DomNode):-
@@ -126,15 +125,18 @@ replace_node_data(DomNode, NewData):-
 destroy_widget(_DomNode, _Widget).
 
 init_widget(_, VNode, DomNode):-
-        VNode = element(Tag, Attributes, _),
-        Tag:getInitialState(Attributes, State),
+        VNode = widget(Tag, Attributes, _),
+        ( current_predicate(Tag:getInitialState/2)->
+            Tag:getInitialState(Attributes, StateTerm),
+            proactive_term_to_state(StateTerm, State)
+        ; otherwise->
+            State = proactive{}
+        ),
         Tag:render(State, Attributes, VDom),
-        vdiff(VNode, VDom, Patches),
-        create_element(Document, div, FakeDom),
-	vpatch(FakeDom, Patches, [document(Document)], DomNode).
+        create_element_from_vdom([], VDom, DomNode).
 
 update_widget(_Widget, VNode, DomNode, NewNode):-
-        VNode = element(Tag, Attributes, _),
+        VNode = widget(Tag, Attributes, _),
         State = ?, % FIXME: Need to recover this from DomNode, I guess
         Tag:render(State, Attributes, VDom),
 	vdiff(VNode, VDom, Patches),
@@ -256,7 +258,20 @@ user:'.'(State,Key,Value):-
 	( is_list(State)->
 	    get_state(State, Key, Value)
 	; State == {null}->
-	    Value = {null}
+            Value = {null}
+        ; is_dict(State, proactive)->
+            ( get_dict(Key, State, Value)->
+                true
+            ; Value = {null}
+            )
 	; '$dicts':'.'(State, Key, Value)
 	).
 
+proactive_term_to_state({null}, proactive{}):- !.
+proactive_term_to_state({Values}, State):-
+        state_pairs(Values, Pairs),
+        dict_pairs(State, proactive, Pairs).
+
+state_pairs((A:B, C), [A-B|D]):- !,
+        state_pairs(C, D).
+state_pairs(A:B, [A-B]):- !.
