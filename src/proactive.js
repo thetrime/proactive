@@ -11,17 +11,17 @@ window.onPrologReady = function(Prolog)
     if (onProactiveReady !== undefined)
 	onProactiveReady({render: function(url, rootElementId, container, callback)
 			  {
-                              var engine = new PrologEngine(url, rootElementId, function(status)
+                              var engine = new PrologEngine(url, rootElementId, function(status, error)
                                                             {
                                                                 if (status)
                                                                     new ReactWidget(null, engine, rootElementId, PrologState.emptyState, function(widget)
 										    {
 											container.className += " proactive_container vertical_layout vertical_fill horizontal_fill";
 											container.appendChild(widget.getDOMNode());
-                                                                                        callback(true);
+                                                                                        callback(true, error);
                                                                                     });
                                                                 else
-                                                                    callback(false);
+                                                                    callback(false, error);
 							      });
                           },
                           registerPredicate: Prolog._define_foreign,
