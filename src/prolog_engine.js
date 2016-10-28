@@ -21,9 +21,10 @@ function crossModuleCall(module, goal)
 }
 
 
-function PrologEngine(baseURL, rootElementId, callback)
+function PrologEngine(baseURL, rootElementId, errorHandler, callback)
 {
     this.env = {};
+    this.errorHandler = errorHandler;
     // Set up a few of our own properties
     this.env.proactive_context = [];
     this.env.engine = this;
@@ -250,7 +251,11 @@ PrologEngine.prototype.triggerEvent = function(handler, event, context, callback
                         {
                             var ex = Prolog._get_exception();
                             if (ex != 0)
+                            {
+                                if (this.errorHandler != undefined)
+                                    this.errorHandler(ex);
                                 console.log("trigger_event/4 raised an error: "+ Prolog._format_term(null, 1200, ex));
+                            }
                             else
                                 console.log("trigger_event/4 failed");
                         }

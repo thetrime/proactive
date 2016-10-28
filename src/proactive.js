@@ -9,9 +9,9 @@ window.onPrologReady = function(Prolog)
     var PrologState = require('./prolog_state');
     var ReactComponent = require('./react_component.js');
     if (onProactiveReady !== undefined)
-	onProactiveReady({render: function(url, rootElementId, container, callback)
+        onProactiveReady({render: function(url, rootElementId, container, callback, errorHandler)
 			  {
-                              var engine = new PrologEngine(url, rootElementId, function(status, error)
+                              var engine = new PrologEngine(url, rootElementId, errorHandler, function(status, error)
                                                             {
                                                                 if (status)
                                                                     new ReactWidget(null, engine, rootElementId, PrologState.emptyState, function(widget)
