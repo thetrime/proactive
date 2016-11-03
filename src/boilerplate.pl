@@ -58,3 +58,5 @@ debug_message(X):-
 
 on_server(Goal):-
         '_on_server'(Goal).
+
+string(_):- fail.
