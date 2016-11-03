@@ -9,6 +9,7 @@ function textInputHandler(event)
     event.preventDefault();
     var oldValue = this.domNode.value;
     var newValue = oldValue.slice(0, this.domNode.selectionStart) + event.data + oldValue.slice(this.domNode.selectionEnd);
+    this.proposedCaretPosition = this.domNode.selectionStart + event.data.length;
     this.valueWouldChange(newValue);
     return false;
 }
@@ -21,9 +22,17 @@ function keydownHandler(event)
         var newValue;
         var oldValue = this.domNode.value;
         if (this.domNode.selectionStart === this.domNode.selectionEnd)
+        {
+            if (this.domNode.selectionStart == 0) // This has no effect anyway, and if we do not return here then oldValue.slice(0, -1) is the entire string!
+                return;
             newValue = oldValue.slice(0, this.domNode.selectionStart-1) + oldValue.slice(this.domNode.selectionEnd);
+            this.proposedCaretPosition = this.domNode.selectionStart-1
+        }
         else
+        {
             newValue = oldValue.slice(0, this.domNode.selectionStart) + oldValue.slice(this.domNode.selectionEnd);
+            this.proposedCaretPosition = this.domNode.selectionStart;
+        }
         //        console.log(this.domNode.value + "-keydown>" + newValue);
         this.valueWouldChange(newValue);
         return false;
@@ -34,9 +43,15 @@ function keydownHandler(event)
         var newValue;
         var oldValue = this.domNode.value;
         if (this.domNode.selectionStart === this.domNode.selectionEnd)
+        {
             newValue = oldValue.slice(0, this.domNode.selectionStart) + oldValue.slice(this.domNode.selectionEnd+1);
+            this.proposedCaretPosition = this.domNode.selectionStart;
+        }
         else
+        {
             newValue = oldValue.slice(0, this.domNode.selectionStart) + oldValue.slice(this.domNode.selectionEnd);
+            this.proposedCaretPosition = this.domNode.selectionStart;
+        }
         this.valueWouldChange(newValue);
         //console.log(this.domNode.value + "-keydown>" + newValue);
         return false;
@@ -163,7 +178,7 @@ function Field()
     this.verifyValue = null;
     this.blurHandler = null;
     this.changeHandler = null;
-
+    this.proposedCaretPosition = null;
     this.domNode.onblur = blurHandler.bind(this);
 
     // What a mess :(
@@ -250,7 +265,11 @@ Field.prototype.setProperties = function(t)
         else
             this.value = Prolog._atom_chars(t.value);
         this.setValue(this.value);
+        if (this.proposedCaretPosition != null && this.value.length >= this.proposedCaretPosition)
+            this.domNode.setSelectionRange(this.proposedCaretPosition, this.proposedCaretPosition);
     }
+    // Reset this between events
+    this.proposedCaretPosition = null;
     if (t.disabled !== undefined)
     {
         this.domNode.disabled = ReactComponent.booleanValue(t.disabled);
