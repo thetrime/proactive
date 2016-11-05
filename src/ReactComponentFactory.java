@@ -26,5 +26,10 @@ public class ReactComponentFactory
       return new org.proactive.ui.Broken();
    }
 
+   public static void registerComponent(String tagName, Class<? extends ReactComponent> clazz) throws NoSuchMethodException
+   {
+      configuration.registerComponent(tagName, clazz.getConstructor());
+   }
+
 
 }

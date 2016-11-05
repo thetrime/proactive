@@ -44,4 +44,9 @@ public class DefaultReactComponentFactoryConfiguration implements ReactComponent
    {
       return constructorHash.get(key);
    }
+
+   public void registerComponent(String key, Constructor<? extends ReactComponent> constructor)
+   {
+      constructorHash.put(key, constructor);
+   }
 }
