@@ -15,6 +15,28 @@ Table.prototype = new ReactComponent;
 Table.prototype.appendChild = function(t)
 {
     this.table.appendChild(t.getDOMNode());
+    t.setParent(this);
 }
+
+Table.prototype.insertBefore = function(t, s)
+{
+    this.table.insertBefore(t.getDOMNode(), s.getDOMNode());
+    t.setParent(this);
+}
+
+Table.prototype.replaceChild = function(n, o)
+{
+    this.table.replaceChild(n.getDOMNode(), o.getDOMNode());
+    n.setParent(this);
+    o.setParent(null);
+}
+
+
+Table.prototype.removeChild = function(t)
+{
+    this.table.removeChild(t.getDOMNode());
+    t.setParent(null);
+}
+
 
 module.exports = Table;
