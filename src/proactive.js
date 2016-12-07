@@ -14,12 +14,29 @@ window.onPrologReady = function(Prolog)
                               var engine = new PrologEngine(url, rootElementId, errorHandler, function(status, error)
                                                             {
                                                                 if (status)
-                                                                    new ReactWidget(null, engine, rootElementId, PrologState.emptyState, function(widget)
+                                                                {
+                                                                    // Make the initial props
+                                                                    var initialPropsObject = PrologState.emptyState;
+                                                                    /*
+                                                                    if (initialProps != null)
+                                                                    {
+                                                                        initialPropsObject = new PrologState();
+                                                                        var keys = Object.keys(initialProps);
+                                                                        for (var i = 0; i < keys.length; i++)
+                                                                        {
+                                                                            var key = keys[i];
+                                                                            var value = initialProps[key];
+                                                                            initialPropsObject.map[key] = Prolog._make_atom(value);
+                                                                        }
+                                                                    }
+                                                                    */
+                                                                    new ReactWidget(null, engine, rootElementId, initialPropsObject, function(widget)
 										    {
 											container.className += " proactive_container vertical_layout vertical_fill horizontal_fill";
 											container.appendChild(widget.getDOMNode());
                                                                                         callback(true, error);
                                                                                     });
+                                                                }
                                                                 else
                                                                     callback(false, error);
 							      });
@@ -46,6 +63,13 @@ window.onPrologReady = function(Prolog)
                                   return false;
                               return true;
                           },
+                          hasFunctor: function(t, f)
+                          {
+                              if (!Prolog._is_compound(t))
+                                  return false;
+                              return Prolog._term_functor(t) == f;
+                          },
+                          functorOf: Prolog._term_functor,
                           argOf: Prolog._term_arg
                          }
 			);
