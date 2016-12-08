@@ -184,7 +184,7 @@ module.exports["_on_server"] = function(goal)
             {
                 ws.close();
                 var rc = Prolog._unify(goal, Prolog._copy_term(Prolog._term_arg(term, 0)));
-                console.log("Resuming with " + Prolog._format_term(null, 1200, Prolog._term_arg(term, 0)) + ": " + rc);
+                //console.log("Resuming with " + Prolog._format_term(null, 1200, Prolog._term_arg(term, 0)) + ": " + rc);
                 resume(rc);
                 Prolog._free_local(term);
             }
