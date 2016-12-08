@@ -9,7 +9,7 @@ window.onPrologReady = function(Prolog)
     var PrologState = require('./prolog_state');
     var ReactComponent = require('./react_component.js');
     if (onProactiveReady !== undefined)
-        onProactiveReady({render: function(url, rootElementId, container, callback, errorHandler)
+        onProactiveReady({render: function(url, propSpec, rootElementId, container, callback, errorHandler)
 			  {
                               var engine = new PrologEngine(url, rootElementId, errorHandler, function(status, error)
                                                             {
@@ -17,19 +17,12 @@ window.onPrologReady = function(Prolog)
                                                                 {
                                                                     // Make the initial props
                                                                     var initialPropsObject = PrologState.emptyState;
-                                                                    /*
-                                                                    if (initialProps != null)
+                                                                    if (propSpec != null)
                                                                     {
-                                                                        initialPropsObject = new PrologState();
-                                                                        var keys = Object.keys(initialProps);
-                                                                        for (var i = 0; i < keys.length; i++)
-                                                                        {
-                                                                            var key = keys[i];
-                                                                            var value = initialProps[key];
-                                                                            initialPropsObject.map[key] = Prolog._make_atom(value);
-                                                                        }
+                                                                        var p = decodeURIComponent(propSpec);
+                                                                        console.log(p);
+                                                                        initialPropsObject = new PrologState(Prolog._string_to_local_term(p));
                                                                     }
-                                                                    */
                                                                     new ReactWidget(null, engine, rootElementId, initialPropsObject, function(widget)
 										    {
 											container.className += " proactive_container vertical_layout vertical_fill horizontal_fill";
@@ -46,6 +39,7 @@ window.onPrologReady = function(Prolog)
 			  ReactComponent: ReactComponent,
 			  Constants: Constants,
                           make_atom: Prolog._make_atom,
+                          make_functor: Prolog._make_functor,
                           makeInteger: Prolog._make_integer,
                           atom_chars: Prolog._atom_chars,
                           numeric_value: Prolog._numeric_value,
@@ -53,6 +47,15 @@ window.onPrologReady = function(Prolog)
                           forEach: Prolog._forEach,
                           createHandler: Prolog._make_local,
                           releaseHandler: Prolog._free_local,
+                          isAtom: Prolog.is_atom,
+                          toCanonicalString: function(w)
+                          {
+                              var qOp = Prolog._create_options();
+                              Prolog._set_option(qOp, Prolog._make_atom("quoted"), Prolog._make_atom("true"));
+                              var s = Prolog._format_term(qOp, 1200, w);
+                              Prolog._free_options(qOp);
+                              return s;
+                          },
                           isCompound: function(t, name, arity)
                           {
                               if (!Prolog._is_compound(t))
