@@ -80,8 +80,8 @@ public class Row extends ReactComponent
    public void setProperties(HashMap<String, PrologObject> properties)
    {
       super.setProperties(properties);
-      if (properties.containsKey("onDoubleClick"))
-	 setDoubleClickHandler(properties.get("onDoubleClick"));
+      if (properties.containsKey("onDblClick"))
+         setDoubleClickHandler(properties.get("onDblClick"));
    }  
 
    public ReactComponent get(int index)
