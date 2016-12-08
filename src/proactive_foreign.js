@@ -183,7 +183,7 @@ module.exports["_on_server"] = function(goal)
             else if (Prolog._term_functor(term) == Constants.cutFunctor)
             {
                 ws.close();
-                var rc = Prolog._unify(goal, Prolog._term_arg(term, 0));
+                var rc = Prolog._unify(goal, Prolog._copy_term(Prolog._term_arg(term, 0)));
                 console.log("Resuming with " + Prolog._format_term(null, 1200, Prolog._term_arg(term, 0)) + ": " + rc);
                 resume(rc);
                 Prolog._free_local(term);
@@ -192,7 +192,7 @@ module.exports["_on_server"] = function(goal)
             {
                 // OK, we need a backtrack point here so we can retry
                 Prolog._create_choicepoint(ws, function() { ws.close(); });
-                resume(Prolog._unify(goal, Prolog._term_arg(term, 0)));
+                resume(Prolog._unify(goal, Prolog._copy_term(Prolog._term_arg(term, 0))));
                 Prolog._free_local(term);
             }
         }
