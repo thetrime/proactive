@@ -47,7 +47,7 @@ window.onPrologReady = function(Prolog)
                           forEach: Prolog._forEach,
                           createHandler: Prolog._make_local,
                           releaseHandler: Prolog._free_local,
-                          isAtom: Prolog.is_atom,
+                          isAtom: Prolog._is_atom,
                           toCanonicalString: function(w)
                           {
                               var qOp = Prolog._create_options();
