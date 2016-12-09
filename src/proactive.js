@@ -48,6 +48,7 @@ window.onPrologReady = function(Prolog)
                           createHandler: Prolog._make_local,
                           releaseHandler: Prolog._free_local,
                           isAtom: Prolog._is_atom,
+                          unify: Prolog._unify,
                           toCanonicalString: function(w)
                           {
                               var qOp = Prolog._create_options();

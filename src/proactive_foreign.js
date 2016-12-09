@@ -191,7 +191,7 @@ module.exports["_on_server"] = function(goal)
             else
             {
                 // OK, we need a backtrack point here so we can retry
-                Prolog._create_choicepoint(ws, function() { ws.close(); });
+                Prolog._make_choicepoint(ws, function() { ws.close(); });
                 resume(Prolog._unify(goal, Prolog._copy_term(Prolog._term_arg(term, 0))));
                 Prolog._free_local(term);
             }
