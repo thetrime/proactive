@@ -18,8 +18,10 @@ ComboItem.prototype.setProperties = function(t)
         this.domNode.textContent = Prolog._portray(t.label);
     if (t.value !== undefined)
     {
-        this.domNode.value = t.value;
-        this.value = t.value;
+        this.domNode.value = Prolog._portray(t.value);
+        if (this.value != null)
+            Prolog._free_local(this.value);
+        this.value = Prolog._make_local(t.value);
     }
 }
 
@@ -31,6 +33,13 @@ ComboItem.prototype.getValue = function()
 ComboItem.prototype.setSelected = function(t)
 {
     this.domNode.selected = t;
+}
+
+ComboItem.prototype.freeComponent = function(vNode)
+{
+    if (this.value != null)
+        Prolog._free_local(this.value);
+    ReactComponent.prototype.freeComponent.call(this, vNode); //ie super.freeComponent(vNode)
 }
 
 module.exports = ComboItem;
