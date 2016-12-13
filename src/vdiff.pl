@@ -113,6 +113,8 @@ child_element(Children, Element):-
         member(Child, Children),
         ( Child = list(List)->
             child_element(List, Element)
+        ; is_list(Child)->
+            child_element(Child, Element)
         ; Element = Child
         ).
 
@@ -661,6 +663,12 @@ render(Options, VNodeIn, DomNode):-
 
 render_children([], _, _):- !.
 render_children([list(List)|Children], Options, DomNode):-
+        !,
+        render_children(List, Options, DomNode),
+        render_children(Children, Options, DomNode).
+
+render_children([List|Children], Options, DomNode):-
+        is_list(List),
         !,
         render_children(List, Options, DomNode),
         render_children(Children, Options, DomNode).
