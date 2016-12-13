@@ -119,19 +119,28 @@ ComboBox.prototype.insertBefore = function(n, s)
 
 ComboBox.prototype.setValue = function(t)
 {
-    this.value = t;
+    // If you try and set the value to a variable then it will have no effect.
+    // Do not rely on this behaviour! It is there purely to avoid an even more nasty consequence
+    // if you bind the variable
+    if (!Prolog._is_variable(t))
+        this.value = t;
     this.selectCurrentIndex();
 }
 
 ComboBox.prototype.selectCurrentIndex = function()
 {
+    var isAtomic = Prolog._is_atom(this.value);
     for (var i = 0; i < this.children.length; i++)
     {
-        if (this.children[i] instanceof ComboItem && this.children[i].getValue() == this.value)
+        if (this.children[i] instanceof ComboItem)
         {
-            this.currentIndex = i;
-            this.children[i].setSelected(true);
-            break;
+            var childValue = this.children[i].getValue();
+            if ((isAtomic && childValue == this.value) || (!isAtomic && !Prolog._is_atom(childValue) && Prolog._unify(childValue, this.value)))
+            {
+                this.currentIndex = i;
+                this.children[i].setSelected(true);
+                break;
+            }
         }
     }
 }
