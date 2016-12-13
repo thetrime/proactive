@@ -103,27 +103,36 @@ jsx_atom_codes([Code|Codes])-->
         jsx_atom_codes(Codes).
 jsx_atom_codes([])--> [].
 
-jsx_children(Dict, Children, Goal, GoalTail, Singletons, SingletonsTail)-->
-        % This allows terms like {A|Tail}
+jsx_children(Dict, [Term|Tail], Goal, GoalTail, Singletons, SingletonsTail)-->
+        % This allows terms like {A}
         optional_spaces,
         `{`,
           optional_spaces,
-          variable_name(HeadName),
+          read_until_close_paren(Codes, [], 1),
           optional_spaces,
-          `|`,
-          !,
-          optional_spaces,
-          variable_name(TailName),
-          optional_spaces,
-        `}`,
+          `}`,
+        optional_spaces,
+        {read_term_from_atom(Codes, Term, [variable_names(TermVariableNames)]),
+         unify_variables(TermVariableNames, Dict)
+        },
+        jsx_children(Dict, Tail, Goal, GoalTail, Singletons, SingletonsTail).
+
+jsx_children(Dict, [list(List)|Tail], Goal, GoalTail, Singletons, SingletonsTail)-->
+        % This is for things like list([A, B, C])
+        optional_spaces,
+        `list(`,
+              optional_spaces,
+              read_until_close_paren(Codes, [], 1),
+              `)`,
+        optional_spaces,
+        % Array of components. We have to have a pointer to the siblings, which is why we do it in jsx_children
+        % rather than jsx_node
+        {read_term_from_atom(Codes, Term, [variable_names(TermVariableNames)]),
+         unify_variables(TermVariableNames, Dict),
+         List = Term
+        },
         !,
-        {memberchk(HeadName=List, Dict),
-         memberchk(TailName=TailVar, Dict),
-         Children = List,
-         Goal = G1,
-         TailVar = Tail,
-         Singletons = ((TailVar = TailVar), S1)},
-        jsx_children(Dict, Tail, G1, GoalTail, S1, SingletonsTail).
+        jsx_children(Dict, Tail, Goal, GoalTail, Singletons, SingletonsTail).
 
 jsx_children(Dict, Children, Goal, GoalTail, Singletons, SingletonsTail)-->
         % This allows terms like {A}, {[A, B]} and {Props.children}
@@ -134,18 +143,7 @@ jsx_children(Dict, Children, Goal, GoalTail, Singletons, SingletonsTail)-->
         !,
         {read_term_from_atom(Codes, Term, [variable_names(TermVariableNames)]),
          unify_variables(TermVariableNames, Dict),
-         ( var(Term)->
-             Goal = ((var(Term)->
-                        throw(error(instantiation_error(Term), _))
-                     ; Term == [] ->
-                        Children = Tail
-                     ; is_list(Term)->
-                        once(append(Term, Tail, Children))
-                     ; Children = [Term|Tail]
-                     ), G1)
-         ; expand_goals(Term, List, G2, G1),
-           Goal = (once(append(List, Tail, Children)), G2)
-         )},
+         Goal = (once(append(Term, Tail, Children)), G1)},
         jsx_children(Dict, Tail, G1, GoalTail, Singletons, SingletonsTail).
 
 jsx_children(Dict, Children, Goal, GoalTail, Singletons, SingletonsTail)-->
