@@ -325,6 +325,14 @@ Field.prototype.setProperties = function(t)
         else
             this.domNode.id = Prolog._portray(t.id);
     }
+    if (t.title !== undefined)
+    {
+        if (ReactComponent.isNull(t.title))
+            this.domNode.title = "";
+        else
+            this.domNode.title = Prolog._atom_chars(t.title);
+    }
+
 }
 
 Field.prototype.setValue = function(text)

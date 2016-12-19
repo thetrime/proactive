@@ -207,3 +207,12 @@ th > *
 {
     width: 100%;
 }
+
+/* Make each table cell object take up the entire td.
+   Note that only block objects can have a width
+*/
+td > *
+{
+    display: block;
+    width: 100%;
+}

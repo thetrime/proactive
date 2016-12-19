@@ -27,6 +27,19 @@ Label.prototype.setProperties = function(t)
         else
             this.domNode.htmlFor = Prolog._portray(f);
     }
+    if (t.align !== undefined)
+    {
+        this.domNode.style["text-align"] = Prolog._atom_chars(t.align);
+    }
+    if (t.title !== undefined)
+    {
+        if (ReactComponent.isNull(t.title))
+            this.domNode.title = "";
+        else
+            this.domNode.title = Prolog._atom_chars(t.title);
+    }
+
+
 }
 
 module.exports = Label;
