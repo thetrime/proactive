@@ -74,7 +74,7 @@ ReactComponent.prototype.getDOMNode = function()
     return this.domNode;
 }
 
-ReactComponent.prototype.restyle = function()
+ReactComponent.prototype.getStyle = function()
 {
     var newClassName = this.baseClassName;
     if (this.fill == "none")
@@ -98,9 +98,12 @@ ReactComponent.prototype.restyle = function()
 
     if (this.justify_content == "space-between")
         newClassName += " justify_space_between";
+    return newClassName;
+}
 
-    this.getDOMNode().className = newClassName;
-
+ReactComponent.prototype.restyle = function()
+{
+    this.getDOMNode().className = this.getStyle();
 }
 
 ReactComponent.prototype.setOwnerDocument = function(d)
