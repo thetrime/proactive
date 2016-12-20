@@ -1,6 +1,6 @@
 {
     "name": "proactive",
-    "version": "0.0.29",
+    "version": "0.0.30",
     "description": "React in Prolog",
     "main": "proscript.js",
     "dependencies": {
