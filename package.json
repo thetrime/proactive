@@ -1,13 +1,13 @@
 {
     "name": "proactive",
-    "version": "0.0.28",
+    "version": "0.0.29",
     "description": "React in Prolog",
     "main": "proscript.js",
     "dependencies": {
         "xmlhttprequest": "^1.8.0",
         "browserify": "^13.0.0",
         "brfs": "^1.4.3",
-        "proscript": "git+https://github.com/thetrime/proscript2.git#e2160a2"
+        "proscript": "git+https://github.com/thetrime/proscript2.git#6f06fcae2b8dc770049d35c541224d735c11ab74"
     },
     "devDependencies": {
     },
