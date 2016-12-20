@@ -8,6 +8,8 @@ function Panel()
     this.contentElement = document.createElement("div");
     this.setDOMNode(this.contentElement);
     this.deletion = new RegExp('(\\s|^)fieldset(\\s|$)');
+    this.legendElement = null;
+    this.fieldSetTextElement = null;
 }
 
 
@@ -18,32 +20,54 @@ Panel.prototype = new ReactComponent;
 Panel.prototype.setProperties = function(t)
 {
     ReactComponent.prototype.setProperties.call(this, t);
-    if (t.label !== undefined)
+    if (t.label !== undefined && !ReactComponent.isNull(t.label))
     {
-        this.legendElement = document.createElement("div");
-        this.legendElement.className = "proactive_container horizontal_fill horizontal_layout fieldset_legend";
-        var pre = document.createElement("div"); // this is the --- at the top-left
-        pre.className = "pre_fieldset";
-        this.legendElement.appendChild(pre);
-        var fieldSetText = document.createElement("div"); // this is the text itself
-        fieldSetText.className = "fieldset_text";
-        fieldSetText.textContent = Prolog._portray(t.label);
-        this.legendElement.appendChild(fieldSetText);
-        var post = document.createElement("div"); // this is the --- at the top-right
-        post.className = "post_fieldset horizontal_fill";
-        this.legendElement.appendChild(post);
-        this.baseClassName = "proactive_container fieldset";
-        this.domNode.insertBefore(this.legendElement, this.domNode.firstChild);
-        this.contentElement = document.createElement("div");
-        this.contentElement.className = "proactive_container fieldset_main";
-        var f = "no_fill";
-        if (this.fill == "horizontal")
-            f = "horizontal_fill";
-        else if (this.fill == "vertical")
-            f = "vertical_fill";
-        this.getDOMNode().className = "proactive_container fieldset vertical_layout " + f;
-        this.getDOMNode().appendChild(this.contentElement);
+        if (this.legendElement == null)
+        {
+            console.log("Creating legend");
+            this.legendElement = document.createElement("div");
+            this.legendElement.className = "proactive_container horizontal_fill horizontal_layout fieldset_legend";
+            var pre = document.createElement("div"); // this is the --- at the top-left
+            pre.className = "pre_fieldset";
+            this.legendElement.appendChild(pre);
+            this.fieldSetTextElement = document.createElement("div"); // this is the text itself
+            this.fieldSetTextElement.className = "fieldset_text";
+            this.fieldSetTextElement.textContent = Prolog._portray(t.label);
+            this.legendElement.appendChild(this.fieldSetTextElement);
+            var post = document.createElement("div"); // this is the --- at the top-right
+            post.className = "post_fieldset horizontal_fill";
+            this.legendElement.appendChild(post);
+            this.baseClassName = "proactive_container fieldset";
+            var newParent = document.createElement("div");
+            newParent.className = "proactive_container fieldset vertical_layout";
+            var f = "no_fill";
+            if (this.fill == "horizontal")
+                f = "horizontal_fill";
+            else if (this.fill == "vertical")
+                f = "vertical_fill";
+            this.getDOMNode().className = "proactive_container fieldset vertical_layout " + f;
+            newParent.appendChild(this.getDOMNode());
+            newParent.insertBefore(this.legendElement, this.getDOMNode());
+            this.setDOMNode(newParent);
+        }
+        else
+        {
+            console.log("Changing legend");
+            this.fieldSetTextElement.textContent = Prolog._portray(t.label);
+        }
         this.restyle();
+    }
+    else
+    {
+        // Delete the legend if preset
+        if (this.legendElement != null)
+        {
+            console.log("Deleting legend");
+            this.domNode.removeChild(this.legendElement);
+            this.contentElement = this.getDOMNode();
+            this.legendElement = null;
+            this.restyle();
+        }
     }
     if (t.scroll !== undefined)
     {
