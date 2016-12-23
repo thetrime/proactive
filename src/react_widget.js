@@ -93,7 +93,7 @@ ReactWidget.prototype.updateWidget = function(newProps, callback)
 
 ReactWidget.prototype.destroyWidget = function(vNode)
 {
-    console.log("ohai");
+    console.log("Destroy component: " + Prolog._portray(vNode));
     this.freeComponent(vNode);
 }
 

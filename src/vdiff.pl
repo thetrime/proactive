@@ -109,14 +109,8 @@ expand_children(element(_, _, Children), AllChildren):-
                 child_element(Children, ChildElement),
                 AllChildren).
 
-child_element(Children, Element):-
-        member(Child, Children),
-        ( Child = list(List)->
-            child_element(List, Element)
-        ; is_list(Child)->
-            child_element(Child, Element)
-        ; Element = Child
-        ).
+child_element(Children, Child):-
+        member(Child, Children).
 
 
 diff_children(A, B, Index, Patch):-
@@ -662,17 +656,6 @@ render(Options, VNodeIn, DomNode):-
         ).
 
 render_children([], _, _):- !.
-render_children([list(List)|Children], Options, DomNode):-
-        !,
-        render_children(List, Options, DomNode),
-        render_children(Children, Options, DomNode).
-
-render_children([List|Children], Options, DomNode):-
-        is_list(List),
-        !,
-        render_children(List, Options, DomNode),
-        render_children(Children, Options, DomNode).
-
 render_children([Child|Children], Options, DomNode):-
         render(Options, Child, ChildDomNode),
         ( ChildDomNode \== {null}->

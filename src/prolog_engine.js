@@ -14,6 +14,7 @@ var documentFunctor = Prolog._make_functor(Prolog._make_atom("document"), 1);
 var createElementFromVDomFunctor = Prolog._make_functor(Prolog._make_atom("create_element_from_vdom"), 3);
 var vDiffFunctor = Prolog._make_functor(Prolog._make_atom("vdiff"), 3);
 var vPatchFunctor = Prolog._make_functor(Prolog._make_atom("vpatch"), 4);
+var expandChildrenFunctor = Prolog._make_functor(Prolog._make_atom("expand_children"), 2);
 
 function crossModuleCall(module, goal)
 {
@@ -144,15 +145,36 @@ PrologEngine.prototype.render = function(widget, component, state, props, callba
                     function(success)
                     {
                         this.env.popProactiveContext();
-                        vDom = Prolog._make_local(vDom);
-                        Prolog._restore_state(savePoint);
                         if (success)
                         {
-                            //console.log("Render of " + component + " succeeded!");
-                            callback(vDom);
+                            // Expand child objects here
+                            var expandedDom = Prolog._make_variable();
+                            // Prolog._cut();
+                            Prolog._execute(this.env,
+                                            Prolog._make_compound(expandChildrenFunctor, [vDom, expandedDom]),
+                                            function(s2)
+                                            {
+                                                vDom = Prolog._make_local(expandedDom);
+                                                Prolog._restore_state(savePoint);
+                                                if (s2)
+                                                {
+                                                    callback(vDom);
+                                                }
+                                                else
+                                                {
+                                                    var ex = Prolog._get_exception();
+                                                    if (ex != 0)
+                                                        console.log("expand_children/2 raised an error: " + ex  + Prolog._format_term(null, 1200, ex));
+                                                    else
+                                                        console.log("expand_children/2 failed");
+                                                    throw new Error("Stop: Render fail");
+                                                }
+                                            }
+                                           );
                         }
                         else
                         {
+                            Prolog._restore_state(savePoint);
                             var ex = Prolog._get_exception();
                             if (ex != 0)
                                 console.log("render/3 raised an error: " + ex  + Prolog._format_term(null, 1200, ex));
