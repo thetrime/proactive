@@ -171,7 +171,7 @@ get_count_1([Child|Children], Count):-
 
 thunks(A, B, Index, Index-thunk({null}, PatchSet)):-
         handle_thunk(A, B, ANodes, BNodes),
-        diff(ANodes, BNodes, PatchSet).
+        vdiff(ANodes, BNodes, PatchSet).
 
 
 handle_thunk(A, B, ANodes, BNodes):-

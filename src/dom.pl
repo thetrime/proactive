@@ -174,12 +174,12 @@ test:-
                                       element('Button', [label=submit], [])]),
 	vdiff(InitialTree, Tree1, Patch1),
 	vdiff(Tree1, Tree2, Patch2),
-	debug_message(patch:Patch1),
-	debug_message(patch:Patch2),
+        writeln(patch:Patch1),
+        writeln(patch:Patch2),
 	vpatch(InitialRoot, Patch1, [document(Document)], IntermediateRoot),
 	vpatch(IntermediateRoot, Patch2, [document(Document)], FinalRoot),
         crystalize([FinalRoot]),
-	debug_message(FinalRoot).
+        writeln(FinalRoot).
 
 crystalize([]):- !.
 crystalize([DomNode|DomNodes]):-

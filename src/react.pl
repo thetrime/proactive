@@ -3,6 +3,7 @@
           wait_for/1,
           bubble_event/3,
           trigger_react_recompile/1,
+          vdiff_warning/1,
           jsx/2]).
 
 %       You MUST provide an implementation of react:goal_is_safe/1 or on_server/1 will always fail on the client.
@@ -20,6 +21,7 @@ user:term_expansion(:-table_predicate(Indicator), tabled_predicate(user, Indicat
 :- use_module(library(http/websocket)).
 :- use_module(library(http/thread_httpd)).
 :- use_module(library(http/http_dispatch)).
+:- use_module(library(http/http_session)).
 
 
 :-http_handler(root('react/component'), serve_react, [prefix]).
@@ -275,3 +277,7 @@ bubble_event(List, Key, Event):-
         ).
 
 user:term_expansion(requires(X), [depends_on(X), :-use_module(X)]).
+
+vdiff_warning(X):-
+        format(user_error, 'Warning: ~w', [X]).
+
