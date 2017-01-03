@@ -107,7 +107,7 @@ set_vdom_properties(DomNode, NewProperties):-
 
 merge_vdom_properties([], Merged, Merged):- !.
 merge_vdom_properties([Name=OldValue|Old], NewProperties, Merged):-
-        ( select(Name-NewValue, NewProperties, MoreIn)->
+        ( select(Name=NewValue, NewProperties, MoreIn)->
             ( NewValue == {null} ->
                 MoreOut = Merged
             ; Merged = [Name=NewValue|MoreOut]
