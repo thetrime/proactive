@@ -289,7 +289,9 @@ pop_context:-
 peek_context(This):-
         nb_current(proactive_this, [This|_]).
 
-react_dom:attr_unify_hook(X, X).
+% To save on nightmares, never allow these unifications to actually take place
+react_dom:attr_unify_hook(X, X):-
+        var(X), !.
 
 get_state({null}, _, {null}):- !.
 get_state(Object, Key, Value):-
@@ -392,12 +394,27 @@ fire_event(Handler, Event, This):-
         set_state(This, UpdatedState),
         % Now we must re-render. That means, essentially, changing the children. First, we must render the whole component with the new state
         setup_call_cleanup(push_context(This),
-                           Module:render(UpdatedState, Props, NewVDom),
+                           Module:render(UpdatedState, Props, NewVDOM),
                            pop_context),
-        vdiff(OldVDOM, NewVDom, Patch),
+        !,
+        % vdiff/3 will not work if the term contains attributed variables. This is because, for example:
+        %   ?- put_attr(X, react_dom, qqq), bagof(A, member(A, [X,Y]), As).
+        %   X = qqq,
+        %   As = [qqq, Y].
+        % despite the fact that
+        %   ?- bagof(A, member(A, [X,Y]), As).
+        %   As = [X, Y].
+        % In other words, setof/bagof end up unfreezing attributed variables :(
+        % We can fix this with a very /very/ complicated dance
+        term_variables(OldVDOM-NewVDOM, OriginalVars),
+        copy_term(OriginalVars-OldVDOM-NewVDOM, CopiedVars-CopiedOldVDOM-CopiedNewVDOM, AttributeGoals),
+        vdiff(CopiedOldVDOM, CopiedNewVDOM, Patch),
+        % Then restore the variables
+        OriginalVars = CopiedVars,
+        maplist(call, AttributeGoals),
+        % Then continue on our way
         vpatch(OldDOM, Patch, [document(This)], NewDOM),
-        % and finally replace the child in the parent
-        put_attr(This, react_dom, react_widget(Module, State, Props, Id, NewVDom, NewDOM)).
+        put_attr(This, react_dom, react_widget(Module, State, Props, Id, NewVDOM, NewDOM)).
 
 curly_term_to_state(Term, State):-
         ( Term == {} ->
@@ -499,3 +516,6 @@ merge_pairs([Key-OldValue|OldState], NewState, Merged):-
 
 vpath(_DOM, _Spec, _Content):-
         throw(not_implemented).
+
+
+
