@@ -1,6 +1,7 @@
 :-module(test_demo, []).
 
 requires('Title').
+
 render(State, _Props, Form) :-
         on_server(UserId = tester),
         format(atom(Message), 'Hello ~w, and welcome to the tech demo', [UserId]),
@@ -11,6 +12,7 @@ render(State, _Props, Form) :-
         {|jsx(Form)||
         <Panel fill="both" layout="vertical">
           <FakeTestWidget onSplunge={this.splunge}/>
+          <Label label={State.message}/>
           <Title label="Tech Demo" fill="none" align-children="center"/>
           <Label label={Message}/>
           <Panel layout="vertical" fill="none">
@@ -74,7 +76,8 @@ row(Row, Number, Size) :-
 selectValue(Name, _Event, _State, _Props, {}) :-
         writeln(row_selected(Name)).
 
-getInitialState(_, {chart_type:pie}).
+getInitialState(_, {chart_type:pie,
+                    message: initial}).
 
 table_data(mike, tardigrade, big, 3).
 table_data(keri, lemur, small, 7).
@@ -96,8 +99,9 @@ toggleChartType(_Event, State, _Props, {chart_type:NewType}):-
         ; NewType = pie
         ).
 
-splunge(Event, _State, _Props, {}):-
-        writeln(got_event(Event)).
+splunge(Event, _State, _Props, {message: NewMessage}):-
+        writeln(got_event(Event)),
+        memberchk(new_message=NewMessage, Event).
 
 
 
@@ -106,11 +110,31 @@ splunge(Event, _State, _Props, {}):-
 %% Tests
 
 
+xdo_test:-
+        proactive(test_demo, proactive{}, Document),
+        find_a_thing(Document, Root),
+        show_splunge(Root),
+        writeln(triggering_event_now),
+        proactive_event(Root, onSplunge, [qux=bing]),
+        find_a_thing(Document, Root2),
+        show_splunge(Root2),
+        render_document(user_error, Document).
+
+show_splunge(dom_element(A)):-
+        memberchk(properties-P, A),
+        get_attr(P, react_dom, Props),
+        memberchk(onSplunge='$this'(XXX, _), Props),
+        get_attr(XXX, react_dom, This),
+        writeln(splunge=This).
+
+
 do_test:-
         proactive(test_demo, proactive{}, Document),
         find_a_thing(Document, Root),
         find_a_thing(Root, Thing),
-        proactive_event(Thing, onSplunge, [qux=bing]),
+        proactive_event(Thing, onSplunge, [new_message=after_event_1]),
+        proactive_event(Thing, onSplunge, [new_message=after_event_2]),
+        show_splunge(Thing),
         render_document(user_error, Document).
 
 % This will be replaced by vPath eventually
