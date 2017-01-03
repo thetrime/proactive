@@ -14,6 +14,12 @@
           update_widget/4,
           destroy_widget/2,
 
+          vpath/3,
+          proactive_event/3,
+
+          proactive/3,
+          render_dom/2,
+          render_document/2,
           proactive_term_to_state/2,
           get_store_state/2,
 	  state_to_term/2,
@@ -134,6 +140,7 @@ init_widget(_, VNode, DomNode):-
         ),
         Tag:render(State, Attributes, VDom),
         create_element_from_vdom([], VDom, DomNode).
+        % FIXME: Attach state and props here to the DomNode? Note that not all dom_element/1 terms will have a state, only widgets...
 
 update_widget(_Widget, VNode, DomNode, NewNode):-
         VNode = widget(Tag, Attributes, _),
@@ -147,8 +154,14 @@ node_type(DomNode, Type):-
         memberchk(type-Type, Attributes).
 
 
-get_this({this}).
-widget_id({widget}).
+get_this(This):-
+        peek_context(This).
+widget_id(Id):-
+        peek_context(This),
+        ( get_attr(This, react_dom, Widget)->
+            Widget = react_widget(_Module, _State, _Props, Id, _VDOM, _DOM)
+        ; existence_error(widget, This)
+        ).
 
 % DOM node is represented as dom_node(Attributes)
 %  Attributes must contain:
@@ -177,33 +190,79 @@ test:-
         writeln(patch:Patch1),
         writeln(patch:Patch2),
 	vpatch(InitialRoot, Patch1, [document(Document)], IntermediateRoot),
-	vpatch(IntermediateRoot, Patch2, [document(Document)], FinalRoot),
-        crystalize([FinalRoot]),
-        writeln(FinalRoot).
+        vpatch(IntermediateRoot, Patch2, [document(Document)], FinalRoot),
+        render_dom(user_error, [FinalRoot]).
 
-crystalize([]):- !.
-crystalize([DomNode|DomNodes]):-
-        DomNode = dom_element(Attributes),
-        crystalize_attributes(Attributes),
-        crystalize(DomNodes).
+render_dom(Stream, Object):-
+        crystalize(Object, XML),
+        xml_write(Stream, XML, []).
 
-crystalize_attributes([]):- !.
-crystalize_attributes([parent-_|Attributes]):-
-        !,
-        crystalize_attributes(Attributes).
-crystalize_attributes([children-Ptr|Attributes]):-
-        !,
-        get_attr(Ptr, react_dom, ChildNodes),
-        Ptr = ChildNodes,
-        crystalize(ChildNodes),
-        crystalize_attributes(Attributes).
-crystalize_attributes([_-Value|Attributes]):-
-        ( attvar(Value)->
-            get_attr(Value, react_dom, Value)
+render_document(Stream, dom_element(Attributes)):-
+        memberchk(children-ChildPtr, Attributes),
+        get_attr(ChildPtr, react_dom, Children),
+        render_dom(Stream, Children).
+
+
+crystalize([], []):- !.
+crystalize([Object|DomNodes], [element(Tag, Attributes, Children)|Siblings]):-
+        Object = dom_element(DomAttributes),
+        ( memberchk(children-ChildPtr, DomAttributes) ->
+            get_attr(ChildPtr, react_dom, ChildNodes),
+            crystalize(ChildNodes, Children)
         ; otherwise->
-            true
+            Children = []
         ),
-        crystalize_attributes(Attributes).
+        retrieve_tag(Object, Tag),
+        ( memberchk(properties-PropertiesPtr, DomAttributes)->
+            get_attr(PropertiesPtr, react_dom, AttributesWithObjects),
+            crystalize_attributes(AttributesWithObjects, Attributes)
+        ; otherwise->
+            Attributes = []
+        ),
+        crystalize(DomNodes, Siblings).
+
+crystalize_attributes([], []):- !.
+crystalize_attributes([Name=Value|In], [Name=Atom|Out]):-
+        ( atomic(Value)->
+            Atom = Value
+        ; term_to_atom(Value, Atom)
+        ),
+        crystalize_attributes(In, Out).
+
+proactive(Module, Props, Document):-
+        current_module(Module),
+        ( current_predicate(Module:getInitialState/2)->
+            Module:getInitialState(Props, InitialState)
+        ; otherwise->
+            InitialState = proactive{}
+        ),
+        % FIXME: Set a pointer to This somehow and remove it after rendering?
+        curly_term_to_state(InitialState, I),
+        put_attr(This, react_dom, react_widget(Module, I, Props, id_goes_here, [], [])),
+        setup_call_cleanup(push_context(This),
+                           Module:render(I, Props, VDOM),
+                           pop_context),
+        create_element_from_vdom([], VDOM, DOM),
+        put_attr(This, react_dom, react_widget(Module, I, Props, id_goes_here, VDOM, DOM)),
+        Document = dom_element([tag-{document},
+                                children-ChildPtr]),
+        put_attr(ChildPtr, react_dom, [DOM]),
+        DOM = dom_element(Attributes),
+        memberchk(parent-ParentPtr, Attributes),
+        put_attr(ParentPtr, react_dom, Document).
+
+push_context(This):-
+        ( nb_current(proactive_this, List)->
+            b_setval(proactive_this, [This|List])
+        ; b_setval(proactive_this, [This])
+        ).
+
+pop_context:-
+        nb_current(proactive_this, [_|List]),
+        b_setval(proactive_this, List).
+
+peek_context(This):-
+        nb_current(proactive_this, [This|_]).
 
 react_dom:attr_unify_hook(X, X).
 
@@ -275,3 +334,143 @@ proactive_term_to_state({Values}, State):-
 state_pairs((A:B, C), [A-B|D]):- !,
         state_pairs(C, D).
 state_pairs(A:B, [A-B]):- !.
+
+proactive_event(Target, HandlerName, Event):-
+        Target = dom_element(DomAttributes),
+        ( memberchk(properties-PropertiesPtr, DomAttributes),
+          get_attr(PropertiesPtr, react_dom, AttributesWithObjects),
+          memberchk(HandlerName=Handler, AttributesWithObjects)->
+            fire_event(Handler, Event, Target)
+        ; format(user_error, 'Warning: Object has no handler for ~w attached', [HandlerName]),
+          fail
+        ).
+
+fire_event('$this'(Context, Handler), Event, _This):-
+        !,
+        fire_event(Handler, Event, Context).
+
+fire_event(Handler, Event, This):-
+        ( get_attr(This, react_dom, Widget)->
+            Widget = react_widget(Module, State, Props, Id, OldVDOM, OldDOM)
+        ; existence_error(widget, This)
+        ),
+        ( atom(Handler)->
+            Goal =.. [Handler, Event, State, Props, Result]
+        ; otherwise->
+            Handler =.. A,
+            append(A, [Event, State, Props, Result], B),
+            Goal =.. B
+        ),
+        Module:Goal,
+        curly_term_to_state(Result, NewState),
+        merge_states(State, NewState, UpdatedState),
+        set_state(This, UpdatedState),
+        % Now we must re-render. That means, essentially, changing the children. First, we must render the whole component with the new state
+        setup_call_cleanup(push_context(This),
+                           Module:render(UpdatedState, Props, NewVDom),
+                           pop_context),
+        vdiff(OldVDOM, NewVDom, Patch),
+        vpatch(OldDOM, Patch, [document(This)], NewDOM),
+        % and finally replace the child in the parent
+        put_attr(This, react_dom, react_widget(Module, State, Props, Id, NewVDom, NewDOM)).
+
+curly_term_to_state(Term, State):-
+        ( Term == {} ->
+            State = proactive{}
+        ; otherwise->
+            Term = {}(List),
+            curly_term_to_pairs(List, Pairs),
+            dict_pairs(State, proactive, Pairs)
+        ).
+
+curly_term_to_pairs(Name:Value, [Pair]):-
+        !,
+        curly_item_to_pair(Name, Value, Pair).
+curly_term_to_pairs((Name:Value, In), [Pair|Out]):-
+        !,
+        curly_item_to_pair(Name, Value, Pair),
+        curly_term_to_pairs(In, Out).
+
+curly_item_to_pair(Name, Value, Pair):-
+        ( Value == {} ->
+            Pair = Name-proactive{}
+        ; functor(Value, {}, 1)->
+            curly_term_to_state(Value, N),
+            Pair = Name-N
+        ; otherwise->
+            Pair = Name-Value
+        ).
+
+retrieve_tag(dom_element(Attributes), Tag):-
+        ( memberchk(tag-Tag, Attributes)->
+            true
+        ; throw(error(existence_error(tag, Attributes), _))
+        ).
+
+retrieve_parent(dom_element(Attributes), Parent):-
+        ( memberchk(parent-ParentPtr, Attributes)->
+            get_attr(ParentPtr, react_dom, Parent)
+        ; throw(error(existence_error(tag, Attributes), _))
+        ).
+
+
+retrieve_state(dom_element(Attributes), State):-
+        ( memberchk(state-StatePtr, Attributes)->
+            get_attr(StatePtr, react_dom, State)
+        ; throw(error(existence_error(state, Attributes), _))
+        ).
+
+
+retrieve_props(dom_element(Attributes), Props):-
+        ( memberchk(state-PropsPtr, Attributes)->
+            get_attr(PropsPtr, react_dom, Props)
+        ; throw(error(existence_error(state, Attributes), _))
+        ).
+
+set_state(This, NewState):-
+        ( get_attr(This, react_dom, Widget)->
+            Widget = react_widget(Module, _State, Props, Id, VDOM, DOM),
+            put_attr(This, react_dom, react_widget(Module, NewState, Props, Id, VDOM, DOM))
+        ; existence_error(widget, This)
+        ).
+
+
+replace_child_in_vdom(Parent, OldChild, NewChild):-
+        Parent = dom_element(Attributes),
+        ( memberchk(children-ChildPtr, Attributes)->
+            get_attr(ChildPtr, react_dom, OldChildren),
+            replace_child_in_vdom_1(OldChildren, OldChild, NewChild, NewChildren),
+            put_attr(ChildPtr, react_dom, NewChildren)
+        ; throw(error(existence_error(children, Attributes), _))
+        ).
+
+replace_child_in_vdom_1([OldChild|Tail], OldChild, NewChild, [NewChild|Tail]):- !.
+replace_child_in_vdom_1([Child|OldChildren], OldChild, NewChild, [Child|NewChildren]):-
+        replace_child_in_vdom_1(OldChildren, OldChild, NewChild, NewChildren).
+
+merge_states(OldState, NewState, Merged):-
+        dict_pairs(OldState, proactive, OldPairs),
+        dict_pairs(NewState, proactive, NewPairs),
+        merge_pairs(OldPairs, NewPairs, MergedPairs),
+        dict_pairs(Merged, proactive, MergedPairs).
+
+merge_pairs([], N, N):- !.
+merge_pairs([Key-OldValue|OldState], NewState, Merged):-
+        ( select(Key-NewValue, NewState, N1)->
+            ( is_dict(OldValue, proactive),
+              is_dict(NewValue, proactive)->
+                merge_states(OldValue, NewValue, M),
+                Merged = [Key-M|More]
+            ; NewValue == {null} ->
+                Merged = More
+            ; otherwise->
+                Merged = [Key-NewValue|More]
+            )
+        ; otherwise->
+            N1 = NewState,
+            Merged = [Key-OldValue|More]
+        ),
+        merge_pairs(OldState, N1, More).
+
+vpath(_DOM, _Spec, _Content):-
+        throw(not_implemented).
