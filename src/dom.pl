@@ -101,7 +101,21 @@ create_element(Document, TagName, DomNode):-
 set_vdom_properties(DomNode, NewProperties):-
         DomNode = dom_element(Attributes),
         memberchk(properties-PropertiesPtr, Attributes),
-        put_attr(PropertiesPtr, react_dom, NewProperties).
+        get_attr(PropertiesPtr, react_dom, OldProperties),
+        merge_vdom_properties(OldProperties, NewProperties, Merged),
+        put_attr(PropertiesPtr, react_dom, Merged).
+
+merge_vdom_properties([], Merged, Merged):- !.
+merge_vdom_properties([Name=OldValue|Old], NewProperties, Merged):-
+        ( select(Name-NewValue, NewProperties, MoreIn)->
+            ( NewValue == {null} ->
+                MoreOut = Merged
+            ; Merged = [Name=NewValue|MoreOut]
+            )
+        ; Merged = [Name=OldValue|MoreOut],
+          MoreIn = NewProperties
+        ),
+        merge_vdom_properties(Old, MoreIn, MoreOut).
 
 create_text_node(Document, Data, DomNode):-
         DomNode = dom_element([type-text,
