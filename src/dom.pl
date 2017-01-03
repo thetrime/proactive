@@ -27,6 +27,31 @@
           widget_id/1
          ]).
 
+% The virtual DOM is the same in all implementations - everything is either an element/3 or a widget/3.
+% The whole thing is just a normal Prolog term.
+
+% The real DOM is implemented differently depending on the front-end:
+%    * In Proactive/Swing it's implemented as a tree of Swing components.
+%    * In Proactive/JS it's implemented as a HTML DOM.
+%    * In Proactive/PL it's implemented as a tree of dom_element/1 terms. This is what this file implements
+
+% Note that in addition to the DOM, there's also the logical (widget) tree.
+%    * In Proactive/Swing, this is a set of instances of the ReactWidget class.
+%    * In Proactive/JS, it's implemented by instances of the react_widget class
+%    * In Proactive/PL, it's a series of react_widget/6 terms. The arguments to react_widget/6 are:
+%        * Module (ie component name)
+%        * State (in dict form)
+%        * Props (in dict form)
+%        * Id (not currently implemented, but in theory used by widget_id/1)
+%        * The current VDOM for the widget
+%        * The current DOM for the object
+
+% the widgets in the widget tree do not contain any references to any other widgets directly, but are used by vpatch/4 to update
+% the DOM in each widget using predicates like update_widget/4.
+
+
+
+
 % ----------------- the real DOM. Implemented in SWI by attributed variables
 
 remove_child(DomNode, Child):-
