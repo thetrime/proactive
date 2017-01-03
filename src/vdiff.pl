@@ -433,12 +433,17 @@ is_widget(widget(_, _, _)).
 vpatch(RootNode, Patches, Options, NewRoot):-
         patch_recursive(RootNode, Patches, Options, NewRoot).
 
+% patch_indices/2 used to be a setof(Index, P^(member(Index-P, Patches), Index \== a), Indices)
+% but when I came to write Proactive/PL I found that this caused a real problem if Patches
+% included any attributed variables. This avoids copying the term and is therefore a lot nicer
+% and probably uses less memory as a bonus
+patch_indices([], []):- !.
+patch_indices([a-_|Patch], Indices):- !,  patch_indices(Patch, Indices).
+patch_indices([Index-_|Patch], [Index|Indices]):- patch_indices(Patch, Indices).
+
 patch_recursive(RootNode, PatchSet, Options, NewRoot):-
-        ( setof(Index,
-                Value^( member(Index-Value, PatchSet),
-                        Index \== a
-                      ),
-                Indices)->
+        ( patch_indices(PatchSet, Indices),
+          Indices \== []->
             memberchk(a-A, PatchSet),
             dom_index(RootNode, A, Indices, [], Index),
             %writeln(dom_index(RootNode, A, Indices, [], Index)),
