@@ -10,7 +10,7 @@ render(State, _Props, Form) :-
         ; IsPie = boolean(false)
         ),
         {|jsx(Form)||
-        <Panel fill="both" layout="vertical" eventData={State.event_data}>
+        <Panel fill="both" layout="vertical" eventData={State.event_data} >
           <FakeTestWidget onSplunge={splunge}/>
           <Title label="Tech Demo" fill="none" align-children="center" onFoo={this.onFoo} onBar={this.onBar} subordinate_data={State.event_data}/>
           <Label label={State.message}/>
@@ -119,27 +119,15 @@ onBar(Event, State, _Props, {event_data: Data}):-
 %% Tests
 
 
-show_splunge(dom_element(A)):-
-        memberchk(properties-P, A),
-        get_attr(P, react_dom, Props),
-        memberchk(onSplunge='$this'(XXX, _), Props),
-        get_attr(XXX, react_dom, This),
-        writeln(splunge=This).
-
-
 do_test:-
         proactive(test_demo, proactive{}, Document),
-        find_a_thing(Document, 0, Root),
-        find_a_thing(Root, 1, Title),
+        vpath(Document, 'Label'(@className=title), Title),
+        !,
         proactive_event(Title, onFoo, [data=1]),
-        %proactive_event(Title, onBar, [data=2]),
-        %show_splunge(Thing),
         render_document(user_error, Document),
-        true.
+        vpath(Document, 'Label'(@parentData=ParentData, @className=title), _),
+        vpath(Document, /_/'Panel'(@eventData=EventData), _),
+        vpath(Document, /_/_/'Label'(@eventData=ChildEventData), _),
+        !,
+        writeln(EventData->ParentData->ChildEventData).
 
-% This will be replaced by vPath eventually
-find_a_thing(DOM, N, Thing):-
-        DOM = dom_element(A),
-        memberchk(children-Ptr, A),
-        get_attr(Ptr, react_dom, Children),
-        nth0(N, Children, Thing).

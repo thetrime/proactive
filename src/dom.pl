@@ -23,7 +23,11 @@
           get_store_state/2,
 	  state_to_term/2,
           get_this/1,
-          widget_id/1
+          widget_id/1,
+
+          op(400, fx, //),
+          op(400, fx, /),
+          op(200, fy, @)
          ]).
 
 % The virtual DOM is the same in all implementations - everything is either an element/3 or a widget/3.
@@ -236,7 +240,7 @@ render_dom(Stream, Object):-
         crystalize(Object, XML),
         xml_write(Stream, XML, []).
 
-render_document(Stream, dom_element(Attributes)):-
+render_document(Stream, [dom_element(Attributes)]):-
         memberchk(children-ChildPtr, Attributes),
         get_attr(ChildPtr, react_dom, Children),
         render_dom(Stream, Children).
@@ -268,7 +272,7 @@ crystalize_attributes([Name=Value|In], [Name=Atom|Out]):-
         ),
         crystalize_attributes(In, Out).
 
-proactive(Module, Props, Document):-
+proactive(Module, Props, [Document]):-
         current_module(Module),
         ( current_predicate(Module:getInitialState/2)->
             Module:getInitialState(Props, InitialState)
@@ -534,8 +538,51 @@ merge_pairs([Key-OldValue|OldState], NewState, Merged):-
         ),
         merge_pairs(OldState, N1, More).
 
-vpath(_DOM, _Spec, _Content):-
-        throw(not_implemented).
+
+vpath(DOM, /Spec, Node):-
+        member(Node, DOM),
+        match_spec(Spec, Node).
+
+vpath(DOM, Path/Child, Node):-
+        !,
+        vpath(DOM, Path, Parent),
+        node_children(Parent, Children),
+        vpath(Children, /Child, Node).
+
+vpath(DOM, Spec, MatchingNode):-
+        member(Node, DOM),
+        ( match_spec(Spec, Node),
+          MatchingNode = Node
+        ; node_children(Node, Children),
+          vpath(Children, Spec, MatchingNode)
+        ).
 
 
+match_spec(Spec, dom_element(Attributes)):-
+        ( var(Spec) ->
+            memberchk(tag-Spec, Attributes)
+        ; atomic(Spec) ->
+            memberchk(tag-Spec, Attributes)
+        ; otherwise->
+            Spec =.. [Tag|Args],
+            match_spec(Tag, dom_element(Attributes)),
+            memberchk(properties-PropertiesPtr, Attributes),
+            get_attr(PropertiesPtr, react_dom, Properties),
+            match_spec_args(Args, Properties)
+        ).
 
+match_spec_args([], _Attributes):- !.
+match_spec_args([@Name=Value|Args], Attributes):-
+        memberchk(Name=CurrentValue, Attributes),
+        ( ground(Value)->
+            Value == CurrentValue
+        ; ground(CurrentValue)->
+            Value = CurrentValue
+        ; copy_term(CurrentValue, Value)
+        ),
+        !,
+        match_spec_args(Args, Attributes).
+
+node_children(dom_element(Attributes), Children):-
+        memberchk(children-Ptr, Attributes),
+        get_attr(Ptr, react_dom, Children).
