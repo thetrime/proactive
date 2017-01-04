@@ -20,7 +20,6 @@
           proactive/3,
           render_dom/2,
           render_document/2,
-          proactive_term_to_state/2,
           get_store_state/2,
 	  state_to_term/2,
           get_this/1,
@@ -90,13 +89,15 @@ replace_child(DomNode, New, Old):-
 create_element(Document, TagName, DomNode):-
         DomNode = dom_element([tag-TagName,
                                type-node,
+                               widget-Widget,
                                children-ChildrenPtr,
                                document-Document,
                                properties-PropertiesPtr,
                                parent-ParentPtr]),
+        get_this(Widget),
         put_attr(ChildrenPtr, react_dom, []),
         put_attr(PropertiesPtr, react_dom, []),
-        put_attr(ParentPtr, react_dom, {null}).
+        put_attr(ParentPtr, react_dom, Document).
 
 set_vdom_properties(DomNode, NewProperties):-
         DomNode = dom_element(Attributes),
@@ -170,16 +171,20 @@ replace_node_data(DomNode, NewData):-
 destroy_widget(_DomNode, _Widget).
 
 init_widget(_, VNode, DomNode):-
-        VNode = widget(Tag, Attributes, _),
+        VNode = widget(Tag, Props, _),
         ( current_predicate(Tag:getInitialState/2)->
-            Tag:getInitialState(Attributes, StateTerm),
-            proactive_term_to_state(StateTerm, State)
+            Tag:getInitialState(Props, StateTerm),
+            curly_term_to_state(StateTerm, State)
         ; otherwise->
             State = proactive{}
         ),
-        Tag:render(State, Attributes, VDom),
-        create_element_from_vdom([], VDom, DomNode).
-        % FIXME: Attach state and props here to the DomNode? Note that not all dom_element/1 terms will have a state, only widgets...
+        put_attr(This, react_dom, react_widget(Tag, State, Props, id_goes_here, [], [])),
+        setup_call_cleanup(push_context(This),
+                           ( Tag:render(State, Props, VDom),
+                             create_element_from_vdom([], VDom, DomNode)
+                           ),
+                           pop_context),
+        put_attr(This, react_dom, react_widget(Tag, State, Props, id_goes_here, VDom, DomNode)).
 
 update_widget(_Widget, VNode, DomNode, NewNode):-
         VNode = widget(Tag, Attributes, _),
@@ -194,7 +199,10 @@ node_type(DomNode, Type):-
 
 
 get_this(This):-
-        peek_context(This).
+        ( peek_context(This)->
+            true
+        ; existence_error(context, current)
+        ).
 widget_id(Id):-
         peek_context(This),
         ( get_attr(This, react_dom, Widget)->
@@ -214,23 +222,6 @@ widget_id(Id):-
 %     * properties-AttributedVar if type is node
 
 
-
-test:-
-        Document = doc,
-        InitialTree = element('Panel', [], []),
-        create_element(Document, 'Panel', InitialRoot),
-        Tree1 = element('Panel', [], [element('Field', [label=hello], []),
-                                      element('Button', [label=submit], [])]),
-        Tree2 = element('Panel', [], [element('Field', [label=hello], []),
-                                      element('Field', [label=second], []),
-                                      element('Button', [label=submit], [])]),
-	vdiff(InitialTree, Tree1, Patch1),
-	vdiff(Tree1, Tree2, Patch2),
-        writeln(patch:Patch1),
-        writeln(patch:Patch2),
-	vpatch(InitialRoot, Patch1, [document(Document)], IntermediateRoot),
-        vpatch(IntermediateRoot, Patch2, [document(Document)], FinalRoot),
-        render_dom(user_error, [FinalRoot]).
 
 render_dom(Stream, Object):-
         crystalize(Object, XML),
@@ -275,13 +266,14 @@ proactive(Module, Props, Document):-
         ; otherwise->
             InitialState = proactive{}
         ),
-        % FIXME: Set a pointer to This somehow and remove it after rendering?
         curly_term_to_state(InitialState, I),
         put_attr(This, react_dom, react_widget(Module, I, Props, id_goes_here, [], [])),
         setup_call_cleanup(push_context(This),
-                           Module:render(I, Props, VDOM),
+                           ( Module:render(I, Props, VDOM),
+                             create_element_from_vdom([], VDOM, DOM)
+                           ),
                            pop_context),
-        create_element_from_vdom([], VDOM, DOM),
+
         put_attr(This, react_dom, react_widget(Module, I, Props, id_goes_here, VDOM, DOM)),
         Document = dom_element([tag-{document},
                                 children-ChildPtr]),
@@ -367,14 +359,6 @@ user:'.'(State,Key,Value):-
 	; '$dicts':'.'(State, Key, Value)
 	).
 
-proactive_term_to_state({null}, proactive{}):- !.
-proactive_term_to_state({Values}, State):-
-        state_pairs(Values, Pairs),
-        dict_pairs(State, proactive, Pairs).
-
-state_pairs((A:B, C), [A-B|D]):- !,
-        state_pairs(C, D).
-state_pairs(A:B, [A-B]):- !.
 
 proactive_event(Target, HandlerName, Event):-
         Target = dom_element(DomAttributes),
@@ -382,18 +366,22 @@ proactive_event(Target, HandlerName, Event):-
           get_attr(PropertiesPtr, react_dom, AttributesWithObjects),
           memberchk(HandlerName=Handler, AttributesWithObjects)->
             fire_event(Handler, Event, Target)
-        ; format(user_error, 'Warning: Object has no handler for ~w attached', [HandlerName]),
-          fail
+        ; format(user_error, 'Warning: Object has no handler for ~w attached', [HandlerName])
         ).
 
 fire_event('$this'(Context, Handler), Event, _This):-
         !,
         fire_event(Handler, Event, Context).
 
-fire_event(Handler, Event, This):-
-        ( get_attr(This, react_dom, Widget)->
+fire_event(Handler, Event, ThisPtr):-
+        ( get_attr(ThisPtr, react_dom, Widget)->
+            This = ThisPtr,
             Widget = react_widget(Module, State, Props, Id, OldVDOM, OldDOM)
-        ; existence_error(widget, This)
+        ; ThisPtr = dom_element(Attributes),
+          memberchk(widget-This, Attributes),
+          get_attr(This, react_dom, Widget),
+          Widget = react_widget(Module, State, Props, Id, OldVDOM, OldDOM)
+        ; existence_error(widget, ThisPtr)
         ),
         ( atom(Handler)->
             Goal =.. [Handler, Event, State, Props, Result]
