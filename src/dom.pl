@@ -21,7 +21,6 @@
           render_dom/2,
           render_document/2,
           get_store_state/2,
-	  state_to_term/2,
           get_this/1,
           widget_id/1
          ]).
@@ -350,8 +349,6 @@ glue_args(Goal, Args, NewGoal):- !,
         ).
 
 get_store_state(_, []). % FIXME: Implement Flux!
-
-state_to_term(X, X). % FIXME: This should copy X and instantiate all the vars
 
 
 :-redefine_system_predicate('.'(_,_,_)).
