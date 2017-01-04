@@ -10,10 +10,10 @@ render(State, _Props, Form) :-
         ; IsPie = boolean(false)
         ),
         {|jsx(Form)||
-        <Panel fill="both" layout="vertical">
-          <FakeTestWidget onSplunge={this.splunge}/>
+        <Panel fill="both" layout="vertical" eventData={State.event_data}>
+          <FakeTestWidget onSplunge={splunge}/>
+          <Title label="Tech Demo" fill="none" align-children="center" onFoo={this.onFoo} onBar={this.onBar} subordinate_data={State.event_data}/>
           <Label label={State.message}/>
-          <Title label="Tech Demo" fill="none" align-children="center"/>
           <Label label={Message}/>
           <Panel layout="vertical" fill="none">
             <LabelledField label="User ID" value={UserId}/>
@@ -77,7 +77,8 @@ selectValue(Name, _Event, _State, _Props, {}) :-
         writeln(row_selected(Name)).
 
 getInitialState(_, {chart_type:pie,
-                    message: initial}).
+                    message: initial,
+                    event_data: no_data_yet}).
 
 table_data(mike, tardigrade, big, 3).
 table_data(keri, lemur, small, 7).
@@ -103,22 +104,20 @@ splunge(Event, _State, _Props, {message: NewMessage}):-
         writeln(got_event(Event)),
         memberchk(new_message=NewMessage, Event).
 
+onFoo(Event, State, _Props, {event_data: Data}):-
+        writeln(test_demo(onFoo, Event, State)),
+        memberchk(data=Data, Event).
+
+onBar(Event, State, _Props, {event_data: Data}):-
+        writeln(test_demo(onBar, Event, State)),
+        memberchk(data=Data, Event).
+
 
 
 
 
 %% Tests
 
-
-xdo_test:-
-        proactive(test_demo, proactive{}, Document),
-        find_a_thing(Document, Root),
-        show_splunge(Root),
-        writeln(triggering_event_now),
-        proactive_event(Root, onSplunge, [qux=bing]),
-        find_a_thing(Document, Root2),
-        show_splunge(Root2),
-        render_document(user_error, Document).
 
 show_splunge(dom_element(A)):-
         memberchk(properties-P, A),
@@ -130,16 +129,17 @@ show_splunge(dom_element(A)):-
 
 do_test:-
         proactive(test_demo, proactive{}, Document),
-        find_a_thing(Document, Root),
-        find_a_thing(Root, Thing),
-        proactive_event(Thing, onSplunge, [new_message=after_event_1]),
-        proactive_event(Thing, onSplunge, [new_message=after_event_2]),
-        show_splunge(Thing),
-        render_document(user_error, Document).
+        find_a_thing(Document, 0, Root),
+        find_a_thing(Root, 1, Title),
+        proactive_event(Title, onFoo, [data=1]),
+        %proactive_event(Title, onBar, [data=2]),
+        %show_splunge(Thing),
+        render_document(user_error, Document),
+        true.
 
 % This will be replaced by vPath eventually
-find_a_thing(DOM, Thing):-
+find_a_thing(DOM, N, Thing):-
         DOM = dom_element(A),
         memberchk(children-Ptr, A),
         get_attr(Ptr, react_dom, Children),
-        memberchk(Thing, Children).
+        nth0(N, Children, Thing).

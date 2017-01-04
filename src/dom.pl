@@ -186,12 +186,19 @@ init_widget(_, VNode, DomNode):-
                            pop_context),
         put_attr(This, react_dom, react_widget(Tag, State, Props, id_goes_here, VDom, DomNode)).
 
-update_widget(_Widget, VNode, DomNode, NewNode):-
-        VNode = widget(Tag, Attributes, _),
-        State = ?, % FIXME: Need to recover this from DomNode, I guess
-        Tag:render(State, Attributes, VDom),
-	vdiff(VNode, VDom, Patches),
-	vpatch(DomNode, Patches, [document(_Document)], NewNode).
+update_widget(NewWidget, VNode, DomNode, NewNode):-
+        NewWidget = widget(Tag, Props, _),
+        DomNode = dom_element(Attributes),
+        memberchk(widget-This, Attributes),
+        get_attr(This, react_dom, Widget),
+        Widget = react_widget(_OldTag, State, _OldProps, Id, _OldVDOM, _OldDOM),
+        setup_call_cleanup(push_context(This),
+                           ( Tag:render(State, Props, VDom),
+                             vdiff(VNode, VDom, Patches),
+                             vpatch(DomNode, Patches, [document(_Document)], NewNode)
+                           ),
+                           pop_context),
+        put_attr(This, react_dom, react_widget(Tag, State, Props, Id, VDom, NewNode)).
 
 node_type(DomNode, Type):-
         DomNode = dom_element(Attributes),
