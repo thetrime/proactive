@@ -171,13 +171,14 @@ replace_node_data(DomNode, NewData):-
 destroy_widget(_DomNode, _Widget).
 
 init_widget(_, VNode, DomNode):-
-        VNode = widget(Tag, Props, _),
+        VNode = widget(Tag, PropList, _),
         ( current_predicate(Tag:getInitialState/2)->
             Tag:getInitialState(Props, StateTerm),
             curly_term_to_state(StateTerm, State)
         ; otherwise->
             State = proactive{}
         ),
+        props_from_list(PropList, Props),
         put_attr(This, react_dom, react_widget(Tag, State, Props, id_goes_here, [], [])),
         setup_call_cleanup(push_context(This),
                            ( Tag:render(State, Props, VDom),
@@ -187,10 +188,11 @@ init_widget(_, VNode, DomNode):-
         put_attr(This, react_dom, react_widget(Tag, State, Props, id_goes_here, VDom, DomNode)).
 
 update_widget(NewWidget, VNode, DomNode, NewNode):-
-        NewWidget = widget(Tag, Props, _),
+        NewWidget = widget(Tag, PropList, Children),
         DomNode = dom_element(Attributes),
         memberchk(widget-This, Attributes),
         get_attr(This, react_dom, Widget),
+        props_from_list([children=Children|PropList], Props),
         Widget = react_widget(_OldTag, State, _OldProps, Id, _OldVDOM, _OldDOM),
         setup_call_cleanup(push_context(This),
                            ( Tag:render(State, Props, VDom),
@@ -451,6 +453,15 @@ curly_item_to_pair(Name, Value, Pair):-
         ; otherwise->
             Pair = Name-Value
         ).
+
+props_from_list(PropList, Props):-
+        list_to_pairs(PropList, Pairs),
+        dict_pairs(Props, proactive, Pairs).
+
+list_to_pairs([], []):- !.
+list_to_pairs([Name=Value|In], [Pair|Out]):-
+        curly_item_to_pair(Name, Value, Pair),
+        list_to_pairs(In, Out).
 
 retrieve_tag(dom_element(Attributes), Tag):-
         ( memberchk(tag-Tag, Attributes)->
