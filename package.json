@@ -7,7 +7,7 @@
         "xmlhttprequest": "^1.8.0",
         "browserify": "^13.0.0",
         "brfs": "^1.4.3",
-        "proscript": "git+https://github.com/thetrime/proscript2.git#471f25a1d011e12259da7d89280ca00db11db193"
+        "proscript": "git+https://github.com/thetrime/proscript2.git#04ba6f1"
     },
     "devDependencies": {
     },
