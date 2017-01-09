@@ -62,7 +62,7 @@ on_server(Goal):-
 string(_):- fail.
 
 expand_children(A, B):-
-        expand_children([A], [B], []),
+        expand_children([A], [B], []).
 
 expand_children([], T, T):- !.
 expand_children([element(A, B, C)|D], [element(A,B,CC)|DD], T):- !,
