@@ -290,11 +290,12 @@ module.exports["remove_child"] = function(parent, child)
     var p = Prolog._get_blob("react_component", parent);
     var c = Prolog._get_blob("react_component", child);
     var found = false;
+    var index = -1;
     for (var i = 0; i < p.children.length; i++)
     {
         if (p.children[i] == c)
         {
-            p.children.splice(i, 1);
+            index = i;
             found = true;
             break;
         }
@@ -302,6 +303,7 @@ module.exports["remove_child"] = function(parent, child)
     if (!found)
         throw new Error("Attempt to remove non-existent child");
     p.removeChild(c);
+    p.children.splice(index, 1);
     return 1;
 }
 
@@ -320,11 +322,12 @@ module.exports["insert_before"] = function(parent, child, sibling)
     var c = Prolog._get_blob("react_component", child);
     var s = Prolog._get_blob("react_component", sibling);
     var found = false;
+    var index = -1;
     for (var i = 0; i < p.children.length; i++)
     {
         if (p.children[i] == s)
         {
-            p.children.splice(i, 0, c);
+            index = i;
             found = true;
             break;
         }
@@ -332,6 +335,7 @@ module.exports["insert_before"] = function(parent, child, sibling)
     if (!found)
         throw new Error("Attempt to insert before non-existent sibling");
     p.insertBefore(c, s);
+    p.children.splice(index, 0, c);
     return 1;
 }
 
@@ -341,11 +345,12 @@ module.exports["replace_child"] = function(parent, newChild, oldChild)
     var n = Prolog._get_blob("react_component", newChild);
     var o = Prolog._get_blob("react_component", oldChild);
     var found = false;
+    var index = -1;
     for (var i = 0; i < p.children.length; i++)
     {
         if (p.children[i] == o)
         {
-            p.children[i] = n;
+            index = i;
             found = true;
             break;
         }
@@ -353,6 +358,7 @@ module.exports["replace_child"] = function(parent, newChild, oldChild)
     if (!found)
         throw new Error("Attempt to replace non-existent child");
     p.replaceChild(n, o);
+    p.children[index] = n;
     return 1;
 }
 
