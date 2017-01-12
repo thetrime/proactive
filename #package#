@@ -1,4 +1,4 @@
-#!/bin/sh
+.#!/bin/sh
 
 VERSION=$(npm list --depth -1 | sed -e "s/proactive@\([^ ]*\) .*/\1/g" | head -1)
 mkdir proactivejs-${VERSION}

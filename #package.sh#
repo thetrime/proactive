@@ -7,3 +7,5 @@ cp node_modules/proscript/proscript.js.mem proactivejs-${VERSION}/
 cp proactive.css proactivejs-${VERSION}/
 zip -r proactivejs-${VERSION}.zip proactivejs-${VERSION}/
 #rm -rf proactivejs-${VERSION}
+
+1970877

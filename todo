@@ -1,0 +1,5 @@
+See about fixing ~+, ~| and ~t in format
+Investigate AGC
+Tidy up exception printing - there's a number in there?
+Add regression tests for ~t
+Add regression tests for aggregate
