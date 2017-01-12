@@ -7,23 +7,33 @@
 //
 
 #import "Label.h"
+#import <YogaKit/YogaKit.h>
+#import <Proscript/proscript2.h>
+#import "PrologObject.h"
 
 @implementation Label
 -(id) init
 {
-    view = [UILabel alloc];
-    dispatch_async(dispatch_get_main_queue(),
-                   ^{
-                       view = [view init];
-                       view.frame = CGRectMake(0, 0, 100, 100);
-                       [view setText:@"Hello, world"];
-                   });
+    dispatch_sync(dispatch_get_main_queue(),
+                       ^{
+                           view = [[UILabel alloc] init];
+                           view.yoga.isEnabled = YES;
+                       });
+    
     self = [super initWithDOMNode:view];
     if (self)
     {
-        
     }
     return self;
+}
+
+-(void)setProperties:(NSDictionary *)properties
+{
+    if (properties[@"label"] != nil)
+    {
+        PrologObject* o = properties[@"label"];
+        [view setText:[Prolog atomString:[o value]]];
+    }
 }
 
 @end

@@ -13,6 +13,7 @@
 #include "Prolog.h"
 #include "ReactWidget.h"
 #import <UIKit/UIKit.h>
+#import <YogaKit/YogaKit.h>
 
 void render_with_engine(PrologEngine* engine, NSString* url, PrologState* initialProps, NSString* rootElementId, UIView* container)
 {
@@ -23,7 +24,10 @@ void render_with_engine(PrologEngine* engine, NSString* url, PrologState* initia
              ReactWidget* widget = [[ReactWidget alloc] initWithParent:NULL engine:engine elementId:rootElementId props:initialProps];
              dispatch_async(dispatch_get_main_queue(),
                             ^{
-                                [container addSubview:[widget getDOMNode]];
+                                container.yoga.isEnabled = YES;
+                                [container setBackgroundColor:[UIColor orangeColor]];
+                                [container addSubview:[widget getDOMNode]];                                
+                                [container.yoga applyLayout];
                                 [container setNeedsDisplay];
                             });
             }

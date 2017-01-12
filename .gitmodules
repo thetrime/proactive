@@ -4,3 +4,6 @@
 [submodule "lib/proscript2"]
 	path = lib/proscript2
 	url = http://github.com/thetrime/proscript2.git
+[submodule "yoga/yoga"]
+	path = yoga/yoga
+	url = https://github.com/facebook/yoga.git

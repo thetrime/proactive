@@ -7,6 +7,7 @@
 //
 
 #import "ReactComponent.h"
+#import <YogaKit/YogaKit.h>
 
 @implementation ReactComponent
 
