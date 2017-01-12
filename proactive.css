@@ -211,3 +211,11 @@ td > *
     display: block;
     width: 100%;
 }
+
+/* This was added to enable overflow="ellipsis" to work on tables.
+   It may have other unintended consequences, though...
+*/
+table
+{
+    table-layout:fixed;
+}

@@ -27,4 +27,5 @@ module.exports = {emptyListAtom: Prolog._make_atom("[]"),
                   abortedAtom: Prolog._make_atom("$aborted"),
                   nullAtom: Prolog._make_atom("null"),
                   nodeAtom: Prolog._make_atom("node"),
-                  trueAtom: Prolog._make_atom("true")};
+                  trueAtom: Prolog._make_atom("true"),
+                  ellipsisAtom: Prolog._make_atom("ellipsis"),};
