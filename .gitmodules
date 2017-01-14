@@ -7,3 +7,6 @@
 [submodule "yoga/yoga"]
 	path = yoga/yoga
 	url = https://github.com/facebook/yoga.git
+[submodule "SocketRocket"]
+	path = SocketRocket
+	url = https://github.com/facebook/SocketRocket.git
