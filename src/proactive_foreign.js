@@ -501,3 +501,9 @@ module.exports["update_widget"] = function(newVDom, oldVDom, widget, newDomNode)
     return 3; // YIELD;
 }
 
+
+module.exports["qqq"] = function()
+{
+    Prolog._qqq();
+    return 1;
+}

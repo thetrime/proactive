@@ -214,6 +214,11 @@ void _callback(RC result)
     return [Prolog formatTerm:w withQuotes:NO];
 }
 
++(void)releaseBlob:(word)b ofType:(NSString*)type
+{
+    // FIXME: Not implemented
+}
+
 +(NSString*)formatTerm:(word)w withQuotes:(bool)withQuotes
 {
     char* ptr;
@@ -250,6 +255,11 @@ void _callback(RC result)
 +(int)typeError:(word)actual whenExpecting:(word)expected
 {
     return [Prolog setException:[Prolog makeCompoundFrom:[Constants errorFunctor], [Prolog makeCompoundFrom:[Constants typeErrorFunctor], expected, actual], [Prolog makeVariable]]];
+}
+
++(word)makeNull
+{
+    return [Prolog makeCompoundFrom:[Constants curlyFunctor], [Constants nullAtom]];
 }
 
 @end

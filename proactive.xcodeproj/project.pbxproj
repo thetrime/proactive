@@ -43,9 +43,21 @@
 		F4298F5A1E27B1950008BDEF /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = F4298F591E27B1950008BDEF /* ViewController.m */; };
 		F4298F5F1E27B1950008BDEF /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = F4298F5E1E27B1950008BDEF /* Assets.xcassets */; };
 		F4298F621E27B1950008BDEF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = F4298F601E27B1950008BDEF /* LaunchScreen.storyboard */; };
-		F4298F671E27B25E0008BDEF /* proactive.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F4AC5C6C1E27A21800F2384C /* proactive.framework */; };
 		F4298F6A1E27B2830008BDEF /* boilerplate.pl in Resources */ = {isa = PBXBuildFile; fileRef = F4298F681E27B2830008BDEF /* boilerplate.pl */; };
 		F4298F6B1E27B2830008BDEF /* vdiff.pl in Resources */ = {isa = PBXBuildFile; fileRef = F4298F691E27B2830008BDEF /* vdiff.pl */; };
+		F46BE5461E27E7DF00DA8359 /* proactive.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F4AC5C6C1E27A21800F2384C /* proactive.framework */; };
+		F46BE5471E27E7DF00DA8359 /* proactive.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = F4AC5C6C1E27A21800F2384C /* proactive.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		F46BE54A1E27E7F900DA8359 /* YogaKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F40B23F21E27C5F700B14997 /* YogaKit.framework */; };
+		F46BE54B1E27E7F900DA8359 /* YogaKit.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = F40B23F21E27C5F700B14997 /* YogaKit.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		F46BE54E1E27E8A700DA8359 /* proscript.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F4298F461E27A3950008BDEF /* proscript.framework */; };
+		F46BE54F1E27E8A700DA8359 /* proscript.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = F4298F461E27A3950008BDEF /* proscript.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		F46BE5521E27E8CD00DA8359 /* yoga.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F40B23F01E27C5F700B14997 /* yoga.framework */; };
+		F46BE5531E27E8CD00DA8359 /* yoga.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = F40B23F01E27C5F700B14997 /* yoga.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		F46BE5581E2A7C3B00DA8359 /* CodeListener.h in Headers */ = {isa = PBXBuildFile; fileRef = F46BE5561E2A7C3B00DA8359 /* CodeListener.h */; };
+		F46BE5591E2A7C3B00DA8359 /* CodeListener.m in Sources */ = {isa = PBXBuildFile; fileRef = F46BE5571E2A7C3B00DA8359 /* CodeListener.m */; };
+		F46BE58C1E2A807000DA8359 /* SocketRocket.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F46BE5791E2A7D4F00DA8359 /* SocketRocket.framework */; };
+		F46BE5961E2BB09100DA8359 /* Button.h in Headers */ = {isa = PBXBuildFile; fileRef = F46BE5941E2BB09100DA8359 /* Button.h */; };
+		F46BE5971E2BB09100DA8359 /* Button.m in Sources */ = {isa = PBXBuildFile; fileRef = F46BE5951E2BB09100DA8359 /* Button.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -91,7 +103,94 @@
 			remoteGlobalIDString = F48B3FED1E279E3F0056C796;
 			remoteInfo = proscript;
 		};
+		F46BE54C1E27E7F900DA8359 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F40B23EA1E27C5F700B14997 /* yoga.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = F40B23D41E27C59E00B14997;
+			remoteInfo = YogaKit;
+		};
+		F46BE5501E27E8A700DA8359 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F4298F411E27A3950008BDEF /* proscript.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = F48B3FEC1E279E3E0056C796;
+			remoteInfo = proscript;
+		};
+		F46BE5541E27E8CD00DA8359 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F40B23EA1E27C5F700B14997 /* yoga.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = F4298FB41E27C3800008BDEF;
+			remoteInfo = yoga;
+		};
+		F46BE5781E2A7D4F00DA8359 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F46BE56F1E2A7D4F00DA8359 /* SocketRocket.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 81D6478D1D2CA78800690609;
+			remoteInfo = "SocketRocket-iOS";
+		};
+		F46BE57A1E2A7D4F00DA8359 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F46BE56F1E2A7D4F00DA8359 /* SocketRocket.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 2D4227621BB4358C000C1A6C;
+			remoteInfo = "SocketRocket-iOS-Dynamic";
+		};
+		F46BE57C1E2A7D4F00DA8359 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F46BE56F1E2A7D4F00DA8359 /* SocketRocket.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = F668C880153E91210044DBAC;
+			remoteInfo = "SocketRocket-macOS";
+		};
+		F46BE57E1E2A7D4F00DA8359 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F46BE56F1E2A7D4F00DA8359 /* SocketRocket.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 3345DC901C52ACD70083CCB8;
+			remoteInfo = "SocketRocket-tvOS";
+		};
+		F46BE5801E2A7D4F00DA8359 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F46BE56F1E2A7D4F00DA8359 /* SocketRocket.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = F6BDA802145900D200FE3253;
+			remoteInfo = "SocketRocketTests-iOS";
+		};
+		F46BE5821E2A7D4F00DA8359 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F46BE56F1E2A7D4F00DA8359 /* SocketRocket.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = F62417E314D52F3C003CE997;
+			remoteInfo = TestChat;
+		};
+		F46BE58D1E2A807600DA8359 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F46BE56F1E2A7D4F00DA8359 /* SocketRocket.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = 81D6475F1D2CA78800690609;
+			remoteInfo = "SocketRocket-iOS";
+		};
 /* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		F46BE5491E27E7DF00DA8359 /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				F46BE54F1E27E8A700DA8359 /* proscript.framework in Embed Frameworks */,
+				F46BE5471E27E7DF00DA8359 /* proactive.framework in Embed Frameworks */,
+				F46BE5531E27E8CD00DA8359 /* yoga.framework in Embed Frameworks */,
+				F46BE54B1E27E7F900DA8359 /* YogaKit.framework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		F40B23EA1E27C5F700B14997 /* yoga.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = yoga.xcodeproj; path = yoga/yoga.xcodeproj; sourceTree = "<group>"; };
@@ -137,6 +236,11 @@
 		F4298F631E27B1950008BDEF /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		F4298F681E27B2830008BDEF /* boilerplate.pl */ = {isa = PBXFileReference; lastKnownFileType = text.script.perl; name = boilerplate.pl; path = src/boilerplate.pl; sourceTree = "<group>"; };
 		F4298F691E27B2830008BDEF /* vdiff.pl */ = {isa = PBXFileReference; lastKnownFileType = text.script.perl; name = vdiff.pl; path = src/vdiff.pl; sourceTree = "<group>"; };
+		F46BE5561E2A7C3B00DA8359 /* CodeListener.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CodeListener.h; path = src/CodeListener.h; sourceTree = SOURCE_ROOT; };
+		F46BE5571E2A7C3B00DA8359 /* CodeListener.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = CodeListener.m; path = src/CodeListener.m; sourceTree = SOURCE_ROOT; };
+		F46BE56F1E2A7D4F00DA8359 /* SocketRocket.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = SocketRocket.xcodeproj; path = SocketRocket/SocketRocket.xcodeproj; sourceTree = "<group>"; };
+		F46BE5941E2BB09100DA8359 /* Button.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Button.h; path = src/Button.h; sourceTree = SOURCE_ROOT; };
+		F46BE5951E2BB09100DA8359 /* Button.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Button.m; path = src/Button.m; sourceTree = SOURCE_ROOT; };
 		F4AC5C6C1E27A21800F2384C /* proactive.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = proactive.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -145,7 +249,10 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				F4298F671E27B25E0008BDEF /* proactive.framework in Frameworks */,
+				F46BE54E1E27E8A700DA8359 /* proscript.framework in Frameworks */,
+				F46BE5461E27E7DF00DA8359 /* proactive.framework in Frameworks */,
+				F46BE5521E27E8CD00DA8359 /* yoga.framework in Frameworks */,
+				F46BE54A1E27E7F900DA8359 /* YogaKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -153,6 +260,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F46BE58C1E2A807000DA8359 /* SocketRocket.framework in Frameworks */,
 				F40B23F31E27C60A00B14997 /* YogaKit.framework in Frameworks */,
 				F4298F471E27A3A90008BDEF /* proscript.framework in Frameworks */,
 			);
@@ -201,6 +309,19 @@
 			name = "Supporting Files";
 			sourceTree = "<group>";
 		};
+		F46BE5701E2A7D4F00DA8359 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				F46BE5791E2A7D4F00DA8359 /* SocketRocket.framework */,
+				F46BE57B1E2A7D4F00DA8359 /* SocketRocket.framework */,
+				F46BE57D1E2A7D4F00DA8359 /* SocketRocket.framework */,
+				F46BE57F1E2A7D4F00DA8359 /* SocketRocket.framework */,
+				F46BE5811E2A7D4F00DA8359 /* SocketRocketTests-iOS.xctest */,
+				F46BE5831E2A7D4F00DA8359 /* TestChat.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
 		F4AC5C621E27A21800F2384C = {
 			isa = PBXGroup;
 			children = (
@@ -209,6 +330,7 @@
 				F4AC5C6E1E27A21800F2384C /* proactive */,
 				F4298F511E27B1950008BDEF /* proactive-demo */,
 				F4AC5C6D1E27A21800F2384C /* Products */,
+				F46BE56F1E2A7D4F00DA8359 /* SocketRocket.xcodeproj */,
 				F40B23EA1E27C5F700B14997 /* yoga.xcodeproj */,
 				F4298F411E27A3950008BDEF /* proscript.xcodeproj */,
 			);
@@ -230,6 +352,7 @@
 				F4298F061E27A34B0008BDEF /* Constants.h */,
 				F4298F071E27A34B0008BDEF /* Label.h */,
 				F4298F081E27A34B0008BDEF /* Panel.h */,
+				F46BE5941E2BB09100DA8359 /* Button.h */,
 				F4298F091E27A34B0008BDEF /* proactive.h */,
 				F4298F0A1E27A34B0008BDEF /* ProactiveComponentFactory.h */,
 				F4298F0B1E27A34B0008BDEF /* ProactiveForeign.h */,
@@ -244,11 +367,14 @@
 				F4298F141E27A34B0008BDEF /* Constants.m */,
 				F4298F151E27A34B0008BDEF /* Label.m */,
 				F4298F161E27A34B0008BDEF /* Panel.m */,
+				F46BE5951E2BB09100DA8359 /* Button.m */,
 				F4298F171E27A34B0008BDEF /* proactive.m */,
 				F4298F181E27A34B0008BDEF /* ProactiveComponentFactory.m */,
 				F4298F191E27A34B0008BDEF /* ProactiveForeign.m */,
 				F4298F1A1E27A34B0008BDEF /* Prolog.m */,
 				F4298F1B1E27A34B0008BDEF /* PrologEngine.m */,
+				F46BE5561E2A7C3B00DA8359 /* CodeListener.h */,
+				F46BE5571E2A7C3B00DA8359 /* CodeListener.m */,
 				F4298F1C1E27A34B0008BDEF /* PrologEnvironment.m */,
 				F4298F1D1E27A34B0008BDEF /* PrologObject.m */,
 				F4298F1E1E27A34B0008BDEF /* PrologSourceDownloader.m */,
@@ -272,6 +398,7 @@
 				F4298F2A1E27A34B0008BDEF /* Prolog.h in Headers */,
 				F4298F301E27A34B0008BDEF /* ReactComponent.h in Headers */,
 				F4298F2F1E27A34B0008BDEF /* PrologState.h in Headers */,
+				F46BE5581E2A7C3B00DA8359 /* CodeListener.h in Headers */,
 				F4298F261E27A34B0008BDEF /* Panel.h in Headers */,
 				F4298F2C1E27A34B0008BDEF /* PrologEnvironment.h in Headers */,
 				F4298F241E27A34B0008BDEF /* Constants.h in Headers */,
@@ -279,6 +406,7 @@
 				F4298F231E27A34B0008BDEF /* CodeChangeListener.h in Headers */,
 				F4298F2D1E27A34B0008BDEF /* PrologObject.h in Headers */,
 				F4298F2E1E27A34B0008BDEF /* PrologSourceDownloader.h in Headers */,
+				F46BE5961E2BB09100DA8359 /* Button.h in Headers */,
 				F4298F291E27A34B0008BDEF /* ProactiveForeign.h in Headers */,
 				F4298F311E27A34B0008BDEF /* ReactWidget.h in Headers */,
 				F4298F281E27A34B0008BDEF /* ProactiveComponentFactory.h in Headers */,
@@ -295,11 +423,15 @@
 				F4298F4C1E27B1950008BDEF /* Sources */,
 				F4298F4D1E27B1950008BDEF /* Frameworks */,
 				F4298F4E1E27B1950008BDEF /* Resources */,
+				F46BE5491E27E7DF00DA8359 /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 				F40B23FE1E27CCCB00B14997 /* PBXTargetDependency */,
+				F46BE54D1E27E7F900DA8359 /* PBXTargetDependency */,
+				F46BE5511E27E8A700DA8359 /* PBXTargetDependency */,
+				F46BE5551E27E8CD00DA8359 /* PBXTargetDependency */,
 			);
 			name = "proactive-demo";
 			productName = "proactive-demo";
@@ -318,6 +450,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				F46BE58E1E2A807600DA8359 /* PBXTargetDependency */,
 				F40B23FC1E27CCBF00B14997 /* PBXTargetDependency */,
 				F40B23FA1E27CCBC00B14997 /* PBXTargetDependency */,
 			);
@@ -364,6 +497,10 @@
 					ProjectRef = F4298F411E27A3950008BDEF /* proscript.xcodeproj */;
 				},
 				{
+					ProductGroup = F46BE5701E2A7D4F00DA8359 /* Products */;
+					ProjectRef = F46BE56F1E2A7D4F00DA8359 /* SocketRocket.xcodeproj */;
+				},
+				{
 					ProductGroup = F40B23EB1E27C5F700B14997 /* Products */;
 					ProjectRef = F40B23EA1E27C5F700B14997 /* yoga.xcodeproj */;
 				},
@@ -396,6 +533,48 @@
 			fileType = wrapper.framework;
 			path = proscript.framework;
 			remoteRef = F4298F451E27A3950008BDEF /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		F46BE5791E2A7D4F00DA8359 /* SocketRocket.framework */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			path = SocketRocket.framework;
+			remoteRef = F46BE5781E2A7D4F00DA8359 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		F46BE57B1E2A7D4F00DA8359 /* SocketRocket.framework */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			path = SocketRocket.framework;
+			remoteRef = F46BE57A1E2A7D4F00DA8359 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		F46BE57D1E2A7D4F00DA8359 /* SocketRocket.framework */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			path = SocketRocket.framework;
+			remoteRef = F46BE57C1E2A7D4F00DA8359 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		F46BE57F1E2A7D4F00DA8359 /* SocketRocket.framework */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			path = SocketRocket.framework;
+			remoteRef = F46BE57E1E2A7D4F00DA8359 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		F46BE5811E2A7D4F00DA8359 /* SocketRocketTests-iOS.xctest */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.cfbundle;
+			path = "SocketRocketTests-iOS.xctest";
+			remoteRef = F46BE5801E2A7D4F00DA8359 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		F46BE5831E2A7D4F00DA8359 /* TestChat.app */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.application;
+			path = TestChat.app;
+			remoteRef = F46BE5821E2A7D4F00DA8359 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 /* End PBXReferenceProxy section */
@@ -447,9 +626,11 @@
 				F4298F3B1E27A34B0008BDEF /* PrologObject.m in Sources */,
 				F4298F361E27A34B0008BDEF /* ProactiveComponentFactory.m in Sources */,
 				F4298F321E27A34B0008BDEF /* Constants.m in Sources */,
+				F46BE5591E2A7C3B00DA8359 /* CodeListener.m in Sources */,
 				F4298F3A1E27A34B0008BDEF /* PrologEnvironment.m in Sources */,
 				F4298F351E27A34B0008BDEF /* proactive.m in Sources */,
 				F4298F3F1E27A34B0008BDEF /* ReactWidget.m in Sources */,
+				F46BE5971E2BB09100DA8359 /* Button.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -470,6 +651,26 @@
 			isa = PBXTargetDependency;
 			target = F4AC5C6B1E27A21800F2384C /* proactive */;
 			targetProxy = F40B23FD1E27CCCB00B14997 /* PBXContainerItemProxy */;
+		};
+		F46BE54D1E27E7F900DA8359 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = YogaKit;
+			targetProxy = F46BE54C1E27E7F900DA8359 /* PBXContainerItemProxy */;
+		};
+		F46BE5511E27E8A700DA8359 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = proscript;
+			targetProxy = F46BE5501E27E8A700DA8359 /* PBXContainerItemProxy */;
+		};
+		F46BE5551E27E8CD00DA8359 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = yoga;
+			targetProxy = F46BE5541E27E8CD00DA8359 /* PBXContainerItemProxy */;
+		};
+		F46BE58E1E2A807600DA8359 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = "SocketRocket-iOS";
+			targetProxy = F46BE58D1E2A807600DA8359 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 

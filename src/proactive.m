@@ -25,7 +25,7 @@ void render_with_engine(PrologEngine* engine, NSString* url, PrologState* initia
              dispatch_async(dispatch_get_main_queue(),
                             ^{
                                 container.yoga.isEnabled = YES;
-                                [container setBackgroundColor:[UIColor orangeColor]];
+                                [container setBackgroundColor:[UIColor blackColor]];
                                 [container addSubview:[widget getDOMNode]];                                
                                 [container.yoga applyLayout];
                                 [container setNeedsDisplay];

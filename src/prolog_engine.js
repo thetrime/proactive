@@ -318,10 +318,13 @@ PrologEngine.prototype.applyPatch = function(patch, root, callback)
     var renderOptions = Prolog._make_compound(Constants.listFunctor, [Prolog._make_compound(documentFunctor, [root.getOwnerDocument().blob]), Constants.emptyListAtom]);
     var goal = crossModuleCall("vdiff", Prolog._make_compound(vPatchFunctor, [root.blob, patch, renderOptions, newRoot]));
     var savePoint = Prolog._save_state();
+    Prolog._qqq();
+    console.log("About to applyPatch");
     Prolog._execute(this.env,
                     goal,
                     function(result)
                     {
+                        console.log("applyPatch complete: " + result);
                         var element = null;
                         if (result == 1)
                             element = Prolog._get_blob("react_component", newRoot);

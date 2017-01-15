@@ -11,7 +11,7 @@
 #import "Constants.h"
 #import "PrologEnvironment.h"
 #import "ProactiveForeign.h"
-
+#import "CodeListener.h"
 
 @implementation PrologEngine
 
@@ -36,7 +36,7 @@
         listenURL = [NSString stringWithFormat:@"ws%@/listen", [baseURL substringFromIndex:4]];
     }
     componentURL = [NSString stringWithFormat:@"%@/component/%@", baseURL, rootElementId];
-    // FIXME: start code listener
+    codeListener = [[CodeListener alloc] initWithURL:listenURL forEngine:self];
     [self makeThenCall:callback];
     return self;
 }
@@ -50,7 +50,7 @@
 
 -(void)listenForCodeChangesIn:(NSString *)componentId andNotify:(NSObject<CodeChangeListener> *)listener
 {
-    // FIXME: Implement
+    [codeListener listenForCodeChangesIn:componentId andNotify:listener];
 }
 
 -(void)getInitialStateFor:(NSString *)elementId withProps:(PrologState *)props thenCall:(void (^)(PrologState*))callback
@@ -133,9 +133,77 @@
              
          }
      }];
-    
-    
 }
+
+-(void)diff:(word)oldDOM and:(word)newDOM thenCall:(void(^)(word))callback
+{
+    word patch = [Prolog makeVariable];
+    word goal = [Prolog makeCompoundFrom:[Constants vdiffFunctor], oldDOM, newDOM, patch];
+    ExecutionState* saved = [Prolog saveState];
+    [Prolog executeGoal:goal inEnvironment:env thenCall:^(RC rc)
+     {
+         if (rc == SUCCESS || rc == SUCCESS_WITH_CHOICES)
+         {
+             word copy = [Prolog makeLocal:patch];
+             [Prolog restoreState:saved];
+             callback(copy);
+             [Prolog freeLocal:copy];
+         }
+         else
+         {
+             [Prolog restoreState:saved];
+             word ex = [Prolog currentException];
+             if (ex != 0)
+             {
+                 NSLog(@"Exception: %@", [Prolog formatTerm:ex withQuotes:NO]);
+                 // Exception raised
+             }
+             else
+             {
+                 NSLog(@"Failed");
+                 // Failed
+             }
+         }
+     }];
+}
+-(void)applyPatch:(word)patch to:(ReactWidget*)target thenCall:(void(^)())callback
+{
+    word newRoot = [Prolog makeVariable];
+    word renderOptions = [Prolog makeCompoundFrom:[Constants listFunctor], [Prolog makeCompoundFrom:[Constants documentFunctor], [target blob]], [Constants emptyListAtom]];
+    word goal = [Prolog makeCompoundFrom:[Constants vpatchFunctor], [target blob], patch, renderOptions, newRoot];
+    ExecutionState* saved = [Prolog saveState];
+    [Prolog executeGoal:goal inEnvironment:env thenCall:^(RC rc)
+     {
+         id element = NULL;
+         if (rc == SUCCESS || rc == SUCCESS_WITH_CHOICES)
+         {
+             element = [Prolog blobData:newRoot forType:@"react_component"];
+         }
+         [Prolog restoreState:saved];
+         if (rc == SUCCESS || rc == SUCCESS_WITH_CHOICES)
+         {
+             callback();
+         }
+         else
+         {
+             [Prolog restoreState:saved];
+             word ex = [Prolog currentException];
+             if (ex != 0)
+             {
+                 NSLog(@"Exception: %@", [Prolog formatTerm:ex withQuotes:NO]);
+                 // Exception raised
+             }
+             else
+             {
+                 NSLog(@"Failed");
+                 // Failed
+             }
+         }
+     }];
+
+}
+
+
 
 -(void)createElementFromVDOM:(word)vDOM forWidget:(ReactWidget *)widget thenCall:(void (^)(ReactComponent*))callback
 {

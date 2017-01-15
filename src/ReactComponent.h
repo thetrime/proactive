@@ -18,6 +18,8 @@
     ReactComponent* parent;
     word blob;
     NSMutableArray* children;
+    enum {HORIZONTAL, VERTICAL} orientation;
+    enum {HORIZONTAL_FILL, VERTICAL_FILL, NONE, BOTH} fill;
 }
 -(id)initWithDOMNode:(UIView*)node;
 -(void)restyle;
@@ -26,5 +28,11 @@
 -(void)setProperties:(NSDictionary*)properties;
 -(word)blob;
 -(void)appendChild:(ReactComponent*)child;
+-(void)removeChild:(ReactComponent*)child;
 -(void)setParent:(ReactComponent*)parent;
+-(NSMutableArray*)getChildren;
+-(ReactComponent*)parent;
+-(void)freeComponent;
+-(void)requestLayout;
+
 @end

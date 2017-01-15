@@ -9,6 +9,7 @@
 #import "ProactiveComponentFactory.h"
 #import "Panel.h"
 #import "Label.h"
+#import "Button.h"
 
 @implementation ProactiveComponentFactory
 +(ReactComponent*)createElementOfType:(NSString*)type withContext:(ReactComponent*)context
@@ -17,6 +18,8 @@
         return [[Panel alloc] init];
     if ([type isEqualToString:@"Label"])
         return [[Label alloc] init];
+    if ([type isEqualToString:@"Button"])
+        return [[Button alloc] init];
 
     NSLog(@"Not implemented: %@", type);
     assert(0);

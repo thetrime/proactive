@@ -31,6 +31,9 @@
 +(word)listFunctor;
 +(word)documentFunctor;
 +(word)createElementFromVdomFunctor;
++(word)vdiffFunctor;
++(word)vpatchFunctor;
+
 
 +(word)makeNull;
 +(bool)isNull:(word)w;

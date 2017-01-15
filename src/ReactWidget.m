@@ -20,6 +20,7 @@
     
     [self setProperties:[props getProperties]];
     [engine listenForCodeChangesIn:elementId andNotify:self];
+    vDOM = -1;
     [engine getInitialStateFor:elementId withProps:props thenCall:^(PrologState* _state)
              {
                  state = _state;
@@ -37,10 +38,31 @@
     return self;
 }
 
+-(void)reRenderThenCall:(void (^)(ReactWidget*))callback
+{
+    [engine renderWidget:self withState:state props:props thenCall:^(word v)
+     {
+         [engine diff:vDOM and:v thenCall:^(word patches)
+          {
+              [engine applyPatch:patches to:internalComponent thenCall:^()
+               {
+                   [internalComponent setOwnerDocument:self];
+                   if (vDOM != -1)
+                       [Prolog freeLocal:vDOM];
+                   vDOM = v;
+                   callback(self);
+               }];
+          }];
+     }];
+}
+
 -(void)codeChanged
 {
-    // FIXME: Implement
-    NSLog(@"Code changed. Should reload");
+    [self reRenderThenCall:^(ReactComponent* ignored)
+     {
+         NSLog(@"Rerendered");
+     }
+     ];
 }
 
 -(UIView*)getDOMNode
@@ -53,6 +75,14 @@
 -(NSString*)elementId
 {
     return elementId;
+}
+
+-(void)freeComponent
+{
+    [state freeState];
+    [props freeState];
+    [Prolog releaseBlob:blob ofType:@"react_component"];
+    [super freeComponent];
 }
 
 @end

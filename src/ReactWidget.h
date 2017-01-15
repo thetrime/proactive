@@ -23,4 +23,6 @@
 }
 -(id)initWithParent:(ReactComponent*)parent engine:(PrologEngine*)engine elementId:(NSString*)rootElementId props:(PrologState*)initialProps;
 -(NSString*)elementId;
+-(void)codeChanged;
+-(void)reRenderThenCall:(void (^)(ReactWidget*))callback;
 @end

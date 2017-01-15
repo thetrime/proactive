@@ -8,6 +8,7 @@
 
 #import "ViewController.h"
 #import <Proactive/proactive.h>
+#import <YogaKit/YogaKit.h>
 
 @interface ViewController ()
 
@@ -17,7 +18,7 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    render(@"http://localhost:8080/react", NULL, @"ios_demo_proactive", self.view);
+    render(@"http://192.168.0.13:8080/react", NULL, @"ios_demo_proactive", self.view);
     NSLog(@"View: %@", self.view);
     // Do any additional setup after loading the view, typically from a nib.
 }
@@ -28,5 +29,14 @@
     // Dispose of any resources that can be recreated.
 }
 
+- (void)didRotateFromInterfaceOrientation:(UIInterfaceOrientation)fromInterfaceOrientation
+{
+    [self.view.yoga applyLayout];
+}
+
+-(UIInterfaceOrientationMask)supportedInterfaceOrientations
+{
+    return UIInterfaceOrientationMaskAll;
+}
 
 @end

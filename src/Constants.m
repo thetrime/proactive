@@ -29,6 +29,8 @@ word typeErrorFunctor = 0;
 word listFunctor = 0;
 word documentFunctor = 0;
 word createElementFromVdomFunctor = 0;
+word vdiffFunctor = 0;
+word vpatchFunctor = 0;
 
 @implementation Constants
 +(void)initialize
@@ -55,8 +57,19 @@ word createElementFromVdomFunctor = 0;
     listFunctor = [Prolog makeFunctor:[Prolog makeAtomFrom:@"."] withArity:2];
     createElementFromVdomFunctor = [Prolog makeFunctor:[Prolog makeAtomFrom:@"create_element_from_vdom"] withArity:3];
     equalsFunctor = [Prolog makeFunctor:[Prolog makeAtomFrom:@"="] withArity:2];
+    vdiffFunctor = [Prolog makeFunctor:[Prolog makeAtomFrom:@"vdiff"] withArity:3];
+    vpatchFunctor = [Prolog makeFunctor:[Prolog makeAtomFrom:@"vpatch"] withArity:4];
+
 }
 
++(word)vdiffFunctor
+{
+    return vdiffFunctor;
+}
++(word)vpatchFunctor
+{
+    return vpatchFunctor;
+}
 
 +(word) atomAtom
 {

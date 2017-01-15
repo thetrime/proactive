@@ -47,4 +47,6 @@ typedef int (*foreign_call_t)();
 +(int)unify:(word)a and:(word)b;
 +(int)setException:(word)e;
 +(int)typeError:(word)a whenExpecting:(word)b;
++(word)makeNull;
++(void)releaseBlob:(word)b ofType:(NSString*)type;
 @end
