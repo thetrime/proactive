@@ -83,4 +83,9 @@ public class ReactPanel extends JPanel implements StyleSheetListener
             }
          });
    }
+   public void cleanUp()
+   {
+      // FIXME: Currently a no-op
+   }
+
 }
