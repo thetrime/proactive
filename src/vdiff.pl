@@ -529,7 +529,7 @@ index_in_range(Indices, Left, Right):-
 index_in_range_1(MinIndex, MaxIndex, Indices, Left, Right):-
         MinIndex =< MaxIndex,
         CurrentIndex is (MaxIndex + MinIndex)//2,
-        qnth0(CurrentIndex, Indices, CurrentItem),
+        nth0(CurrentIndex, Indices, CurrentItem),
         ( MinIndex == MaxIndex->
             CurrentItem >= Left,
             CurrentItem =< Right
@@ -626,7 +626,7 @@ patch_op(props_patch(VNode, Patch), DomNode, _Options, DomNode):-
 
 reorder_removes([], _DomNode, _ChildNodes, T, T):- !.
 reorder_removes([remove(From, Key)|Removes], DomNode, ChildNodes, KeyMap, FinalKeyMap):-
-        qnth0(From, ChildNodes, Node),
+        nth0(From, ChildNodes, Node),
         ( Key \== {null}->
             NewKeyMap = [Key-Node|KeyMap]
         ; otherwise->
@@ -638,7 +638,7 @@ reorder_removes([remove(From, Key)|Removes], DomNode, ChildNodes, KeyMap, FinalK
 reorder_inserts([], _DomNode, _ChildNodes, _KeyMap):- !.
 reorder_inserts([insert(Key, Position)|Inserts], DomNode, ChildNodes, KeyMap):-
         memberchk(Key-Node, KeyMap),
-        ( qnth0(Position, ChildNodes, Sibling)->
+        ( nth0(Position, ChildNodes, Sibling)->
             insert_before(DomNode, Node, Sibling)
         ; otherwise->
             insert_before(DomNode, Node, {null})
@@ -725,11 +725,6 @@ is_hook(_):- fail. % FIXME: Stub
 hook(_, _, _):- fail. % FIXME: Stub
 
 
-
-qnth0(0, [X|_], X):- !.
-qnth0(I, [_|X], Y):-
-        II is I-1,
-        qnth0(II, X, Y).
 
 
 create_element_from_vdom(Options, VDom, Element):-

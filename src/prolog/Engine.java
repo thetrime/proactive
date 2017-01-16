@@ -107,6 +107,7 @@ public class Engine
       env.installBuiltin("init_widget", 3);
       env.installBuiltin("update_widget", 4);
       env.installBuiltin("widget_id", 1);
+      env.installBuiltin("nth0", 3);
 
 
       env.ensureLoaded(new CompoundTerm(CompoundTermTag.get("resource", 1), AtomTerm.get("/boilerplate.pl")));
