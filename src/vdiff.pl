@@ -437,43 +437,20 @@ patch_indices([Index-_|Patch], [Index|Indices]):- patch_indices(Patch, Indices).
 
 
 patch_recursive(RootNode, PatchSet, Options, NewRoot):-
-        PatchSet = [a-A|Patches],
-        ( Patches == []->
+        ( patch_indices(PatchSet, Indices),
+          Indices \== []->
+            memberchk(a-A, PatchSet),
+            dom_index(RootNode, A, Indices, [], Index),
+            %writeln(dom_index(RootNode, A, Indices, [], Index)),
+            %owner_document(RootNode, OwnerDocument)
+            patch_recursive(Indices, RootNode, Index, PatchSet, Options, NewRoot)
+        ; otherwise->
             NewRoot = RootNode
-        ; otherwise->
-            patch_backtracking(Patches, RootNode, A, PatchSet, Options, NewRoot)
         ).
 
-patch_backtracking(PatchSet, RootNode, A, PatchSet, Options, NewRoot):-
-        ( member(Index-Patches, PatchSet),
-          ( find_node(Index, 0, A, RootNode, DOMNode),
-            apply_patch(RootNode, DOMNode, Patches, Options, _NewNode)->
-              fail
-          ; writeln(failed_to_apply_patch),
-            fail
-          )
-        ; true
-        ).
 
-find_node(Target, Target, DOMNode, _VNode, DOMNode):- !.
-find_node(Target, CurrentIndex, _DOMNode, [], Node, CurrentIndex):-
-find_node(Target, CurrentIndex, [CurrentNode|Siblings], Node, AfterIndex):-
-        ( CurrentNode = element(_, _, VChildren)->
-            II is CurrentIndex+1,
-            child_nodes(CurrentNode, ChildNodes),
-            find_node(Target, II, ChildNodes, Node, A)
-        ; Tree = widget(_, _, VChildren)->
-            II is CurrentIndex+1,
-            find_node(Target, II, VChildren, Node, A)
-        ; otherwise->
-            A = CurrentIndex+1
-        ),
-        find_node(Target, A, Siblings, Node, AfterIndex).
-
-
-
-patch_recursive([], RootNode, _PatchSet, _Options, RootNode):- !.
-patch_recursive([NodeIndex|Indices], RootNode, PatchSet, Options, NewRoot):-
+patch_recursive([], RootNode, _Index, _PatchSet, _Options, RootNode):- !.
+patch_recursive([NodeIndex|Indices], RootNode, Index, PatchSet, Options, NewRoot):-
         ( memberchk(NodeIndex-DomNode, Index)->
             true
         ; otherwise->
@@ -570,7 +547,7 @@ patch_op(remove_patch(VNode, _), DomNode, _Options, NewNode):-
         ; otherwise->
             true
         ),
-        writeln(case1),
+        %writeln(case1),
         destroy_component(DomNode, VNode),
         NewNode = {null}.
 
