@@ -224,7 +224,7 @@
 		F4298F201E27A34B0008BDEF /* ReactComponent.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ReactComponent.m; path = src/ReactComponent.m; sourceTree = SOURCE_ROOT; };
 		F4298F211E27A34B0008BDEF /* ReactWidget.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ReactWidget.m; path = src/ReactWidget.m; sourceTree = SOURCE_ROOT; };
 		F4298F221E27A34B0008BDEF /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = src/Info.plist; sourceTree = SOURCE_ROOT; };
-		F4298F411E27A3950008BDEF /* proscript.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = proscript.xcodeproj; path = ../proscript2/proscript.xcodeproj; sourceTree = "<group>"; };
+                F4298F411E27A3950008BDEF /* proscript.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = proscript.xcodeproj; path = node_modules/proscript/proscript.xcodeproj; sourceTree = "<group>"; };
 		F4298F501E27B1950008BDEF /* proactive-demo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "proactive-demo.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		F4298F531E27B1950008BDEF /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		F4298F551E27B1950008BDEF /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
