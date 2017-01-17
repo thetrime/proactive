@@ -20,7 +20,6 @@ window.onPrologReady = function(Prolog)
                                                                     if (propSpec != null)
                                                                     {
                                                                         var p = decodeURIComponent(propSpec);
-                                                                        console.log(p);
                                                                         initialPropsObject = new PrologState(Prolog._string_to_local_term(p));
                                                                     }
                                                                     new ReactWidget(null, engine, rootElementId, initialPropsObject, function(widget)
