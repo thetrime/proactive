@@ -2,7 +2,7 @@
 	path = reactive-prolog
 	url = https://github.com/thetrime/reactive-prolog.git
 [submodule "lib/proscript"]
-        path = lib/proscript
+        path = node_modules/proscript
 	url = http://github.com/thetrime/proscript2.git
 [submodule "yoga/yoga"]
 	path = yoga/yoga
