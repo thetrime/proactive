@@ -10,6 +10,3 @@
 [submodule "SocketRocket"]
 	path = SocketRocket
 	url = https://github.com/facebook/SocketRocket.git
-[submodule "node_modules/proscript2"]
-	path = node_modules/proscript2
-	url = https://github.com/thetrime/proscript2.git
