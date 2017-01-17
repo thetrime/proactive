@@ -427,22 +427,53 @@ is_widget(widget(_, _, _)).
 vpatch(RootNode, Patches, Options, NewRoot):-
         patch_recursive(RootNode, Patches, Options, NewRoot).
 
+% patch_indices/2 used to be a setof(Index, P^(member(Index-P, Patches), Index \== a), Indices)
+% but when I came to write Proactive/PL I found that this caused a real problem if Patches
+% included any attributed variables. This avoids copying the term and is therefore a lot nicer
+% and probably uses less memory as a bonus
+patch_indices([], []):- !.
+patch_indices([a-_|Patch], Indices):- !,  patch_indices(Patch, Indices).
+patch_indices([Index-_|Patch], [Index|Indices]):- patch_indices(Patch, Indices).
+
+
 patch_recursive(RootNode, PatchSet, Options, NewRoot):-
-        ( setof(Index,
-                Value^( member(Index-Value, PatchSet),
-                        Index \== a
-                      ),
-                Indices)->
-            memberchk(a-A, PatchSet),
-            dom_index(RootNode, A, Indices, [], Index),
-            %owner_document(RootNode, OwnerDocument)
-            patch_recursive(Indices, RootNode, Index, PatchSet, Options, NewRoot)
-        ; otherwise->
+        PatchSet = [a-A|Patches],
+        ( Patches == []->
             NewRoot = RootNode
+        ; otherwise->
+            patch_backtracking(Patches, RootNode, A, PatchSet, Options, NewRoot)
         ).
 
-patch_recursive([], RootNode, _Index, _PatchSet, _Options, RootNode):- !.
-patch_recursive([NodeIndex|Indices], RootNode, Index, PatchSet, Options, NewRoot):-
+patch_backtracking(PatchSet, RootNode, A, PatchSet, Options, NewRoot):-
+        ( member(Index-Patches, PatchSet),
+          ( find_node(Index, 0, A, RootNode, DOMNode),
+            apply_patch(RootNode, DOMNode, Patches, Options, _NewNode)->
+              fail
+          ; writeln(failed_to_apply_patch),
+            fail
+          )
+        ; true
+        ).
+
+find_node(Target, Target, DOMNode, _VNode, DOMNode):- !.
+find_node(Target, CurrentIndex, _DOMNode, [], Node, CurrentIndex):-
+find_node(Target, CurrentIndex, [CurrentNode|Siblings], Node, AfterIndex):-
+        ( CurrentNode = element(_, _, VChildren)->
+            II is CurrentIndex+1,
+            child_nodes(CurrentNode, ChildNodes),
+            find_node(Target, II, ChildNodes, Node, A)
+        ; Tree = widget(_, _, VChildren)->
+            II is CurrentIndex+1,
+            find_node(Target, II, VChildren, Node, A)
+        ; otherwise->
+            A = CurrentIndex+1
+        ),
+        find_node(Target, A, Siblings, Node, AfterIndex).
+
+
+
+patch_recursive([], RootNode, _PatchSet, _Options, RootNode):- !.
+patch_recursive([NodeIndex|Indices], RootNode, PatchSet, Options, NewRoot):-
         ( memberchk(NodeIndex-DomNode, Index)->
             true
         ; otherwise->
@@ -474,7 +505,7 @@ dom_index(RootNode, Tree, Indices, Nodes, Index):-
 
 recurse({null}, _Tree, _Indices, Nodes, _RootIndex, Nodes):- !.
 recurse(RootNode, Tree, Indices, Nodes, RootIndex, Index):-
-        ( index_in_range(Indices, RootIndex, RootIndex)->
+        ( \+ \+ index_in_range(Indices, RootIndex, RootIndex)->
             N1 = [RootIndex-RootNode|Nodes]
         ; otherwise->
             N1 = Nodes
@@ -500,7 +531,7 @@ recurse_1([ChildNode|Tree], VChildren, RootIndex, Indices, Nodes, FinalNodes):-
             Count = 0
         ),
         NextIndex is R1 + Count,
-        ( index_in_range(Indices, R1, NextIndex)->
+        ( \+ \+ index_in_range(Indices, R1, NextIndex)->
             recurse(ChildNode, VChild, Indices, Nodes, R1, N1)
         ; otherwise->
             N1 = Nodes
