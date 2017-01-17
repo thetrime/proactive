@@ -26,6 +26,7 @@
         node.yoga.flexShrink = 1;
         node.yoga.alignItems = YGAlignCenter;
         node.yoga.justifyContent = YGJustifyCenter;
+
     }
     return self;
 }
@@ -33,9 +34,9 @@
 -(void) restyle
 {
     if (orientation == VERTICAL)
-        DOMnode.yoga.direction = YGFlexDirectionColumn;
+        DOMnode.yoga.flexDirection = YGFlexDirectionColumn;
     else
-        DOMnode.yoga.direction = YGFlexDirectionRow;
+        DOMnode.yoga.flexDirection = YGFlexDirectionRow;
     if (parent != NULL)
     {
         if (fill == NONE)
