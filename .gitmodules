@@ -1,8 +1,8 @@
 [submodule "reactive-prolog"]
 	path = reactive-prolog
 	url = https://github.com/thetrime/reactive-prolog.git
-[submodule "lib/proscript2"]
-	path = lib/proscript2
+[submodule "lib/proscript"]
+        path = lib/proscript
 	url = http://github.com/thetrime/proscript2.git
 [submodule "yoga/yoga"]
 	path = yoga/yoga
@@ -10,3 +10,6 @@
 [submodule "SocketRocket"]
 	path = SocketRocket
 	url = https://github.com/facebook/SocketRocket.git
+[submodule "node_modules/proscript2"]
+	path = node_modules/proscript2
+	url = https://github.com/thetrime/proscript2.git

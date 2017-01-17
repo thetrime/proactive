@@ -1,5 +1,7 @@
 *~
 *.zip
 proactivejs-*
-node_modules
+node_modules/browserify
+node_modules/brfs
+node_modules/xmlhttprequest
 build
