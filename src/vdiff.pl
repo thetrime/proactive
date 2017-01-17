@@ -456,7 +456,6 @@ patch_recursive([NodeIndex|Indices], RootNode, Index, PatchSet, Options, NewRoot
 apply_patch(RootNode, {null}, _Patches, _Options, RootNode):- !.
 apply_patch(RootNode, _DomNode, [], _Options, RootNode):- !.
 apply_patch(RootNode, DomNode, [Patch|Patches], Options, NewRoot):-
-        writeln(patch_op(Patch, DomNode, Options, NewNode)),
         ( patch_op(Patch, DomNode, Options, NewNode)->
             true
 	; vdiff_warning(failed_to_apply_patch(Patch)), fail
