@@ -64,6 +64,7 @@ ENGINE= src/prolog/Predicate_remove_child.java                \
 	src/prolog/Predicate_get_state.java                   \
 	src/prolog/Predicate_state_to_term.java               \
 	src/prolog/Predicate_bubble_event.java                \
+	src/prolog/Predicate_nth0.java                        \
 	src/prolog/Engine.java                                \
         src/prolog/PrologState.java                           \
         src/prolog/PrologObject.java                          \
@@ -120,7 +121,7 @@ package: dist/proactive.jar src/jsx.pl src/vdiff.pl src/react.pl src/dom.pl
 	cp dist/proactive.jar proactive-${VERSION}/lib/proactive-${VERSION}.jar
 	cp src/jsx.pl src/vdiff.pl src/react.pl src/dom.pl proactive-${VERSION}/src/
 	zip -r proactive-${VERSION}.zip proactive-${VERSION}
-	rm -rf proactive-${VERSION}
+#	rm -rf proactive-${VERSION}
 
 clean:
 	rm -rf build
