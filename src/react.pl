@@ -25,7 +25,7 @@ user:term_expansion(:-table_predicate(Indicator), tabled_predicate(user, Indicat
 
 
 :-http_handler(root('react/component'), serve_react, [prefix]).
-:-http_handler(root('react/listen'), notify_react, []).
+:-http_handler(root('react/listen'), notify_react, [spawn([])]).
 :-http_handler(root('react/goal'), execute_react, []).
 
 :-initialization(message_queue_create(react_reload_queue), restore).
