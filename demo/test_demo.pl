@@ -127,7 +127,8 @@ do_test:-
         render_document(user_error, Document),
         vpath(Document, 'Label'(@parentData=ParentData, @className=title), _),
         vpath(Document, /_/'Panel'(@eventData=EventData), _),
-        vpath(Document, /_/_/'Label'(@eventData=ChildEventData), _),
+        vpath(Document, /_/X/'Label'(@eventData=ChildEventData), _),
         !,
-        writeln(EventData->ParentData->ChildEventData).
+        writeln(EventData->ParentData->ChildEventData),
+        writeln(X).
 
