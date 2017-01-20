@@ -8,6 +8,7 @@
 
 #import "ReactComponent.h"
 #import "PrologObject.h"
+#import "Constants.h"
 #import <YogaKit/YogaKit.h>
 
 @implementation ReactComponent
@@ -156,6 +157,14 @@
 -(NSArray*)getChildren
 {
     return children;
+}
+
++(word)serialize:(NSDictionary *)data
+{
+    word result = [Constants emptyListAtom];
+    for (NSString* key in data)
+        result = [Prolog makeCompoundFrom:[Constants listFunctor], [Prolog makeCompoundFrom:[Constants equalsFunctor], [Prolog makeAtomFrom:key], [((PrologObject*)[data valueForKey:key]) value]], result];
+    return result;
 }
 
 @end

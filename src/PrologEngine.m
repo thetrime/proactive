@@ -237,4 +237,54 @@
      }];    
 }
 
+-(void)triggerEvent:(word)handler forWidget:(ReactWidget*)context withData:(word)event thenCall:(void(^)(int))callback
+{
+    PrologState* state;
+    PrologState* props;
+    while ([Prolog isCompound:handler withFunctor:[Constants thisFunctor]])
+    {
+        context = [Prolog blobData:[Prolog arg:0 ofTerm:handler] forType:@"react_component"];
+        handler = [Prolog arg:1 ofTerm:handler];
+    }
+    state = [context state];
+    props = [context props];
+    word newState = [Prolog makeVariable];
+    word goal;
+    if ([Prolog isAtom:handler])
+        goal = [self makeGoal:[Prolog makeCompoundFrom:[Prolog makeFunctor:handler withArity:4], event, [state blob], [props blob], newState] inModule:[context elementId]];
+    else
+    {
+        @throw @"Not implemented yet";
+    }
+    ExecutionState* saved = [Prolog saveState];
+    [Prolog executeGoal:goal inEnvironment:env thenCall:^(RC rc)
+     {
+         PrologState* ss = nil;
+         if (rc == SUCCESS || rc == SUCCESS_WITH_CHOICES)
+         {
+             ss = [[context state] cloneWith:[Prolog deref:newState]];
+         }
+         [Prolog restoreState:saved];
+         if (rc == SUCCESS || rc == SUCCESS_WITH_CHOICES)
+         {
+             [context setState:ss thenCall:callback];
+         }
+         else
+         {
+             word ex = [Prolog currentException];
+             if (ex != 0)
+             {
+                 NSLog(@"Exception: %@", [Prolog formatTerm:ex withQuotes:NO]);
+                 // Exception raised
+             }
+             else
+             {
+                 NSLog(@"Failed");
+                 // Failed
+             }
+         }
+
+     }];
+}
+
 @end

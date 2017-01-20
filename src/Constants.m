@@ -31,6 +31,7 @@ word documentFunctor = 0;
 word createElementFromVdomFunctor = 0;
 word vdiffFunctor = 0;
 word vpatchFunctor = 0;
+word thisFunctor = 0;
 
 @implementation Constants
 +(void)initialize
@@ -59,7 +60,7 @@ word vpatchFunctor = 0;
     equalsFunctor = [Prolog makeFunctor:[Prolog makeAtomFrom:@"="] withArity:2];
     vdiffFunctor = [Prolog makeFunctor:[Prolog makeAtomFrom:@"vdiff"] withArity:3];
     vpatchFunctor = [Prolog makeFunctor:[Prolog makeAtomFrom:@"vpatch"] withArity:4];
-
+    thisFunctor = [Prolog makeFunctor:[Prolog makeAtomFrom:@"$this"] withArity:1];
 }
 
 +(word)vdiffFunctor
@@ -170,6 +171,12 @@ word vpatchFunctor = 0;
 {
     return prologStateKeyAtom;
 }
+
++(word)thisFunctor
+{
+    return thisFunctor;
+}
+
 
 +(word)makeNull
 {

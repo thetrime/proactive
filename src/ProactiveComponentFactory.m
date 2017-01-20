@@ -10,6 +10,7 @@
 #import "Panel.h"
 #import "Label.h"
 #import "Button.h"
+#import "Field.h"
 
 @implementation ProactiveComponentFactory
 +(ReactComponent*)createElementOfType:(NSString*)type withContext:(ReactComponent*)context
@@ -20,6 +21,8 @@
         return [[Label alloc] init];
     if ([type isEqualToString:@"Button"])
         return [[Button alloc] init];
+    if ([type isEqualToString:@"Field"])
+        return [[Field alloc] init];
 
     NSLog(@"Not implemented: %@", type);
     assert(0);

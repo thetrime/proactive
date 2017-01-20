@@ -14,6 +14,7 @@
 {
     NSMutableDictionary* map;
     word blob;
+    BOOL global;
 }
 -(id)initWithTerm:(word)term;
 +(PrologState*)emptyState;
@@ -22,4 +23,5 @@
 -(void)freeState;
 -(PrologState*)cloneWith:(word)term;
 -(word)getValueFor:(NSString*)key;
+-(BOOL)isGlobal;
 @end

@@ -33,5 +33,5 @@
 -(void)makeThenCall:(void(^)(int))callback;
 -(void)diff:(word)oldDOM and:(word)newDOM thenCall:(void(^)(word))callback;
 -(void)applyPatch:(word)p to:(ReactComponent*)target thenCall:(void(^)())callback;
-
+-(void)triggerEvent:(word)handler forWidget:(ReactWidget*)widget withData:(word)w thenCall:(void(^)(int))callback;
 @end

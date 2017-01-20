@@ -33,7 +33,7 @@
 +(word)createElementFromVdomFunctor;
 +(word)vdiffFunctor;
 +(word)vpatchFunctor;
-
++(word)thisFunctor;
 
 +(word)makeNull;
 +(bool)isNull:(word)w;

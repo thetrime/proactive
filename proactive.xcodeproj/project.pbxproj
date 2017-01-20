@@ -45,6 +45,8 @@
 		F4298F621E27B1950008BDEF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = F4298F601E27B1950008BDEF /* LaunchScreen.storyboard */; };
 		F4298F6A1E27B2830008BDEF /* boilerplate.pl in Resources */ = {isa = PBXBuildFile; fileRef = F4298F681E27B2830008BDEF /* boilerplate.pl */; };
 		F4298F6B1E27B2830008BDEF /* vdiff.pl in Resources */ = {isa = PBXBuildFile; fileRef = F4298F691E27B2830008BDEF /* vdiff.pl */; };
+		F46BBEA01E328227007BD8B0 /* Field.h in Headers */ = {isa = PBXBuildFile; fileRef = F46BBE9E1E328227007BD8B0 /* Field.h */; };
+		F46BBEA11E328227007BD8B0 /* Field.m in Sources */ = {isa = PBXBuildFile; fileRef = F46BBE9F1E328227007BD8B0 /* Field.m */; };
 		F46BE5461E27E7DF00DA8359 /* proactive.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F4AC5C6C1E27A21800F2384C /* proactive.framework */; };
 		F46BE5471E27E7DF00DA8359 /* proactive.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = F4AC5C6C1E27A21800F2384C /* proactive.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		F46BE54A1E27E7F900DA8359 /* YogaKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F40B23F21E27C5F700B14997 /* YogaKit.framework */; };
@@ -224,7 +226,7 @@
 		F4298F201E27A34B0008BDEF /* ReactComponent.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ReactComponent.m; path = src/ReactComponent.m; sourceTree = SOURCE_ROOT; };
 		F4298F211E27A34B0008BDEF /* ReactWidget.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ReactWidget.m; path = src/ReactWidget.m; sourceTree = SOURCE_ROOT; };
 		F4298F221E27A34B0008BDEF /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = src/Info.plist; sourceTree = SOURCE_ROOT; };
-                F4298F411E27A3950008BDEF /* proscript.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = proscript.xcodeproj; path = node_modules/proscript/proscript.xcodeproj; sourceTree = "<group>"; };
+		F4298F411E27A3950008BDEF /* proscript.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = proscript.xcodeproj; path = node_modules/proscript/proscript.xcodeproj; sourceTree = "<group>"; };
 		F4298F501E27B1950008BDEF /* proactive-demo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "proactive-demo.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		F4298F531E27B1950008BDEF /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		F4298F551E27B1950008BDEF /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
@@ -236,6 +238,8 @@
 		F4298F631E27B1950008BDEF /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		F4298F681E27B2830008BDEF /* boilerplate.pl */ = {isa = PBXFileReference; lastKnownFileType = text.script.perl; name = boilerplate.pl; path = src/boilerplate.pl; sourceTree = "<group>"; };
 		F4298F691E27B2830008BDEF /* vdiff.pl */ = {isa = PBXFileReference; lastKnownFileType = text.script.perl; name = vdiff.pl; path = src/vdiff.pl; sourceTree = "<group>"; };
+		F46BBE9E1E328227007BD8B0 /* Field.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Field.h; path = ../src/Field.h; sourceTree = "<group>"; };
+		F46BBE9F1E328227007BD8B0 /* Field.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Field.m; path = ../src/Field.m; sourceTree = "<group>"; };
 		F46BE5561E2A7C3B00DA8359 /* CodeListener.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CodeListener.h; path = src/CodeListener.h; sourceTree = SOURCE_ROOT; };
 		F46BE5571E2A7C3B00DA8359 /* CodeListener.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = CodeListener.m; path = src/CodeListener.m; sourceTree = SOURCE_ROOT; };
 		F46BE56F1E2A7D4F00DA8359 /* SocketRocket.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = SocketRocket.xcodeproj; path = SocketRocket/SocketRocket.xcodeproj; sourceTree = "<group>"; };
@@ -348,6 +352,8 @@
 		F4AC5C6E1E27A21800F2384C /* proactive */ = {
 			isa = PBXGroup;
 			children = (
+				F46BBE9E1E328227007BD8B0 /* Field.h */,
+				F46BBE9F1E328227007BD8B0 /* Field.m */,
 				F4298F051E27A34B0008BDEF /* CodeChangeListener.h */,
 				F4298F061E27A34B0008BDEF /* Constants.h */,
 				F4298F071E27A34B0008BDEF /* Label.h */,
@@ -408,6 +414,7 @@
 				F4298F2E1E27A34B0008BDEF /* PrologSourceDownloader.h in Headers */,
 				F46BE5961E2BB09100DA8359 /* Button.h in Headers */,
 				F4298F291E27A34B0008BDEF /* ProactiveForeign.h in Headers */,
+				F46BBEA01E328227007BD8B0 /* Field.h in Headers */,
 				F4298F311E27A34B0008BDEF /* ReactWidget.h in Headers */,
 				F4298F281E27A34B0008BDEF /* ProactiveComponentFactory.h in Headers */,
 			);
@@ -619,6 +626,7 @@
 				F4298F341E27A34B0008BDEF /* Panel.m in Sources */,
 				F4298F391E27A34B0008BDEF /* PrologEngine.m in Sources */,
 				F4298F3E1E27A34B0008BDEF /* ReactComponent.m in Sources */,
+				F46BBEA11E328227007BD8B0 /* Field.m in Sources */,
 				F4298F3C1E27A34B0008BDEF /* PrologSourceDownloader.m in Sources */,
 				F4298F3D1E27A34B0008BDEF /* PrologState.m in Sources */,
 				F4298F331E27A34B0008BDEF /* Label.m in Sources */,

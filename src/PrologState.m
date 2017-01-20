@@ -151,6 +151,7 @@ void processElements(word t, NSMutableDictionary* map)
 +(void)initialize
 {
     emptyState = [[PrologState alloc] initWithTerm:-1];
+    emptyState->global = 1;
 }
 
 +(PrologState*)emptyState
@@ -162,6 +163,7 @@ void processElements(word t, NSMutableDictionary* map)
 {
     self = [super init];
     map = [[NSMutableDictionary alloc] init];
+    global = 0;
     if (term == -1)
     {
         // Empty state
@@ -172,6 +174,12 @@ void processElements(word t, NSMutableDictionary* map)
     }
     blob = [Prolog makeBlobOfType:@"state" withData:self];
     return self;
+}
+
+
+-(BOOL)isGlobal
+{
+    return global == 1;
 }
 
 -(word)blob

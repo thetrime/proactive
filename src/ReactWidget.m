@@ -85,4 +85,32 @@
     [super freeComponent];
 }
 
+-(void)triggerEvent:(word)handler withData:(word)w thenCall:(void (^)(int))callback
+{
+    [engine triggerEvent:handler forWidget:self withData:w thenCall:callback];
+}
+
+-(void)setState:(PrologState*)s thenCall:(void(^)(int))callback
+{
+    if (state != nil && ![state isGlobal])
+    {
+        [Prolog releaseBlob:[state blob] ofType:@"state"];
+    }
+    state = s;
+    [self reRenderThenCall:^(ReactWidget* ignored)
+      {
+          callback(1);
+      }];
+}
+
+-(PrologState*)state
+{
+    return state;
+}
+
+-(PrologState*)props
+{
+    return props;
+}
+
 @end

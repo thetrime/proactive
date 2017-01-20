@@ -25,4 +25,10 @@
 -(NSString*)elementId;
 -(void)codeChanged;
 -(void)reRenderThenCall:(void (^)(ReactWidget*))callback;
+-(void)triggerEvent:(word)handler withData:(word)w thenCall:(void(^)(int))callback;
+-(void)setState:(PrologState*)state thenCall:(void(^)(int))callback;
+-(PrologState*)state;
+-(PrologState*)props;
+-(NSString*)elementId;
+
 @end

@@ -34,5 +34,5 @@
 -(ReactComponent*)parent;
 -(void)freeComponent;
 -(void)requestLayout;
-
++(word)serialize:(NSDictionary*)data;
 @end
