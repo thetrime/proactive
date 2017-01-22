@@ -181,7 +181,7 @@ void _callback(RC result)
     {
         if (error == nil)
         {
-            _consult_string_of_length([data bytes], [data length]);
+            _consult_string_of_length([data bytes], (int)[data length]);
             callback(1);
         }
         else
