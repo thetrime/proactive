@@ -110,6 +110,7 @@
 -(void)setParent:(ReactComponent *)p
 {
     parent = p;
+    [self restyle];
 }
 
 -(ReactComponent*)parent
