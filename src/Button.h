@@ -12,6 +12,7 @@
 @interface Button : ReactComponent
 {
     UIButton* view;
+    word clickListener;
 }
 
 @end

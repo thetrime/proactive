@@ -24,6 +24,7 @@
                   ^{
                       view = [[UITextField alloc] init];
                       [view setDelegate:self];
+                      [view setBorderStyle:UITextBorderStyleLine];
                       view.yoga.isEnabled = YES;
                       changeListener = -1;
                       cursorLocation = nil;
