@@ -61,7 +61,7 @@ proactive-${VERSION}:
 	mkdir -p proactive-${VERSION}/lib proactive-${VERSION}/src
 	cp src/jsx.pl src/vdiff.pl src/react.pl src/dom.pl proactive-${VERSION}/src/
 
-package: $(CLIENTS) src/jsx.pl src/vdiff.pl src/react.pl src/dom.pl
+package: proactive-${VERSION} $(CLIENTS) src/jsx.pl src/vdiff.pl src/react.pl src/dom.pl
 	zip -r proactive-${VERSION}.zip proactive-${VERSION}
 #	rm -rf proactive-${VERSION}
 
