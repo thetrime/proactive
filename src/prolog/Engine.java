@@ -83,7 +83,7 @@ public class Engine
 
       env.installBuiltin(".", 3);
       env.installBuiltin("state_to_term", 2);
-      env.installBuiltin("on_server", 1);
+      env.installBuiltin("_on_server", 1);
       env.installBuiltin("raise_event", 2);
       env.installBuiltin("wait_for", 1);
       env.installBuiltin("get_this", 1);
@@ -795,10 +795,17 @@ public class Engine
             interpreter.stop(g);
          if (rc == PrologCode.RC.SUCCESS || rc == PrologCode.RC.SUCCESS_LAST)
          {
-	    Term result = vDom.dereference();
-            result = result.clone(new TermCloneContext());
-            interpreter.undo(undoPosition);
-            return result;
+            VariableTerm expanded = new VariableTerm("expanded");
+            Interpreter.Goal g2 = interpreter.prepareGoal(new CompoundTerm(AtomTerm.get("expand_children"), new Term[]{vDom.dereference(), expanded}));
+            rc = interpreter.execute(g2);
+            if (rc == PrologCode.RC.SUCCESS || rc == PrologCode.RC.SUCCESS_LAST)
+            {
+               Term result = expanded.dereference();
+               result = result.clone(new TermCloneContext());
+               interpreter.undo(undoPosition);
+               return result;
+            }
+            System.out.println("expand_children/2 failed?");
          }
       }
       finally
