@@ -9,6 +9,7 @@ PORT=10080
 VERSION := $(shell cat VERSION)
 
 include Swing.src
+include JS.src
 
 
 BOILERPLATE = src/boilerplate.pl                              \
@@ -26,9 +27,9 @@ build:
 
 .PHONY: $(CLIENTS) package
 
-swing-client: proactive-${VERSION}/proactive.jar
+swing-client: proactive-${VERSION}/lib/proactive.jar
 
-js-client: proactive-${VERSION}/lib/proactive.js proactive-${VERSION}/lib/proscript.js.mem
+js-client: proactive-${VERSION}/lib/proactive.js proactive-${VERSION}/lib/proscript.js.mem proactive-${VERSION}/css/proactive.css
 
 ifeq ($(OS), Windows_NT)
 CLASSPATH_SEPARATOR=\;
@@ -36,7 +37,7 @@ else
 CLASSPATH_SEPARATOR=:
 endif
 
-proactive-${VERSION}/proactive.jar:	.src build $(BOILERPLATE) proactive-${VERSION}
+proactive-${VERSION}/lib/proactive.jar:	.src build $(BOILERPLATE) proactive-${VERSION}
 	javac -cp dist/gpj.jar${CLASSPATH_SEPARATOR}dist/java_websocket.jar -Xlint:unchecked @.src -d build
 	jar cvf proactive-${VERSION}/lib/proactive.jar -C build/ . -C src boilerplate.pl -C src vdiff.pl
 
