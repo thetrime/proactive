@@ -10,4 +10,3 @@ proactive-*
 node_modules/browserify
 node_modules/brfs
 node_modules/xmlhttprequest
-dist
