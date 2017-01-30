@@ -480,7 +480,7 @@ dom_index(RootNode, Tree, Indices, Nodes, Index):-
 
 recurse({null}, _Tree, _Indices, Nodes, _RootIndex, Nodes):- !.
 recurse(RootNode, Tree, Indices, Nodes, RootIndex, Index):-
-        ( \+ \+ index_in_range(Indices, RootIndex, RootIndex)->
+        ( \+ (\+ index_in_range(Indices, RootIndex, RootIndex))->
             N1 = [RootIndex-RootNode|Nodes]
         ; otherwise->
             N1 = Nodes
@@ -506,7 +506,7 @@ recurse_1([ChildNode|Tree], VChildren, RootIndex, Indices, Nodes, FinalNodes):-
             Count = 0
         ),
         NextIndex is R1 + Count,
-        ( \+ \+ index_in_range(Indices, R1, NextIndex)->
+        ( \+ (\+ index_in_range(Indices, R1, NextIndex))->
             recurse(ChildNode, VChild, Indices, Nodes, R1, N1)
         ; otherwise->
             N1 = Nodes
