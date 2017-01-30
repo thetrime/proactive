@@ -18,10 +18,14 @@ public class Predicate_memberchk extends ExecuteOnlyCode
       while(CompoundTerm.isListPair(list))
       {
          Term head = ((CompoundTerm) list).args[0].dereference();
-         if (interpreter.unify(head, args[0]) == RC.SUCCESS)
+         if (interpreter.unify(head, args[0]) == RC.FAIL)
+         {
+            interpreter.undo(undoPosition);
+            list = ((CompoundTerm) list).args[1].dereference();
+            continue;
+         }
+         else
             return RC.SUCCESS;
-         interpreter.undo(undoPosition);
-         list = ((CompoundTerm) list).args[1].dereference();
       }
       if (list instanceof VariableTerm)
          return interpreter.unify(args[0], CompoundTerm.getList(args[1], CompoundTerm.getList(args[1], new VariableTerm())));
