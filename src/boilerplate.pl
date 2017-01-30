@@ -84,4 +84,3 @@ expand_children([[A|As]|D], AA, T):- !,
         expand_children(D, T2, T).
 expand_children(Other, _, _):-
         writeq(failed_to_expand(Other)), nl, fail.
->>>>>>> proactivejs/master
