@@ -72,8 +72,6 @@ public class Engine
    {
       long t1 = System.currentTimeMillis();
       env = new ReactEnvironment(this, httpContext);
-      // FIXME: Move all this to boilerplate.pl
-      env.installBuiltin("java_println", 1);
       env.installBuiltin("upcase_atom", 2);
       env.installBuiltin("format", 3);
       Predicate p = env.installBuiltin("findall", 4);

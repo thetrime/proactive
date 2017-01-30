@@ -3,7 +3,7 @@ import gnu.prolog.vm.Interpreter;
 import gnu.prolog.vm.ExecuteOnlyCode;
 import gnu.prolog.vm.PrologException;
 
-public class Predicate_java_println extends ExecuteOnlyCode
+public class Predicate_writeln extends ExecuteOnlyCode
 {
    private static int id = 0;
    public RC execute(Interpreter interpreter, boolean backtrackMode, gnu.prolog.term.Term args[]) throws PrologException
