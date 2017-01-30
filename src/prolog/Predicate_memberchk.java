@@ -25,7 +25,7 @@ public class Predicate_memberchk extends ExecuteOnlyCode
             continue;
          }
          else
-            return RC.SUCCESS;
+            return RC.SUCCESS_LAST;
       }
       if (list instanceof VariableTerm)
          return interpreter.unify(args[0], CompoundTerm.getList(args[1], CompoundTerm.getList(args[1], new VariableTerm())));
