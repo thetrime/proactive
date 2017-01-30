@@ -128,7 +128,10 @@ public class ReactEnvironment extends Environment
       Predicate p = module.createDefinedPredicate(head);
       p.setType(Predicate.TYPE.BUILD_IN);
       if (functor.equals("."))
-	 p.setJavaClassName("org.proactive.prolog.Predicate_get_state");
+         p.setJavaClassName("org.proactive.prolog.Predicate_get_state");
+      else if (functor.equals("_on_server"))
+         p.setJavaClassName("org.proactive.prolog.Predicate_on_server");
+
       else
          p.setJavaClassName("org.proactive.prolog.Predicate_" + functor);
       PrologCode q = loadPrologCode(head);
