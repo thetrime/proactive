@@ -1,7 +1,6 @@
 :-module(react,
          [raise_event/2,
           wait_for/1,
-          bubble_event/3,
           trigger_react_recompile/1,
           vdiff_warning/1,
           jsx/2]).
@@ -267,14 +266,6 @@ user:on_server(X):- X.
 
 raise_event(Key, _):- permission_error(raise, server_side_event, Key).
 wait_for(List):- permission_error(wait_for, server_side_event, List).
-
-bubble_event(List, Key, Event):-
-        ( memberchk(Key=Handler, List),
-          Handler \== {null}->
-            call(Handler, Event)
-        ; otherwise->
-            true
-        ).
 
 user:term_expansion(requires(X), [depends_on(X), :-use_module(X)]).
 

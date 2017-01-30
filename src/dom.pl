@@ -18,6 +18,7 @@
           proactive_event/3,
 
           proactive/3,
+          bubble_event/3,
           render_dom/2,
           render_document/2,
           get_store_state/2,
@@ -27,6 +28,7 @@
 
           op(400, fx, //),
           op(400, fx, /),
+          op(200, xfy, ~),
           op(200, fy, @)
          ]).
 
@@ -176,16 +178,16 @@ destroy_widget(_DomNode, _Widget).
 
 init_widget(_, VNode, DomNode):-
         VNode = widget(Tag, PropList, _),
+        props_from_list(PropList, Props),
         ( current_predicate(Tag:getInitialState/2)->
             Tag:getInitialState(Props, StateTerm),
             curly_term_to_state(StateTerm, State)
         ; otherwise->
             State = proactive{}
         ),
-        props_from_list(PropList, Props),
         put_attr(This, react_dom, react_widget(Tag, State, Props, id_goes_here, [], [])),
         setup_call_cleanup(push_context(This),
-                           ( Tag:render(State, Props, VDom),
+                           ( Tag:render(State, Props, VDom) ->
                              create_element_from_vdom([], VDom, DomNode)
                            ),
                            pop_context),
@@ -199,7 +201,7 @@ update_widget(NewWidget, VNode, DomNode, NewNode):-
         props_from_list([children=Children|PropList], Props),
         Widget = react_widget(_OldTag, State, _OldProps, Id, _OldVDOM, _OldDOM),
         setup_call_cleanup(push_context(This),
-                           ( Tag:render(State, Props, VDom),
+                           ( Tag:render(State, Props, VDom) ->
                              vdiff(VNode, VDom, Patches),
                              vpatch(DomNode, Patches, [document(_Document)], NewNode)
                            ),
@@ -275,14 +277,14 @@ crystalize_attributes([Name=Value|In], [Name=Atom|Out]):-
 proactive(Module, Props, [Document]):-
         current_module(Module),
         ( current_predicate(Module:getInitialState/2)->
-            Module:getInitialState(Props, InitialState)
+            Module:getInitialState(Props, StateTerm),
+            curly_term_to_state(StateTerm, I)
         ; otherwise->
-            InitialState = proactive{}
+            I = proactive{}
         ),
-        curly_term_to_state(InitialState, I),
         put_attr(This, react_dom, react_widget(Module, I, Props, id_goes_here, [], [])),
         setup_call_cleanup(push_context(This),
-                           ( Module:render(I, Props, VDOM),
+                           ( Module:render(I, Props, VDOM) ->
                              create_element_from_vdom([], VDOM, DOM)
                            ),
                            pop_context),
@@ -378,7 +380,7 @@ proactive_event(Target, HandlerName, Event):-
         ( memberchk(properties-PropertiesPtr, DomAttributes),
           get_attr(PropertiesPtr, react_dom, AttributesWithObjects),
           memberchk(HandlerName=Handler, AttributesWithObjects)->
-            fire_event(Handler, Event, Target)
+             fire_event(Handler, Event, Target)
         ; format(user_error, 'Warning: Object has no handler for ~w attached', [HandlerName])
         ).
 
@@ -429,7 +431,7 @@ fire_event(Handler, Event, ThisPtr):-
         maplist(call, AttributeGoals),
         % Then continue on our way
         vpatch(OldDOM, Patch, [document(This)], NewDOM),
-        put_attr(This, react_dom, react_widget(Module, State, Props, Id, NewVDOM, NewDOM)).
+        put_attr(This, react_dom, react_widget(Module, UpdatedState, Props, Id, NewVDOM, NewDOM)).
 
 curly_term_to_state(Term, State):-
         ( Term == {} ->
@@ -543,11 +545,34 @@ vpath(DOM, /Spec, Node):-
         member(Node, DOM),
         match_spec(Spec, Node).
 
+% Child selector is /
 vpath(DOM, Path/Child, Node):-
         !,
         vpath(DOM, Path, Parent),
         node_children(Parent, Children),
         vpath(Children, /Child, Node).
+
+% Adjascent sibling selector is +
+vpath(DOM, Path+Child, Node):-
+        !,
+        vpath(DOM, Path, OlderSibling),
+        parent_node(OlderSibling, Parent),
+        node_children(Parent, Children),
+        once(nth1(N, Children, OlderSibling)),
+        once(nth0(N, Children, Candidate)),
+        vpath([Candidate], /Child, Node).
+
+% General sibling selector is ~
+vpath(DOM, Path+Child, Node):-
+        !,
+        vpath(DOM, Path, OlderSibling),
+        parent_node(OlderSibling, Parent),
+        node_children(Parent, Children),
+        once(nth1(N, Children, OlderSibling)),
+        length(List, N),
+        append(List, Candidates, Children),
+        vpath(Candidates, /Child, Node).
+
 
 vpath(DOM, Spec, MatchingNode):-
         member(Node, DOM),
@@ -586,3 +611,12 @@ match_spec_args([@Name=Value|Args], Attributes):-
 node_children(dom_element(Attributes), Children):-
         memberchk(children-Ptr, Attributes),
         get_attr(Ptr, react_dom, Children).
+
+bubble_event(Props, Key, Event):-
+        ( is_dict(Props, proactive),
+          get_dict(Key, Props, Handler)->
+            % TBD: This will go wrong if the handler is not a $this/2
+            fire_event(Handler, Event, _)
+        ; otherwise->
+            true
+        ).
