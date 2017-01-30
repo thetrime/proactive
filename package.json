@@ -1,6 +1,6 @@
 {
     "name": "proactive",
-    "version": "0.0.36",
+    "version": "0.1.0",
     "description": "React in Prolog",
     "main": "proscript.js",
     "dependencies": {
@@ -13,7 +13,7 @@
     },
     "scripts": {
         "start": "STATIC_ROOT=./static watchify src/core.js --standalone Proactive -t brfs -v -o build/proactive.js",
-        "install": "sh package.sh",
+        "install": "make CLIENTS=js-client package",
         "test": "echo 'No tests created yet'"
     },
     "repository": {

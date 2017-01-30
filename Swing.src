@@ -1,0 +1,84 @@
+# This file includes the source definitions for the Swing client
+
+BASE=src/React.java                                           \
+     src/HTTPContext.java                                     \
+     src/ReactComponent.java                                  \
+     src/ReactWidget.java                                     \
+     src/ReactComponentFactory.java                           \
+     src/CodeChangeListener.java                              \
+     src/StyleSheetListener.java                              \
+     src/StyleSheet.java                                      \
+     src/ServerConnection.java                                \
+     src/ReactLeafComponent.java                              \
+     src/ReactComponentFactoryConfiguration.java
+
+UI=  src/ui/Panel.java                                        \
+     src/ui/Broken.java                                       \
+     src/ui/Button.java                                       \
+     src/ui/Field.java                                        \
+     src/ui/PopupMenu.java                                    \
+     src/ui/MenuItem.java                                     \
+     src/ui/ComboBox.java                                     \
+     src/ui/ComboItem.java                                    \
+     src/ui/InputWidget.java                                  \
+     src/ui/InputWidgetListener.java                          \
+     src/ui/InputWidgetVerifier.java                          \
+     src/ui/RadioButton.java                                  \
+     src/ui/TextField.java                                    \
+     src/ui/CheckBox.java                                     \
+     src/ui/PasswordField.java                                \
+     src/ui/Label.java                                        \
+     src/ui/Table.java                                        \
+     src/ui/TableHeader.java                                  \
+     src/ui/Row.java                                          \
+     src/ui/RowChangeListener.java                            \
+     src/ui/TabbedPane.java                                   \
+     src/ui/Tab.java                                          \
+     src/ui/List.java                                         \
+     src/ui/ListItem.java                                     \
+     src/ui/TextArea.java                                     \
+     src/ui/Tree.java                                         \
+     src/ui/EditorPane.java                                   \
+     src/ui/Frame.java                                        \
+     src/ui/ReactApp.java                                     \
+     src/ui/ReactPanel.java                                   \
+     src/ui/DefaultReactComponentFactoryConfiguration.java
+
+ENGINE= src/prolog/Predicate_remove_child.java                \
+	src/prolog/Predicate_append_child.java                \
+        src/prolog/Predicate_insert_before.java               \
+        src/prolog/Predicate_replace_child.java               \
+        src/prolog/Predicate_child_nodes.java                 \
+        src/prolog/Predicate_create_element.java              \
+        src/prolog/Predicate_create_text_node.java            \
+        src/prolog/Predicate_parent_node.java                 \
+        src/prolog/Predicate_node_type.java                   \
+	src/prolog/Predicate_set_vdom_properties.java         \
+        src/prolog/Predicate_replace_node_data.java           \
+        src/prolog/Predicate_destroy_widget.java              \
+        src/prolog/Predicate_update_widget.java               \
+	src/prolog/Predicate_init_widget.java                 \
+	src/prolog/Predicate_get_this.java                    \
+	src/prolog/Predicate_get_store_state.java             \
+	src/prolog/Predicate_get_state.java                   \
+	src/prolog/Predicate_state_to_term.java               \
+	src/prolog/Predicate_bubble_event.java                \
+	src/prolog/Predicate_nth0.java                        \
+	src/prolog/Predicate_writeln.java                     \
+	src/prolog/Predicate_memberchk.java                   \
+	src/prolog/Engine.java                                \
+        src/prolog/PrologState.java                           \
+        src/prolog/PrologObject.java                          \
+        src/prolog/ReactEnvironment.java                      \
+	src/prolog/FluxDispatcher.java                        \
+	src/prolog/FluxStore.java                             \
+	src/prolog/Predicate_format.java                      \
+	src/prolog/Predicate_findall.java                     \
+	src/prolog/Predicate_upcase_atom.java                 \
+        src/prolog/Predicate_on_server.java                   \
+	src/prolog/Predicate_raise_event.java                 \
+	src/prolog/Predicate_widget_id.java                   \
+        src/prolog/Predicate_wait_for.java
+
+
+SWING_SRC=$(BASE) $(UI) $(ENGINE)
