@@ -5,3 +5,7 @@
 .src
 build
 *.zip
+proactivejs-*
+node_modules/browserify
+node_modules/brfs
+node_modules/xmlhttprequest

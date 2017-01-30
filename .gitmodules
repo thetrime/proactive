@@ -1,0 +1,12 @@
+[submodule "reactive-prolog"]
+	path = reactive-prolog
+	url = https://github.com/thetrime/reactive-prolog.git
+[submodule "yoga/yoga"]
+	path = yoga/yoga
+	url = https://github.com/facebook/yoga.git
+[submodule "SocketRocket"]
+	path = SocketRocket
+	url = https://github.com/facebook/SocketRocket.git
+[submodule "node_modules/proscript"]
+	path = node_modules/proscript
+	url = https://github.com/thetrime/proscript2.git

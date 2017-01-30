@@ -1,0 +1,886 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		F40B23F31E27C60A00B14997 /* YogaKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F40B23F21E27C5F700B14997 /* YogaKit.framework */; };
+		F4298F231E27A34B0008BDEF /* CodeChangeListener.h in Headers */ = {isa = PBXBuildFile; fileRef = F4298F051E27A34B0008BDEF /* CodeChangeListener.h */; };
+		F4298F241E27A34B0008BDEF /* Constants.h in Headers */ = {isa = PBXBuildFile; fileRef = F4298F061E27A34B0008BDEF /* Constants.h */; };
+		F4298F251E27A34B0008BDEF /* Label.h in Headers */ = {isa = PBXBuildFile; fileRef = F4298F071E27A34B0008BDEF /* Label.h */; };
+		F4298F261E27A34B0008BDEF /* Panel.h in Headers */ = {isa = PBXBuildFile; fileRef = F4298F081E27A34B0008BDEF /* Panel.h */; };
+		F4298F271E27A34B0008BDEF /* proactive.h in Headers */ = {isa = PBXBuildFile; fileRef = F4298F091E27A34B0008BDEF /* proactive.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		F4298F281E27A34B0008BDEF /* ProactiveComponentFactory.h in Headers */ = {isa = PBXBuildFile; fileRef = F4298F0A1E27A34B0008BDEF /* ProactiveComponentFactory.h */; };
+		F4298F291E27A34B0008BDEF /* ProactiveForeign.h in Headers */ = {isa = PBXBuildFile; fileRef = F4298F0B1E27A34B0008BDEF /* ProactiveForeign.h */; };
+		F4298F2A1E27A34B0008BDEF /* Prolog.h in Headers */ = {isa = PBXBuildFile; fileRef = F4298F0C1E27A34B0008BDEF /* Prolog.h */; };
+		F4298F2B1E27A34B0008BDEF /* PrologEngine.h in Headers */ = {isa = PBXBuildFile; fileRef = F4298F0D1E27A34B0008BDEF /* PrologEngine.h */; };
+		F4298F2C1E27A34B0008BDEF /* PrologEnvironment.h in Headers */ = {isa = PBXBuildFile; fileRef = F4298F0E1E27A34B0008BDEF /* PrologEnvironment.h */; };
+		F4298F2D1E27A34B0008BDEF /* PrologObject.h in Headers */ = {isa = PBXBuildFile; fileRef = F4298F0F1E27A34B0008BDEF /* PrologObject.h */; };
+		F4298F2E1E27A34B0008BDEF /* PrologSourceDownloader.h in Headers */ = {isa = PBXBuildFile; fileRef = F4298F101E27A34B0008BDEF /* PrologSourceDownloader.h */; };
+		F4298F2F1E27A34B0008BDEF /* PrologState.h in Headers */ = {isa = PBXBuildFile; fileRef = F4298F111E27A34B0008BDEF /* PrologState.h */; };
+		F4298F301E27A34B0008BDEF /* ReactComponent.h in Headers */ = {isa = PBXBuildFile; fileRef = F4298F121E27A34B0008BDEF /* ReactComponent.h */; };
+		F4298F311E27A34B0008BDEF /* ReactWidget.h in Headers */ = {isa = PBXBuildFile; fileRef = F4298F131E27A34B0008BDEF /* ReactWidget.h */; };
+		F4298F321E27A34B0008BDEF /* Constants.m in Sources */ = {isa = PBXBuildFile; fileRef = F4298F141E27A34B0008BDEF /* Constants.m */; };
+		F4298F331E27A34B0008BDEF /* Label.m in Sources */ = {isa = PBXBuildFile; fileRef = F4298F151E27A34B0008BDEF /* Label.m */; };
+		F4298F341E27A34B0008BDEF /* Panel.m in Sources */ = {isa = PBXBuildFile; fileRef = F4298F161E27A34B0008BDEF /* Panel.m */; };
+		F4298F351E27A34B0008BDEF /* proactive.m in Sources */ = {isa = PBXBuildFile; fileRef = F4298F171E27A34B0008BDEF /* proactive.m */; };
+		F4298F361E27A34B0008BDEF /* ProactiveComponentFactory.m in Sources */ = {isa = PBXBuildFile; fileRef = F4298F181E27A34B0008BDEF /* ProactiveComponentFactory.m */; };
+		F4298F371E27A34B0008BDEF /* ProactiveForeign.m in Sources */ = {isa = PBXBuildFile; fileRef = F4298F191E27A34B0008BDEF /* ProactiveForeign.m */; };
+		F4298F381E27A34B0008BDEF /* Prolog.m in Sources */ = {isa = PBXBuildFile; fileRef = F4298F1A1E27A34B0008BDEF /* Prolog.m */; };
+		F4298F391E27A34B0008BDEF /* PrologEngine.m in Sources */ = {isa = PBXBuildFile; fileRef = F4298F1B1E27A34B0008BDEF /* PrologEngine.m */; };
+		F4298F3A1E27A34B0008BDEF /* PrologEnvironment.m in Sources */ = {isa = PBXBuildFile; fileRef = F4298F1C1E27A34B0008BDEF /* PrologEnvironment.m */; };
+		F4298F3B1E27A34B0008BDEF /* PrologObject.m in Sources */ = {isa = PBXBuildFile; fileRef = F4298F1D1E27A34B0008BDEF /* PrologObject.m */; };
+		F4298F3C1E27A34B0008BDEF /* PrologSourceDownloader.m in Sources */ = {isa = PBXBuildFile; fileRef = F4298F1E1E27A34B0008BDEF /* PrologSourceDownloader.m */; };
+		F4298F3D1E27A34B0008BDEF /* PrologState.m in Sources */ = {isa = PBXBuildFile; fileRef = F4298F1F1E27A34B0008BDEF /* PrologState.m */; };
+		F4298F3E1E27A34B0008BDEF /* ReactComponent.m in Sources */ = {isa = PBXBuildFile; fileRef = F4298F201E27A34B0008BDEF /* ReactComponent.m */; };
+		F4298F3F1E27A34B0008BDEF /* ReactWidget.m in Sources */ = {isa = PBXBuildFile; fileRef = F4298F211E27A34B0008BDEF /* ReactWidget.m */; };
+		F4298F471E27A3A90008BDEF /* proscript.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F4298F461E27A3950008BDEF /* proscript.framework */; };
+		F4298F541E27B1950008BDEF /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = F4298F531E27B1950008BDEF /* main.m */; };
+		F4298F571E27B1950008BDEF /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = F4298F561E27B1950008BDEF /* AppDelegate.m */; };
+		F4298F5A1E27B1950008BDEF /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = F4298F591E27B1950008BDEF /* ViewController.m */; };
+		F4298F5F1E27B1950008BDEF /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = F4298F5E1E27B1950008BDEF /* Assets.xcassets */; };
+		F4298F621E27B1950008BDEF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = F4298F601E27B1950008BDEF /* LaunchScreen.storyboard */; };
+		F4298F6A1E27B2830008BDEF /* boilerplate.pl in Resources */ = {isa = PBXBuildFile; fileRef = F4298F681E27B2830008BDEF /* boilerplate.pl */; };
+		F4298F6B1E27B2830008BDEF /* vdiff.pl in Resources */ = {isa = PBXBuildFile; fileRef = F4298F691E27B2830008BDEF /* vdiff.pl */; };
+		F46BE5461E27E7DF00DA8359 /* proactive.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F4AC5C6C1E27A21800F2384C /* proactive.framework */; };
+		F46BE5471E27E7DF00DA8359 /* proactive.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = F4AC5C6C1E27A21800F2384C /* proactive.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		F46BE54A1E27E7F900DA8359 /* YogaKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F40B23F21E27C5F700B14997 /* YogaKit.framework */; };
+		F46BE54B1E27E7F900DA8359 /* YogaKit.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = F40B23F21E27C5F700B14997 /* YogaKit.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		F46BE54E1E27E8A700DA8359 /* proscript.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F4298F461E27A3950008BDEF /* proscript.framework */; };
+		F46BE54F1E27E8A700DA8359 /* proscript.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = F4298F461E27A3950008BDEF /* proscript.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		F46BE5521E27E8CD00DA8359 /* yoga.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F40B23F01E27C5F700B14997 /* yoga.framework */; };
+		F46BE5531E27E8CD00DA8359 /* yoga.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = F40B23F01E27C5F700B14997 /* yoga.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		F46BE5581E2A7C3B00DA8359 /* CodeListener.h in Headers */ = {isa = PBXBuildFile; fileRef = F46BE5561E2A7C3B00DA8359 /* CodeListener.h */; };
+		F46BE5591E2A7C3B00DA8359 /* CodeListener.m in Sources */ = {isa = PBXBuildFile; fileRef = F46BE5571E2A7C3B00DA8359 /* CodeListener.m */; };
+		F46BE58C1E2A807000DA8359 /* SocketRocket.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F46BE5791E2A7D4F00DA8359 /* SocketRocket.framework */; };
+		F46BE5961E2BB09100DA8359 /* Button.h in Headers */ = {isa = PBXBuildFile; fileRef = F46BE5941E2BB09100DA8359 /* Button.h */; };
+		F46BE5971E2BB09100DA8359 /* Button.m in Sources */ = {isa = PBXBuildFile; fileRef = F46BE5951E2BB09100DA8359 /* Button.m */; };
+		F4E63AE01E3282F500A22FCA /* Field.h in Headers */ = {isa = PBXBuildFile; fileRef = F4E63ADE1E3282F500A22FCA /* Field.h */; };
+		F4E63AE11E3282F500A22FCA /* Field.m in Sources */ = {isa = PBXBuildFile; fileRef = F4E63ADF1E3282F500A22FCA /* Field.m */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		F40B23EF1E27C5F700B14997 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F40B23EA1E27C5F700B14997 /* yoga.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = F4298FB51E27C3800008BDEF;
+			remoteInfo = yoga;
+		};
+		F40B23F11E27C5F700B14997 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F40B23EA1E27C5F700B14997 /* yoga.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = F40B23D51E27C59E00B14997;
+			remoteInfo = YogaKit;
+		};
+		F40B23F91E27CCBC00B14997 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F40B23EA1E27C5F700B14997 /* yoga.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = F40B23D41E27C59E00B14997;
+			remoteInfo = YogaKit;
+		};
+		F40B23FB1E27CCBF00B14997 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F4298F411E27A3950008BDEF /* proscript.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = F48B3FEC1E279E3E0056C796;
+			remoteInfo = proscript;
+		};
+		F40B23FD1E27CCCB00B14997 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F4AC5C631E27A21800F2384C /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = F4AC5C6B1E27A21800F2384C;
+			remoteInfo = proactive;
+		};
+		F4298F451E27A3950008BDEF /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F4298F411E27A3950008BDEF /* proscript.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = F48B3FED1E279E3F0056C796;
+			remoteInfo = proscript;
+		};
+		F46BE54C1E27E7F900DA8359 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F40B23EA1E27C5F700B14997 /* yoga.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = F40B23D41E27C59E00B14997;
+			remoteInfo = YogaKit;
+		};
+		F46BE5501E27E8A700DA8359 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F4298F411E27A3950008BDEF /* proscript.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = F48B3FEC1E279E3E0056C796;
+			remoteInfo = proscript;
+		};
+		F46BE5541E27E8CD00DA8359 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F40B23EA1E27C5F700B14997 /* yoga.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = F4298FB41E27C3800008BDEF;
+			remoteInfo = yoga;
+		};
+		F46BE5781E2A7D4F00DA8359 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F46BE56F1E2A7D4F00DA8359 /* SocketRocket.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 81D6478D1D2CA78800690609;
+			remoteInfo = "SocketRocket-iOS";
+		};
+		F46BE57A1E2A7D4F00DA8359 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F46BE56F1E2A7D4F00DA8359 /* SocketRocket.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 2D4227621BB4358C000C1A6C;
+			remoteInfo = "SocketRocket-iOS-Dynamic";
+		};
+		F46BE57C1E2A7D4F00DA8359 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F46BE56F1E2A7D4F00DA8359 /* SocketRocket.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = F668C880153E91210044DBAC;
+			remoteInfo = "SocketRocket-macOS";
+		};
+		F46BE57E1E2A7D4F00DA8359 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F46BE56F1E2A7D4F00DA8359 /* SocketRocket.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 3345DC901C52ACD70083CCB8;
+			remoteInfo = "SocketRocket-tvOS";
+		};
+		F46BE5801E2A7D4F00DA8359 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F46BE56F1E2A7D4F00DA8359 /* SocketRocket.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = F6BDA802145900D200FE3253;
+			remoteInfo = "SocketRocketTests-iOS";
+		};
+		F46BE5821E2A7D4F00DA8359 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F46BE56F1E2A7D4F00DA8359 /* SocketRocket.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = F62417E314D52F3C003CE997;
+			remoteInfo = TestChat;
+		};
+		F46BE58D1E2A807600DA8359 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F46BE56F1E2A7D4F00DA8359 /* SocketRocket.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = 81D6475F1D2CA78800690609;
+			remoteInfo = "SocketRocket-iOS";
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		F46BE5491E27E7DF00DA8359 /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				F46BE54F1E27E8A700DA8359 /* proscript.framework in Embed Frameworks */,
+				F46BE5471E27E7DF00DA8359 /* proactive.framework in Embed Frameworks */,
+				F46BE5531E27E8CD00DA8359 /* yoga.framework in Embed Frameworks */,
+				F46BE54B1E27E7F900DA8359 /* YogaKit.framework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		F40B23EA1E27C5F700B14997 /* yoga.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = yoga.xcodeproj; path = yoga/yoga.xcodeproj; sourceTree = "<group>"; };
+		F4298F051E27A34B0008BDEF /* CodeChangeListener.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CodeChangeListener.h; path = src/CodeChangeListener.h; sourceTree = SOURCE_ROOT; };
+		F4298F061E27A34B0008BDEF /* Constants.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Constants.h; path = src/Constants.h; sourceTree = SOURCE_ROOT; };
+		F4298F071E27A34B0008BDEF /* Label.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Label.h; path = src/Label.h; sourceTree = SOURCE_ROOT; };
+		F4298F081E27A34B0008BDEF /* Panel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Panel.h; path = src/Panel.h; sourceTree = SOURCE_ROOT; };
+		F4298F091E27A34B0008BDEF /* proactive.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = proactive.h; path = src/proactive.h; sourceTree = SOURCE_ROOT; };
+		F4298F0A1E27A34B0008BDEF /* ProactiveComponentFactory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ProactiveComponentFactory.h; path = src/ProactiveComponentFactory.h; sourceTree = SOURCE_ROOT; };
+		F4298F0B1E27A34B0008BDEF /* ProactiveForeign.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ProactiveForeign.h; path = src/ProactiveForeign.h; sourceTree = SOURCE_ROOT; };
+		F4298F0C1E27A34B0008BDEF /* Prolog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Prolog.h; path = src/Prolog.h; sourceTree = SOURCE_ROOT; };
+		F4298F0D1E27A34B0008BDEF /* PrologEngine.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PrologEngine.h; path = src/PrologEngine.h; sourceTree = SOURCE_ROOT; };
+		F4298F0E1E27A34B0008BDEF /* PrologEnvironment.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PrologEnvironment.h; path = src/PrologEnvironment.h; sourceTree = SOURCE_ROOT; };
+		F4298F0F1E27A34B0008BDEF /* PrologObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PrologObject.h; path = src/PrologObject.h; sourceTree = SOURCE_ROOT; };
+		F4298F101E27A34B0008BDEF /* PrologSourceDownloader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PrologSourceDownloader.h; path = src/PrologSourceDownloader.h; sourceTree = SOURCE_ROOT; };
+		F4298F111E27A34B0008BDEF /* PrologState.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PrologState.h; path = src/PrologState.h; sourceTree = SOURCE_ROOT; };
+		F4298F121E27A34B0008BDEF /* ReactComponent.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ReactComponent.h; path = src/ReactComponent.h; sourceTree = SOURCE_ROOT; };
+		F4298F131E27A34B0008BDEF /* ReactWidget.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ReactWidget.h; path = src/ReactWidget.h; sourceTree = SOURCE_ROOT; };
+		F4298F141E27A34B0008BDEF /* Constants.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Constants.m; path = src/Constants.m; sourceTree = SOURCE_ROOT; };
+		F4298F151E27A34B0008BDEF /* Label.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Label.m; path = src/Label.m; sourceTree = SOURCE_ROOT; };
+		F4298F161E27A34B0008BDEF /* Panel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Panel.m; path = src/Panel.m; sourceTree = SOURCE_ROOT; };
+		F4298F171E27A34B0008BDEF /* proactive.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = proactive.m; path = src/proactive.m; sourceTree = SOURCE_ROOT; };
+		F4298F181E27A34B0008BDEF /* ProactiveComponentFactory.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ProactiveComponentFactory.m; path = src/ProactiveComponentFactory.m; sourceTree = SOURCE_ROOT; };
+		F4298F191E27A34B0008BDEF /* ProactiveForeign.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ProactiveForeign.m; path = src/ProactiveForeign.m; sourceTree = SOURCE_ROOT; };
+		F4298F1A1E27A34B0008BDEF /* Prolog.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Prolog.m; path = src/Prolog.m; sourceTree = SOURCE_ROOT; };
+		F4298F1B1E27A34B0008BDEF /* PrologEngine.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = PrologEngine.m; path = src/PrologEngine.m; sourceTree = SOURCE_ROOT; };
+		F4298F1C1E27A34B0008BDEF /* PrologEnvironment.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = PrologEnvironment.m; path = src/PrologEnvironment.m; sourceTree = SOURCE_ROOT; };
+		F4298F1D1E27A34B0008BDEF /* PrologObject.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = PrologObject.m; path = src/PrologObject.m; sourceTree = SOURCE_ROOT; };
+		F4298F1E1E27A34B0008BDEF /* PrologSourceDownloader.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = PrologSourceDownloader.m; path = src/PrologSourceDownloader.m; sourceTree = SOURCE_ROOT; };
+		F4298F1F1E27A34B0008BDEF /* PrologState.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = PrologState.m; path = src/PrologState.m; sourceTree = SOURCE_ROOT; };
+		F4298F201E27A34B0008BDEF /* ReactComponent.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ReactComponent.m; path = src/ReactComponent.m; sourceTree = SOURCE_ROOT; };
+		F4298F211E27A34B0008BDEF /* ReactWidget.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ReactWidget.m; path = src/ReactWidget.m; sourceTree = SOURCE_ROOT; };
+		F4298F221E27A34B0008BDEF /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = src/Info.plist; sourceTree = SOURCE_ROOT; };
+		F4298F411E27A3950008BDEF /* proscript.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = proscript.xcodeproj; path = node_modules/proscript/proscript.xcodeproj; sourceTree = "<group>"; };
+		F4298F501E27B1950008BDEF /* proactive-demo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "proactive-demo.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		F4298F531E27B1950008BDEF /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
+		F4298F551E27B1950008BDEF /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
+		F4298F561E27B1950008BDEF /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
+		F4298F581E27B1950008BDEF /* ViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ViewController.h; sourceTree = "<group>"; };
+		F4298F591E27B1950008BDEF /* ViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ViewController.m; sourceTree = "<group>"; };
+		F4298F5E1E27B1950008BDEF /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		F4298F611E27B1950008BDEF /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
+		F4298F631E27B1950008BDEF /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		F4298F681E27B2830008BDEF /* boilerplate.pl */ = {isa = PBXFileReference; lastKnownFileType = text.script.perl; name = boilerplate.pl; path = src/boilerplate.pl; sourceTree = "<group>"; };
+		F4298F691E27B2830008BDEF /* vdiff.pl */ = {isa = PBXFileReference; lastKnownFileType = text.script.perl; name = vdiff.pl; path = src/vdiff.pl; sourceTree = "<group>"; };
+		F46BE5561E2A7C3B00DA8359 /* CodeListener.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CodeListener.h; path = src/CodeListener.h; sourceTree = SOURCE_ROOT; };
+		F46BE5571E2A7C3B00DA8359 /* CodeListener.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = CodeListener.m; path = src/CodeListener.m; sourceTree = SOURCE_ROOT; };
+		F46BE56F1E2A7D4F00DA8359 /* SocketRocket.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = SocketRocket.xcodeproj; path = SocketRocket/SocketRocket.xcodeproj; sourceTree = "<group>"; };
+		F46BE5941E2BB09100DA8359 /* Button.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Button.h; path = src/Button.h; sourceTree = SOURCE_ROOT; };
+		F46BE5951E2BB09100DA8359 /* Button.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Button.m; path = src/Button.m; sourceTree = SOURCE_ROOT; };
+		F4AC5C6C1E27A21800F2384C /* proactive.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = proactive.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		F4E63ADE1E3282F500A22FCA /* Field.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Field.h; path = src/Field.h; sourceTree = SOURCE_ROOT; };
+		F4E63ADF1E3282F500A22FCA /* Field.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Field.m; path = src/Field.m; sourceTree = SOURCE_ROOT; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		F4298F4D1E27B1950008BDEF /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F46BE54E1E27E8A700DA8359 /* proscript.framework in Frameworks */,
+				F46BE5461E27E7DF00DA8359 /* proactive.framework in Frameworks */,
+				F46BE5521E27E8CD00DA8359 /* yoga.framework in Frameworks */,
+				F46BE54A1E27E7F900DA8359 /* YogaKit.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F4AC5C681E27A21800F2384C /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F46BE58C1E2A807000DA8359 /* SocketRocket.framework in Frameworks */,
+				F40B23F31E27C60A00B14997 /* YogaKit.framework in Frameworks */,
+				F4298F471E27A3A90008BDEF /* proscript.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		F40B23EB1E27C5F700B14997 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				F40B23F01E27C5F700B14997 /* yoga.framework */,
+				F40B23F21E27C5F700B14997 /* YogaKit.framework */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		F4298F421E27A3950008BDEF /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				F4298F461E27A3950008BDEF /* proscript.framework */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		F4298F511E27B1950008BDEF /* proactive-demo */ = {
+			isa = PBXGroup;
+			children = (
+				F4298F551E27B1950008BDEF /* AppDelegate.h */,
+				F4298F561E27B1950008BDEF /* AppDelegate.m */,
+				F4298F581E27B1950008BDEF /* ViewController.h */,
+				F4298F591E27B1950008BDEF /* ViewController.m */,
+				F4298F5E1E27B1950008BDEF /* Assets.xcassets */,
+				F4298F601E27B1950008BDEF /* LaunchScreen.storyboard */,
+				F4298F631E27B1950008BDEF /* Info.plist */,
+				F4298F521E27B1950008BDEF /* Supporting Files */,
+			);
+			path = "proactive-demo";
+			sourceTree = "<group>";
+		};
+		F4298F521E27B1950008BDEF /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				F4298F531E27B1950008BDEF /* main.m */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		F46BE5701E2A7D4F00DA8359 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				F46BE5791E2A7D4F00DA8359 /* SocketRocket.framework */,
+				F46BE57B1E2A7D4F00DA8359 /* SocketRocket.framework */,
+				F46BE57D1E2A7D4F00DA8359 /* SocketRocket.framework */,
+				F46BE57F1E2A7D4F00DA8359 /* SocketRocket.framework */,
+				F46BE5811E2A7D4F00DA8359 /* SocketRocketTests-iOS.xctest */,
+				F46BE5831E2A7D4F00DA8359 /* TestChat.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		F4AC5C621E27A21800F2384C = {
+			isa = PBXGroup;
+			children = (
+				F4298F681E27B2830008BDEF /* boilerplate.pl */,
+				F4298F691E27B2830008BDEF /* vdiff.pl */,
+				F4AC5C6E1E27A21800F2384C /* proactive */,
+				F4298F511E27B1950008BDEF /* proactive-demo */,
+				F4AC5C6D1E27A21800F2384C /* Products */,
+				F46BE56F1E2A7D4F00DA8359 /* SocketRocket.xcodeproj */,
+				F40B23EA1E27C5F700B14997 /* yoga.xcodeproj */,
+				F4298F411E27A3950008BDEF /* proscript.xcodeproj */,
+			);
+			sourceTree = "<group>";
+		};
+		F4AC5C6D1E27A21800F2384C /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				F4AC5C6C1E27A21800F2384C /* proactive.framework */,
+				F4298F501E27B1950008BDEF /* proactive-demo.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		F4AC5C6E1E27A21800F2384C /* proactive */ = {
+			isa = PBXGroup;
+			children = (
+				F4E63ADE1E3282F500A22FCA /* Field.h */,
+				F4E63ADF1E3282F500A22FCA /* Field.m */,
+				F4298F051E27A34B0008BDEF /* CodeChangeListener.h */,
+				F4298F061E27A34B0008BDEF /* Constants.h */,
+				F4298F071E27A34B0008BDEF /* Label.h */,
+				F4298F081E27A34B0008BDEF /* Panel.h */,
+				F46BE5941E2BB09100DA8359 /* Button.h */,
+				F4298F091E27A34B0008BDEF /* proactive.h */,
+				F4298F0A1E27A34B0008BDEF /* ProactiveComponentFactory.h */,
+				F4298F0B1E27A34B0008BDEF /* ProactiveForeign.h */,
+				F4298F0C1E27A34B0008BDEF /* Prolog.h */,
+				F4298F0D1E27A34B0008BDEF /* PrologEngine.h */,
+				F4298F0E1E27A34B0008BDEF /* PrologEnvironment.h */,
+				F4298F0F1E27A34B0008BDEF /* PrologObject.h */,
+				F4298F101E27A34B0008BDEF /* PrologSourceDownloader.h */,
+				F4298F111E27A34B0008BDEF /* PrologState.h */,
+				F4298F121E27A34B0008BDEF /* ReactComponent.h */,
+				F4298F131E27A34B0008BDEF /* ReactWidget.h */,
+				F4298F141E27A34B0008BDEF /* Constants.m */,
+				F4298F151E27A34B0008BDEF /* Label.m */,
+				F4298F161E27A34B0008BDEF /* Panel.m */,
+				F46BE5951E2BB09100DA8359 /* Button.m */,
+				F4298F171E27A34B0008BDEF /* proactive.m */,
+				F4298F181E27A34B0008BDEF /* ProactiveComponentFactory.m */,
+				F4298F191E27A34B0008BDEF /* ProactiveForeign.m */,
+				F4298F1A1E27A34B0008BDEF /* Prolog.m */,
+				F4298F1B1E27A34B0008BDEF /* PrologEngine.m */,
+				F46BE5561E2A7C3B00DA8359 /* CodeListener.h */,
+				F46BE5571E2A7C3B00DA8359 /* CodeListener.m */,
+				F4298F1C1E27A34B0008BDEF /* PrologEnvironment.m */,
+				F4298F1D1E27A34B0008BDEF /* PrologObject.m */,
+				F4298F1E1E27A34B0008BDEF /* PrologSourceDownloader.m */,
+				F4298F1F1E27A34B0008BDEF /* PrologState.m */,
+				F4298F201E27A34B0008BDEF /* ReactComponent.m */,
+				F4298F211E27A34B0008BDEF /* ReactWidget.m */,
+				F4298F221E27A34B0008BDEF /* Info.plist */,
+			);
+			path = proactive;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXHeadersBuildPhase section */
+		F4AC5C691E27A21800F2384C /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F4298F271E27A34B0008BDEF /* proactive.h in Headers */,
+				F4298F251E27A34B0008BDEF /* Label.h in Headers */,
+				F4298F2A1E27A34B0008BDEF /* Prolog.h in Headers */,
+				F4298F301E27A34B0008BDEF /* ReactComponent.h in Headers */,
+				F4298F2F1E27A34B0008BDEF /* PrologState.h in Headers */,
+				F46BE5581E2A7C3B00DA8359 /* CodeListener.h in Headers */,
+				F4298F261E27A34B0008BDEF /* Panel.h in Headers */,
+				F4298F2C1E27A34B0008BDEF /* PrologEnvironment.h in Headers */,
+				F4298F241E27A34B0008BDEF /* Constants.h in Headers */,
+				F4298F2B1E27A34B0008BDEF /* PrologEngine.h in Headers */,
+				F4298F231E27A34B0008BDEF /* CodeChangeListener.h in Headers */,
+				F4298F2D1E27A34B0008BDEF /* PrologObject.h in Headers */,
+				F4298F2E1E27A34B0008BDEF /* PrologSourceDownloader.h in Headers */,
+				F46BE5961E2BB09100DA8359 /* Button.h in Headers */,
+				F4298F291E27A34B0008BDEF /* ProactiveForeign.h in Headers */,
+				F4E63AE01E3282F500A22FCA /* Field.h in Headers */,
+				F4298F311E27A34B0008BDEF /* ReactWidget.h in Headers */,
+				F4298F281E27A34B0008BDEF /* ProactiveComponentFactory.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
+
+/* Begin PBXNativeTarget section */
+		F4298F4F1E27B1950008BDEF /* proactive-demo */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = F4298F641E27B1950008BDEF /* Build configuration list for PBXNativeTarget "proactive-demo" */;
+			buildPhases = (
+				F4298F4C1E27B1950008BDEF /* Sources */,
+				F4298F4D1E27B1950008BDEF /* Frameworks */,
+				F4298F4E1E27B1950008BDEF /* Resources */,
+				F46BE5491E27E7DF00DA8359 /* Embed Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				F40B23FE1E27CCCB00B14997 /* PBXTargetDependency */,
+				F46BE54D1E27E7F900DA8359 /* PBXTargetDependency */,
+				F46BE5511E27E8A700DA8359 /* PBXTargetDependency */,
+				F46BE5551E27E8CD00DA8359 /* PBXTargetDependency */,
+			);
+			name = "proactive-demo";
+			productName = "proactive-demo";
+			productReference = F4298F501E27B1950008BDEF /* proactive-demo.app */;
+			productType = "com.apple.product-type.application";
+		};
+		F4AC5C6B1E27A21800F2384C /* proactive */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = F4AC5C741E27A21800F2384C /* Build configuration list for PBXNativeTarget "proactive" */;
+			buildPhases = (
+				F4AC5C671E27A21800F2384C /* Sources */,
+				F4AC5C681E27A21800F2384C /* Frameworks */,
+				F4AC5C691E27A21800F2384C /* Headers */,
+				F4AC5C6A1E27A21800F2384C /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				F46BE58E1E2A807600DA8359 /* PBXTargetDependency */,
+				F40B23FC1E27CCBF00B14997 /* PBXTargetDependency */,
+				F40B23FA1E27CCBC00B14997 /* PBXTargetDependency */,
+			);
+			name = proactive;
+			productName = proactive;
+			productReference = F4AC5C6C1E27A21800F2384C /* proactive.framework */;
+			productType = "com.apple.product-type.framework";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		F4AC5C631E27A21800F2384C /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0820;
+				ORGANIZATIONNAME = "Matt Lilley";
+				TargetAttributes = {
+					F4298F4F1E27B1950008BDEF = {
+						CreatedOnToolsVersion = 8.2.1;
+						DevelopmentTeam = NFE4HPYDWF;
+						ProvisioningStyle = Automatic;
+					};
+					F4AC5C6B1E27A21800F2384C = {
+						CreatedOnToolsVersion = 8.2.1;
+						DevelopmentTeam = NFE4HPYDWF;
+						ProvisioningStyle = Automatic;
+					};
+				};
+			};
+			buildConfigurationList = F4AC5C661E27A21800F2384C /* Build configuration list for PBXProject "proactive" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = F4AC5C621E27A21800F2384C;
+			productRefGroup = F4AC5C6D1E27A21800F2384C /* Products */;
+			projectDirPath = "";
+			projectReferences = (
+				{
+					ProductGroup = F4298F421E27A3950008BDEF /* Products */;
+					ProjectRef = F4298F411E27A3950008BDEF /* proscript.xcodeproj */;
+				},
+				{
+					ProductGroup = F46BE5701E2A7D4F00DA8359 /* Products */;
+					ProjectRef = F46BE56F1E2A7D4F00DA8359 /* SocketRocket.xcodeproj */;
+				},
+				{
+					ProductGroup = F40B23EB1E27C5F700B14997 /* Products */;
+					ProjectRef = F40B23EA1E27C5F700B14997 /* yoga.xcodeproj */;
+				},
+			);
+			projectRoot = "";
+			targets = (
+				F4AC5C6B1E27A21800F2384C /* proactive */,
+				F4298F4F1E27B1950008BDEF /* proactive-demo */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXReferenceProxy section */
+		F40B23F01E27C5F700B14997 /* yoga.framework */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			path = yoga.framework;
+			remoteRef = F40B23EF1E27C5F700B14997 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		F40B23F21E27C5F700B14997 /* YogaKit.framework */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			path = YogaKit.framework;
+			remoteRef = F40B23F11E27C5F700B14997 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		F4298F461E27A3950008BDEF /* proscript.framework */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			path = proscript.framework;
+			remoteRef = F4298F451E27A3950008BDEF /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		F46BE5791E2A7D4F00DA8359 /* SocketRocket.framework */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			path = SocketRocket.framework;
+			remoteRef = F46BE5781E2A7D4F00DA8359 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		F46BE57B1E2A7D4F00DA8359 /* SocketRocket.framework */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			path = SocketRocket.framework;
+			remoteRef = F46BE57A1E2A7D4F00DA8359 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		F46BE57D1E2A7D4F00DA8359 /* SocketRocket.framework */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			path = SocketRocket.framework;
+			remoteRef = F46BE57C1E2A7D4F00DA8359 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		F46BE57F1E2A7D4F00DA8359 /* SocketRocket.framework */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			path = SocketRocket.framework;
+			remoteRef = F46BE57E1E2A7D4F00DA8359 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		F46BE5811E2A7D4F00DA8359 /* SocketRocketTests-iOS.xctest */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.cfbundle;
+			path = "SocketRocketTests-iOS.xctest";
+			remoteRef = F46BE5801E2A7D4F00DA8359 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		F46BE5831E2A7D4F00DA8359 /* TestChat.app */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.application;
+			path = TestChat.app;
+			remoteRef = F46BE5821E2A7D4F00DA8359 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+/* End PBXReferenceProxy section */
+
+/* Begin PBXResourcesBuildPhase section */
+		F4298F4E1E27B1950008BDEF /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F4298F621E27B1950008BDEF /* LaunchScreen.storyboard in Resources */,
+				F4298F5F1E27B1950008BDEF /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F4AC5C6A1E27A21800F2384C /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F4298F6A1E27B2830008BDEF /* boilerplate.pl in Resources */,
+				F4298F6B1E27B2830008BDEF /* vdiff.pl in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		F4298F4C1E27B1950008BDEF /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F4298F5A1E27B1950008BDEF /* ViewController.m in Sources */,
+				F4298F571E27B1950008BDEF /* AppDelegate.m in Sources */,
+				F4298F541E27B1950008BDEF /* main.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F4AC5C671E27A21800F2384C /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F4298F371E27A34B0008BDEF /* ProactiveForeign.m in Sources */,
+				F4298F341E27A34B0008BDEF /* Panel.m in Sources */,
+				F4298F391E27A34B0008BDEF /* PrologEngine.m in Sources */,
+				F4298F3E1E27A34B0008BDEF /* ReactComponent.m in Sources */,
+				F4E63AE11E3282F500A22FCA /* Field.m in Sources */,
+				F4298F3C1E27A34B0008BDEF /* PrologSourceDownloader.m in Sources */,
+				F4298F3D1E27A34B0008BDEF /* PrologState.m in Sources */,
+				F4298F331E27A34B0008BDEF /* Label.m in Sources */,
+				F4298F381E27A34B0008BDEF /* Prolog.m in Sources */,
+				F4298F3B1E27A34B0008BDEF /* PrologObject.m in Sources */,
+				F4298F361E27A34B0008BDEF /* ProactiveComponentFactory.m in Sources */,
+				F4298F321E27A34B0008BDEF /* Constants.m in Sources */,
+				F46BE5591E2A7C3B00DA8359 /* CodeListener.m in Sources */,
+				F4298F3A1E27A34B0008BDEF /* PrologEnvironment.m in Sources */,
+				F4298F351E27A34B0008BDEF /* proactive.m in Sources */,
+				F4298F3F1E27A34B0008BDEF /* ReactWidget.m in Sources */,
+				F46BE5971E2BB09100DA8359 /* Button.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		F40B23FA1E27CCBC00B14997 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = YogaKit;
+			targetProxy = F40B23F91E27CCBC00B14997 /* PBXContainerItemProxy */;
+		};
+		F40B23FC1E27CCBF00B14997 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = proscript;
+			targetProxy = F40B23FB1E27CCBF00B14997 /* PBXContainerItemProxy */;
+		};
+		F40B23FE1E27CCCB00B14997 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = F4AC5C6B1E27A21800F2384C /* proactive */;
+			targetProxy = F40B23FD1E27CCCB00B14997 /* PBXContainerItemProxy */;
+		};
+		F46BE54D1E27E7F900DA8359 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = YogaKit;
+			targetProxy = F46BE54C1E27E7F900DA8359 /* PBXContainerItemProxy */;
+		};
+		F46BE5511E27E8A700DA8359 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = proscript;
+			targetProxy = F46BE5501E27E8A700DA8359 /* PBXContainerItemProxy */;
+		};
+		F46BE5551E27E8CD00DA8359 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = yoga;
+			targetProxy = F46BE5541E27E8CD00DA8359 /* PBXContainerItemProxy */;
+		};
+		F46BE58E1E2A807600DA8359 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = "SocketRocket-iOS";
+			targetProxy = F46BE58D1E2A807600DA8359 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin PBXVariantGroup section */
+		F4298F601E27B1950008BDEF /* LaunchScreen.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				F4298F611E27B1950008BDEF /* Base */,
+			);
+			name = LaunchScreen.storyboard;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		F4298F651E27B1950008BDEF /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				DEVELOPMENT_TEAM = NFE4HPYDWF;
+				INFOPLIST_FILE = "proactive-demo/Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.trime.proactive-demo";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		F4298F661E27B1950008BDEF /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				DEVELOPMENT_TEAM = NFE4HPYDWF;
+				INFOPLIST_FILE = "proactive-demo/Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.trime.proactive-demo";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+		F4AC5C721E27A21800F2384C /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.2;
+				MTL_ENABLE_DEBUG_INFO = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Debug;
+		};
+		F4AC5C731E27A21800F2384C /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.2;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Release;
+		};
+		F4AC5C751E27A21800F2384C /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_IDENTITY = "";
+				DEFINES_MODULE = YES;
+				DEVELOPMENT_TEAM = NFE4HPYDWF;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				INFOPLIST_FILE = src/Info.plist;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.trime.proactive;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+			};
+			name = Debug;
+		};
+		F4AC5C761E27A21800F2384C /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_IDENTITY = "";
+				DEFINES_MODULE = YES;
+				DEVELOPMENT_TEAM = NFE4HPYDWF;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				INFOPLIST_FILE = src/Info.plist;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.trime.proactive;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		F4298F641E27B1950008BDEF /* Build configuration list for PBXNativeTarget "proactive-demo" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F4298F651E27B1950008BDEF /* Debug */,
+				F4298F661E27B1950008BDEF /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		F4AC5C661E27A21800F2384C /* Build configuration list for PBXProject "proactive" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F4AC5C721E27A21800F2384C /* Debug */,
+				F4AC5C731E27A21800F2384C /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		F4AC5C741E27A21800F2384C /* Build configuration list for PBXNativeTarget "proactive" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F4AC5C751E27A21800F2384C /* Debug */,
+				F4AC5C761E27A21800F2384C /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = F4AC5C631E27A21800F2384C /* Project object */;
+}

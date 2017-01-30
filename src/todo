@@ -1,0 +1,24 @@
+Totally unimplemented components:
+   * TextArea
+   * Tree
+   * EditorPane (maybe call this something else)
+   * Frame
+   * PopupMenu
+      * MenuItem
+
+Partially implemneted components:
+   * Table (needs event handling for contextMenu)
+   * Field (needs contextMenu, handlers for button-type inputs like radio)
+
+Fully Implemented components:
+   * Button
+   * Panel
+   * Label
+   * TabbedPane
+      * Tab
+   * ComboBox (needs onChange and setting value does not actually select the child)
+      * ComboItem
+
+There are many layout problems to be fixed still. layout=grid, for example.
+
+If possible, more efficiency needs to be wrung out of everything

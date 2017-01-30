@@ -1,9 +1,3 @@
-memberchk(A, B):-
-        once(member(A, B)).
-
-writeln(X):-
-        java_println(X).
-
 otherwise.
 
 jsx(Form, jsx(Form)):- !.
@@ -54,7 +48,40 @@ between(Low, High, I):-
         ).
 
 vdiff_warning(X):-
-        java_println(X).
+        writeln(X).
 
 debug_message(X):-
         writeln(X).
+
+:-meta_predicate(on_server(0)).
+
+on_server(Goal):-
+        '_on_server'(Goal).
+
+string(_):- fail.
+
+expand_children(A, B):-
+        expand_children([A], [B], []).
+
+expand_children([], T, T):- !.
+expand_children([element(A, B, C)|D], [element(A,B,CC)|DD], T):- !,
+        expand_children(C, CC, []),
+        expand_children(D, DD, T).
+expand_children([widget(A, B, C)|D], [widget(A,B,CC)|DD], T):- !,
+        expand_children(C, CC, []),
+        expand_children(D, DD, T).
+expand_children([list([])|D], AA, T):- !,
+        expand_children(D, AA, T).
+expand_children([list([A|As])|D], AA, T):- !,
+        expand_children([A], AA, T1),
+        expand_children(As, T1, T2),
+        expand_children(D, T2, T).
+expand_children([[]|D], AA, T):- !,
+        expand_children(D, AA, T).
+expand_children([[A|As]|D], AA, T):- !,
+        expand_children([A], AA, T1),
+        expand_children(As, T1, T2),
+        expand_children(D, T2, T).
+expand_children(Other, _, _):-
+        writeq(failed_to_expand(Other)), nl, fail.
+>>>>>>> proactivejs/master

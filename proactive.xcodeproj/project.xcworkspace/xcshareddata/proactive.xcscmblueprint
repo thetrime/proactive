@@ -1,0 +1,51 @@
+{
+  "DVTSourceControlWorkspaceBlueprintPrimaryRemoteRepositoryKey" : "08C6031E212CD030291537F2C5CDBAA1013D6A58",
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyRepositoryLocationsKey" : {
+
+  },
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyStatesKey" : {
+    "ABB939127996C66F7E852A780552ADEEF03C6B13" : 9223372036854775807,
+    "376D02D17509BDFD19F7426F0B8328E0F935C1A8" : 9223372036854775807,
+    "08C6031E212CD030291537F2C5CDBAA1013D6A58" : 9223372036854775807,
+    "2BDDA899D3F9418286E738DFBBCC7EEA0BD1BD2F" : 9223372036854775807,
+    "EF4E0D78BD66D72DA5A8D5BC350B60E01C5A9EF4" : 9223372036854775807
+  },
+  "DVTSourceControlWorkspaceBlueprintIdentifierKey" : "6F928D80-2BC1-4B28-953B-64A9C93E073D",
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyPathsKey" : {
+    "ABB939127996C66F7E852A780552ADEEF03C6B13" : "proactivejs\/SocketRocket\/",
+    "376D02D17509BDFD19F7426F0B8328E0F935C1A8" : "gmp-ios-builder\/",
+    "08C6031E212CD030291537F2C5CDBAA1013D6A58" : "proactivejs\/",
+    "2BDDA899D3F9418286E738DFBBCC7EEA0BD1BD2F" : "proactivejs\/node_modules\/proscript\/",
+    "EF4E0D78BD66D72DA5A8D5BC350B60E01C5A9EF4" : "proactivejs\/yoga\/yoga\/"
+  },
+  "DVTSourceControlWorkspaceBlueprintNameKey" : "proactive",
+  "DVTSourceControlWorkspaceBlueprintVersion" : 204,
+  "DVTSourceControlWorkspaceBlueprintRelativePathToProjectKey" : "proactive.xcodeproj",
+  "DVTSourceControlWorkspaceBlueprintRemoteRepositoriesKey" : [
+    {
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "https:\/\/github.com\/thetrime\/proactivejs.git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "08C6031E212CD030291537F2C5CDBAA1013D6A58"
+    },
+    {
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "https:\/\/github.com\/thetrime\/proscript2.git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "2BDDA899D3F9418286E738DFBBCC7EEA0BD1BD2F"
+    },
+    {
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "https:\/\/github.com\/NeoTeo\/gmp-ios-builder.git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "376D02D17509BDFD19F7426F0B8328E0F935C1A8"
+    },
+    {
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "https:\/\/github.com\/facebook\/SocketRocket.git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "ABB939127996C66F7E852A780552ADEEF03C6B13"
+    },
+    {
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "https:\/\/github.com\/facebook\/yoga.git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "EF4E0D78BD66D72DA5A8D5BC350B60E01C5A9EF4"
+    }
+  ]
+}

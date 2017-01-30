@@ -65,6 +65,8 @@ ENGINE= src/prolog/Predicate_remove_child.java                \
 	src/prolog/Predicate_state_to_term.java               \
 	src/prolog/Predicate_bubble_event.java                \
 	src/prolog/Predicate_nth0.java                        \
+	src/prolog/Predicate_writeln.java                     \
+	src/prolog/Predicate_memberchk.java                   \
 	src/prolog/Engine.java                                \
         src/prolog/PrologState.java                           \
         src/prolog/PrologObject.java                          \
