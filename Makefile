@@ -3,6 +3,7 @@
 #  npm
 #  browserify
 #  uglifyjs
+# Note also that this makefile does NOT build proscript, gmpjs (yet) or the ios version (Probably ever)
 
 PORT=10080
 VERSION := $(shell cat VERSION)
@@ -35,11 +36,11 @@ else
 CLASSPATH_SEPARATOR=:
 endif
 
-proactive-${VERSION}/proactive.jar:	.src build $(BOILERPLATE)
+proactive-${VERSION}/proactive.jar:	.src build $(BOILERPLATE) proactive-${VERSION}
 	javac -cp dist/gpj.jar${CLASSPATH_SEPARATOR}dist/java_websocket.jar -Xlint:unchecked @.src -d build
-	jar cvf proactive-${VERSION}/proactive.jar -C build/ . -C src boilerplate.pl -C src vdiff.pl
+	jar cvf proactive-${VERSION}/lib/proactive.jar -C build/ . -C src boilerplate.pl -C src vdiff.pl
 
-proactive-${VERSION}/proactive.js:	$(JS_SRC)
+proactive-${VERSION}/proactive.js:	$(JS_SRC) proactive-${VERSION}
 # We have to disable warnings here because emscripten generates output containing a HUGE amount of unused vars and functions
 # and uglify produces pages and pages of warnings about them if we dont stop it
 	browserify --standalone Proactive -t brfs src/core.js | uglifyjs -m -c warnings=false > proactive-${VERSION}/proactive.js
@@ -51,7 +52,7 @@ proactive-${VERSION}/proscript.js.mem:	node_modules/proscript/proscript.js.mem
 	cp $< $@
 
 run-swing-client:	swing-client
-	java -cp dist/gpj.jar${CLASSPATH_SEPARATOR}dist/java_websocket.jar${CLASSPATH_SEPARATOR}proactive-${VERSION}/proactive.jar org.proactive.React "http://localhost:${PORT}/react" "App"
+	java -cp dist/gpj.jar${CLASSPATH_SEPARATOR}dist/java_websocket.jar${CLASSPATH_SEPARATOR}proactive-${VERSION}/lib/proactive.jar org.proactive.React "http://localhost:${PORT}/react" "App"
 
 run-server:
 	swipl -f src/server.pl -g "start_react_server(${PORT}), ['demo/App']"
