@@ -28,7 +28,7 @@ build:
 
 swing-client: proactive-${VERSION}/proactive.jar
 
-js-client: proactive-${VERSION}/proactive.js proactive-${VERSION}/proscript.js.mem
+js-client: proactive-${VERSION}/lib/proactive.js proactive-${VERSION}/lib/proscript.js.mem
 
 ifeq ($(OS), Windows_NT)
 CLASSPATH_SEPARATOR=\;
@@ -40,15 +40,16 @@ proactive-${VERSION}/proactive.jar:	.src build $(BOILERPLATE) proactive-${VERSIO
 	javac -cp dist/gpj.jar${CLASSPATH_SEPARATOR}dist/java_websocket.jar -Xlint:unchecked @.src -d build
 	jar cvf proactive-${VERSION}/lib/proactive.jar -C build/ . -C src boilerplate.pl -C src vdiff.pl
 
-proactive-${VERSION}/proactive.js:	$(JS_SRC) proactive-${VERSION}
+proactive-${VERSION}/lib/proactive.js:	$(JS_SRC) proactive-${VERSION}
 # We have to disable warnings here because emscripten generates output containing a HUGE amount of unused vars and functions
 # and uglify produces pages and pages of warnings about them if we dont stop it
-	browserify --standalone Proactive -t brfs src/core.js | uglifyjs -m -c warnings=false > proactive-${VERSION}/proactive.js
+	browserify --standalone Proactive -t brfs src/core.js | uglifyjs -m -c warnings=false > proactive-${VERSION}/lib/proactive.js
 
-proactive-${VERSION}/proactive.css:	css/proactive.css
+proactive-${VERSION}/css/proactive.css:	css/proactive.css
+	mkdir -p proactive-${VERSION}/css
 	cp $< $@
 
-proactive-${VERSION}/proscript.js.mem:	node_modules/proscript/proscript.js.mem
+proactive-${VERSION}/lib/proscript.js.mem:	node_modules/proscript/proscript.js.mem
 	cp $< $@
 
 run-swing-client:	swing-client
