@@ -36,14 +36,16 @@ serve_form(Request):-
 
 Building
 --------
-To build proactivejs is a bit of a chore. The dependencies are:
-   * uglifyjs and browserify on your path
-   * proscript, which requires:
-      * emscripten on your path
-      * gmp-js, which requires:
-         * emscripten on your path
+Building proactivejs is not as bad as it once was. You need to have emscripten and npm on your path, and internet access to download necessary modules (for the first build).
 
-If you have all this, you can just run
+Note that there are many submodules, so if you did not do a recursive clone of the proactive repository, you will need to recursively initialize these before a compile will succeed.
+
+If you just want the JS client (and not the Swing one) you can use the CLIENTS variable to override the default (which is to build both):
+
 ```
 make CLIENTS="js-client" package
 ```
+
+Note that Proscript is currently ALWAYS linked (statically) against GMP. This has implications for the legality of distributing the end result. In the future this may be changed to either use the MP package from OpenSSL or some other package to make the license more liberal.
+
+Compiling the JS client also installs several other tools (browserify, xmlhttprequest, uglifyjs) but these should not end up in the final build
