@@ -42,7 +42,7 @@ else
 CLASSPATH_SEPARATOR=:
 endif
 
-proactive-${VERSION}/lib/proactive.jar:	.src build $(BOILERPLATE) proactive-${VERSION}
+proactive-${VERSION}/lib/proactive.jar:	.src build $(BOILERPLATE) proactive-${VERSION}/lib
 	javac -cp dist/gpj.jar${CLASSPATH_SEPARATOR}dist/java_websocket.jar -Xlint:unchecked @.src -d build
 	jar cf proactive-${VERSION}/lib/proactive.jar -C build/ . -C src boilerplate.pl -C src vdiff.pl
 
