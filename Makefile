@@ -20,7 +20,7 @@ CLIENTS?=swing-client js-client
 all:	$(CLIENTS)
 
 .src:	$(SWING_SRC) Swing.src
-	echo $(SWING_SRC) > $@
+	@echo $(SWING_SRC) > $@
 
 build:
 	mkdir build
@@ -39,7 +39,7 @@ endif
 
 proactive-${VERSION}/lib/proactive.jar:	.src build $(BOILERPLATE) proactive-${VERSION}
 	javac -cp dist/gpj.jar${CLASSPATH_SEPARATOR}dist/java_websocket.jar -Xlint:unchecked @.src -d build
-	jar cvf proactive-${VERSION}/lib/proactive.jar -C build/ . -C src boilerplate.pl -C src vdiff.pl
+	jar cf proactive-${VERSION}/lib/proactive.jar -C build/ . -C src boilerplate.pl -C src vdiff.pl
 
 proactive-${VERSION}/lib/proactive.js:	$(JS_SRC) proactive-${VERSION}
 # We have to disable warnings here because emscripten generates output containing a HUGE amount of unused vars and functions
