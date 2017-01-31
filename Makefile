@@ -47,10 +47,16 @@ node_modules/brfs:
 node_modules/xmlhttprequest:
 	npm install xmlhttprequest
 
-proactive-${VERSION}/lib/proactive.js:	$(JS_SRC) proactive-${VERSION} node_modules/brfs node_modules/xmlhttprequest
+node_modules/uglifyjs:
+	npm install uglifyjs
+
+node_modules/browserify:
+	npm install browserify
+
+proactive-${VERSION}/lib/proactive.js:	$(JS_SRC) proactive-${VERSION} node_modules/brfs node_modules/xmlhttprequest node_modules/uglifyjs node_modules/browserify
 # We have to disable warnings here because emscripten generates output containing a HUGE amount of unused vars and functions
 # and uglify produces pages and pages of warnings about them if we dont stop it
-	browserify --standalone Proactive -t brfs src/core.js | uglifyjs -m -c warnings=false > proactive-${VERSION}/lib/proactive.js
+	node_modules/browserify/bin/cmd.js --standalone Proactive -t brfs src/core.js | node_modules/uglifyjs/bin/uglifyjs  -m -c warnings=false > proactive-${VERSION}/lib/proactive.js
 
 proactive-${VERSION}/css/proactive.css:	css/proactive.css
 	mkdir -p proactive-${VERSION}/css
