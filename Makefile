@@ -17,7 +17,12 @@ BOILERPLATE = src/boilerplate.pl                              \
 
 CLIENTS?=swing-client js-client
 
-all:	$(CLIENTS)
+REACT_SRC=proactive-${VERSION}/src/jsx.pl                     \
+	  proactive-${VERSION}/src/vdiff.pl                   \
+	  proactive-${VERSION}/src/react.pl                   \
+	  proactive-${VERSION}/src/dom.pl
+
+all:	$(CLIENTS) $(REACT_SRC)
 
 .src:	$(SWING_SRC) Swing.src
 	@echo $(SWING_SRC) > $@
@@ -53,7 +58,7 @@ node_modules/uglifyjs:
 node_modules/browserify:
 	npm install browserify
 
-proactive-${VERSION}/lib/proactive.js:	$(JS_SRC) proactive-${VERSION} node_modules/brfs node_modules/xmlhttprequest node_modules/uglifyjs node_modules/browserify
+proactive-${VERSION}/lib/proactive.js:	$(JS_SRC) proactive-${VERSION}/lib node_modules/brfs node_modules/xmlhttprequest node_modules/uglifyjs node_modules/browserify
 # We have to disable warnings here because emscripten generates output containing a HUGE amount of unused vars and functions
 # and uglify produces pages and pages of warnings about them if we dont stop it
 	node_modules/browserify/bin/cmd.js --standalone Proactive -t brfs src/core.js | node_modules/uglifyjs/bin/uglifyjs  -m -c warnings=false > proactive-${VERSION}/lib/proactive.js
@@ -76,11 +81,25 @@ run-swing-client:	swing-client
 run-server:
 	swipl -f src/server.pl -g "start_react_server(${PORT}), ['demo/App']"
 
-proactive-${VERSION}:
-	mkdir -p proactive-${VERSION}/lib proactive-${VERSION}/src
-	cp src/jsx.pl src/vdiff.pl src/react.pl src/dom.pl proactive-${VERSION}/src/
+proactive-${VERSION}/lib:
+	mkdir -p proactive-${VERSION}/lib
 
-package: proactive-${VERSION} $(CLIENTS) src/jsx.pl src/vdiff.pl src/react.pl src/dom.pl
+proactive-${VERSION}/src:
+	mkdir -p  proactive-${VERSION}/src
+
+proactive-${VERSION}/src/jsx.pl: src/jsx.pl proactive-${VERSION}/src
+	cp $< $@
+
+proactive-${VERSION}/src/vdiff.pl: src/vdiff.pl proactive-${VERSION}/src
+	cp $< $@
+
+proactive-${VERSION}/src/react.pl: src/react.pl proactive-${VERSION}/src
+	cp $< $@
+
+proactive-${VERSION}/src/dom.pl: src/dom.pl proactive-${VERSION}/src
+	cp $< $@
+
+package: proactive-${VERSION} $(CLIENTS) $(REACT_SRC)
 	zip -r proactive-${VERSION}.zip proactive-${VERSION}
 #	rm -rf proactive-${VERSION}
 
