@@ -1,5 +1,0 @@
-There are two trees.
-First is the virtual DOM tree, which is comprised of org.w3c.dom.Node elements.
-Next we have the actual component tree, which is a set of ReactComponents. A ReactComponent has 0..N children, and may or may not extend java.awt.Component. It must have methods similar to managing Node objects - getting a list of the children, inserting a child after a named child (or at the end of the children) and deleting a given child. It should also have a getParent() to give either the parent (or NULL) and a getOwnerDocument() (which will return the root of the tree, or NULL if it's not in a tree)
-
-React.java provides instantiateNode() for obtaining a ReactComponent from a given virtual node
