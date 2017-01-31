@@ -41,7 +41,13 @@ proactive-${VERSION}/lib/proactive.jar:	.src build $(BOILERPLATE) proactive-${VE
 	javac -cp dist/gpj.jar${CLASSPATH_SEPARATOR}dist/java_websocket.jar -Xlint:unchecked @.src -d build
 	jar cf proactive-${VERSION}/lib/proactive.jar -C build/ . -C src boilerplate.pl -C src vdiff.pl
 
-proactive-${VERSION}/lib/proactive.js:	$(JS_SRC) proactive-${VERSION}
+node_modules/brfs:
+	npm install brfs
+
+node_modules/xmlhttprequest:
+	npm install xmlhttprequest
+
+proactive-${VERSION}/lib/proactive.js:	$(JS_SRC) proactive-${VERSION} node_modules/brfs node_modules/xmlhttprequest
 # We have to disable warnings here because emscripten generates output containing a HUGE amount of unused vars and functions
 # and uglify produces pages and pages of warnings about them if we dont stop it
 	browserify --standalone Proactive -t brfs src/core.js | uglifyjs -m -c warnings=false > proactive-${VERSION}/lib/proactive.js
@@ -49,6 +55,11 @@ proactive-${VERSION}/lib/proactive.js:	$(JS_SRC) proactive-${VERSION}
 proactive-${VERSION}/css/proactive.css:	css/proactive.css
 	mkdir -p proactive-${VERSION}/css
 	cp $< $@
+
+node_modules/proscript/proscript.js.mem:	force-proscript-build
+
+force-proscript-build:
+	make -C node_modules/proscript
 
 proactive-${VERSION}/lib/proscript.js.mem:	node_modules/proscript/proscript.js.mem
 	cp $< $@
