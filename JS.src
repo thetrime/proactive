@@ -1,1 +1,25 @@
-JS_SRC=
+JS_SRC=src/button.js                                        \
+       src/combo_box.js                                     \
+       src/combo_item.js                                    \
+       src/constants.js                                     \
+       src/core.js                                          \
+       src/errors.js                                        \
+       src/field.js                                         \
+       src/label.js                                         \
+       src/list.js                                          \
+       src/list_item.js                                     \
+       src/panel.js                                         \
+       src/proactive.js                                     \
+       src/proactive_component_factory.js                   \
+       src/proactive_foreign.js                             \
+       src/prolog_engine.js                                 \
+       src/prolog_state.js                                  \
+       src/react_component.js                               \
+       src/react_widget.js                                  \
+       src/row.js                                           \
+       src/tab.js                                           \
+       src/tabbed_pane.js                                   \
+       src/table.js                                         \
+       src/table_header.js                                  \
+       src/title.js
+       
