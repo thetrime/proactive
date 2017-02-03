@@ -100,7 +100,8 @@ proactive-${VERSION}/src/dom.pl: src/dom.pl
 	@mkdir -p  proactive-${VERSION}/src
 	cp $< $@
 
-package: proactive-${VERSION} $(CLIENTS) $(REACT_SRC)
+package: $(CLIENTS) $(REACT_SRC)
+	mkdir -p proactive-${VERSION}
 	zip -r proactive-${VERSION}.zip proactive-${VERSION}
 #	rm -rf proactive-${VERSION}
 
