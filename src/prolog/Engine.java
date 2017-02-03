@@ -102,6 +102,7 @@ public class Engine
       env.installBuiltin("set_vdom_properties", 2);
       env.installBuiltin("replace_node_data", 2);
       env.installBuiltin("destroy_widget", 2);
+      env.installBuiltin("destroy_component", 2);
       env.installBuiltin("init_widget", 3);
       env.installBuiltin("update_widget", 4);
       env.installBuiltin("widget_id", 1);

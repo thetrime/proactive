@@ -13,6 +13,7 @@
           init_widget/3,
           update_widget/4,
           destroy_widget/2,
+          destroy_component/2,
 
           vpath/3,
           proactive_event/3,
@@ -175,6 +176,7 @@ replace_node_data(DomNode, NewData):-
 
 
 destroy_widget(_DomNode, _Widget).
+destroy_component(_DomNode, _Component).
 
 init_widget(_, VNode, DomNode):-
         VNode = widget(Tag, PropList, _),

@@ -545,7 +545,7 @@ patch_op(remove_patch(VNode, _), DomNode, _Options, NewNode):-
         ; otherwise->
             true
         ),
-        destroy_widget(DomNode, VNode),
+        destroy_component(DomNode, VNode),
         NewNode = {null}.
 
 patch_op(insert_patch(_ActualVNode, VNode), ParentNode, Options, ParentNode):-
