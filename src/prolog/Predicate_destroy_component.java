@@ -8,7 +8,7 @@ import gnu.prolog.term.JavaObjectTerm;
 import org.proactive.ReactComponent;
 import org.proactive.ReactWidget;
 
-public class Predicate_destroy_widget extends ExecuteOnlyCode
+public class Predicate_destroy_component extends ExecuteOnlyCode
 {
    public RC execute(Interpreter interpreter, boolean backtrackMode, gnu.prolog.term.Term args[]) throws PrologException
    {
