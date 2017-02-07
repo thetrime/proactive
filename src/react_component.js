@@ -10,7 +10,7 @@ function ReactComponent()
     this.layout = "vertical";
     this.baseClassName = "";
     this.children = [];
-    this.parent = Constants.nullAtom;
+    this.parent = null;
     this.align_children = "start";
     this.justify_content = "start";
     this.blob = Prolog._make_blob("react_component", this);
@@ -30,6 +30,10 @@ ReactComponent.prototype.setDOMNode = function(n)
     this.restyle();
 }
 
+ReactComponent.prototype.notifyParentOfLayoutChange = function(n)
+{
+}
+
 ReactComponent.prototype.setParent = function(p)
 {
     this.parent = p;
@@ -38,6 +42,7 @@ ReactComponent.prototype.setParent = function(p)
 ReactComponent.prototype.setProperties = function(t)
 {
     var restyleRequired = false;
+    var mustNotifyParent = false;
     if (t.id !== undefined && this.getDOMNode() != null)
         this.getDOMNode().id = t.id;
     if (t.className !== undefined)
@@ -65,6 +70,31 @@ ReactComponent.prototype.setProperties = function(t)
         this.layout = Prolog._atom_chars(t.layout);
         restyleRequired = true;
     }
+    if (t.weight !== undefined)
+    {
+        if (Prolog._is_integer(t.weight))
+        {
+            this.weight = Prolog._numeric_value(t.weight);
+        }
+        else if (Prolog._is_atom(t.weight))
+        {
+            var w = Prolog._atom_chars(t.weight);
+            if (!isNaN(Number(w)))
+                this.weight = Number(w)
+            else if (w.charAt(w.length-1) == "%")
+                this.weight = w;
+            else
+                this.weight = undefined;
+        }
+        else
+        {
+            this.weight = undefined;
+        }
+        mustNotifyParent = true;
+    }
+
+    if (mustNotifyParent && this.parent != null)
+        this.parent.notifyParentOfLayoutChange(this);
     if (restyleRequired && this.getDOMNode() != null) // react_widget will restyle itself later once it has actually instantiated the DOM
         this.restyle();
 }
