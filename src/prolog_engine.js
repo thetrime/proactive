@@ -81,9 +81,9 @@ PrologEngine.prototype.getInitialState = function(component, props, callback)
         callback(PrologState.emptyState);
         return;
     }
+    var savePoint = Prolog._save_state();
     var replyTerm = Prolog._make_variable();
     var goal = crossModuleCall(component, Prolog._make_compound(getInitialStateFunctor, [props.blob, replyTerm]));
-    var savePoint = Prolog._save_state();
     Prolog._execute(this.env,
                     goal,
                     function(success)
@@ -110,11 +110,11 @@ PrologEngine.prototype.componentWillReceiveProps = function(component, context, 
         callback(false);
         return;
     }
+    var savePoint = Prolog._save_state();
     var state = context.getState();
     var props = context.getProps();
     var newState = Prolog._make_variable();
     var goal = crossModuleCall(component, Prolog._make_compound(componentWillReceivePropsFunctor, [state.blob, props.blob, newState]));
-    var savePoint = Prolog._save_state();
     Prolog._execute(this.env,
                     goal, function(result)
                     {
@@ -136,9 +136,9 @@ PrologEngine.prototype.componentWillReceiveProps = function(component, context, 
 
 PrologEngine.prototype.render = function(widget, component, state, props, callback)
 {
+    var savePoint = Prolog._save_state();
     var vDom = Prolog._make_variable();
     var goal = crossModuleCall(component, Prolog._make_compound(renderFunctor, [state.blob, props.blob, vDom]));
-    var savePoint = Prolog._save_state();
     this.env.pushProactiveContext(widget.blob);
     Prolog._execute(this.env,
                     goal,
@@ -188,10 +188,10 @@ PrologEngine.prototype.render = function(widget, component, state, props, callba
 
 PrologEngine.prototype.createElementFromVDom = function(vDOM, context, callback)
 {
+    var savePoint = Prolog._save_state();
     var resultValue = Prolog._make_variable();
     var renderOptions = Prolog._make_compound(Constants.listFunctor, [Prolog._make_compound(documentFunctor, [context.blob]), Constants.emptyListAtom]);
     var goal = crossModuleCall("vdiff", Prolog._make_compound(createElementFromVDomFunctor, [renderOptions, vDOM, resultValue]));
-    var savePoint = Prolog._save_state();
     Prolog._execute(this.env,
                     goal,
                     function(success)
@@ -225,6 +225,7 @@ PrologEngine.prototype.triggerEvent = function(handler, event, context, callback
         context = Prolog._get_blob("react_component", Prolog._term_arg(handler, 0));
         handler = Prolog._term_arg(handler, 1);
     }
+    var savePoint = Prolog._save_state();
     state = context.getState();
     props = context.getProps();
     var goal;
@@ -250,10 +251,10 @@ PrologEngine.prototype.triggerEvent = function(handler, event, context, callback
     else
     {
         console.log("Invalid handler: " + handler);
+        Prolog._restore_state(savePoint);
         callback(false);
         return;
     }
-    var savePoint = Prolog._save_state();
     Prolog._execute(this.env,
                     goal,
                     function(success)
@@ -286,9 +287,9 @@ PrologEngine.prototype.triggerEvent = function(handler, event, context, callback
 
 PrologEngine.prototype.diff = function(a, b, callback)
 {
+    var savePoint = Prolog._save_state();
     var patchTerm = Prolog._make_variable();
     var goal = crossModuleCall("vdiff", Prolog._make_compound(vDiffFunctor, [a, b, patchTerm]));
-    var savePoint = Prolog._save_state();
     Prolog._execute(this.env,
                     goal,
                     function(success)
@@ -314,10 +315,10 @@ PrologEngine.prototype.diff = function(a, b, callback)
 
 PrologEngine.prototype.applyPatch = function(patch, root, callback)
 {
+    var savePoint = Prolog._save_state();
     var newRoot = Prolog._make_variable();
     var renderOptions = Prolog._make_compound(Constants.listFunctor, [Prolog._make_compound(documentFunctor, [root.getOwnerDocument().blob]), Constants.emptyListAtom]);
     var goal = crossModuleCall("vdiff", Prolog._make_compound(vPatchFunctor, [root.blob, patch, renderOptions, newRoot]));
-    var savePoint = Prolog._save_state();
     Prolog._execute(this.env,
                     goal,
                     function(result)
