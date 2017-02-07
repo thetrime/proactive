@@ -132,7 +132,7 @@ module.exports["_on_server"] = function(goal)
     if (this.foreign)
     {
         // We are backtracking. Try to get another solution by sending a ; and then yielding
-        ws = this.foreign;
+        ws = Prolog._get_blob("websocket", this.foreign);
         ws.send(";");
         return 3; // YIELD
     }
@@ -152,37 +152,43 @@ module.exports["_on_server"] = function(goal)
         ws.send(";");
         // This is all we do for now. Either we will get an error, find out that the goal failed, or that it succeeded
     }
+    ws.cleanup = function()
+    {
+        if (this.foreign)
+            Prolog._release_blob("websocket", this.foreign);
+        ws.close();
+    }.bind(this);
     ws.onmessage = function(event)
     {
         //console.log("Got a message: " + util.inspect(event.data));
         var term = Prolog._string_to_local_term(event.data);
         if (term == 0) // parse error
         {
-            ws.close();
+            ws.cleanup();
             resume(false);
         }
         else if (term == Constants.failAtom)
         {
-            ws.close();
+            ws.cleanup();
             resume(false);
         }
         else if (term == Constants.abortedAtom)
         {
-            ws.close();
+            ws.cleanup();
             resume(false);
         }
         else if (Prolog._is_compound(term))
         {
             if (Prolog._term_functor(term) == Constants.exceptionFunctor)
             {
-                ws.close();
+                ws.cleanup();
                 Prolog._set_exception(Prolog._term_arg(term, 0));
                 Prolog._free_local(term);
                 resume(0);
             }
             else if (Prolog._term_functor(term) == Constants.cutFunctor)
             {
-                ws.close();
+                ws.cleanup();
                 var rc = Prolog._unify(goal, Prolog._copy_term(Prolog._term_arg(term, 0)));
                 //console.log("Resuming with " + Prolog._format_term(null, 1200, Prolog._term_arg(term, 0)) + ": " + rc);
                 resume(rc);
@@ -191,7 +197,10 @@ module.exports["_on_server"] = function(goal)
             else
             {
                 // OK, we need a backtrack point here so we can retry
-                Prolog._make_choicepoint(ws, function() { ws.close(); });
+                if (this.foreign)
+                    Prolog._make_choicepoint_with_cleanup(this.foreign, ws.cleanup);
+                else
+                    Prolog._make_choicepoint_with_cleanup(Prolog._make_blob("websocket", ws), ws.cleanup);
                 resume(Prolog._unify(goal, Prolog._copy_term(Prolog._term_arg(term, 0))));
                 Prolog._free_local(term);
             }
