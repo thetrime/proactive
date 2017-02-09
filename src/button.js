@@ -25,6 +25,10 @@ Button.prototype.setProperties = function(t)
         this.domNode.textContent = Prolog._portray(t.label);
     if (t.onClick !== undefined)
         this.setClickHandler(t.onClick);
+    if (t.disabled !== undefined)
+        this.domNode.disabled = ReactComponent.booleanValue(t.disabled);
+    if (t.onClick !== undefined)
+        this.setClickHandler(t.onClick);
 }
 
 Button.prototype.setClickHandler = function(value)
