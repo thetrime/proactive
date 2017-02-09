@@ -38,7 +38,6 @@ ComboBox.prototype.setProperties = function(t)
     }
     if (t.maxWidth !== undefined)
     {
-        console.log("maxWidth: " + t.maxWidth);
         this.domNode.style["max-width"] = Prolog._atom_chars(t.maxWidth);
     }
     if (t.onChange !== undefined)
