@@ -53,20 +53,7 @@ Frame.prototype.setProperties = function(t)
     ReactComponent.prototype.setProperties.call(this, t);
     if (t.z_index !== undefined)
     {
-        if (Prolog._is_integer(t.z_index))
-        {
-            this.z = Prolog._numeric_value(t.z_index);
-        }
-        else if (Prolog._is_atom(t.z_index))
-        {
-            var w = Prolog._atom_chars(t.z_index);
-            if (!isNaN(Number(w)))
-                this.z = Number(w)
-            else
-                this.z = 0;
-        }
-        else
-            this.z = 0;
+        t.z = ReactComponent.numericValueOr(t.z_index, 0);
         this.setZ();
     }
     if (t.scroll !== undefined)
