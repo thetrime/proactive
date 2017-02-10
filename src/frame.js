@@ -53,7 +53,7 @@ Frame.prototype.setProperties = function(t)
     ReactComponent.prototype.setProperties.call(this, t);
     if (t.z_index !== undefined)
     {
-        t.z = ReactComponent.numericValueOr(t.z_index, 0);
+        this.z = ReactComponent.numericValueOr(t.z_index, 0);
         this.setZ();
     }
     if (t.scroll !== undefined)
