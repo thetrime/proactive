@@ -14,6 +14,7 @@ var ComboBox = require('./combo_box');
 var ComboItem = require('./combo_item');
 var Title = require('./title');
 var Frame = require('./frame');
+var Image = require('./image');
 
 var overrides = {};
 
@@ -39,6 +40,7 @@ module.exports.createElement = function(name)
         case "ComboBox": return new ComboBox();
         case "ComboItem": return new ComboItem();
         case "Frame": return new Frame();
+        case "Image": return new Image();
         default: return new Broken(name);
     }
 }

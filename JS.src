@@ -6,6 +6,7 @@ JS_SRC=src/button.js                                        \
        src/errors.js                                        \
        src/field.js                                         \
        src/frame.js                                         \
+       src/image.js                                         \
        src/label.js                                         \
        src/list.js                                          \
        src/list_item.js                                     \

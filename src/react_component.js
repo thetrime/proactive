@@ -211,6 +211,24 @@ ReactComponent.booleanValue = function(t)
     return t == Constants.trueAtom;
 }
 
+ReactComponent.numericValueOr = function(value, otherwise)
+{
+    if (Prolog._is_integer(value))
+    {
+        return Prolog._numeric_value(value);
+    }
+    else if (Prolog._is_atom(value))
+    {
+        var w = Prolog._atom_chars(value);
+        if (!isNaN(Number(w)))
+            return Number(w)
+        else
+            return otherwise;
+    }
+    else
+        return otherwise;
+}
+
 ReactComponent.make_local = function(t)
 {
     return Prolog._make_local(t);
