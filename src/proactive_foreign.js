@@ -510,6 +510,22 @@ module.exports["update_widget"] = function(newVDom, oldVDom, widget, newDomNode)
     return 3; // YIELD;
 }
 
+module.exports["get_current_position"] = function(latitude, longitude)
+{
+    if (navigator.geolocation)
+    {
+        var resume = Prolog._yield();
+        var savedState = Prolog._save_state();
+        navigator.geolocation.getCurrentPosition(function(position)
+                                                 {
+                                                     Prolog._restore_state(savedState);
+                                                     resume(Prolog._unify(latitude, Prolog._make_integer(position.latitude)) &&
+                                                            Prolog._unify(longitude, position.longitude));
+                                                 }.bind(this));
+        return 3; //  YIELD
+    }
+    return 0;
+}
 
 module.exports["qqq"] = function()
 {
