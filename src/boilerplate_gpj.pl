@@ -106,7 +106,11 @@ aggregate_all(max(X), Goal, Max) :- !,
 	State = state(X),
 	(  call(Goal),
 	   arg(1, State, M0),
-	   M is max(M0,X),
+           %M is max(M0,X),
+           ( M0 > X ->
+               M = M0
+           ; M = X
+           ),
 	   nb_setarg(1, State, M),
 	   fail
 	;  arg(1, State, Max),
@@ -116,7 +120,11 @@ aggregate_all(min(X), Goal, Min) :- !,
 	State = state(X),
 	(  call(Goal),
 	   arg(1, State, M0),
-	   M is min(M0,X),
+           %M is min(M0,X),
+           ( M0 < X ->
+               M = M0
+           ; M = X
+           ),
 	   nb_setarg(1, State, M),
 	   fail
 	;  arg(1, State, Min),
@@ -292,7 +300,7 @@ needs_one(max_witness).
 aggregate_list(bag, List0, List) :- !,
 	List = List0.
 aggregate_list(set, List, Set) :- !,
-	sort(List, Set).
+        sort(List, Set).
 aggregate_list(sum, List, Sum) :-
 	sum_list(List, Sum).
 aggregate_list(count, List, Count) :-
@@ -359,9 +367,17 @@ step(count, _, X0, X1) :-
 step(sum,   X, X0, X1) :-
 	X1 is X0+X.
 step(max,   X, X0, X1) :-
-	X1 is max(X0, X).
+        ( X0 > X ->
+            X1 = X0
+        ; X1 = X
+        ).
+%	X1 is max(X0, X).
 step(min,   X, X0, X1) :-
-	X1 is min(X0, X).
+        %X1 is min(X0, X).
+        ( X0 < X ->
+            X1 = X0
+        ; X1 = X
+        ).
 step(max_witness, X-W, X0-W0, X1-W1) :-
 	(   X > X0
 	->  X1 = X, W1 = W
@@ -440,7 +456,11 @@ max_list([First|List], Max) :-
 
 max_list([], Max, Max).
 max_list([Value|Tail], Max, Result) :-
-        NewMax is max(Max,Value),
+        %NewMax is max(Max,Value),
+        ( Max > Value ->
+            NewMax = Max
+        ; NewMax = Value
+        ),
         max_list(Tail, NewMax, Result).
 
 min_list([First|List], Min) :-
@@ -448,7 +468,11 @@ min_list([First|List], Min) :-
 
 min_list([], Min, Min).
 min_list([Value|Tail], Min, Result) :-
-        NewMin is min(Min,Value),
+        %NewMin is min(Min,Value),
+        ( Min < Value ->
+            NewMin = Min
+        ; NewMin = Value
+        ),
         min_list(Tail, NewMin, Result).
 
 

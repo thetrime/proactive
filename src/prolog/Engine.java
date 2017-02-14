@@ -63,63 +63,87 @@ public class Engine
       make();
    }
 
+   // This creates an engine for testing
+   static public void runTests() throws Exception
+   {
+      Environment e = boil(null, null);
+      e.ensureLoaded(AtomTerm.get("test.pl"));
+      Term goal = AtomTerm.get("run_all_tests");
+      Interpreter i = e.createInterpreter();
+      Interpreter.Goal g = i.prepareGoal(goal);
+      PrologCode.RC rc = i.execute(g);
+      if (rc == PrologCode.RC.SUCCESS)
+         i.stop(g);
+      if (rc == PrologCode.RC.SUCCESS || rc == PrologCode.RC.SUCCESS_LAST)
+         System.out.println("Success");
+      else
+         System.out.println("Failed");
+   }
+
+
    public URI getListenURI()
    {
       return listenURI;
    }
 
-   public void make() throws Exception
+   static ReactEnvironment boil(Engine e, HTTPContext c) throws Exception
    {
-      long t1 = System.currentTimeMillis();
-      env = new ReactEnvironment(this, httpContext);
-      env.installBuiltin("upcase_atom", 2);
-      env.installBuiltin("format", 3);
-      Predicate p = env.installBuiltin("findall", 4);
+      ReactEnvironment newEnv = new ReactEnvironment(e, c);
+      newEnv.installBuiltin("upcase_atom", 2);
+      newEnv.installBuiltin("format", 3);
+      Predicate p = newEnv.installBuiltin("findall", 4);
       p.setMeta(new MetaPredicateInfo(new MetaPredicateInfo.MetaType[]{MetaPredicateInfo.MetaType.NORMAL,
 								       MetaPredicateInfo.MetaType.META,
 								       MetaPredicateInfo.MetaType.NORMAL,
 								       MetaPredicateInfo.MetaType.NORMAL}));
 
 
-      env.installBuiltin(".", 3);
-      env.installBuiltin("state_to_term", 2);
-      env.installBuiltin("_on_server", 1);
-      env.installBuiltin("raise_event", 2);
-      env.installBuiltin("wait_for", 1);
-      env.installBuiltin("get_this", 1);
-      env.installBuiltin("get_store_state", 2);
-      env.installBuiltin("bubble_event", 2);
+      newEnv.installBuiltin(".", 3);
+      newEnv.installBuiltin("state_to_term", 2);
+      newEnv.installBuiltin("_on_server", 1);
+      newEnv.installBuiltin("raise_event", 2);
+      newEnv.installBuiltin("wait_for", 1);
+      newEnv.installBuiltin("get_this", 1);
+      newEnv.installBuiltin("get_store_state", 2);
+      newEnv.installBuiltin("bubble_event", 2);
 
-      env.installBuiltin("remove_child", 2);
-      env.installBuiltin("append_child", 2);
-      env.installBuiltin("insert_before", 3);
-      env.installBuiltin("replace_child", 3);
-      env.installBuiltin("child_nodes", 2);
-      env.installBuiltin("create_element", 3);
-      env.installBuiltin("create_text_node", 3);
-      env.installBuiltin("parent_node", 2);
-      env.installBuiltin("node_type", 2);
-      env.installBuiltin("set_vdom_properties", 2);
-      env.installBuiltin("replace_node_data", 2);
-      env.installBuiltin("destroy_widget", 2);
-      env.installBuiltin("destroy_component", 2);
-      env.installBuiltin("init_widget", 3);
-      env.installBuiltin("update_widget", 4);
-      env.installBuiltin("widget_id", 1);
-      env.installBuiltin("nth0", 3);
-      env.installBuiltin("memberchk", 2);
-      env.installBuiltin("writeln", 1);
-      env.installBuiltin("nb_setarg", 3);
-      env.installBuiltin("succ", 2);
-      env.installBuiltin("callable", 1);
-      env.installBuiltin("atomic_list_concat", 3);
-      env.installBuiltin("code_type", 2);
+      newEnv.installBuiltin("remove_child", 2);
+      newEnv.installBuiltin("append_child", 2);
+      newEnv.installBuiltin("insert_before", 3);
+      newEnv.installBuiltin("replace_child", 3);
+      newEnv.installBuiltin("child_nodes", 2);
+      newEnv.installBuiltin("create_element", 3);
+      newEnv.installBuiltin("create_text_node", 3);
+      newEnv.installBuiltin("parent_node", 2);
+      newEnv.installBuiltin("node_type", 2);
+      newEnv.installBuiltin("set_vdom_properties", 2);
+      newEnv.installBuiltin("replace_node_data", 2);
+      newEnv.installBuiltin("destroy_widget", 2);
+      newEnv.installBuiltin("destroy_component", 2);
+      newEnv.installBuiltin("init_widget", 3);
+      newEnv.installBuiltin("update_widget", 4);
+      newEnv.installBuiltin("widget_id", 1);
+      newEnv.installBuiltin("nth0", 3);
+      newEnv.installBuiltin("memberchk", 2);
+      newEnv.installBuiltin("writeln", 1);
+      newEnv.installBuiltin("nb_setarg", 3);
+      newEnv.installBuiltin("succ", 2);
+      newEnv.installBuiltin("callable", 1);
+      newEnv.installBuiltin("atomic_list_concat", 3);
+      newEnv.installBuiltin("code_type", 2);
 
 
-      env.ensureLoaded(new CompoundTerm(CompoundTermTag.get("resource", 1), AtomTerm.get("/boilerplate.pl")));
-      env.ensureLoaded(new CompoundTerm(CompoundTermTag.get("resource", 1), AtomTerm.get("/boilerplate_gpj.pl")));
-      env.ensureLoaded(new CompoundTerm(CompoundTermTag.get("resource", 1), AtomTerm.get("/vdiff.pl")));
-      interpreter = env.createInterpreter();      
+      newEnv.ensureLoaded(new CompoundTerm(CompoundTermTag.get("resource", 1), AtomTerm.get("/boilerplate.pl")));
+      newEnv.ensureLoaded(new CompoundTerm(CompoundTermTag.get("resource", 1), AtomTerm.get("/boilerplate_gpj.pl")));
+      newEnv.ensureLoaded(new CompoundTerm(CompoundTermTag.get("resource", 1), AtomTerm.get("/vdiff.pl")));
+      return newEnv;
+   }
+
+   public void make() throws Exception
+   {
+      long t1 = System.currentTimeMillis();
+      env = boil(this, httpContext);
+      interpreter = env.createInterpreter();
       env.ensureLoaded(componentURL, rootElementId);
       env.runInitialization(interpreter);
       fluxDispatcher.initializeFlux(this);

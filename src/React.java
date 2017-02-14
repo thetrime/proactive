@@ -27,6 +27,11 @@ public class React
       List<String> cookies = new LinkedList<String>();
       if (args.length < 2)
       {
+         if (args.length == 1 && args[0].equals("--test"))
+         {
+            Engine.runTests();
+            System.exit(-1);
+         }
          System.err.println("Usage: React [Options] <URI> <Component>");
          System.err.println("       Options include:");
          System.err.println("       --laf <LAF>");
