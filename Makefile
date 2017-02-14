@@ -12,9 +12,6 @@ include Swing.src
 include JS.src
 
 
-BOILERPLATE = src/boilerplate.pl                              \
-	      src/vdiff.pl
-
 CLIENTS?=swing-client js-client
 
 REACT_SRC=proactive-${VERSION}/src/jsx.pl                     \
@@ -42,10 +39,10 @@ else
 CLASSPATH_SEPARATOR=:
 endif
 
-proactive-${VERSION}/lib/proactive.jar:	.src build $(BOILERPLATE)
+proactive-${VERSION}/lib/proactive.jar:	.src build $(BOILERPLATE_GPJ)
 	@mkdir -p proactive-${VERSION}/lib
 	javac -cp dist/gpj.jar${CLASSPATH_SEPARATOR}dist/java_websocket.jar -Xlint:unchecked @.src -d build
-	jar cf proactive-${VERSION}/lib/proactive.jar -C build/ . -C src boilerplate.pl -C src vdiff.pl
+	jar cf proactive-${VERSION}/lib/proactive.jar -C build/ . -C src boilerplate.pl -C src boilerplate_gpj.pl -C src vdiff.pl
 
 node_modules/brfs:
 	npm install brfs

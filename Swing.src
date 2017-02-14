@@ -64,9 +64,14 @@ ENGINE= src/prolog/Predicate_remove_child.java                \
 	src/prolog/Predicate_get_state.java                   \
 	src/prolog/Predicate_state_to_term.java               \
 	src/prolog/Predicate_bubble_event.java                \
-	src/prolog/Predicate_nth0.java                        \
+        src/prolog/Predicate_nth0.java                        \
 	src/prolog/Predicate_writeln.java                     \
-	src/prolog/Predicate_memberchk.java                   \
+        src/prolog/Predicate_memberchk.java                   \
+        src/prolog/Predicate_succ.java                        \
+        src/prolog/Predicate_callable.java                    \
+        src/prolog/Predicate_nb_setarg.java                   \
+        src/prolog/Predicate_atomic_list_concat.java          \
+        src/prolog/Predicate_code_type.java                   \
 	src/prolog/Engine.java                                \
         src/prolog/PrologState.java                           \
         src/prolog/PrologObject.java                          \
@@ -83,3 +88,8 @@ ENGINE= src/prolog/Predicate_remove_child.java                \
 
 
 SWING_SRC=$(BASE) $(UI) $(ENGINE)
+
+BOILERPLATE_GPJ = src/boilerplate.pl                              \
+		  src/boilerplate_gpj.pl                          \
+		  src/vdiff.pl
+

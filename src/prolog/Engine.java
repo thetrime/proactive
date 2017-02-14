@@ -109,9 +109,15 @@ public class Engine
       env.installBuiltin("nth0", 3);
       env.installBuiltin("memberchk", 2);
       env.installBuiltin("writeln", 1);
+      env.installBuiltin("nb_setarg", 3);
+      env.installBuiltin("succ", 2);
+      env.installBuiltin("callable", 1);
+      env.installBuiltin("atomic_list_concat", 3);
+      env.installBuiltin("code_type", 2);
 
 
       env.ensureLoaded(new CompoundTerm(CompoundTermTag.get("resource", 1), AtomTerm.get("/boilerplate.pl")));
+      env.ensureLoaded(new CompoundTerm(CompoundTermTag.get("resource", 1), AtomTerm.get("/boilerplate_gpj.pl")));
       env.ensureLoaded(new CompoundTerm(CompoundTermTag.get("resource", 1), AtomTerm.get("/vdiff.pl")));
       interpreter = env.createInterpreter();      
       env.ensureLoaded(componentURL, rootElementId);
