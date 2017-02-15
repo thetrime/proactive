@@ -190,7 +190,8 @@ init_widget(_, VNode, DomNode):-
         put_attr(This, react_dom, react_widget(Tag, State, Props, id_goes_here, [], [])),
         setup_call_cleanup(push_context(This),
                            ( Tag:render(State, Props, VDom) ->
-                             create_element_from_vdom([], VDom, DomNode)
+                             expand_children(VDom, Expanded),
+                             create_element_from_vdom([], Expanded, DomNode)
                            ),
                            pop_context),
         put_attr(This, react_dom, react_widget(Tag, State, Props, id_goes_here, VDom, DomNode)).
@@ -204,7 +205,8 @@ update_widget(NewWidget, VNode, DomNode, NewNode):-
         Widget = react_widget(_OldTag, State, _OldProps, Id, _OldVDOM, _OldDOM),
         setup_call_cleanup(push_context(This),
                            ( Tag:render(State, Props, VDom) ->
-                             vdiff(VNode, VDom, Patches),
+                             expand_children(VDom, ExpandedVDom),
+                             vdiff(VNode, ExpandedVDom, Patches),
                              vpatch(DomNode, Patches, [document(_Document)], NewNode)
                            ),
                            pop_context),
@@ -287,7 +289,8 @@ proactive(Module, Props, [Document]):-
         put_attr(This, react_dom, react_widget(Module, I, Props, id_goes_here, [], [])),
         setup_call_cleanup(push_context(This),
                            ( Module:render(I, Props, VDOM) ->
-                             create_element_from_vdom([], VDOM, DOM)
+                               expand_children(VDOM, Expanded),
+                             create_element_from_vdom([], Expanded, DOM)
                            ),
                            pop_context),
 
@@ -413,8 +416,9 @@ fire_event(Handler, Event, ThisPtr):-
         set_state(This, UpdatedState),
         % Now we must re-render. That means, essentially, changing the children. First, we must render the whole component with the new state
         setup_call_cleanup(push_context(This),
-                           Module:render(UpdatedState, Props, NewVDOM),
+                           Module:render(UpdatedState, Props, CompressedNewVDOM),
                            pop_context),
+        expand_children(CompressedNewVDOM, NewVDOM),
         !,
         % vdiff/3 will not work if the term contains attributed variables. This is because, for example:
         %   ?- put_attr(X, react_dom, qqq), bagof(A, member(A, [X,Y]), As).
@@ -622,3 +626,29 @@ bubble_event(Props, Key, Event):-
         ; otherwise->
             true
         ).
+
+
+expand_children(A, B):-
+        expand_children([A], [B], []).
+
+expand_children([], T, T):- !.
+expand_children([element(A, B, C)|D], [element(A,B,CC)|DD], T):- !,
+        expand_children(C, CC, []),
+        expand_children(D, DD, T).
+expand_children([widget(A, B, C)|D], [widget(A,B,CC)|DD], T):- !,
+        expand_children(C, CC, []),
+        expand_children(D, DD, T).
+expand_children([list([])|D], AA, T):- !,
+        expand_children(D, AA, T).
+expand_children([list([A|As])|D], AA, T):- !,
+        expand_children([A], AA, T1),
+        expand_children(As, T1, T2),
+        expand_children(D, T2, T).
+expand_children([[]|D], AA, T):- !,
+        expand_children(D, AA, T).
+expand_children([[A|As]|D], AA, T):- !,
+        expand_children([A], AA, T1),
+        expand_children(As, T1, T2),
+        expand_children(D, T2, T).
+expand_children(Other, _, _):-
+        writeq(failed_to_expand(Other)), nl, fail.
