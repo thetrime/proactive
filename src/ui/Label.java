@@ -35,6 +35,13 @@ public class Label extends ReactLeafComponent
          else
             label.setText(properties.get("label").asString());
       }
+      if (properties.containsKey("title"))
+      {
+         if (properties.get("label") == null)
+            label.setToolTipText("");
+         else
+            label.setToolTipText(properties.get("title").asString());
+      }
       setStyles();
    }
    public Component getAWTComponent()
