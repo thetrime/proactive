@@ -44,7 +44,7 @@ render(State, _Props, Form):-
               <Button label="column 4"/>
               <Button label="column 5"/>
             </TableHeader>
-            {Rows|Tail}
+            {Rows}
           </Table>
           <Splunge foo="bar"/>
           <Button label={State.label}/>
@@ -60,8 +60,8 @@ render(State, _Props, Form):-
                   {|jsx(Row)||
                   <Row><Label label={L1}/><Label label={L2}/><Label label={L3}/><Label label={L4}/><Label label={L5}/></Row>|}
                 ),
-                Rows,
-                Tail).
+                Rows),
+        writeln(Form).
 
 list_item(State, ListItem):-
 	member(Label, [foo, bar, baz, qux]),
