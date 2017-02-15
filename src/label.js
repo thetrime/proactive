@@ -20,8 +20,8 @@ Label.prototype.setProperties = function(t)
         else
             this.domNode.textContent = v;
         // If no title is supplied and there is no title on the node, default it to the label when the label is set
-        if (t.title == undefined && this.domNode.title == "")
-            t.title = t.label;
+        if (t.title == undefined && this.domNode.title == "" && Prolog._is_atom(t.label))
+            t.title = v;
     }
     if (t["for"] !== undefined)
     {
