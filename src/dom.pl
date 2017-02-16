@@ -651,4 +651,4 @@ expand_children([[A|As]|D], AA, T):- !,
         expand_children(As, T1, T2),
         expand_children(D, T2, T).
 expand_children(Other, _, _):-
-        writeq(failed_to_expand(Other)), nl, fail.
+        format(user_error, 'Failed to expand; ~w~n', [Other]).
