@@ -23,5 +23,6 @@ JS_SRC=src/button.js                                        \
        src/tabbed_pane.js                                   \
        src/table.js                                         \
        src/table_header.js                                  \
+       src/textarea.js                                      \
        src/title.js
        

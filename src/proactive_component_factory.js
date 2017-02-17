@@ -15,6 +15,7 @@ var ComboItem = require('./combo_item');
 var Title = require('./title');
 var Frame = require('./frame');
 var Image = require('./image');
+var TextArea = require('./textarea');
 
 var overrides = {};
 
@@ -41,6 +42,7 @@ module.exports.createElement = function(name)
         case "ComboItem": return new ComboItem();
         case "Frame": return new Frame();
         case "Image": return new Image();
+        case "TextArea": return new TextArea();
         default: return new Broken(name);
     }
 }
