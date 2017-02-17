@@ -53,7 +53,7 @@ Label.prototype.setProperties = function(t)
 
     if (t.title !== undefined)
     {
-        if (ReactComponent.isNull(t.title))
+        if (ReactComponent.isNull(t.title) || !Prolog._is_atom(t.title))
             this.domNode.title = "";
         else
             this.domNode.title = Prolog._atom_chars(t.title);
