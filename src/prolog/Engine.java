@@ -131,6 +131,7 @@ public class Engine
       newEnv.installBuiltin("callable", 1);
       newEnv.installBuiltin("atomic_list_concat", 3);
       newEnv.installBuiltin("code_type", 2);
+      newEnv.installBuiltin("ground", 1);
 
 
       newEnv.ensureLoaded(new CompoundTerm(CompoundTermTag.get("resource", 1), AtomTerm.get("/boilerplate.pl")));
@@ -352,6 +353,11 @@ public class Engine
    }
 
    public static final CompoundTermTag tagThis = CompoundTermTag.get("$this", 2);
+
+   public Environment getEnvironment()
+   {
+      return env;
+   }
 
    public Term renderContextualElement(Term handler, Term event, ReactWidget context) throws PrologException
    {

@@ -17,9 +17,9 @@ public class Predicate_atomic_list_concat extends ExecuteOnlyCode
    private static int id = 0;
    public RC execute(Interpreter interpreter, boolean backtrackMode, gnu.prolog.term.Term args[]) throws PrologException
    {
-      Term atomics = args[0];
-      Term sep = args[1];
-      Term out = args[2];
+      Term atomics = args[0].dereference();
+      Term sep = args[1].dereference();
+      Term out = args[2].dereference();
       if (atomics instanceof VariableTerm)
          PrologException.instantiationError(atomics);
       if (!(sep instanceof AtomicTerm))
@@ -28,11 +28,13 @@ public class Predicate_atomic_list_concat extends ExecuteOnlyCode
          return interpreter.unify(out, AtomTerm.get(""));
 
       StringBuilder sb = new StringBuilder();
-      Term list = atomics;
+      Term list = atomics.dereference();
+      System.out.println("list: " + list);
       while (list instanceof CompoundTerm && ((CompoundTerm)list).tag == TermConstants.listTag)
       {
-         Term head = ((CompoundTerm)list).args[0];
-         list = ((CompoundTerm)list).args[1];
+         System.out.println("Is a list: " + list);
+         Term head = ((CompoundTerm)list).args[0].dereference();
+         list = ((CompoundTerm)list).args[1].dereference();
          if (head instanceof AtomTerm)
             sb.append(((AtomTerm)head).value);
          else if (head instanceof IntegerTerm)

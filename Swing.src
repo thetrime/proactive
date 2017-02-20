@@ -69,6 +69,7 @@ ENGINE= src/prolog/Predicate_remove_child.java                \
         src/prolog/Predicate_memberchk.java                   \
         src/prolog/Predicate_succ.java                        \
         src/prolog/Predicate_callable.java                    \
+        src/prolog/Predicate_ground.java                      \
         src/prolog/Predicate_nb_setarg.java                   \
         src/prolog/Predicate_atomic_list_concat.java          \
         src/prolog/Predicate_code_type.java                   \

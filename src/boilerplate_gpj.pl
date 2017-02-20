@@ -1,3 +1,7 @@
+atomic_list_concat(A, B):-
+        atomic_list_concat(A, '', B).
+
+
 /* Aggregate library */
 /*  Part of SWI-Prolog
 
@@ -49,6 +53,7 @@ maplist_([], [], [], [], _):- !.
 maplist_([Elem1|Tail1], [Elem2|Tail2], [Elem3|Tail3], [Elem4|Tail4], Goal) :-
 	call(Goal, Elem1, Elem2, Elem3, Elem4),
         maplist_(Tail1, Tail2, Tail3, Tail4, Goal).
+
 
 		 /*******************************
 		 *	     AGGREGATE		*

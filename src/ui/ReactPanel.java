@@ -24,7 +24,9 @@ import org.proactive.HTTPContext;
 import gnu.prolog.term.Term;
 import gnu.prolog.term.CompoundTerm;
 import gnu.prolog.term.AtomTerm;
+import gnu.prolog.vm.Environment;
 import gnu.prolog.vm.TermConstants;
+import gnu.prolog.vm.PrologException;
 
 public class ReactPanel extends JPanel implements StyleSheetListener
 {
@@ -42,6 +44,16 @@ public class ReactPanel extends JPanel implements StyleSheetListener
       React.addStyleSheetListener(this);
       setLayout(new BorderLayout());
       add(context.getAWTComponent(), BorderLayout.CENTER);
+   }
+
+   public void setProps(PrologState props) throws PrologException
+   {
+      context.updateWidget(props);
+   }
+
+   public Environment getEnvironment()
+   {
+      return engine.getEnvironment();
    }
 
    public void styleSheetChanged()
