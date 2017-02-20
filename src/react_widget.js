@@ -15,9 +15,8 @@ function ReactWidget(parentContext, engine, elementId, props, callback)
     this.vDom = null;
     this.internalComponent = null;
     this.id = "$widget" + (global_widget_id++);
-
+    engine.registerWidget(this);
     this.setProperties(props.getProperties());
-    engine.addCodeChangeListener(elementId, this.codeChanged.bind(this));
     engine.getInitialState(elementId, props, function(state)
                            {
                                this.state = state;
@@ -94,6 +93,7 @@ ReactWidget.prototype.updateWidget = function(newProps, callback)
 ReactWidget.prototype.destroyWidget = function(vNode)
 {
     console.log("Destroy component: " + Prolog._portray(vNode));
+    this.engine.deregisterWidget(this);
     this.freeComponent(vNode);
 }
 
@@ -132,14 +132,6 @@ ReactWidget.prototype.triggerEvent = function(handler, event, callback)
 ReactWidget.prototype.debugStuff = function()
 {
     this.engine.debugStuff();
-}
-
-ReactWidget.prototype.codeChanged = function()
-{
-    this.reRender(function()
-                  {
-                      //console.log("Reloaded " + t.elementId);
-                  });
 }
 
 module.exports = ReactWidget;

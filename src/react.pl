@@ -1,6 +1,7 @@
 :-module(react,
          [raise_event/2,
           wait_for/1,
+          broadcast_proactive_message/1,
           trigger_react_recompile/1,
           vdiff_warning/1,
           jsx/2]).
@@ -24,7 +25,7 @@ user:term_expansion(:-table_predicate(Indicator), tabled_predicate(user, Indicat
 
 
 :-http_handler(root('react/component'), serve_react, [prefix]).
-:-http_handler(root('react/listen'), notify_react, [spawn([])]).
+:-http_handler(root('react/listen'), listen_react, [spawn([])]).
 :-http_handler(root('react/goal'), execute_react, []).
 
 :-initialization(message_queue_create(react_reload_queue), restore).
@@ -102,39 +103,61 @@ related_modules(Module, Related):-
 
 
 
-notify_react(Request):-
-        http_upgrade_to_websocket(notify_react_loop, [], Request).
+listen_react(Request):-
+        http_upgrade_to_websocket(listen_react_loop, [], Request).
 
-notify_react_loop(Websocket):-
+listen_react_loop(Websocket):-
         thread_self(Self),
-        thread_create(ws_notify_slave(Websocket, Self), Slave, [detached(false)]),
-        setup_call_cleanup(assert(react_listener(Self)),
-                           notify_react_loop_1(Websocket, Slave),
-                           retractall(react_listener(Self))).
+        ws_receive(Websocket, Message),
+        ( Message.opcode == text->
+            Data = Message.data,
+            read_term_from_atom(Data, RootComponent, []),
+            setof(RelatedModule,
+                  related_modules(RootComponent, RelatedModule),
+                  Modules),
+            thread_create(ws_listen_slave(Websocket, Self), Slave, [detached(false)]),
+            setup_call_cleanup(assert(react_listener(Self, Modules)),
+                               listen_react_loop_1(Websocket, Slave),
+                               retractall(react_listener(Self, Modules)))
+        ; otherwise->
+            true
+        ).
 
-ws_notify_slave(Websocket, Owner):-
+ws_listen_slave(Websocket, Owner):-
 	ws_receive(Websocket, Message),
         ( Message.opcode == close->
             thread_send_message(Owner, close)
+        ; Message.opcode == text->
+            Data = Message.data,
+            read_term_from_atom(Data, Message, []),
+            % FIXME: Properly handle message arriving from client here by passing it to... some goal
+            format(user_error, 'Message for you, sir: ~q~n', [Message]),
+            ws_listen_slave(Websocket, Owner)
         ; otherwise->
-            ws_notify_slave(Websocket, Owner)
+            ws_listen_slave(Websocket, Owner)
         ).
 
-notify_react_loop_1(Websocket, Slave):-
-        thread_get_message(Message),
+listen_react_loop_1(Websocket, Slave):-
+        ??thread_get_message(Message),
         ( Message == close->
             thread_join(Slave, _),
             ws_close(Websocket, 1000, goodbye),
             throw(terminated)
-        ; Message = text(Data)->
-            ws_send(Websocket, text(Data))
-        ; otherwise->
-            format(user_error, 'Unexpected message: ~q~n', [Message])
+        ; ?? Message = message(Module, Term)->
+            ( ??Module:onMessage(Term, Handler)->
+                format(atom(Text), '~k', [message(Module, Handler, Term)]),
+                ??ws_send(Websocket, text(Text))
+            ; true
+            )
+        ; ??Message = consulted(_)->
+            format(atom(Text), '~k', [Message]),
+            ??ws_send(Websocket, text(Text))
+        ; format(user_error, 'Bad proactive message: ~q~n', [Message])
         ),
         !,
-        notify_react_loop_1(Websocket, Slave).
+        listen_react_loop_1(Websocket, Slave).
 
-:-dynamic(react_listener/1).
+:-dynamic(react_listener/2).
 
 execute_react(Request):-
         ( http_in_session(SessionID)->
@@ -254,8 +277,11 @@ send_reply(WebSocket, Term):-
 	ws_send(WebSocket, text(Text)).
 
 trigger_react_recompile(Module):-
-        forall(react_listener(Queue),
-               thread_send_message(Queue, text(Module))).
+        forall(react_listener(Queue, Modules),
+               ( member(Module, Modules)->
+                   thread_send_message(Queue, consulted(Module))
+               ; true
+               )).
 
 jsx(Form, jsx(Form)):- !.
 jsx(Form, jsx(Form, Goals)):- Goals.
@@ -272,3 +298,13 @@ user:term_expansion(requires(X), [depends_on(X), :-use_module(X)]).
 vdiff_warning(X):-
         format(user_error, 'Warning: ~w', [X]).
 
+
+% Messaging
+broadcast_proactive_message(Term):-
+        forall((react_listener(Listener, Components),
+                member(Component, Components),
+                % If the client has any module which can handle any message, send the message to its worker thread
+                % the worker thread will take additional steps (with context that only the worker should know) to decide
+                % whether it needs to be passed on or not
+                current_predicate(Component:onMessage/2)),
+               thread_send_message(Listener, message(Component, Term))).
