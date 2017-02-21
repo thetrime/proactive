@@ -123,6 +123,9 @@ listen_react_loop(Websocket):-
             true
         ).
 
+
+:-multifile(react:react_message_hook/1).
+
 ws_listen_slave(Websocket, Owner):-
         ws_receive(Websocket, Message),
         ( Message.opcode == close->
@@ -130,8 +133,12 @@ ws_listen_slave(Websocket, Owner):-
         ; Message.opcode == text->
             Data = Message.data,
             read_term_from_atom(Data, Term, []),
-            % FIXME: Properly handle message arriving from client here by passing it to... some goal
-            format(user_error, 'Message for you, sir: ~q~n', [Term]),
+            ( catch(react_message_hook(Term),
+                    Exception,
+                    format(user_error, 'Exception handling Proactive message ~q: ~p~n', [Term, Exception]))->
+                true
+            ; format(user_error, 'Failure handling Proactive message ~q~n', [Term])
+            ),
             ws_listen_slave(Websocket, Owner)
         ; otherwise->
             ws_listen_slave(Websocket, Owner)
