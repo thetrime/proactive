@@ -25,6 +25,13 @@ function crossModuleCall(module, goal)
     return Prolog._make_compound(Constants.crossModuleCallFunctor, [Prolog._make_atom(module), goal]);
 }
 
+function install_foreign()
+{
+    // load in the proactive foreign predicates
+    var foreign_predicates = Object.keys(foreign_module);
+    for (var p = 0; p < foreign_predicates.length; p++)
+        Prolog.define_foreign(foreign_predicates[p], foreign_module[foreign_predicates[p]]);
+}
 
 function PrologEngine(baseURL, rootElementId, errorHandler, callback)
 {
@@ -37,11 +44,7 @@ function PrologEngine(baseURL, rootElementId, errorHandler, callback)
     this.env.pushProactiveContext = function(p) { this.proactive_context.push(p); }.bind(this.env);
     this.env.popProactiveContext = function(p) { this.proactive_context.pop(); }.bind(this.env);
 
-    // Now load in the proactive foreign predicates
-    var foreign_predicates = Object.keys(foreign_module);
-    for (var p = 0; p < foreign_predicates.length; p++)
-        Prolog.define_foreign(foreign_predicates[p], foreign_module[foreign_predicates[p]]);
-
+    install_foreign();
     this.baseURL = baseURL;
     if (this.baseURL.substring(0, 5).toLowerCase() == "https")
     {
@@ -80,6 +83,9 @@ function getServerConnection(URI, rootElementId, callback)
 PrologEngine.prototype.make = function(callback)
 {
     console.log("Calling make()");
+    // First destroy the old user module entirely. Otherwise re-loading boilerplate will end up with 2 definitions of otherwise/0 etc
+    Prolog._hard_reset();
+    install_foreign();
     console.log("Loading boilerplate");
     Prolog._consult_string(fs.readFileSync(__dirname + '/boilerplate.pl', 'utf8'));
     console.log("Loading vdiff");
@@ -375,7 +381,6 @@ PrologEngine.prototype.onMessage = function(event)
 {
     // First read the term out of the message
     console.log("Got message: " + event.data);
-    Prolog._print_memory_info();
     var t = Prolog._string_to_local_term(event.data);
     if (t == 0)
         console.log("Failed to parse message: " + event.data);
@@ -385,8 +390,8 @@ PrologEngine.prototype.onMessage = function(event)
         {
             this.make(function()
                       {
-                          rootWidget.reRender();
-                      });
+                          this.rootWidget.reRender(function() { console.log("Rebuilt due to code change on server"); });
+                      }.bind(this));
         }
         else if (Prolog._term_functor(t) == messageFunctor)
         {
@@ -409,7 +414,7 @@ PrologEngine.prototype.onMessage = function(event)
         }
         else
             console.log("Unexpected message format: " + Prolog._portray(t) + " from " + event.data);
-        Prolog._free(t);
+        Prolog._free_local(t);
     }
 }
 module.exports = PrologEngine;
