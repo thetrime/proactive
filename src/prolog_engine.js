@@ -36,6 +36,8 @@ function install_foreign()
 function PrologEngine(baseURL, rootElementId, errorHandler, callback)
 {
     this.env = {};
+    this.event_queue = [];
+    this.processing_event = false;
     this.errorHandler = errorHandler;
     this.rootWidget = null;
     // Set up a few of our own properties
@@ -244,6 +246,43 @@ PrologEngine.prototype.checkForFluxListeners = function(context)
 
 PrologEngine.prototype.triggerEvent = function(handler, event, context, callback)
 {
+    if (this.processing_event == true)
+    {
+        this.event_queue.push(function()
+                              {
+                                  console.log("Processing an event from the backlog...");
+                                  this.processEvent(handler, event, context, function(t)
+                                                    {
+                                                        callback(t);
+                                                        this.processEvents();
+                                                    }.bind(this));}.bind(this));
+        return;
+    }
+    console.log("Processing that event, since I was otherwise unoccupied");
+    this.processing_event = true;
+    this.processEvent(handler, event, context, function(t)
+                      {
+                          callback(t);
+                          this.processEvents();
+                      }.bind(this));
+}
+
+PrologEngine.prototype.processEvents = function()
+{
+    if (this.event_queue.length > 0)
+    {
+        console.log("Dispatching an event that was raised while I was busy...");
+        this.event_queue.shift()();
+    }
+    else
+    {
+        console.log("All events are now dispatched");
+        this.processing_event = false;
+    }
+}
+PrologEngine.prototype.processEvent = function(handler, event, context, callback)
+{
+    console.log("Processing an event now");
     var state, props;
     while (Prolog._is_compound(handler) && Prolog._term_functor(handler) == Constants.thisFunctor)
     {
