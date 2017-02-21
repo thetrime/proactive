@@ -527,6 +527,12 @@ module.exports["get_current_position"] = function(latitude, longitude)
     return 0;
 }
 
+module.exports["broadcast_proactive_message"] = function(term)
+{
+    this.engine.sendMessage(term);
+    return 1;
+}
+
 module.exports["qqq"] = function()
 {
     Prolog._qqq();

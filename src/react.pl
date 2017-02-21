@@ -124,34 +124,34 @@ listen_react_loop(Websocket):-
         ).
 
 ws_listen_slave(Websocket, Owner):-
-	ws_receive(Websocket, Message),
+        ws_receive(Websocket, Message),
         ( Message.opcode == close->
             thread_send_message(Owner, close)
         ; Message.opcode == text->
             Data = Message.data,
-            read_term_from_atom(Data, Message, []),
+            read_term_from_atom(Data, Term, []),
             % FIXME: Properly handle message arriving from client here by passing it to... some goal
-            format(user_error, 'Message for you, sir: ~q~n', [Message]),
+            format(user_error, 'Message for you, sir: ~q~n', [Term]),
             ws_listen_slave(Websocket, Owner)
         ; otherwise->
             ws_listen_slave(Websocket, Owner)
         ).
 
 listen_react_loop_1(Websocket, Slave):-
-        ??thread_get_message(Message),
+        thread_get_message(Message),
         ( Message == close->
             thread_join(Slave, _),
             ws_close(Websocket, 1000, goodbye),
             throw(terminated)
-        ; ?? Message = message(Module, Term)->
-            ( ??Module:onMessage(Term, Handler)->
+        ;  Message = message(Module, Term)->
+            ( Module:onMessage(Term, Handler)->
                 format(atom(Text), '~k', [message(Module, Handler, Term)]),
-                ??ws_send(Websocket, text(Text))
+                ws_send(Websocket, text(Text))
             ; true
             )
-        ; ??Message = consulted(_)->
+        ; Message = consulted(_)->
             format(atom(Text), '~k', [Message]),
-            ??ws_send(Websocket, text(Text))
+            ws_send(Websocket, text(Text))
         ; format(user_error, 'Bad proactive message: ~q~n', [Message])
         ),
         !,

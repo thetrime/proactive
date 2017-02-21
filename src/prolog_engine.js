@@ -80,6 +80,11 @@ function getServerConnection(URI, rootElementId, callback)
     }
 }
 
+PrologEngine.prototype.sendMessage = function(term)
+{
+    server_connection.send(Prolog._format_term(qOp, 1200, term + ".\n"));
+}
+
 PrologEngine.prototype.make = function(callback)
 {
     console.log("Calling make()");
