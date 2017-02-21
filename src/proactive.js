@@ -22,12 +22,12 @@ window.onPrologReady = function(Prolog)
                                                                         var p = decodeURIComponent(propSpec);
                                                                         initialPropsObject = new PrologState(Prolog._string_to_local_term(p));
                                                                     }
-                                                                    new ReactWidget(null, engine, rootElementId, initialPropsObject, function(widget)
+                                                                    engine.setRootWidget(new ReactWidget(null, engine, rootElementId, initialPropsObject, function(widget)
 										    {
 											container.className += " proactive_container vertical_layout vertical_fill horizontal_fill";
 											container.appendChild(widget.getDOMNode());
                                                                                         callback(true, error);
-                                                                                    });
+                                                                                    }));
                                                                 }
                                                                 else
                                                                     callback(false, error);

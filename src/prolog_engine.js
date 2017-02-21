@@ -15,28 +15,36 @@ var createElementFromVDomFunctor = Prolog._make_functor(Prolog._make_atom("creat
 var vDiffFunctor = Prolog._make_functor(Prolog._make_atom("vdiff"), 3);
 var vPatchFunctor = Prolog._make_functor(Prolog._make_atom("vpatch"), 4);
 var expandChildrenFunctor = Prolog._make_functor(Prolog._make_atom("expand_children"), 2);
+var messageFunctor = Prolog._make_functor(Prolog._make_atom("message"), 3);
+var consultedFunctor = Prolog._make_functor(Prolog._make_atom("consulted"), 1);
+var server_connection = null;
+var qOp = null;
 
 function crossModuleCall(module, goal)
 {
     return Prolog._make_compound(Constants.crossModuleCallFunctor, [Prolog._make_atom(module), goal]);
 }
 
+function install_foreign()
+{
+    // load in the proactive foreign predicates
+    var foreign_predicates = Object.keys(foreign_module);
+    for (var p = 0; p < foreign_predicates.length; p++)
+        Prolog.define_foreign(foreign_predicates[p], foreign_module[foreign_predicates[p]]);
+}
 
 function PrologEngine(baseURL, rootElementId, errorHandler, callback)
 {
     this.env = {};
     this.errorHandler = errorHandler;
+    this.rootWidget = null;
     // Set up a few of our own properties
     this.env.proactive_context = [];
     this.env.engine = this;
     this.env.pushProactiveContext = function(p) { this.proactive_context.push(p); }.bind(this.env);
     this.env.popProactiveContext = function(p) { this.proactive_context.pop(); }.bind(this.env);
 
-    // Now load in the proactive foreign predicates
-    var foreign_predicates = Object.keys(foreign_module);
-    for (var p = 0; p < foreign_predicates.length; p++)
-        Prolog.define_foreign(foreign_predicates[p], foreign_module[foreign_predicates[p]]);
-
+    install_foreign();
     this.baseURL = baseURL;
     if (this.baseURL.substring(0, 5).toLowerCase() == "https")
     {
@@ -50,25 +58,37 @@ function PrologEngine(baseURL, rootElementId, errorHandler, callback)
     }
     this.componentURL = baseURL + "/component/";
     this.rootElementId = rootElementId;
-    getServerConnection(this.listenURI, this.onMessage.bind(this));
+    qOp = Prolog._create_options();
+    Prolog._set_option(qOp, Prolog._make_atom("quoted"), Prolog._make_atom("true"));
+    getServerConnection(this.listenURI, rootElementId, this.onMessage.bind(this));
     this.make(callback);
 }
 
-function getServerConnection(URI, callback)
+function getServerConnection(URI, rootElementId, callback)
 {
-    var ws = new WebSocket(URI);
-    ws.onmessage = callback;
-    ws.onerror = function(event)
+    server_connection = new WebSocket(URI);
+    server_connection.onmessage = callback;
+    server_connection.onerror = function(event)
     {
         console.log("WS error: " + event);
-        ws.close();
-        getServerConnection(URI, callback);
+        server_connection.close();
+        getServerConnection(URI, rootElementId, callback);
+    }
+    server_connection.onopen = function()
+    {
+        server_connection.send(Prolog._format_term(qOp, 1200, Prolog._make_atom(rootElementId)) + ".\n");
     }
 }
 
 PrologEngine.prototype.make = function(callback)
 {
+    console.log("Calling make()");
+    // First destroy the old user module entirely. Otherwise re-loading boilerplate will end up with 2 definitions of otherwise/0 etc
+    Prolog._hard_reset();
+    install_foreign();
+    console.log("Loading boilerplate");
     Prolog._consult_string(fs.readFileSync(__dirname + '/boilerplate.pl', 'utf8'));
+    console.log("Loading vdiff");
     Prolog._consult_string(fs.readFileSync(__dirname + '/vdiff.pl', 'utf8'));
     console.log("Loading " + this.componentURL + this.rootElementId);
     Prolog._consult_url(this.componentURL + this.rootElementId, callback);
@@ -335,27 +355,66 @@ PrologEngine.prototype.applyPatch = function(patch, root, callback)
                     }.bind(this));
 }
 
-var changeListeners = {};
-
-PrologEngine.prototype.addCodeChangeListener = function(elementId, callback)
+// Messaging stuff is below
+PrologEngine.prototype.setRootWidget = function(w)
 {
-    if (changeListeners[elementId] === undefined)
-        changeListeners[elementId] = [callback];
+    this.rootWidget = w;
+}
+
+var widgets = {};
+
+PrologEngine.prototype.registerWidget = function(w)
+{
+    if (widgets[w.elementId] == undefined)
+        widgets[w.elementId] = [w];
     else
-        changeListeners[elementId].push(callback);
+        widgets[w.elementId].push(w);
+}
+
+PrologEngine.prototype.deregisterWidget = function(w)
+{
+    var index = widgets[w.elementId].indexOf(w);
+    widgets[w.elementId].splice(index, 1);
 }
 
 PrologEngine.prototype.onMessage = function(event)
 {
-    var callbacks = changeListeners[event.data];
-    console.log("Code change: " + event.data);
-    if (callbacks !== undefined)
+    // First read the term out of the message
+    console.log("Got message: " + event.data);
+    var t = Prolog._string_to_local_term(event.data);
+    if (t == 0)
+        console.log("Failed to parse message: " + event.data);
+    else
     {
-        this.make(function()
-                  {
-                      for (var i = 0; i < callbacks.length; i++)
-                          callbacks[i]();
-                  });
+        if (Prolog._term_functor(t) == consultedFunctor)
+        {
+            this.make(function()
+                      {
+                          this.rootWidget.reRender(function() { console.log("Rebuilt due to code change on server"); });
+                      }.bind(this));
+        }
+        else if (Prolog._term_functor(t) == messageFunctor)
+        {
+            // We know the modules that the server thinks should process this event
+            var module = Prolog._atom_chars(Prolog._term_arg(t, 0));
+            console.log("Looking for handlers in " + module);
+            var w = widgets[module];
+            console.log("Found these:");
+            console.log(w);
+            if (w != undefined)
+            {
+                // For each of these trigger an event
+                for (var i = 0; i < w.length; i++)
+                {
+                    var handler = Prolog._term_arg(t, 1);
+                    var event = Prolog._term_arg(t, 2);
+                    w[i].triggerEvent(handler, event, function() {console.log("Message dispatched");});
+                }
+            }
+        }
+        else
+            console.log("Unexpected message format: " + Prolog._portray(t) + " from " + event.data);
+        Prolog._free_local(t);
     }
 }
 module.exports = PrologEngine;
