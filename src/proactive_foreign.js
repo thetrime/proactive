@@ -137,6 +137,7 @@ module.exports["_on_server"] = function(goal)
         return 3; // YIELD
     }
     // First, create the websocket
+    this.engine.indicateBusy();
     ws = new WebSocket(this.engine.goalURI);
     if (qOp == null)
     {
@@ -154,6 +155,7 @@ module.exports["_on_server"] = function(goal)
     }
     ws.cleanup = function()
     {
+        this.engine.indicateReady();
         if (this.foreign)
             Prolog._release_blob("websocket", this.foreign);
         ws.close();
