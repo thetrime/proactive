@@ -5,5 +5,9 @@ public class ProactiveConstraints
    public enum Fill {HORIZONTAL, VERTICAL, BOTH, NONE};
    public Fill fill = Fill.NONE;
    public int index = -1;
-   public ProactiveConstraints() {}
+   public ProactiveConstraints(Fill fill, int index)
+   {
+      this.fill = fill;
+      this.index = index;
+   }
 }

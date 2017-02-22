@@ -7,6 +7,7 @@ import gnu.prolog.term.FloatTerm;
 import gnu.prolog.term.CompoundTerm;
 import gnu.prolog.term.CompoundTermTag;
 import gnu.prolog.vm.TermConstants;
+import org.proactive.ui.ProactiveConstraints;
 import java.util.Map;
 import java.util.List;
 import java.util.LinkedList;
@@ -53,20 +54,20 @@ public class PrologObject
       return t.toString();
    }
 
-   public int asFill()
+   public ProactiveConstraints.Fill asFill()
    {
       Term t = term; //Engine.unpack(term);
       if (t instanceof AtomTerm)
       {
          String fill = ((AtomTerm)term).value;
          if (fill.equals("horizontal"))
-            return java.awt.GridBagConstraints.HORIZONTAL;
+            return ProactiveConstraints.Fill.HORIZONTAL;
          else if (fill.equals("vertical"))
-            return java.awt.GridBagConstraints.VERTICAL;
+            return ProactiveConstraints.Fill.VERTICAL;
          else if (fill.equals("both"))
-            return java.awt.GridBagConstraints.BOTH;
+            return ProactiveConstraints.Fill.BOTH;
       }
-      return java.awt.GridBagConstraints.NONE;      
+      return ProactiveConstraints.Fill.NONE;
    }
 
    public String asOrientation()

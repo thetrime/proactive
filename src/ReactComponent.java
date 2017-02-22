@@ -7,7 +7,7 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.HashMap;
 import java.awt.Component;
-import java.awt.GridBagConstraints;
+import org.proactive.ui.ProactiveConstraints;
 
 public abstract class ReactComponent
 {
@@ -20,7 +20,7 @@ public abstract class ReactComponent
    protected String id = null;
    protected String className = null;
 
-   protected int fill = GridBagConstraints.NONE;
+   protected ProactiveConstraints.Fill fill = ProactiveConstraints.Fill.NONE;
    public ReactComponent()
    {
    }
@@ -32,9 +32,9 @@ public abstract class ReactComponent
          properties.put(property.getKey(), property.getValue());
       if (properties.containsKey("fill"))
       {
-         int oldFill = fill;
+         ProactiveConstraints.Fill oldFill = fill;
          if (properties.get("fill") == null)
-            fill = GridBagConstraints.NONE;
+            fill = ProactiveConstraints.Fill.NONE;
          else
             fill = properties.get("fill").asFill();
          if (oldFill != fill && getParentNode() != null)
@@ -132,7 +132,7 @@ public abstract class ReactComponent
       for (ReactComponent child: children)
          child.setOwnerDocument(owner);
    }
-   public int getFill()
+   public ProactiveConstraints.Fill getFill()
    {
       return fill;
    }

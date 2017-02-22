@@ -87,6 +87,7 @@ public class ReactWidget extends ReactComponent
       return "<Widget:" + elementId + " " + props+ ">";
    }
 
+/*
    public int getFill()
    {
       // Originally, we would allow the child to provide the fill, but this is a bit weird in reality
@@ -96,6 +97,7 @@ public class ReactWidget extends ReactComponent
       //         return internalComponent.getFill();
       return super.getFill();
    }
+*/
 
    public PrologState getState()
    {

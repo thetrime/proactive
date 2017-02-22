@@ -11,40 +11,47 @@ import java.util.HashMap;
 public class ProactiveLayoutManager implements LayoutManager2
 {
    private Map<Component, ProactiveConstraints> map;
-   private enum Layout {HORIZONTAL, VERTICAL};
-
-   private Layout layout;
+   public enum Layout {HORIZONTAL, VERTICAL};
+   public static Layout HORIZONTAL = Layout.HORIZONTAL;
+   public static Layout VERTICAL = Layout.VERTICAL;
+   private Layout layout = Layout.VERTICAL;
    private ProactiveConstraints.Fill fill;
-   private int nextComponentIndex;
-   public ProactiveLayoutManager()
+   public ProactiveLayoutManager(Layout layout)
    {
-      nextComponentIndex = 0;
       map = new HashMap<Component, ProactiveConstraints>();
+      System.out.println("Set layout to: " + layout);
+      this.layout = layout;
    }
 
    public void addLayoutComponent(String s, Component c) {} // Deliberately does nothing
    public void removeLayoutComponent(Component c) {}        // Deliberately does nothing
-
+   
    public Dimension preferredLayoutSize(Container parent)
    {
       if (parent == null)
          return new Dimension (0, 0);
       int major = 0;
       int minor = 0;
+      System.out.println("Computing preferred layout for " + parent.getComponents().length + " components in " + parent);
       for (Component c : parent.getComponents())
       {
          if (!c.isVisible()) continue;
          if (layout == Layout.HORIZONTAL)
          {
+            System.out.println("Horizontal");
             major += c.getPreferredSize().getWidth();
             minor = (int)Math.max(c.getPreferredSize().getHeight(), minor);
          }
          else if (layout == Layout.VERTICAL)
          {
+            System.out.println("Vertical");
             major += c.getPreferredSize().getHeight();
             minor = (int)Math.max(c.getPreferredSize().getWidth(), minor);
          }
+         else
+            System.out.println("Illegal layout");
       }
+      System.out.println("PreferredLayout: (" + major + "," + minor + ")");
       if (layout == Layout.HORIZONTAL)
          return new Dimension(major, minor);
       else if (layout == Layout.VERTICAL)
@@ -55,7 +62,31 @@ public class ProactiveLayoutManager implements LayoutManager2
 
    public Dimension minimumLayoutSize(Container parent)
    {
-      return new Dimension (0, 0);
+      if (parent == null)
+         return new Dimension (0, 0);
+      int major = 0;
+      int minor = 0;
+      for (Component c : parent.getComponents())
+      {
+         if (!c.isVisible()) continue;
+         if (layout == Layout.HORIZONTAL)
+         {
+            major += c.getMinimumSize().getWidth();
+            minor = (int)Math.max(c.getMinimumSize().getHeight(), minor);
+         }
+         else if (layout == Layout.VERTICAL)
+         {
+            major += c.getMinimumSize().getHeight();
+            minor = (int)Math.max(c.getMinimumSize().getWidth(), minor);
+         }
+      }
+      System.out.println("Minimum Layout: (" + major + "," + minor + ")");
+      if (layout == Layout.HORIZONTAL)
+         return new Dimension(major, minor);
+      else if (layout == Layout.VERTICAL)
+         return new Dimension(minor, major);
+      else
+         return new Dimension(0, 0);
    }
 
    public Dimension maximumLayoutSize(Container parent)
@@ -65,6 +96,7 @@ public class ProactiveLayoutManager implements LayoutManager2
 
    public void layoutContainer(Container parent)
    {
+      System.out.println("Laying out...");
       Component[] components = parent.getComponents();
       if (components.length == 0)
          return;
@@ -74,6 +106,7 @@ public class ProactiveLayoutManager implements LayoutManager2
          if (!c.isVisible())
             continue;
          Rectangle rect = proposedLayout.get(c);
+         System.out.println("Layout for component: " + rect);
          if (layout == Layout.HORIZONTAL)
             c.setBounds((int)rect.getX(), (int)rect.getY(), (int)rect.getWidth(), (int)rect.getHeight());
          else if (layout == Layout.VERTICAL)
@@ -196,16 +229,17 @@ public class ProactiveLayoutManager implements LayoutManager2
          return;
       if (!(constraints instanceof ProactiveConstraints))
          throw new IllegalArgumentException("Constraints must be ProactiveConstraints. Received: " + constraints.getClass().getName());
-      synchronized(this)
-      {
-         ((ProactiveConstraints)constraints).index = nextComponentIndex++;
-      }
       setConstraints(c, (ProactiveConstraints)constraints);
    }
 
    public void setConstraints(Component c, ProactiveConstraints newConstraints)
    {
       map.put(c, newConstraints);
+   }
+
+   public ProactiveConstraints getConstraints(Component c)
+   {
+      return map.get(c);
    }
 
    public float getLayoutAlignmentX(Container c)
