@@ -13,6 +13,8 @@ BASE=src/React.java                                           \
 
 UI=  src/ui/Panel.java                                        \
      src/ui/Broken.java                                       \
+     src/ui/ProactiveLayoutManager.java                       \
+     src/ui/ProactiveConstraints.java                         \
      src/ui/Button.java                                       \
      src/ui/Field.java                                        \
      src/ui/PopupMenu.java                                    \
