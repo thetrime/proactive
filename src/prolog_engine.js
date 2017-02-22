@@ -36,6 +36,8 @@ function install_foreign()
 function PrologEngine(baseURL, rootElementId, errorHandler, callback)
 {
     this.env = {};
+    this.event_queue = [];
+    this.processing_event = false;
     this.errorHandler = errorHandler;
     this.rootWidget = null;
     // Set up a few of our own properties
@@ -244,6 +246,60 @@ PrologEngine.prototype.checkForFluxListeners = function(context)
 
 PrologEngine.prototype.triggerEvent = function(handler, event, context, callback)
 {
+    this.withEventQueue("user",
+                        function(then)
+                        {
+                            this.processEvent(handler, event, context, function(t) { callback(t); then();}.bind(this));
+                        }.bind(this));
+}
+
+PrologEngine.prototype.triggerSystemEvent = function(handler, event, context, callback)
+{
+    this.withEventQueue("system",
+                        function(then)
+                        {
+                            this.processEvent(handler, event, context, function(t) { callback(t); then();}.bind(this));
+                        }.bind(this));
+}
+
+PrologEngine.prototype.withEventQueue = function(origin, fn)
+{
+    if (this.processing_event == true)
+    {
+        if (origin == "user")
+            console.log("Ignoring user-initiated event because I am busy");
+        else
+        {
+            console.log("I'm busy. I'll do that in a moment");
+            this.event_queue.push(fn);
+        }
+        return;
+    }
+    console.log("Processing that event, since I was otherwise unoccupied");
+    this.processing_event = true;
+    this.event_queue.push(fn);
+    this.processEvents();
+}
+
+PrologEngine.prototype.processEvents = function()
+{
+    if (this.event_queue.length > 0)
+    {
+        console.log("Dispatching an event from my queue...");
+        this.event_queue.shift()(function(t)
+                                 {
+                                     this.processEvents();
+                                 }.bind(this));
+    }
+    else
+    {
+        console.log("All events are now dispatched");
+        this.processing_event = false;
+    }
+}
+PrologEngine.prototype.processEvent = function(handler, event, context, callback)
+{
+    console.log("Processing an event now");
     var state, props;
     while (Prolog._is_compound(handler) && Prolog._term_functor(handler) == Constants.thisFunctor)
     {
@@ -393,10 +449,15 @@ PrologEngine.prototype.onMessage = function(event)
     {
         if (Prolog._term_functor(t) == consultedFunctor)
         {
-            this.make(function()
-                      {
-                          this.rootWidget.reRender(function() { console.log("Rebuilt due to code change on server"); });
-                      }.bind(this));
+            this.withEventQueue("internal",
+                                function(then)
+                                {
+                                    this.make(function()
+                                              {
+                                                  this.rootWidget.reRender(function() { console.log("Rebuilt due to code change on server"); });
+                                                  then();
+                                              }.bind(this));
+                                }.bind(this));
         }
         else if (Prolog._term_functor(t) == messageFunctor)
         {
@@ -413,7 +474,7 @@ PrologEngine.prototype.onMessage = function(event)
                 {
                     var handler = Prolog._term_arg(t, 1);
                     var event = Prolog._term_arg(t, 2);
-                    w[i].triggerEvent(handler, event, function() {console.log("Message dispatched");});
+                    w[i].triggerSystemEvent(handler, event, function() {console.log("Message dispatched");});
                 }
             }
         }
@@ -422,4 +483,20 @@ PrologEngine.prototype.onMessage = function(event)
         Prolog._free_local(t);
     }
 }
+
+PrologEngine.prototype.indicateBusy = function()
+{
+    var spinner = document.getElementById("$spinner");
+    console.log("Spinner: " + spinner);
+    if (spinner !== null)
+        spinner.className = "busy";
+}
+
+PrologEngine.prototype.indicateReady = function()
+{
+    var spinner = document.getElementById("$spinner");
+    if (spinner !== null)
+        spinner.className = "free";
+}
+
 module.exports = PrologEngine;
