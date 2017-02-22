@@ -33,7 +33,7 @@ window.onPrologReady = function(Prolog)
                                                                     callback(false, error);
 							      });
                           },
-                          registerPredicate: Prolog.define_foreign,
+                          registerPredicate: PrologEngine.registerPredicate,
 			  registerComponent: ProactiveComponentFactory.registerComponent,
 			  ReactComponent: ReactComponent,
 			  Constants: Constants,

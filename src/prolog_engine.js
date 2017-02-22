@@ -99,6 +99,9 @@ PrologEngine.prototype.make = function(callback)
     Prolog._consult_string(fs.readFileSync(__dirname + '/vdiff.pl', 'utf8'));
     console.log("Loading " + this.componentURL + this.rootElementId);
     Prolog._consult_url(this.componentURL + this.rootElementId, callback);
+    console.log("Reinstalling user-defined foreign predicates")
+    for (var i = 0; i < user_foreign_predicates.length; i++)
+        Prolog.define_foreign(user_foreign_predicates[i].name, user_foreign_predicates[i].fn);
 }
 
 PrologEngine.prototype.getInitialState = function(component, props, callback)
@@ -497,6 +500,13 @@ PrologEngine.prototype.indicateReady = function()
     var spinner = document.getElementById("$spinner");
     if (spinner !== null)
         spinner.className = "free";
+}
+var user_foreign_predicates = [];
+PrologEngine.registerPredicate = function(name, fn)
+{
+    user_foreign_predicates.push({name:name,
+                                  fn:fn});
+    Prolog.define_foreign(name, fn);
 }
 
 module.exports = PrologEngine;
