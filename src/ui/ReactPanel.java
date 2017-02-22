@@ -41,6 +41,7 @@ public class ReactPanel extends JPanel implements StyleSheetListener
       React.setStyleSheet(sheet);
       engine = new Engine(URL, rootElementId, httpContext);
       context = new ReactWidget(null, engine, rootElementId, PrologState.emptyState);
+      engine.setRootWidget(context);
       React.addStyleSheetListener(this);
       setLayout(new BorderLayout());
       add(context.getAWTComponent(), BorderLayout.CENTER);

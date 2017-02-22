@@ -174,12 +174,6 @@ public class React
          }
       }
    }
-    
-
-   public static void addCodeChangeListener(URI uri, String rootElementId, CodeChangeListener listener) throws Exception
-   {
-      ServerConnection.addCodeChangeListener(uri, rootElementId, listener);
-   }
 
    private static StyleSheet styleSheet = new StyleSheet();
    private static List<StyleSheetListener> styleSheetListeners = new LinkedList<StyleSheetListener>();

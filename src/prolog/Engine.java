@@ -27,6 +27,7 @@ import gnu.prolog.vm.Environment;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Vector;
 import java.util.List;
 import java.io.IOException;
 import java.net.URI;
@@ -47,6 +48,12 @@ public class Engine
    private FluxDispatcher fluxDispatcher = new FluxDispatcher();
    private HTTPContext httpContext;
    private Map<String, String> emptyHTTPHeaders = new HashMap<String, String>();
+   private ReactWidget rootWidget = null;
+   private WebSocketClient serverConnection = null;
+   private Map<String, List<ReactWidget>> knownWidgets = new HashMap<String, List<ReactWidget>>();
+   private static final CompoundTermTag consultedFunctor = CompoundTermTag.get("consulted", 1);
+   private static final CompoundTermTag messageFunctor = CompoundTermTag.get("message", 3);
+
    public Engine(String baseURL, String rootElementId, HTTPContext httpContext) throws Exception
    {
       goalURI = new URI(baseURL + "/goal");
@@ -60,6 +67,7 @@ public class Engine
       this.listenURI = new URI(baseURL + "/listen");
       listenURI = new URI(scheme, listenURI.getUserInfo(), listenURI.getHost(), listenURI.getPort(), listenURI.getPath(), listenURI.getQuery(), listenURI.getFragment());
       this.rootElementId = rootElementId;
+      serverConnection = new ServerConnection(listenURI);
       make();
    }
 
@@ -132,6 +140,7 @@ public class Engine
       newEnv.installBuiltin("atomic_list_concat", 3);
       newEnv.installBuiltin("code_type", 2);
       newEnv.installBuiltin("ground", 1);
+      newEnv.installBuiltin("broadcast_proactive_message", 1);
 
 
       newEnv.ensureLoaded(new CompoundTerm(CompoundTermTag.get("resource", 1), AtomTerm.get("/boilerplate.pl")));
@@ -571,68 +580,10 @@ public class Engine
       return false;
    }
 
-   /*
-   private void addProperties(Term state, HashMap<String, Term> props) throws PrologException
+   public void setRootWidget(ReactWidget w)
    {
-      if (TermConstants.emptyListAtom.equals(state))
-         return;
-      else if (state instanceof CompoundTerm)
-      {
-         CompoundTerm c = (CompoundTerm)state;
-         while(c.tag.arity == 2)
-         {
-            if (c.args[0] instanceof CompoundTerm)
-            {
-               CompoundTerm attr = (CompoundTerm)c.args[0];
-               if (attr.tag.arity != 2 || !attr.tag.functor.value.equals("="))
-                  PrologException.typeError(AtomTerm.get("=/2"), attr);
-               Term attrName = attr.args[0];
-               Term attrValue = attr.args[1];
-               if (!(attrName instanceof AtomTerm))
-                  PrologException.typeError(AtomTerm.get("atom"), attrName);
-               attrValue = attrValue.dereference();
-               if (attrValue instanceof VariableTerm)
-                  ;
-               else if (isNull(attrValue))
-                  props.remove(((AtomTerm)attrName).value);
-               else if (props.containsKey(((AtomTerm)attrName).value))
-               {
-                  Term existingValue = props.get(((AtomTerm)attrName).value);
-                  //System.out.println("Existing: " + existingValue);
-                  if ((existingValue instanceof CompoundTerm && ((CompoundTerm)existingValue).tag == TermConstants.listTag) ||
-                      existingValue == TermConstants.emptyListAtom)
-                  {
-                     // This happens if we want to update a sub-state. Basically we just recurse here
-                     Term replacement = applyState(existingValue, attrValue.dereference());
-                     props.put(((AtomTerm)attrName).value, replacement);
-                  }
-                  else
-                     props.put(((AtomTerm)attrName).value, attrValue.dereference());
-               }
-               else
-               {
-                  // A totally new value. Note that it might still be a list with variables in it
-                  if (attrValue instanceof CompoundTerm && ((CompoundTerm)attrValue).tag == TermConstants.listTag)
-                  {
-                     Term replacement = applyState(TermConstants.emptyListAtom, attrValue.dereference());
-                     props.put(((AtomTerm)attrName).value, replacement);
-                  }
-                  else
-                     props.put(((AtomTerm)attrName).value, attrValue.dereference());
-               }
-            }
-            else
-               PrologException.typeError(AtomTerm.get("=/2"), c);
-            if (c.args[1] instanceof CompoundTerm)
-               c = (CompoundTerm)c.args[1];
-            else if (TermConstants.emptyListAtom.equals(c.args[1]))
-               break;
-            else
-               PrologException.typeError(AtomTerm.get("list"), c);
-         }
-      }
+      rootWidget = w;
    }
-   */
 
 
    public static class ExecutionState extends WebSocketClient
@@ -884,6 +835,83 @@ public class Engine
          }
       }
       return properties;
+   }
+
+
+   
+   public void registerWidget(ReactWidget w)
+   {
+      if (knownWidgets.get(w.getComponentName()) == null)
+         knownWidgets.put(w.getComponentName(), new Vector<ReactWidget>());
+      knownWidgets.get(w.getComponentName()).add(w);
+   }
+
+   public void deRegisterWidget(ReactWidget w)
+   {
+      knownWidgets.get(w.getComponentName()).remove(w);
+   }
+
+   public class ServerConnection extends WebSocketClient
+   {
+      public ServerConnection(URI uri)
+      {
+         super(uri);
+         connect();
+      }
+
+      @Override
+      public void onMessage(String message)
+      {
+         try
+         {
+            Term t = gnu.prolog.io.TermReader.stringToTerm((String)message, env);
+            if (t instanceof CompoundTerm && ((CompoundTerm)t).tag == consultedFunctor)
+            {
+               make();
+               rootWidget.reRender();
+            }
+            else if (t instanceof CompoundTerm && ((CompoundTerm)t).tag == messageFunctor)
+            {
+               Term module = ((CompoundTerm)t).args[0];
+               Term handler = ((CompoundTerm)t).args[1];
+               Term event = ((CompoundTerm)t).args[2];
+               List<ReactWidget> widgets = knownWidgets.get(((AtomTerm)module).value);
+               if (widgets != null)
+               {
+                  for (ReactWidget w : widgets)
+                     w.triggerEvent(handler, event);
+               }
+            }
+         }
+         catch(Exception e)
+         {
+            e.printStackTrace();
+         }
+      }
+
+      @Override
+      public void onOpen(ServerHandshake handshake)
+      {
+         send(gnu.prolog.io.TermWriter.toString(AtomTerm.get(rootElementId)) + ".\n");
+      }
+
+      @Override
+      public void onClose(int code, String reason, boolean remote)
+      {
+
+      }
+
+      @Override
+      public void onError(Exception error)
+      {
+         error.printStackTrace();
+         serverConnection = new ServerConnection(listenURI);
+      }
+   }
+
+   public void sendAsyncMessage(Term t)
+   {
+      serverConnection.send(gnu.prolog.io.TermWriter.toString(t) + ".\n");
    }
 
 }

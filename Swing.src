@@ -8,7 +8,6 @@ BASE=src/React.java                                           \
      src/CodeChangeListener.java                              \
      src/StyleSheetListener.java                              \
      src/StyleSheet.java                                      \
-     src/ServerConnection.java                                \
      src/ReactLeafComponent.java                              \
      src/ReactComponentFactoryConfiguration.java
 
@@ -62,7 +61,8 @@ ENGINE= src/prolog/Predicate_remove_child.java                \
 	src/prolog/Predicate_get_this.java                    \
 	src/prolog/Predicate_get_store_state.java             \
 	src/prolog/Predicate_get_state.java                   \
-	src/prolog/Predicate_state_to_term.java               \
+        src/prolog/Predicate_state_to_term.java               \
+        src/prolog/Predicate_broadcast_proactive_message.java \
 	src/prolog/Predicate_bubble_event.java                \
         src/prolog/Predicate_nth0.java                        \
 	src/prolog/Predicate_writeln.java                     \

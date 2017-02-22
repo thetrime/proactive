@@ -47,6 +47,7 @@ public class ReactApp extends JFrame implements StyleSheetListener
       React.setStyleSheet(sheet);
       engine = new Engine(URL, rootElementId, httpContext);
       context = new ReactWidget(null, engine, rootElementId, PrologState.emptyState);
+      engine.setRootWidget(context);
       //React.addCodeChangeListener(new URI(URL + "/listen"), rootElementId, this);
       React.addStyleSheetListener(this);
       getContentPane().setLayout(new BorderLayout());

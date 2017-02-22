@@ -26,7 +26,7 @@ import java.awt.BorderLayout;
  */
 
 
-public class ReactWidget extends ReactComponent implements CodeChangeListener
+public class ReactWidget extends ReactComponent
 {
    protected Engine engine;
    protected String elementId;
@@ -45,10 +45,8 @@ public class ReactWidget extends ReactComponent implements CodeChangeListener
       this.props = props;
       this.owner = parentContext;
       this.widgetId = "$widget" + (globalWidgetId++);
-
+      engine.registerWidget(this);
       setProperties(props.getProperties());
-
-      React.addCodeChangeListener(engine.getListenURI(), elementId, this);
 
       // First, get the state
       this.state = engine.getInitialState(elementId, props);
@@ -66,26 +64,6 @@ public class ReactWidget extends ReactComponent implements CodeChangeListener
    public String getWidgetId()
    {
       return widgetId;
-   }
-
-   public void handleCodeChange() 
-   {
-      System.out.println("Widget code changed");
-      SwingUtilities.invokeLater(new Runnable()
-         {
-            public void run()
-            {
-               try
-               {
-                  engine.make();
-                  reRender();
-               }
-               catch(Exception e)
-               {
-                  e.printStackTrace();
-               }
-            }
-         });
    }
 
    public Component getAWTComponent()
