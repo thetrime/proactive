@@ -99,6 +99,7 @@ ReactWidget.prototype.destroyWidget = function(vNode)
 
 ReactWidget.prototype.freeComponent = function(vNode)
 {
+    this.engine.deregisterWidget(this);
     this.state.freeState();
     this.props.freeState();
     Prolog._release_blob("react_component", this.blob);
