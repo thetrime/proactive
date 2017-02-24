@@ -272,7 +272,7 @@ public class ProactiveLayoutManager implements LayoutManager2
             else if (layout == Layout.VERTICAL)
             {
                major_scale = (int)((c.getPreferredSize().getHeight() / (double)sum) * (double)major_available);
-               if (constraints.fill == ProactiveConstraints.Fill.VERTICAL || constraints.fill == ProactiveConstraints.Fill.BOTH)
+               if (constraints.fill == ProactiveConstraints.Fill.HORIZONTAL || constraints.fill == ProactiveConstraints.Fill.BOTH)
                   minor_scale = minor_available;
                else
                   minor_scale = (int)Math.min(c.getPreferredSize().getWidth(), minor_available);
