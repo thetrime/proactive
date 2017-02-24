@@ -192,6 +192,7 @@ public class ProactiveLayoutManager implements LayoutManager2
                beforePad = (int)((major_available - sum)/(2*componentCount));
             }
          }
+         System.out.println("BeforePad: " + beforePad);
 
          // Now we can set the placing on all the components
          int major_position = beforePad;
@@ -199,7 +200,7 @@ public class ProactiveLayoutManager implements LayoutManager2
          for (Component c : parent.getComponents())
          {
             if (!c.isVisible()) continue;
-            ProactiveConstraints.Fill f = map.get(c).fill;
+            ProactiveConstraints constraints = map.get(c);
 
             int major_scale = 0;
             int minor_scale = 0;
@@ -208,25 +209,32 @@ public class ProactiveLayoutManager implements LayoutManager2
             if (layout == Layout.HORIZONTAL)
             {
                major_scale = (int)c.getPreferredSize().getWidth();
-               minor_scale = (int)Math.min(c.getPreferredSize().getHeight(), minor_available);
+               if (constraints.fill == ProactiveConstraints.Fill.VERTICAL || constraints.fill == ProactiveConstraints.Fill.BOTH)
+                  minor_scale = minor_available;
+               else
+                  minor_scale = (int)Math.min(c.getPreferredSize().getHeight(), minor_available);
             }
             else if (layout == Layout.VERTICAL)
             {
                major_scale = (int)c.getPreferredSize().getHeight();
-               minor_scale = (int)Math.min(c.getPreferredSize().getWidth(), minor_available);
+               if (constraints.fill == ProactiveConstraints.Fill.HORIZONTAL || constraints.fill == ProactiveConstraints.Fill.BOTH)
+                  minor_scale = minor_available;
+               else
+                  minor_scale = (int)Math.min(c.getPreferredSize().getWidth(), minor_available);
             }
 
-            minor_position = getAlignmentOffset(c, minor_available, minor_scale);
+            minor_position = getAlignmentOffset(constraints, minor_available, minor_scale);
 
-            if (f == ProactiveConstraints.Fill.BOTH ||
-                (f == ProactiveConstraints.Fill.HORIZONTAL && layout == Layout.HORIZONTAL) ||
-                (f == ProactiveConstraints.Fill.VERTICAL && layout == Layout.VERTICAL))
+            if (constraints.fill == ProactiveConstraints.Fill.BOTH ||
+                (constraints.fill == ProactiveConstraints.Fill.HORIZONTAL && layout == Layout.HORIZONTAL) ||
+                (constraints.fill == ProactiveConstraints.Fill.VERTICAL && layout == Layout.VERTICAL))
             {
                proposedLayout.put(c, new Rectangle(major_position, minor_position, major_scale + (int)(extraSpace / (double)fillCount), minor_scale));
                major_position += (major_scale + (int)(extraSpace / (double)fillCount)) + intraPad;
             }
             else
             {
+               System.out.println("Layout of button: " + minor_position);
                proposedLayout.put(c, new Rectangle(major_position, minor_position, major_scale, minor_scale));
                major_position += major_scale + intraPad;
             }
@@ -241,19 +249,26 @@ public class ProactiveLayoutManager implements LayoutManager2
          for (Component c : parent.getComponents())
          {
             if (!c.isVisible()) continue;
+            ProactiveConstraints constraints = map.get(c);
             int major_scale = 0;
             int minor_scale = 0;
             if (layout == Layout.HORIZONTAL)
             {
                major_scale = (int)((c.getPreferredSize().getWidth() / (double)sum) * (double)major_available);
-               minor_scale = (int)Math.min(c.getPreferredSize().getHeight(), minor_available);
+               if (constraints.fill == ProactiveConstraints.Fill.VERTICAL || constraints.fill == ProactiveConstraints.Fill.BOTH)
+                  minor_scale = minor_available;
+               else
+                  minor_scale = (int)Math.min(c.getPreferredSize().getHeight(), minor_available);
             }
             else if (layout == Layout.VERTICAL)
             {
                major_scale = (int)((c.getPreferredSize().getHeight() / (double)sum) * (double)major_available);
-               minor_scale = (int)Math.min(c.getPreferredSize().getWidth(), minor_available);
+               if (constraints.fill == ProactiveConstraints.Fill.VERTICAL || constraints.fill == ProactiveConstraints.Fill.BOTH)
+                  minor_scale = minor_available;
+               else
+                  minor_scale = (int)Math.min(c.getPreferredSize().getWidth(), minor_available);
             }
-            minor_position = getAlignmentOffset(c, minor_available, minor_scale);
+            minor_position = getAlignmentOffset(constraints, minor_available, minor_scale);
 
             proposedLayout.put(c, new Rectangle(major_position, minor_position, major_scale, minor_scale));
             major_position += major_scale;
@@ -262,16 +277,14 @@ public class ProactiveLayoutManager implements LayoutManager2
       return proposedLayout;
    }
 
-   private int getAlignmentOffset(Component c, int minor_available, int minor_scale)
+   private int getAlignmentOffset(ProactiveConstraints constraints, int minor_available, int minor_scale)
    {
-      ProactiveConstraints constraints = map.get(c);
       ProactiveConstraints.Alignment itemAlignment = constraints.selfAlignment;
       if (itemAlignment == ProactiveConstraints.Alignment.AUTO)
          itemAlignment = alignment;
       // This is a bit of a quirk: .no_fill { align-self: center; }
       if (constraints.fill == ProactiveConstraints.Fill.NONE)
          itemAlignment = ProactiveConstraints.Alignment.CENTER;
-
       if (itemAlignment == ProactiveConstraints.Alignment.START)
          return 0;
       else if (itemAlignment == ProactiveConstraints.Alignment.END)
@@ -281,7 +294,7 @@ public class ProactiveLayoutManager implements LayoutManager2
       else if (itemAlignment == ProactiveConstraints.Alignment.BASELINE)
          return 0; // This is not actually supported!
       else if (itemAlignment == ProactiveConstraints.Alignment.STRETCH)
-         return minor_available;
+         return 0; //  FIXME: minor_scale should also be set to minor_available?
       // Should not be reachable
       return 0;
    }
