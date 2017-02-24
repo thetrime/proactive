@@ -36,8 +36,10 @@ public class React
          System.err.println("       Options include:");
          System.err.println("       --laf <LAF>");
          System.err.println("       --cookie <cookie>");
+         System.err.println("       --http-header <name> <value>");
       }
       int i;
+      httpHeaders = new HashMap<String, String>();
       for (i = 0; i < args.length-2; i++)
       {
          if (args[i].equals("--laf") && i+1 < args.length-2)
@@ -50,8 +52,12 @@ public class React
             cookies.add(args[i+1]);
             i++;
          }
+         if (args[i].equals("--http-header") && i+2 < args.length-2)
+         {
+            httpHeaders.put(args[i+1], args[i+2]);
+            i+=2;
+         }
       }
-      httpHeaders = new HashMap<String, String>();
       httpHeaders.put("Cookie", String.join(";", cookies));
       HTTPContext httpContext = new HTTPContext()
          {
