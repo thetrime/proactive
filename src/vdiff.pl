@@ -12,7 +12,7 @@ vdiff(A, B, [a-A|PatchSet]):-
         ; otherwise->
             PatchSet = []
         ),
-        %writeln(diff(A, B, [a-A|PatchSet])),
+        %writeq(diff(A, B, [a-A|PatchSet])), nl,
         true.
 
 walk(A, A, _, _):- !, fail.
