@@ -95,6 +95,14 @@ public class ReactWidget extends ReactComponent
       return super.getFill();
    }
 
+   @Override
+   public ProactiveConstraints.Alignment getSelfAlignment()
+   {
+      if (internalComponent != null)
+         return internalComponent.getSelfAlignment();
+      return super.getSelfAlignment();
+   }
+
    public PrologState getState()
    {
       return state;

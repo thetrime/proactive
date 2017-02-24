@@ -47,7 +47,7 @@ public class Panel extends ReactComponent
       awtComponent = panel;
       panel.setBackground(new Color(150, 168, 200));
       reconfigureLayout();
-      panel.setBorder(BorderFactory.createLineBorder(Color.RED));
+      //panel.setBorder(BorderFactory.createLineBorder(Color.RED));
    }
 
    private void reconfigureLayout()
@@ -140,7 +140,6 @@ public class Panel extends ReactComponent
                alignment = ProactiveConstraints.Alignment.END;
             else if (key.equals("stretch"))
                alignment = ProactiveConstraints.Alignment.STRETCH;
-            System.out.println("Set alignment to : " + alignment + " from " + key);
          }
          if (oldAlignment != alignment)
             reconfigureLayout();
@@ -242,6 +241,12 @@ public class Panel extends ReactComponent
             panel.add(child.getAWTComponent(), new ProactiveConstraints(child.getFill(), child.getSelfAlignment(), index));
          }
       }
+   }
+
+   @Override
+   public ProactiveConstraints.Alignment getSelfAlignment()
+   {
+      return alignment;
    }
    
    private void repackChildren()
