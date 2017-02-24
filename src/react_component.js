@@ -47,27 +47,42 @@ ReactComponent.prototype.setProperties = function(t)
         this.getDOMNode().id = t.id;
     if (t.className !== undefined)
     {
-        this.baseClassName = Prolog._atom_chars(t.className);
+        if (ReactComponent.isNull(t.className))
+            this.baseClassName = "";
+        else
+            this.baseClassName = Prolog._atom_chars(t.className);
         restyleRequired = true;
     }
     if (t.fill !== undefined)
     {
-        this.fill = Prolog._atom_chars(t.fill);
+        if (ReactComponent.isNull(t.fill))
+            this.fill = "none";
+        else
+            this.fill = Prolog._atom_chars(t.fill);
         restyleRequired = true;
     }
     if (t["align-children"] !== undefined)
     {
-        this.align_children = Prolog._atom_chars(t["align-children"]);
+        if (ReactComponent.isNull(t["align-children"]))
+            this.align_children = "start";
+        else
+            this.align_children = Prolog._atom_chars(t["align-children"]);
         restyleRequired = true;
     }
     if (t["justify-content"] !== undefined)
     {
-        this.justify_content = Prolog._atom_chars(t["justify-content"]);
+        if (ReactComponent.isNull(t["justify-content"]))
+            this.justify_content = "start";
+        else
+            this.justify_content = Prolog._atom_chars(t["justify-content"]);
         restyleRequired = true;
     }
     if (t.layout !== undefined)
     {
-        this.layout = Prolog._atom_chars(t.layout);
+        if (ReactComponent.isNull(t.layout))
+            this.layout = "vertical";
+        else
+            this.layout = Prolog._atom_chars(t.layout);
         restyleRequired = true;
     }
     if (t.weight !== undefined)

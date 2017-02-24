@@ -1,6 +1,22 @@
 var ReactComponent = require('./react_component');
 var Prolog = require('proscript');
 
+// Panel is rendered as either:
+// <div>
+//   <div class="fieldset_legend>
+//     <div class="pre_fieldset"/>
+//     <div class="fieldset_text"/>
+//     <div class="post_fieldset"/>
+//   </div>
+//   <div {contentElement}.../>
+// </div>
+
+// or
+
+// <div {contentElement}.../>
+
+// The domNode is always the root element.
+
 function Panel()
 {
     ReactComponent.call(this);
@@ -12,8 +28,6 @@ function Panel()
     this.fieldSetTextElement = null;
 }
 
-
-
 Panel.prototype = new ReactComponent;
 
 
@@ -24,7 +38,6 @@ Panel.prototype.setProperties = function(t)
     {
         if (this.legendElement == null)
         {
-            console.log("Creating legend");
             this.legendElement = document.createElement("div");
             this.legendElement.className = "proactive_container horizontal_fill horizontal_layout fieldset_legend";
             var pre = document.createElement("div"); // this is the --- at the top-left
@@ -52,20 +65,18 @@ Panel.prototype.setProperties = function(t)
         }
         else
         {
-            console.log("Changing legend");
             this.fieldSetTextElement.textContent = Prolog._portray(t.label);
         }
         this.restyle();
     }
-    else
+    else if (t.label !== undefined && ReactComponent.isNull(t.label))
     {
         // Delete the legend if preset
         if (this.legendElement != null)
         {
-            console.log("Deleting legend");
             this.domNode.removeChild(this.legendElement);
-            this.contentElement = this.getDOMNode();
             this.legendElement = null;
+            this.setDOMNode(this.contentElement);
             this.restyle();
         }
     }

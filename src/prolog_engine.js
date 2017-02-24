@@ -267,6 +267,7 @@ PrologEngine.prototype.triggerSystemEvent = function(handler, event, context, ca
 
 PrologEngine.prototype.withEventQueue = function(origin, fn)
 {
+    /*
     if (this.processing_event == true)
     {
         if (origin == "user")
@@ -279,6 +280,7 @@ PrologEngine.prototype.withEventQueue = function(origin, fn)
         return;
     }
     console.log("Processing that event, since I was otherwise unoccupied");
+*/
     this.processing_event = true;
     this.event_queue.push(fn);
     this.processEvents();
@@ -288,7 +290,7 @@ PrologEngine.prototype.processEvents = function()
 {
     if (this.event_queue.length > 0)
     {
-        console.log("Dispatching an event from my queue...");
+//        console.log("Dispatching an event from my queue...");
         this.event_queue.shift()(function(t)
                                  {
                                      this.processEvents();
@@ -296,13 +298,12 @@ PrologEngine.prototype.processEvents = function()
     }
     else
     {
-        console.log("All events are now dispatched");
+//        console.log("All events are now dispatched");
         this.processing_event = false;
     }
 }
 PrologEngine.prototype.processEvent = function(handler, event, context, callback)
 {
-    console.log("Processing an event now");
     var state, props;
     while (Prolog._is_compound(handler) && Prolog._term_functor(handler) == Constants.thisFunctor)
     {

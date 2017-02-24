@@ -9,6 +9,12 @@ function ReactWidget(parentContext, engine, elementId, props, callback)
 {
     ReactComponent.call(this);
     this.engine = engine;
+    // Suppose a widget fires an event which results in the widget no longer existing.
+    // Once the handler has completed, it will try and set the state on the (long since cleaned-up) widget
+    // which will result in freeing (a second time) the state, and therefore a mess
+    // To manage this, we have an explicit variable here: this.destroyed, which is set to true to indicate that
+    // setState should be a NOP since the widget has been destroyed
+    this.destroyed = false;
     this.elementId = elementId;
     this.props = props;
     this.owner = parentContext;
@@ -67,6 +73,11 @@ ReactWidget.prototype.getComponentName = function()
 
 ReactWidget.prototype.setState = function(newState, callback)
 {
+    if (this.destroyed)
+    {
+        callback();
+        return;
+    }
     if (this.state != undefined && !this.state.is_global)
     {
         Prolog._release_blob("state", this.state.blob);
@@ -99,9 +110,11 @@ ReactWidget.prototype.destroyWidget = function(vNode)
 
 ReactWidget.prototype.freeComponent = function(vNode)
 {
+    this.engine.deregisterWidget(this);
     this.state.freeState();
     this.props.freeState();
     Prolog._release_blob("react_component", this.blob);
+    this.destroyed = true;
     ReactComponent.prototype.freeComponent.call(this, vNode); //ie super.freeComponent(vNode)
 }
 
