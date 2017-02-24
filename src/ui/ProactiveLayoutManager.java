@@ -81,7 +81,7 @@ public class ProactiveLayoutManager implements LayoutManager2
             minor = (int)Math.max(c.getMinimumSize().getWidth(), minor);
          }
       }
-      System.out.println("Minimum Layout: (" + major + "," + minor + ")");
+      //  System.out.println("Minimum Layout: (" + major + "," + minor + ")");
       if (layout == Layout.HORIZONTAL)
          return new Dimension(major, minor);
       else if (layout == Layout.VERTICAL)

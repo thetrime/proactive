@@ -23,7 +23,7 @@ public class ReactComponentFactory
       if (c != null)
          return c.newInstance();
       System.out.println("Could not construct element: " + tagName);
-      return new org.proactive.ui.Broken();
+      return new org.proactive.ui.Broken(tagName);
    }
 
    public static void registerComponent(String tagName, Class<? extends ReactComponent> clazz) throws NoSuchMethodException
