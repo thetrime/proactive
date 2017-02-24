@@ -97,17 +97,17 @@ public class ProactiveLayoutManager implements LayoutManager2
 
    public void layoutContainer(Container parent)
    {
-      System.out.println("Laying out...");
       Component[] components = parent.getComponents();
       if (components.length == 0)
          return;
+      //System.out.println("Laying out " + parent);
       Map<Component, Rectangle> proposedLayout = makeLayout(parent);
       for (Component c : components)
       {
          if (!c.isVisible())
             continue;
          Rectangle rect = proposedLayout.get(c);
-         System.out.println("Layout for component: " + c.getClass().getName() + " = " + rect);
+         //System.out.println("--- Layout for component: " + c.getClass().getName() + " = " + rect);
          if (layout == Layout.HORIZONTAL)
             c.setBounds((int)rect.getX(), (int)rect.getY(), (int)rect.getWidth(), (int)rect.getHeight());
          else if (layout == Layout.VERTICAL)
@@ -132,16 +132,16 @@ public class ProactiveLayoutManager implements LayoutManager2
       int minor_available = 0;
       if (layout == Layout.HORIZONTAL)
       {
-         major_available = (int)parent.getSize().getWidth();
-         minor_available = (int)parent.getSize().getHeight();
+         major_available = (int)parent.getBounds().getWidth();
+         minor_available = (int)parent.getBounds().getHeight();
       }
       else if (layout == Layout.VERTICAL)
       {
-         major_available = (int)parent.getSize().getHeight();
-         minor_available = (int)parent.getSize().getWidth();
+         major_available = (int)parent.getBounds().getHeight();
+         minor_available = (int)parent.getBounds().getWidth();
       }
-
-      if (sum < major_available)
+      //System.out.println("    We have " + major_available + " x " + minor_available +" to work with");
+      if (sum <= major_available)
       {
          double extraSpace = major_available - sum;
          // We have enough space to display all the components at their preferred size. In this case if a component has:
@@ -192,7 +192,6 @@ public class ProactiveLayoutManager implements LayoutManager2
                beforePad = (int)((major_available - sum)/(2*componentCount));
             }
          }
-         System.out.println("BeforePad: " + beforePad);
 
          // Now we can set the placing on all the components
          int major_position = beforePad;
@@ -234,7 +233,6 @@ public class ProactiveLayoutManager implements LayoutManager2
             }
             else
             {
-               System.out.println("Layout of button: " + minor_position);
                proposedLayout.put(c, new Rectangle(major_position, minor_position, major_scale, minor_scale));
                major_position += major_scale + intraPad;
             }
@@ -242,6 +240,7 @@ public class ProactiveLayoutManager implements LayoutManager2
       }
       else
       {
+         //System.out.println("    -> Not enough space: " + sum + " < " + major_available);
          // We do not have enough space to display everything at its requested size. This is where we would potentially reflow components
          // but for now, just display everything in proportion to its preferred major size
          int major_position = 0;
