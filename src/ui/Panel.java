@@ -25,28 +25,20 @@ public class Panel extends ReactComponent
    private static final int HORIZONTAL = 0;
    private static final int VERTICAL = 1;
    private static final int GRID = 2;
-   private static final int START = 0;
-   private static final int CENTER = 1;
-   private static final int END = 2;
    int nextIndex = 0;
    int orientation = VERTICAL;
-   int alignment = START;
+   ProactiveConstraints.Alignment alignment = ProactiveConstraints.Alignment.STRETCH;
+   ProactiveConstraints.Justification justification = ProactiveConstraints.Justification.START;
    int total_x_weight = 0;
    int total_y_weight = 0;
 
-   private LayoutManager layoutManager = new ProactiveLayoutManager(ProactiveLayoutManager.VERTICAL);
+   private LayoutManager layoutManager;
    private Component awtComponent;
    private JPanel panel = new JPanel();
    private String id;
    private static int global_id = 0;
 
-   ReactComponent alignmentComponent = null;
    LinkedList<ReactComponent> childComponents = new LinkedList<ReactComponent>();
-   public Panel(String q)
-   {
-      this();
-      this.id = q;
-   }
 
    public Panel()
    {
@@ -54,9 +46,19 @@ public class Panel extends ReactComponent
       this.id = "{" + (global_id++) + "}";
       awtComponent = panel;
       panel.setBackground(new Color(150, 168, 200));
-      panel.setLayout(layoutManager);
-      //panel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+      reconfigureLayout();
+      panel.setBorder(BorderFactory.createLineBorder(Color.RED));
    }
+
+   private void reconfigureLayout()
+   {
+      if (orientation == HORIZONTAL)
+         layoutManager = new ProactiveLayoutManager(ProactiveLayoutManager.HORIZONTAL, alignment, justification);
+      else if (orientation == VERTICAL)
+         layoutManager = new ProactiveLayoutManager(ProactiveLayoutManager.VERTICAL, alignment, justification);
+      panel.setLayout(layoutManager);
+   }
+
    public void setProperties(HashMap<String, PrologObject> properties)
    {
       super.setProperties(properties);
@@ -104,11 +106,7 @@ public class Panel extends ReactComponent
          {
             if (orientation != GRID)
             {
-               if (orientation == HORIZONTAL)
-                  layoutManager = new ProactiveLayoutManager(ProactiveLayoutManager.HORIZONTAL);
-               else if (orientation == VERTICAL)
-                  layoutManager = new ProactiveLayoutManager(ProactiveLayoutManager.VERTICAL);
-               panel.setLayout(layoutManager);
+               reconfigureLayout();
             }
             else if (oldOrientation != GRID && orientation == GRID)
             {
@@ -126,23 +124,50 @@ public class Panel extends ReactComponent
       }
       if (properties.containsKey("align-children"))
       {
-         int oldAlignment = alignment;
+         ProactiveConstraints.Alignment oldAlignment = alignment;
          if (properties.get("align-children") == null)
          {
-            alignment = START;
+            alignment = ProactiveConstraints.Alignment.START;
          }
          else
          {
             String key = properties.get("align-children").asString();
             if (key.equals("start"))
-                alignment = START;
+                alignment = ProactiveConstraints.Alignment.START;
             else if (key.equals("center"))
-                alignment = CENTER;
-            if (key.equals("end"))
-               alignment = END;
+               alignment = ProactiveConstraints.Alignment.CENTER;
+            else if (key.equals("end"))
+               alignment = ProactiveConstraints.Alignment.END;
+            else if (key.equals("stretch"))
+               alignment = ProactiveConstraints.Alignment.STRETCH;
+            System.out.println("Set alignment to : " + alignment + " from " + key);
          }
          if (oldAlignment != alignment)
-            repackChildren();
+            reconfigureLayout();
+      }
+      if (properties.containsKey("justify-content"))
+      {
+         ProactiveConstraints.Justification oldJustification = justification;
+         if (properties.get("justify-content") == null)
+         {
+            justification = ProactiveConstraints.Justification.CENTER;
+         }
+         else
+         {
+            String key = properties.get("justify-content").asString();
+            if (key.equals("start"))
+                justification = ProactiveConstraints.Justification.START;
+            else if (key.equals("center"))
+               justification = ProactiveConstraints.Justification.CENTER;
+            else if (key.equals("end"))
+               justification = ProactiveConstraints.Justification.END;
+            else if (key.equals("space-between"))
+               justification = ProactiveConstraints.Justification.SPACE_BETWEEN;
+            else if (key.equals("space-around"))
+               justification = ProactiveConstraints.Justification.SPACE_AROUND;
+         }
+         if (oldJustification != justification)
+            reconfigureLayout();
       }
       if (properties.containsKey("scroll"))
       {
@@ -214,7 +239,7 @@ public class Panel extends ReactComponent
          if (!(child.getAWTComponent() instanceof JFrame))
          {
             childComponents.add(child);
-            panel.add(child.getAWTComponent(), new ProactiveConstraints(child.getFill(), index));
+            panel.add(child.getAWTComponent(), new ProactiveConstraints(child.getFill(), child.getSelfAlignment(), index));
          }
       }
    }

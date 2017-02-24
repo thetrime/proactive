@@ -21,6 +21,7 @@ public abstract class ReactComponent
    protected String className = null;
 
    protected ProactiveConstraints.Fill fill = ProactiveConstraints.Fill.NONE;
+   protected ProactiveConstraints.Alignment selfAlignment = ProactiveConstraints.Alignment.AUTO;
    public ReactComponent()
    {
    }
@@ -135,5 +136,10 @@ public abstract class ReactComponent
    public ProactiveConstraints.Fill getFill()
    {
       return fill;
+   }
+
+   public ProactiveConstraints.Alignment getSelfAlignment()
+   {
+      return selfAlignment;
    }
 }

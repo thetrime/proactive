@@ -14,13 +14,16 @@ public class ProactiveLayoutManager implements LayoutManager2
    public enum Layout {HORIZONTAL, VERTICAL};
    public static Layout HORIZONTAL = Layout.HORIZONTAL;
    public static Layout VERTICAL = Layout.VERTICAL;
+
+   private ProactiveConstraints.Alignment alignment = ProactiveConstraints.Alignment.CENTER;
+   private ProactiveConstraints.Justification justification = ProactiveConstraints.Justification.START;
    private Layout layout = Layout.VERTICAL;
-   private ProactiveConstraints.Fill fill;
-   public ProactiveLayoutManager(Layout layout)
+   public ProactiveLayoutManager(Layout layout, ProactiveConstraints.Alignment alignment, ProactiveConstraints.Justification justification)
    {
       map = new HashMap<Component, ProactiveConstraints>();
-      System.out.println("Set layout to: " + layout);
       this.layout = layout;
+      this.alignment = alignment;
+      this.justification = justification;
    }
 
    public void addLayoutComponent(String s, Component c) {} // Deliberately does nothing
@@ -32,26 +35,24 @@ public class ProactiveLayoutManager implements LayoutManager2
          return new Dimension (0, 0);
       int major = 0;
       int minor = 0;
-      System.out.println("Computing preferred layout for " + parent.getComponents().length + " components in " + parent);
+//      System.out.println("Computing preferred layout for " + parent.getComponents().length + " components in " + parent);
       for (Component c : parent.getComponents())
       {
          if (!c.isVisible()) continue;
          if (layout == Layout.HORIZONTAL)
          {
-            System.out.println("Horizontal");
             major += c.getPreferredSize().getWidth();
             minor = (int)Math.max(c.getPreferredSize().getHeight(), minor);
          }
          else if (layout == Layout.VERTICAL)
          {
-            System.out.println("Vertical");
             major += c.getPreferredSize().getHeight();
             minor = (int)Math.max(c.getPreferredSize().getWidth(), minor);
          }
          else
             System.out.println("Illegal layout");
       }
-      System.out.println("PreferredLayout: (" + major + "," + minor + ")");
+//      System.out.println("PreferredLayout: (" + major + "," + minor + ")");
       if (layout == Layout.HORIZONTAL)
          return new Dimension(major, minor);
       else if (layout == Layout.VERTICAL)
@@ -106,7 +107,7 @@ public class ProactiveLayoutManager implements LayoutManager2
          if (!c.isVisible())
             continue;
          Rectangle rect = proposedLayout.get(c);
-         System.out.println("Layout for component: " + rect);
+         System.out.println("Layout for component: " + c.getClass().getName() + " = " + rect);
          if (layout == Layout.HORIZONTAL)
             c.setBounds((int)rect.getX(), (int)rect.getY(), (int)rect.getWidth(), (int)rect.getHeight());
          else if (layout == Layout.VERTICAL)
@@ -148,24 +149,62 @@ public class ProactiveLayoutManager implements LayoutManager2
          //   Fill == Layout or Fill == BOTH: If there are N of these components, make them preferred size + (extraSpace/N)
          //   Otherwise: Make them preferred size
          int fillCount = 0;
+         int componentCount = 0;
          for (Component c : parent.getComponents())
          {
             if (!c.isVisible()) continue;
+            componentCount++;
             ProactiveConstraints.Fill f = map.get(c).fill;
             if (f == ProactiveConstraints.Fill.BOTH ||
                 (f == ProactiveConstraints.Fill.HORIZONTAL && layout == Layout.HORIZONTAL) ||
                 (f == ProactiveConstraints.Fill.VERTICAL && layout == Layout.VERTICAL))
                fillCount++;
          }
+
+         // Note that if fillCount is 0 we must use the justification
+         int beforePad = 0;
+         int intraPad = 0;
+         if (fillCount == 0)
+         {
+            if (justification == ProactiveConstraints.Justification.START)
+            {
+               beforePad = 0;
+               intraPad = 0;
+            }
+            else if (justification == ProactiveConstraints.Justification.END)
+            {
+               beforePad = major_available - sum;
+               intraPad = 0;
+            }
+            else if (justification == ProactiveConstraints.Justification.CENTER)
+            {
+               beforePad = (int)((major_available - sum)/2);
+               intraPad = 0;
+            }
+            else if (justification == ProactiveConstraints.Justification.SPACE_BETWEEN)
+            {
+               beforePad = 0;
+               intraPad = (int)((major_available - sum)/(componentCount-1));
+            }
+            else if (justification == ProactiveConstraints.Justification.SPACE_AROUND)
+            {
+               intraPad = (int)((major_available - sum)/(componentCount));
+               beforePad = (int)((major_available - sum)/(2*componentCount));
+            }
+         }
+
          // Now we can set the placing on all the components
-         int major_position = 0;
-         int minor_position = 0;
+         int major_position = beforePad;
+
          for (Component c : parent.getComponents())
          {
             if (!c.isVisible()) continue;
             ProactiveConstraints.Fill f = map.get(c).fill;
+
             int major_scale = 0;
             int minor_scale = 0;
+            int minor_position = 0;
+
             if (layout == Layout.HORIZONTAL)
             {
                major_scale = (int)c.getPreferredSize().getWidth();
@@ -176,17 +215,20 @@ public class ProactiveLayoutManager implements LayoutManager2
                major_scale = (int)c.getPreferredSize().getHeight();
                minor_scale = (int)Math.min(c.getPreferredSize().getWidth(), minor_available);
             }
+
+            minor_position = getAlignmentOffset(c, minor_available, minor_scale);
+
             if (f == ProactiveConstraints.Fill.BOTH ||
                 (f == ProactiveConstraints.Fill.HORIZONTAL && layout == Layout.HORIZONTAL) ||
                 (f == ProactiveConstraints.Fill.VERTICAL && layout == Layout.VERTICAL))
             {
-               proposedLayout.put(c, new Rectangle(major_position, 0, major_scale + (int)(extraSpace / (double)fillCount), minor_scale));
-               major_position += (major_scale + (int)(extraSpace / (double)fillCount));
+               proposedLayout.put(c, new Rectangle(major_position, minor_position, major_scale + (int)(extraSpace / (double)fillCount), minor_scale));
+               major_position += (major_scale + (int)(extraSpace / (double)fillCount)) + intraPad;
             }
             else
             {
-               proposedLayout.put(c, new Rectangle(major_position, 0, major_scale, minor_scale));
-               major_position += major_scale;
+               proposedLayout.put(c, new Rectangle(major_position, minor_position, major_scale, minor_scale));
+               major_position += major_scale + intraPad;
             }
          }
       }
@@ -211,11 +253,37 @@ public class ProactiveLayoutManager implements LayoutManager2
                major_scale = (int)((c.getPreferredSize().getHeight() / (double)sum) * (double)major_available);
                minor_scale = (int)Math.min(c.getPreferredSize().getWidth(), minor_available);
             }
-            proposedLayout.put(c, new Rectangle(major_position, 0, major_scale, minor_scale));
+            minor_position = getAlignmentOffset(c, minor_available, minor_scale);
+
+            proposedLayout.put(c, new Rectangle(major_position, minor_position, major_scale, minor_scale));
             major_position += major_scale;
          }
       }
       return proposedLayout;
+   }
+
+   private int getAlignmentOffset(Component c, int minor_available, int minor_scale)
+   {
+      ProactiveConstraints constraints = map.get(c);
+      ProactiveConstraints.Alignment itemAlignment = constraints.selfAlignment;
+      if (itemAlignment == ProactiveConstraints.Alignment.AUTO)
+         itemAlignment = alignment;
+      // This is a bit of a quirk: .no_fill { align-self: center; }
+      if (constraints.fill == ProactiveConstraints.Fill.NONE)
+         itemAlignment = ProactiveConstraints.Alignment.CENTER;
+
+      if (itemAlignment == ProactiveConstraints.Alignment.START)
+         return 0;
+      else if (itemAlignment == ProactiveConstraints.Alignment.END)
+         return minor_available - minor_scale;
+      else if (itemAlignment == ProactiveConstraints.Alignment.CENTER)
+         return (int)((minor_available - minor_scale)/2);
+      else if (itemAlignment == ProactiveConstraints.Alignment.BASELINE)
+         return 0; // This is not actually supported!
+      else if (itemAlignment == ProactiveConstraints.Alignment.STRETCH)
+         return minor_available;
+      // Should not be reachable
+      return 0;
    }
 
    public void invalidateLayout(Container target)
@@ -250,5 +318,4 @@ public class ProactiveLayoutManager implements LayoutManager2
    {
       return Component.CENTER_ALIGNMENT;
    }
-
 }

@@ -34,6 +34,8 @@ public class TextField implements InputWidget
    private int bypass_replacement_len = 0;
    public TextField()
    {
+      field.setMinimumSize(new java.awt.Dimension(220, 23));
+      field.setPreferredSize(new java.awt.Dimension(220, 23));
       if ("Mac OS X".equals(React.currentLaf))
       {
          component = field;
