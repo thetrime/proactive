@@ -37,6 +37,7 @@ public class ProactiveLayoutManager implements LayoutManager2
       int major = 0;
       int minor = 0;
 //      System.out.println("Computing preferred layout for " + parent.getComponents().length + " components in " + parent);
+      Insets parentInsets = parent.getInsets();
       for (Component c : parent.getComponents())
       {
          if (!c.isVisible()) continue;
@@ -53,11 +54,10 @@ public class ProactiveLayoutManager implements LayoutManager2
          else
             System.out.println("Illegal layout");
       }
-//      System.out.println("PreferredLayout: (" + major + "," + minor + ")");
       if (layout == Layout.HORIZONTAL)
-         return new Dimension(major, minor);
+         return new Dimension(major + parentInsets.left + parentInsets.right, minor + parentInsets.top + parentInsets.bottom);
       else if (layout == Layout.VERTICAL)
-         return new Dimension(minor, major);
+         return new Dimension(minor + parentInsets.top + parentInsets.bottom, major + parentInsets.left + parentInsets.right);
       else
          return new Dimension(0, 0);
    }
@@ -68,6 +68,7 @@ public class ProactiveLayoutManager implements LayoutManager2
          return new Dimension (0, 0);
       int major = 0;
       int minor = 0;
+      Insets parentInsets = parent.getInsets();
       for (Component c : parent.getComponents())
       {
          if (!c.isVisible()) continue;
@@ -84,9 +85,9 @@ public class ProactiveLayoutManager implements LayoutManager2
       }
       //  System.out.println("Minimum Layout: (" + major + "," + minor + ")");
       if (layout == Layout.HORIZONTAL)
-         return new Dimension(major, minor);
+         return new Dimension(major + parentInsets.left + parentInsets.right, minor + parentInsets.top + parentInsets.bottom);
       else if (layout == Layout.VERTICAL)
-         return new Dimension(minor, major);
+         return new Dimension(minor + parentInsets.top + parentInsets.bottom, major + parentInsets.left + parentInsets.right);
       else
          return new Dimension(0, 0);
    }
@@ -134,6 +135,7 @@ public class ProactiveLayoutManager implements LayoutManager2
       int major_pad = 0;
       int minor_pad = 0;
       Insets parentInsets = parent.getInsets();
+
       if (layout == Layout.HORIZONTAL)
       {
          major_available = (int)parent.getBounds().getWidth() - parentInsets.left - parentInsets.right;
