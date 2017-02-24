@@ -5,6 +5,7 @@ import java.awt.Dimension;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Rectangle;
+import java.awt.Insets;
 import java.util.Map;
 import java.util.HashMap;
 
@@ -130,15 +131,22 @@ public class ProactiveLayoutManager implements LayoutManager2
       }
       int major_available = 0;
       int minor_available = 0;
+      int major_pad = 0;
+      int minor_pad = 0;
+      Insets parentInsets = parent.getInsets();
       if (layout == Layout.HORIZONTAL)
       {
-         major_available = (int)parent.getBounds().getWidth();
-         minor_available = (int)parent.getBounds().getHeight();
+         major_available = (int)parent.getBounds().getWidth() - parentInsets.left - parentInsets.right;
+         major_pad = parentInsets.left;
+         minor_available = (int)parent.getBounds().getHeight() - parentInsets.top - parentInsets.bottom;
+         minor_pad = parentInsets.top;
       }
       else if (layout == Layout.VERTICAL)
       {
-         major_available = (int)parent.getBounds().getHeight();
-         minor_available = (int)parent.getBounds().getWidth();
+         major_available = (int)parent.getBounds().getHeight() - parentInsets.top - parentInsets.bottom;
+         major_pad = parentInsets.top;
+         minor_available = (int)parent.getBounds().getWidth() - parentInsets.left - parentInsets.right;
+         minor_pad = parentInsets.left;
       }
       //System.out.println("    We have " + major_available + " x " + minor_available +" to work with");
       if (sum <= major_available)
@@ -162,8 +170,8 @@ public class ProactiveLayoutManager implements LayoutManager2
          }
 
          // Note that if fillCount is 0 we must use the justification
-         int beforePad = 0;
          int intraPad = 0;
+         int beforePad = 0;
          if (fillCount == 0)
          {
             if (justification == ProactiveConstraints.Justification.START)
@@ -194,7 +202,7 @@ public class ProactiveLayoutManager implements LayoutManager2
          }
 
          // Now we can set the placing on all the components
-         int major_position = beforePad;
+         int major_position = beforePad + major_pad;
 
          for (Component c : parent.getComponents())
          {
@@ -203,7 +211,7 @@ public class ProactiveLayoutManager implements LayoutManager2
 
             int major_scale = 0;
             int minor_scale = 0;
-            int minor_position = 0;
+            int minor_position = minor_pad;
 
             if (layout == Layout.HORIZONTAL)
             {
@@ -222,7 +230,7 @@ public class ProactiveLayoutManager implements LayoutManager2
                   minor_scale = (int)Math.min(c.getPreferredSize().getWidth(), minor_available);
             }
 
-            minor_position = getAlignmentOffset(constraints, minor_available, minor_scale);
+            minor_position = minor_pad + getAlignmentOffset(constraints, minor_available, minor_scale);
 
             if (constraints.fill == ProactiveConstraints.Fill.BOTH ||
                 (constraints.fill == ProactiveConstraints.Fill.HORIZONTAL && layout == Layout.HORIZONTAL) ||
@@ -243,8 +251,8 @@ public class ProactiveLayoutManager implements LayoutManager2
          //System.out.println("    -> Not enough space: " + sum + " < " + major_available);
          // We do not have enough space to display everything at its requested size. This is where we would potentially reflow components
          // but for now, just display everything in proportion to its preferred major size
-         int major_position = 0;
-         int minor_position = 0;
+         int major_position = major_pad;
+         int minor_position = minor_pad;
          for (Component c : parent.getComponents())
          {
             if (!c.isVisible()) continue;
@@ -267,7 +275,7 @@ public class ProactiveLayoutManager implements LayoutManager2
                else
                   minor_scale = (int)Math.min(c.getPreferredSize().getWidth(), minor_available);
             }
-            minor_position = getAlignmentOffset(constraints, minor_available, minor_scale);
+            minor_position = minor_pad + getAlignmentOffset(constraints, minor_available, minor_scale);
 
             proposedLayout.put(c, new Rectangle(major_position, minor_position, major_scale, minor_scale));
             major_position += major_scale;
