@@ -80,6 +80,13 @@ Panel.prototype.setProperties = function(t)
             this.restyle();
         }
     }
+    if (t.background !== undefined)
+    {
+        if (ReactComponent.isNull(t.background))
+            this.getDOMNode().style.background = "inherit";
+        else if (Prolog._is_atom(t.background))
+            this.getDOMNode().style.background = Prolog._atom_chars(t.background);
+    }
     if (t.scroll !== undefined)
     {
         if (ReactComponent.isNull(t.scroll))
