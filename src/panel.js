@@ -50,18 +50,19 @@ Panel.prototype.setProperties = function(t)
             var post = document.createElement("div"); // this is the --- at the top-right
             post.className = "post_fieldset horizontal_fill";
             this.legendElement.appendChild(post);
-            this.baseClassName = "proactive_container fieldset";
-            var newParent = document.createElement("div");
-            newParent.className = "proactive_container fieldset vertical_layout";
+            this.baseClassName = "proactive_container fieldset vertical_layout";
             var f = "no_fill";
             if (this.fill == "horizontal")
                 f = "horizontal_fill";
             else if (this.fill == "vertical")
                 f = "vertical_fill";
-            this.getDOMNode().className = "proactive_container fieldset vertical_layout " + f;
-            newParent.appendChild(this.getDOMNode());
-            newParent.insertBefore(this.legendElement, this.getDOMNode());
-            this.setDOMNode(newParent);
+            var newContentElement = document.createElement("div");
+            newContentElement.className = "proactive_container vertical_layout " + f;
+            while (this.getDOMNode().firstChild != null)
+                newContentElement.appendChild(this.contentElement.firstChild);
+            this.getDOMNode().appendChild(this.legendElement);
+            this.getDOMNode().appendChild(newContentElement);
+            this.contentElement = newContentElement;
         }
         else
         {
@@ -76,7 +77,10 @@ Panel.prototype.setProperties = function(t)
         {
             this.domNode.removeChild(this.legendElement);
             this.legendElement = null;
-            this.setDOMNode(this.contentElement);
+            while (this.contentElement.firstChild != null)
+                this.getDOMNode().appendChild(this.contentElement.firstChild);
+            this.contentElement = this.getDOMNode();
+            this.baseClassName = "proactive_container";
             this.restyle();
         }
     }
@@ -96,6 +100,7 @@ Panel.prototype.setProperties = function(t)
 
 Panel.prototype.restyle = function()
 {
+    ReactComponent.prototype.restyle.call(this);
     this.contentElement.className = this.getStyle().replace(this.deletion, ' fieldset_main ');
 }
 
