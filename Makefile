@@ -13,13 +13,13 @@ include JS.src
 
 
 CLIENTS?=swing-client js-client
-
+MINIFY?=true
 REACT_SRC=proactive-${VERSION}/src/jsx.pl                     \
 	  proactive-${VERSION}/src/vdiff.pl                   \
 	  proactive-${VERSION}/src/react.pl                   \
 	  proactive-${VERSION}/src/dom.pl
 
-all:	force-proscript-build $(CLIENTS) $(REACT_SRC)
+all:	$(CLIENTS) $(REACT_SRC)
 
 .src:	$(SWING_SRC) Swing.src
 	@echo $(SWING_SRC) > $@
@@ -31,7 +31,7 @@ build:
 
 swing-client: proactive-${VERSION}/lib/proactive.jar
 
-js-client: proactive-${VERSION}/lib/proactive.js proactive-${VERSION}/lib/proscript.js.mem proactive-${VERSION}/css/proactive.css
+js-client: force-proscript-build proactive-${VERSION}/lib/proactive.js proactive-${VERSION}/lib/proscript.js.mem proactive-${VERSION}/css/proactive.css
 
 ifeq ($(OS), Windows_NT)
 CLASSPATH_SEPARATOR=\;
@@ -60,7 +60,11 @@ proactive-${VERSION}/lib/proactive.js:	$(JS_SRC) $(REACT_SRC) node_modules/brfs 
 # We have to disable warnings here because emscripten generates output containing a HUGE amount of unused vars and functions
 # and uglify produces pages and pages of warnings about them if we dont stop it
 	mkdir -p proactive-${VERSION}/lib
+ifeq ($(MINIFY),true)
 	node_modules/browserify/bin/cmd.js --standalone Proactive -t brfs src/core.js | node_modules/uglifyjs/bin/uglifyjs  -m -c warnings=false > proactive-${VERSION}/lib/proactive.js
+else
+	node_modules/browserify/bin/cmd.js --standalone Proactive -t brfs src/core.js  > proactive-${VERSION}/lib/proactive.js
+endif
 
 proactive-${VERSION}/css/proactive.css:	css/proactive.css
 	@mkdir -p proactive-${VERSION}/css

@@ -491,7 +491,6 @@ PrologEngine.prototype.onMessage = function(event)
 PrologEngine.prototype.indicateBusy = function()
 {
     var spinner = document.getElementById("$spinner");
-    console.log("Spinner: " + spinner);
     if (spinner !== null)
         spinner.className = "busy";
 }

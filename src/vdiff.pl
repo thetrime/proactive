@@ -577,7 +577,11 @@ patch_op(widget_patch(LeftVNode, Widget), DomNode, Options, NewNode):-
             Updating = true,
             update_widget(Widget, LeftVNode, DomNode, NewNode)
         ; otherwise->
-	    vdiff_warning(cannot_update_widget(LeftVNode)),
+            % We get here if we are going element -> widget
+            % In this case, update_widget/4 is not applicable. We have to cut out the old component
+            % discard it, and glue in the new component after rendering it
+            % It does not really merit a warning
+            %vdiff_warning(cannot_update_widget(LeftVNode)),
             Updating = false,
             render(Options, Widget, NewNode)
         ),
@@ -589,9 +593,14 @@ patch_op(widget_patch(LeftVNode, Widget), DomNode, Options, NewNode):-
             true
         ),
         ( Updating == true ->
+            % widget -> widget
             true
-        ; otherwise->
+        ; LeftVNode = widget(_, _, _)->
+            % widget -> element
             destroy_widget(DomNode, LeftVNode)
+        ; otherwise->
+            % element -> widget
+            true
         ).
 
 

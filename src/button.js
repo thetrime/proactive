@@ -8,6 +8,7 @@ function Button()
 {
     ReactComponent.call(this);
     this.setDOMNode(document.createElement("button"));
+    this.imageNode = null;
 }
 
 function clickHandler(event)
@@ -23,6 +24,17 @@ Button.prototype.setProperties = function(t)
    ReactComponent.prototype.setProperties.call(this, t);
     if (t.label !== undefined)
         this.domNode.textContent = Prolog._portray(t.label);
+    if (t.image !== undefined)
+    {
+        if (ReactComponent.isNull(t.image) && this.imageNode != null)
+            this.domNode.removeChild(imageNode);
+        else
+        {
+            this.imageNode = document.createElement("img");
+            this.imageNode.src = Prolog._portray(t.image);
+            this.domNode.appendChild(this.imageNode);
+        }
+    }
     if (t.onClick !== undefined)
         this.setClickHandler(t.onClick);
     if (t.disabled !== undefined)
