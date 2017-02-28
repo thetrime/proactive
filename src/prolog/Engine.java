@@ -272,6 +272,35 @@ public class Engine
       return CompoundTerm.getList(elements);
    }
 
+   public void checkForMessageHandlers(ReactWidget context)
+   {
+      if (!env.predicateExists(context.getComponentName(), CompoundTermTag.get("onMessage", 5)))
+         return;
+      VariableTerm replyTerm = new VariableTerm("Result");
+      Term goal = new CompoundTerm(AtomTerm.get("findMessageHandlers"), new Term[]{AtomTerm.get(context.getComponentName()), context.getState(), context.getProps(), replyTerm});
+      int undoPosition = interpreter.getUndoPosition();
+      Interpreter.Goal g = interpreter.prepareGoal(goal);
+      try
+      {
+         PrologCode.RC rc = interpreter.execute(g);
+         if (rc == PrologCode.RC.SUCCESS)
+            interpreter.stop(g);
+         if (rc == PrologCode.RC.SUCCESS || rc == PrologCode.RC.SUCCESS_LAST)
+         {
+            System.out.println(replyTerm);
+            if (replyTerm.dereference() != TermConstants.emptyListAtom)
+               registerForMessages(replyTerm.dereference());
+            interpreter.undo(undoPosition);
+         }
+         else
+            System.out.println("findMessageHandlers failed?");
+      }
+      catch (PrologException notDefined)         
+      {
+         notDefined.printStackTrace();
+      }
+   }
+
    public boolean checkForFluxListeners(ReactWidget context)
    {
       // FIXME: Not quite. listen_for needs to have a goal as the second argument, and we need to take note of that!
@@ -911,7 +940,14 @@ public class Engine
 
    public void sendAsyncMessage(Term t)
    {
-      serverConnection.send(gnu.prolog.io.TermWriter.toString(t) + ".\n");
+      serverConnection.send("message(" + gnu.prolog.io.TermWriter.toString(t) + ").\n");
    }
+
+   public void registerForMessages(Term t)
+   {
+      System.out.println("listen_for(" + gnu.prolog.io.TermWriter.toString(t) + ").\n");
+      serverConnection.send("listen_for(" + gnu.prolog.io.TermWriter.toString(t) + ").\n");
+   }
+
 
 }

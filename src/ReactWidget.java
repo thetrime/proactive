@@ -59,6 +59,7 @@ public class ReactWidget extends ReactComponent
 
       // Next, check to see if the module needs any flux listeners
       hasFluxListeners = engine.checkForFluxListeners(this);
+      engine.checkForMessageHandlers(this);
    }
 
    public String getWidgetId()
@@ -116,6 +117,7 @@ public class ReactWidget extends ReactComponent
    {
       state = newState;
       //System.out.println("State of " + elementId + " is now " + newState);
+      engine.checkForMessageHandlers(this);
       reRender();
    }
 

@@ -2,7 +2,7 @@
 
 var ReactComponent = require('./react_component');
 var Prolog = require('proscript');
-
+var Constants = require('./constants');
 var global_widget_id = 0;
 
 function ReactWidget(parentContext, engine, elementId, props, callback)
@@ -23,6 +23,7 @@ function ReactWidget(parentContext, engine, elementId, props, callback)
     this.id = "$widget" + (global_widget_id++);
     engine.registerWidget(this);
     this.setProperties(props.getProperties());
+    this.listeners = Constants.emptyListAtom;
     engine.getInitialState(elementId, props, function(state)
                            {
                                this.state = state;
@@ -33,10 +34,14 @@ function ReactWidget(parentContext, engine, elementId, props, callback)
                                                                                    {
                                                                                        this.internalComponent = internalComponent;
                                                                                        this.internalComponent.setOwnerDocument(this);
-                                                                                       this.hasFluxListeners = engine.checkForFluxListeners(this);
+                                                                                       //this.hasFluxListeners = engine.checkForFluxListeners(this);
                                                                                        this.internalComponent.restyle();
-                                                                                       callback.bind(this)(this);
-                                                                                       //setTimeout(function(){callback(this)}.bind(this), 0);
+                                                                                       this.engine.checkForMessageHandlers(this,
+                                                                                                                           function()
+                                                                                                                           {
+                                                                                                                               callback(this);
+                                                                                                                           }.bind(this))
+                                                                                       //callback.bind(this)(this);
                                                                                    }.bind(this));
                                                   }.bind(this));
                            }.bind(this));
@@ -83,7 +88,11 @@ ReactWidget.prototype.setState = function(newState, callback)
         Prolog._release_blob("state", this.state.blob);
     }
     this.state = newState;
-    this.reRender(callback);
+    this.engine.checkForMessageHandlers(this,
+                                        function()
+                                        {
+                                            this.reRender(callback);
+                                        }.bind(this))
 }
 
 ReactWidget.prototype.updateWidget = function(newProps, callback)

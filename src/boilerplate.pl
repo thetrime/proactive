@@ -155,3 +155,18 @@ show(Goal, Goal, full, _):-
 :-meta_predicate(?(0)).
 ?(Goal):- show(Goal, Goal, minimal, _).
 ??(Goal):- show(Goal, Goal, explicit, _).
+
+updateMessageHandlers(Module, Current, State, Props, Changes, Handlers):-
+        findall(handle(Key, Discriminant, Handler),
+                Module:onMessage(State, Props, Key, Discriminant, Handler),
+                Handlers),
+        findall(Term,
+                ( member(Added, Handlers),
+                  \+member(Added, Current),
+                  Term = +Added
+                ; member(Deleted, Current),
+                  \+member(Deleted, Handlers),
+                  Term = -Deleted
+                ),
+                Changes),
+        Changes \== [].
