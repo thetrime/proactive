@@ -37,6 +37,7 @@ public class React
          System.err.println("       --laf <LAF>");
          System.err.println("       --cookie <cookie>");
          System.err.println("       --http-header <name> <value>");
+         System.exit(-1);
       }
       int i;
       httpHeaders = new HashMap<String, String>();
