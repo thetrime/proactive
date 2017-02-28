@@ -172,9 +172,9 @@ public class Panel extends ReactComponent
       {
          // FIXME: Not this simple!
          //   * Check scroll modes
-         //   * Could be turning scroll OFF!
+         //   * Could be turning scroll ON->OFF!
          //   * Could be changing from scroll->different scroll
-         if (properties.get("scroll") == null)
+         if (properties.get("scroll") == null || "none".equals(properties.get("scroll")))
          {
             awtComponent = panel;
          }
