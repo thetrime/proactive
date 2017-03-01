@@ -28,7 +28,7 @@ public class Panel extends ReactComponent
    int nextIndex = 0;
    int orientation = VERTICAL;
    ProactiveConstraints.Alignment alignment = ProactiveConstraints.Alignment.STRETCH;
-   ProactiveConstraints.Justification justification = ProactiveConstraints.Justification.START;
+   ProactiveConstraints.Justification justification = ProactiveConstraints.Justification.CENTER;
    int total_x_weight = 0;
    int total_y_weight = 0;
 
