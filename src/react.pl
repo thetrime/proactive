@@ -131,12 +131,12 @@ listen_react_loop(Websocket):-
 listen_for_messages([]):- !.
 
 listen_for_messages([-handle(Key, _, Handler)|Keys]):-
-        ??retractall(react_client_handles_message(Key, Handler)),
-        ??listen_for_messages(Keys).
+        retractall(react_client_handles_message(Key, Handler)),
+        listen_for_messages(Keys).
 
 listen_for_messages([+handle(Key, Discriminant, Handler)|Keys]):-
-        ??assert(react_client_handles_message(Key, Handler) :- Discriminant),
-        ??listen_for_messages(Keys).
+        assert(react_client_handles_message(Key, Handler) :- Discriminant),
+        listen_for_messages(Keys).
 
 ws_listen_slave(Websocket, Owner):-
         ws_receive(Websocket, Message),
@@ -144,16 +144,16 @@ ws_listen_slave(Websocket, Owner):-
             thread_send_message(Owner, close)
         ; Message.opcode == text->
             Data = Message.data,
-            ??read_term_from_atom(Data, Term, []),
-            ( ??Term = message(T)->
-                ( catch(??react_message_hook(T),
+            read_term_from_atom(Data, Term, []),
+            ( Term = message(T)->
+                ( catch(react_message_hook(T),
                         Exception,
                         format(user_error, 'Exception handling Proactive message ~q: ~p~n', [T, Exception]))->
                     true
                 ; format(user_error, 'Failure handling Proactive message ~q~n', [T])
                 )
-            ; ??Term = listen_for(T)->
-                ??thread_send_message(Owner, listen_for_messages(T))
+            ; Term = listen_for(T)->
+                thread_send_message(Owner, listen_for_messages(T))
             ; format(user_error, 'Unexpected message from client: ~q~n', [Term])
             ),
             ws_listen_slave(Websocket, Owner)
