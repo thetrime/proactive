@@ -17,7 +17,7 @@ public class ProactiveLayoutManager implements LayoutManager2
    public static Layout VERTICAL = Layout.VERTICAL;
 
    private ProactiveConstraints.Alignment alignment = ProactiveConstraints.Alignment.CENTER;
-   private ProactiveConstraints.Justification justification = ProactiveConstraints.Justification.START;
+   private ProactiveConstraints.Justification justification = ProactiveConstraints.Justification.CENTER;
    private Layout layout = Layout.VERTICAL;
    public ProactiveLayoutManager(Layout layout, ProactiveConstraints.Alignment alignment, ProactiveConstraints.Justification justification)
    {
@@ -151,6 +151,7 @@ public class ProactiveLayoutManager implements LayoutManager2
          minor_pad = parentInsets.left;
       }
       //System.out.println("    We have " + major_available + " x " + minor_available +" to work with");
+      //System.out.println("Layout: " + layout);
       if (sum <= major_available)
       {
          double extraSpace = major_available - sum;
@@ -170,7 +171,7 @@ public class ProactiveLayoutManager implements LayoutManager2
                 (f == ProactiveConstraints.Fill.VERTICAL && layout == Layout.VERTICAL))
                fillCount++;
          }
-
+         //System.out.println("We have " + fillCount + " components which require fill in our " + major_available + " sized component");
          // Note that if fillCount is 0 we must use the justification
          int intraPad = 0;
          int beforePad = 0;
@@ -214,11 +215,12 @@ public class ProactiveLayoutManager implements LayoutManager2
             int major_scale = 0;
             int minor_scale = 0;
             int minor_position = minor_pad;
-
             if (layout == Layout.HORIZONTAL)
             {
                major_scale = (int)c.getPreferredSize().getWidth();
                if (constraints.fill == ProactiveConstraints.Fill.VERTICAL || constraints.fill == ProactiveConstraints.Fill.BOTH)
+                  minor_scale = minor_available;
+               else if (constraints.fill == ProactiveConstraints.Fill.HORIZONTAL)
                   minor_scale = minor_available;
                else
                   minor_scale = (int)Math.min(c.getPreferredSize().getHeight(), minor_available);
@@ -227,6 +229,8 @@ public class ProactiveLayoutManager implements LayoutManager2
             {
                major_scale = (int)c.getPreferredSize().getHeight();
                if (constraints.fill == ProactiveConstraints.Fill.HORIZONTAL || constraints.fill == ProactiveConstraints.Fill.BOTH)
+                  minor_scale = minor_available;
+               else if (constraints.fill == ProactiveConstraints.Fill.VERTICAL)
                   minor_scale = minor_available;
                else
                   minor_scale = (int)Math.min(c.getPreferredSize().getWidth(), minor_available);
@@ -266,6 +270,8 @@ public class ProactiveLayoutManager implements LayoutManager2
                major_scale = (int)((c.getPreferredSize().getWidth() / (double)sum) * (double)major_available);
                if (constraints.fill == ProactiveConstraints.Fill.VERTICAL || constraints.fill == ProactiveConstraints.Fill.BOTH)
                   minor_scale = minor_available;
+               else if (constraints.fill == ProactiveConstraints.Fill.HORIZONTAL)
+                  minor_scale = minor_available;
                else
                   minor_scale = (int)Math.min(c.getPreferredSize().getHeight(), minor_available);
             }
@@ -273,6 +279,8 @@ public class ProactiveLayoutManager implements LayoutManager2
             {
                major_scale = (int)((c.getPreferredSize().getHeight() / (double)sum) * (double)major_available);
                if (constraints.fill == ProactiveConstraints.Fill.HORIZONTAL || constraints.fill == ProactiveConstraints.Fill.BOTH)
+                  minor_scale = minor_available;
+               else if (constraints.fill == ProactiveConstraints.Fill.VERTICAL)
                   minor_scale = minor_available;
                else
                   minor_scale = (int)Math.min(c.getPreferredSize().getWidth(), minor_available);
