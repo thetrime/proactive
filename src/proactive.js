@@ -4,10 +4,12 @@ window.onPrologReady = function(Prolog)
 {
     var ProactiveComponentFactory = require('./proactive_component_factory.js');
     var Constants = require('./constants');
+    var Version = require('./version');
     var PrologEngine = require('./prolog_engine')
     var ReactWidget = require('./react_widget');
     var PrologState = require('./prolog_state');
     var ReactComponent = require('./react_component.js');
+    console.log("Proactive v" + Version + " is ready");
     if (onProactiveReady !== undefined)
         onProactiveReady({render: function(url, propSpec, rootElementId, container, callback, errorHandler)
 			  {

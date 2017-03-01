@@ -13,7 +13,6 @@ import java.net.URI;
 import org.proactive.prolog.Engine;
 import org.proactive.prolog.PrologObject;
 import org.proactive.ReactComponent;
-import org.proactive.CodeChangeListener;
 import org.proactive.StyleSheetListener;
 import org.proactive.React;
 import org.proactive.HTTPContext;
@@ -21,6 +20,7 @@ import org.proactive.StyleSheet;
 import org.proactive.ReactWidget;
 import org.proactive.ReactComponentFactory;
 import org.proactive.prolog.PrologState;
+import org.proactive.Version;
 
 import gnu.prolog.term.Term;
 import gnu.prolog.term.CompoundTerm;
@@ -41,6 +41,7 @@ public class ReactApp extends JFrame implements StyleSheetListener
    public ReactApp(String URL, String rootElementId, HTTPContext httpContext) throws Exception
    {
       super("React Test");
+      System.out.println("Proactive v" + Version.version + " is ready");
       StyleSheet sheet = new StyleSheet();
       sheet.setValueForClass("title", "colour", java.awt.Color.WHITE);
       sheet.setValueForClass("title", "font-size", 24);
@@ -48,7 +49,6 @@ public class ReactApp extends JFrame implements StyleSheetListener
       engine = new Engine(URL, rootElementId, httpContext);
       context = new ReactWidget(null, engine, rootElementId, PrologState.emptyState);
       engine.setRootWidget(context);
-      //React.addCodeChangeListener(new URI(URL + "/listen"), rootElementId, this);
       React.addStyleSheetListener(this);
       getContentPane().setLayout(new BorderLayout());
       getContentPane().add(context.getAWTComponent(), BorderLayout.CENTER);
@@ -65,26 +65,6 @@ public class ReactApp extends JFrame implements StyleSheetListener
             {
                try
                {
-                  context.reRender();
-                  validate();
-                  repaint();
-               }
-               catch(Exception e)
-               {
-                  e.printStackTrace();
-               }
-            }
-         });
-   }
-   public void handleCodeChange() 
-   {
-      SwingUtilities.invokeLater(new Runnable()
-         {
-            public void run()
-            {
-               try
-               {
-                  engine.make();
                   context.reRender();
                   validate();
                   repaint();

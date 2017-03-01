@@ -13,3 +13,5 @@ node_modules/uglifyjs
 src/#*
 src/.#*
 build
+src/version.js
+src/Version.java

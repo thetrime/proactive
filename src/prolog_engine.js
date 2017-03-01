@@ -9,6 +9,8 @@ var Prolog = require('proscript');
 
 var getInitialStateFunctor = Prolog._make_functor(Prolog._make_atom("getInitialState"), 2);
 var componentWillReceivePropsFunctor = Prolog._make_functor(Prolog._make_atom("componentWillReceiveProps"), 3);
+var updateMessageHandlersFunctor = Prolog._make_functor(Prolog._make_atom("updateMessageHandlers"), 6);
+var onMessageFunctor = Prolog._make_functor(Prolog._make_atom("onMessage"), 5);
 var renderFunctor = Prolog._make_functor(Prolog._make_atom("render"), 3);
 var documentFunctor = Prolog._make_functor(Prolog._make_atom("document"), 1);
 var createElementFromVDomFunctor = Prolog._make_functor(Prolog._make_atom("create_element_from_vdom"), 3);
@@ -66,6 +68,7 @@ function PrologEngine(baseURL, rootElementId, errorHandler, callback)
     this.make(callback);
 }
 
+
 function getServerConnection(URI, rootElementId, callback)
 {
     server_connection = new WebSocket(URI);
@@ -82,9 +85,53 @@ function getServerConnection(URI, rootElementId, callback)
     }
 }
 
+PrologEngine.prototype.checkForMessageHandlers = function(widget, callback)
+{
+    if (!Prolog._exists_predicate(Prolog._make_atom(widget.elementId), onMessageFunctor))
+    {
+        callback();
+        return;
+    }
+    var savePoint = Prolog._save_state();
+    var result = Prolog._make_variable();
+    var delta = Prolog._make_variable();
+    var goal = Prolog._make_compound(updateMessageHandlersFunctor, [Prolog._make_atom(widget.elementId),
+                                                                    widget.listeners,
+                                                                    widget.state.blob,
+                                                                    widget.props.blob,
+                                                                    delta,
+                                                                    result]);
+    Prolog._execute(this.env,
+                    goal,
+                    function(success)
+                    {
+                        var newListeners;
+                        if (success)
+                        {
+                            Prolog._free_local(widget.listeners);
+                            widget.listeners = Prolog._make_local(Prolog._deref(result));
+                            this.registerForMessages(delta);
+                            Prolog._restore_state(savePoint);
+                        }
+                        else
+                        {
+                            var ex = Prolog._get_exception();
+                            if (ex != 0)
+                                console.log("findMessageHandlers/4 raised an error: " + ex  + Prolog._format_term(null, 1200, ex));
+                            Prolog._restore_state(savePoint);
+                        }
+                        callback();
+                    }.bind(this));
+}
+
+PrologEngine.prototype.registerForMessages = function(term)
+{
+    server_connection.send("listen_for(" + Prolog._format_term(qOp, 1200, term) + ").\n");
+}
+
 PrologEngine.prototype.sendMessage = function(term)
 {
-    server_connection.send(Prolog._format_term(qOp, 1200, term + ".\n"));
+    server_connection.send("message(" + Prolog._format_term(qOp, 1200, term) + ").\n");
 }
 
 PrologEngine.prototype.make = function(callback)
@@ -254,6 +301,7 @@ PrologEngine.prototype.triggerEvent = function(handler, event, context, callback
                         {
                             this.processEvent(handler, event, context, function(t) { callback(t); then();}.bind(this));
                         }.bind(this));
+//    this.processEvent(handler, event, context, callback);
 }
 
 PrologEngine.prototype.triggerSystemEvent = function(handler, event, context, callback)
@@ -267,7 +315,7 @@ PrologEngine.prototype.triggerSystemEvent = function(handler, event, context, ca
 
 PrologEngine.prototype.withEventQueue = function(origin, fn)
 {
-    /*
+/*
     if (this.processing_event == true)
     {
         if (origin == "user")
@@ -453,6 +501,7 @@ PrologEngine.prototype.onMessage = function(event)
     {
         if (Prolog._term_functor(t) == consultedFunctor)
         {
+            Prolog._free_local(t);
             this.withEventQueue("internal",
                                 function(then)
                                 {
@@ -467,25 +516,34 @@ PrologEngine.prototype.onMessage = function(event)
         {
             // We know the modules that the server thinks should process this event
             var module = Prolog._atom_chars(Prolog._term_arg(t, 0));
-            console.log("Looking for handlers in " + module);
-            var w = widgets[module];
-            console.log("Found these:");
-            console.log(w);
-            if (w != undefined)
-            {
-                // For each of these trigger an event
-                for (var i = 0; i < w.length; i++)
-                {
-                    var handler = Prolog._term_arg(t, 1);
-                    var event = Prolog._term_arg(t, 2);
-                    w[i].triggerSystemEvent(handler, event, function() {console.log("Message dispatched");});
-                }
-            }
+            dispatchMessages(widgets[module], 0, t);
         }
         else
+        {
             console.log("Unexpected message format: " + Prolog._portray(t) + " from " + event.data);
-        Prolog._free_local(t);
+            Prolog._free_local(t);
+        }
     }
+}
+
+function dispatchMessages(w, i, t)
+{
+    if (w != undefined && i < w.length)
+    {
+        // For each of these trigger an event
+        var handler = Prolog._make_local(Prolog._term_arg(t, 1));
+        var event = Prolog._make_local(Prolog._term_arg(t, 2));
+        w[i].triggerEvent(handler,
+                          event,
+                          function()
+                          {
+                              Prolog._free_local(handler);
+                              Prolog._free_local(event);
+                              dispatchMessages(w, i+1, t);
+                          });
+    }
+    else
+        Prolog._free_local(t);
 }
 
 PrologEngine.prototype.indicateBusy = function()
