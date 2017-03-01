@@ -89,7 +89,7 @@ PrologEngine.prototype.checkForMessageHandlers = function(widget, callback)
 {
     if (!Prolog._exists_predicate(Prolog._make_atom(widget.elementId), onMessageFunctor))
     {
-        callback(currentListeners);
+        callback();
         return;
     }
     var savePoint = Prolog._save_state();
