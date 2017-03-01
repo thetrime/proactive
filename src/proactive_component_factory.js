@@ -16,6 +16,7 @@ var Title = require('./title');
 var Frame = require('./frame');
 var Image = require('./image');
 var TextArea = require('./textarea');
+var Grid = require('./grid');
 
 var overrides = {};
 
@@ -43,6 +44,7 @@ module.exports.createElement = function(name)
         case "Frame": return new Frame();
         case "Image": return new Image();
         case "TextArea": return new TextArea();
+        case "Grid": return new Grid();
         default: return new Broken(name);
     }
 }

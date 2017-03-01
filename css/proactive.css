@@ -243,3 +243,18 @@ table
     border: 2px solid white;
     padding: 10px;
 }
+
+.grid-shrink
+{
+    white-space:nowrap;
+}
+
+.grid-expand
+{
+    width: 100%;
+}
+
+.grid
+{
+    table-layout: auto;
+}
