@@ -14,6 +14,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.Dimension;
 import java.util.List;
 import java.util.LinkedList;
 import java.util.HashMap;
@@ -41,6 +42,8 @@ public class Table extends ReactComponent
                return cellRenderer;
             }
          };
+      table.setPreferredScrollableViewportSize(table.getPreferredSize());
+      table.setFillsViewportHeight(true);
       table.getTableHeader().addMouseMotionListener(new MouseMotionAdapter()
          {
             public void mouseMoved(MouseEvent me)
@@ -327,6 +330,7 @@ public class Table extends ReactComponent
          // It doesnt matter (currently) where the header is in the table. Later this might change
          model.setHeader((TableHeader)child);
       }
+      configureViewport();
    }
 
    public void removeChild(ReactComponent child)
@@ -340,7 +344,7 @@ public class Table extends ReactComponent
       {
          // This means there is no longer to be any header?
       }
-
+      configureViewport();
    }
 
    public void replaceChild(ReactComponent newChild, ReactComponent oldChild)
@@ -367,8 +371,13 @@ public class Table extends ReactComponent
       {
          //
       }
-
+      configureViewport();
       super.replaceChild(newChild, oldChild);
    }
-   
+
+   private void configureViewport()
+   {
+      //table.setPreferredScrollableViewportSize(new Dimension(table.getWidth(), table.getRowCount() * (1+table.getRowHeight())));
+      table.setPreferredScrollableViewportSize(table.getPreferredSize());
+   }
 }
