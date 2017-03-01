@@ -43,6 +43,7 @@ UI=  src/ui/Panel.java                                        \
      src/ui/Frame.java                                        \
      src/ui/ReactApp.java                                     \
      src/ui/ReactPanel.java                                   \
+     src/ui/Grid.java                                         \
      src/ui/DefaultReactComponentFactoryConfiguration.java
 
 ENGINE= src/prolog/Predicate_remove_child.java                \
