@@ -163,10 +163,10 @@ updateMessageHandlers(Module, Current, State, Props, Changes, Handlers):-
         findall(Term,
                 ( member(Added, Handlers),
                   \+member(Added, Current),
-                  Term = +Added
+                  Term = +(Added)
                 ; member(Deleted, Current),
                   \+member(Deleted, Handlers),
-                  Term = -Deleted
+                  Term = -(Deleted)
                 ),
                 Changes),
         Changes \== [].

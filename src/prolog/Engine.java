@@ -272,12 +272,18 @@ public class Engine
       return CompoundTerm.getList(elements);
    }
 
-   public void checkForMessageHandlers(ReactWidget context)
+   public Term checkForMessageHandlers(ReactWidget context, Term existingListeners)
    {
       if (!env.predicateExists(context.getComponentName(), CompoundTermTag.get("onMessage", 5)))
-         return;
+         return TermConstants.emptyListAtom;
       VariableTerm replyTerm = new VariableTerm("Result");
-      Term goal = new CompoundTerm(AtomTerm.get("findMessageHandlers"), new Term[]{AtomTerm.get(context.getComponentName()), context.getState(), context.getProps(), replyTerm});
+      VariableTerm deltaTerm = new VariableTerm("Delta");
+      Term goal = new CompoundTerm(AtomTerm.get("updateMessageHandlers"), new Term[]{AtomTerm.get(context.getComponentName()),
+                                                                                     existingListeners,
+                                                                                     context.getState(),
+                                                                                     context.getProps(),
+                                                                                     deltaTerm,
+                                                                                     replyTerm});
       int undoPosition = interpreter.getUndoPosition();
       Interpreter.Goal g = interpreter.prepareGoal(goal);
       try
@@ -287,18 +293,22 @@ public class Engine
             interpreter.stop(g);
          if (rc == PrologCode.RC.SUCCESS || rc == PrologCode.RC.SUCCESS_LAST)
          {
-            System.out.println(replyTerm);
-            if (replyTerm.dereference() != TermConstants.emptyListAtom)
-               registerForMessages(replyTerm.dereference());
+            registerForMessages(deltaTerm.dereference());
+            Term newListeners = replyTerm.dereference().clone(new TermCloneContext());
             interpreter.undo(undoPosition);
+            return newListeners;
          }
          else
-            System.out.println("findMessageHandlers failed?");
+         {
+            // No changes
+            return existingListeners;
+         }
       }
-      catch (PrologException notDefined)         
+      catch (PrologException error)
       {
-         notDefined.printStackTrace();
+         error.printStackTrace();
       }
+      return existingListeners;
    }
 
    public boolean checkForFluxListeners(ReactWidget context)
