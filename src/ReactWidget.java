@@ -37,7 +37,7 @@ public class ReactWidget extends ReactComponent
    private static int globalWidgetId = 0;
    private String widgetId;
    private ReactComponent internalComponent;
-
+   private Term listeners = TermConstants.emptyListAtom;
    public ReactWidget(ReactWidget parentContext, Engine engine, String elementId, PrologState props) throws Exception
    {
       this.engine = engine;
@@ -59,6 +59,7 @@ public class ReactWidget extends ReactComponent
 
       // Next, check to see if the module needs any flux listeners
       hasFluxListeners = engine.checkForFluxListeners(this);
+      listeners = engine.checkForMessageHandlers(this, listeners);
    }
 
    public String getWidgetId()
@@ -116,6 +117,7 @@ public class ReactWidget extends ReactComponent
    {
       state = newState;
       //System.out.println("State of " + elementId + " is now " + newState);
+      listeners = engine.checkForMessageHandlers(this, listeners);
       reRender();
    }
 

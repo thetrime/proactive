@@ -272,6 +272,45 @@ public class Engine
       return CompoundTerm.getList(elements);
    }
 
+   public Term checkForMessageHandlers(ReactWidget context, Term existingListeners)
+   {
+      if (!env.predicateExists(context.getComponentName(), CompoundTermTag.get("onMessage", 5)))
+         return TermConstants.emptyListAtom;
+      VariableTerm replyTerm = new VariableTerm("Result");
+      VariableTerm deltaTerm = new VariableTerm("Delta");
+      Term goal = new CompoundTerm(AtomTerm.get("updateMessageHandlers"), new Term[]{AtomTerm.get(context.getComponentName()),
+                                                                                     existingListeners,
+                                                                                     context.getState(),
+                                                                                     context.getProps(),
+                                                                                     deltaTerm,
+                                                                                     replyTerm});
+      int undoPosition = interpreter.getUndoPosition();
+      Interpreter.Goal g = interpreter.prepareGoal(goal);
+      try
+      {
+         PrologCode.RC rc = interpreter.execute(g);
+         if (rc == PrologCode.RC.SUCCESS)
+            interpreter.stop(g);
+         if (rc == PrologCode.RC.SUCCESS || rc == PrologCode.RC.SUCCESS_LAST)
+         {
+            registerForMessages(deltaTerm.dereference());
+            Term newListeners = replyTerm.dereference().clone(new TermCloneContext());
+            interpreter.undo(undoPosition);
+            return newListeners;
+         }
+         else
+         {
+            // No changes
+            return existingListeners;
+         }
+      }
+      catch (PrologException error)
+      {
+         error.printStackTrace();
+      }
+      return existingListeners;
+   }
+
    public boolean checkForFluxListeners(ReactWidget context)
    {
       // FIXME: Not quite. listen_for needs to have a goal as the second argument, and we need to take note of that!
@@ -911,7 +950,14 @@ public class Engine
 
    public void sendAsyncMessage(Term t)
    {
-      serverConnection.send(gnu.prolog.io.TermWriter.toString(t) + ".\n");
+      serverConnection.send("message(" + gnu.prolog.io.TermWriter.toString(t) + ").\n");
    }
+
+   public void registerForMessages(Term t)
+   {
+      System.out.println("listen_for(" + gnu.prolog.io.TermWriter.toString(t) + ").\n");
+      serverConnection.send("listen_for(" + gnu.prolog.io.TermWriter.toString(t) + ").\n");
+   }
+
 
 }
