@@ -13,8 +13,10 @@ public class ProactiveLayoutManager implements LayoutManager2
 {
    private Map<Component, ProactiveConstraints> map;
    public enum Layout {HORIZONTAL, VERTICAL};
+   private enum Panic {TRUNCATE, CRUSH};
    public static Layout HORIZONTAL = Layout.HORIZONTAL;
    public static Layout VERTICAL = Layout.VERTICAL;
+   private static final Panic panic = Panic.TRUNCATE;
 
    private ProactiveConstraints.Alignment alignment = ProactiveConstraints.Alignment.CENTER;
    private ProactiveConstraints.Justification justification = ProactiveConstraints.Justification.CENTER;
@@ -121,14 +123,21 @@ public class ProactiveLayoutManager implements LayoutManager2
    {
       // First see what the total preferred major size is
       int sum = 0;
+      int minsum = 0;
       Map<Component, Rectangle> proposedLayout = new HashMap<Component, Rectangle>();
       for (Component c : parent.getComponents())
       {
          if (!c.isVisible()) continue;
          if (layout == Layout.HORIZONTAL)
+         {
             sum += c.getPreferredSize().getWidth();
+            minsum += c.getMinimumSize().getWidth();
+         }
          else if (layout == Layout.VERTICAL)
+         {
             sum += c.getPreferredSize().getHeight();
+            minsum += c.getMinimumSize().getHeight();
+         }
       }
       int major_available = 0;
       int minor_available = 0;
@@ -159,6 +168,7 @@ public class ProactiveLayoutManager implements LayoutManager2
          //   Fill NONE: Make it the preferred size
          //   Fill == Layout or Fill == BOTH: If there are N of these components, make them preferred size + (extraSpace/N)
          //   Otherwise: Make them preferred size
+
          int fillCount = 0;
          int componentCount = 0;
          for (Component c : parent.getComponents())
@@ -257,6 +267,11 @@ public class ProactiveLayoutManager implements LayoutManager2
          //System.out.println("    -> Not enough space: " + sum + " < " + major_available);
          // We do not have enough space to display everything at its requested size. This is where we would potentially reflow components
          // but for now, just display everything in proportion to its preferred major size
+         // One more final consideration: TRY and not make any component smaller than its minimum size in the major direction
+         // Note that if there is not enough space to display everything at its minimum size, then we have two options:
+         //   1) Truncate the items (give them 0 major scale once we are out of space)
+         //   2) Crush items so they all fit
+         // Which we do is governed by the static final field 'panic'
          int major_position = major_pad;
          int minor_position = minor_pad;
          for (Component c : parent.getComponents())
@@ -265,9 +280,19 @@ public class ProactiveLayoutManager implements LayoutManager2
             ProactiveConstraints constraints = map.get(c);
             int major_scale = 0;
             int minor_scale = 0;
+            int major_minimum = 0;
             if (layout == Layout.HORIZONTAL)
             {
+               major_minimum = (int)c.getMinimumSize().getWidth();
                major_scale = (int)((c.getPreferredSize().getWidth() / (double)sum) * (double)major_available);
+               if (major_scale < major_minimum && panic == Panic.TRUNCATE)
+               {
+                  // We have stolen some space. Reduce the major_available to reflect that
+                  major_available -= (major_minimum - major_scale);
+                  if (major_available < 0)
+                     major_available = 0;
+                  major_scale = major_minimum;
+               }
                if (constraints.fill == ProactiveConstraints.Fill.VERTICAL || constraints.fill == ProactiveConstraints.Fill.BOTH)
                   minor_scale = minor_available;
                else if (constraints.fill == ProactiveConstraints.Fill.HORIZONTAL)
@@ -277,7 +302,16 @@ public class ProactiveLayoutManager implements LayoutManager2
             }
             else if (layout == Layout.VERTICAL)
             {
+               major_minimum = (int)c.getMinimumSize().getHeight();
                major_scale = (int)((c.getPreferredSize().getHeight() / (double)sum) * (double)major_available);
+               if (major_scale < major_minimum && panic == Panic.TRUNCATE)
+               {
+                  // We have stolen some space. Reduce the major_available to reflect that
+                  major_available -= (major_minimum - major_scale);
+                  if (major_available < 0)
+                     major_available = 0; // Disappointing :(
+                  major_scale = major_minimum;
+               }
                if (constraints.fill == ProactiveConstraints.Fill.HORIZONTAL || constraints.fill == ProactiveConstraints.Fill.BOTH)
                   minor_scale = minor_available;
                else if (constraints.fill == ProactiveConstraints.Fill.VERTICAL)
