@@ -296,27 +296,26 @@ PrologEngine.prototype.checkForFluxListeners = function(context)
 
 PrologEngine.prototype.triggerEvent = function(handler, event, context, callback)
 {
-//    this.withEventQueue("user",
-//                        function(then)
-//                        {
-//                            this.processEvent(handler, event, context, function(t) { callback(t); then();}.bind(this));
-    //                        }.bind(this));
-    this.processEvent(handler, event, context, callback);
+    this.withEventQueue("user",
+                        function(then)
+                        {
+                            this.processEvent(handler, event, context, function(t) { callback(t); then();}.bind(this));
+                        }.bind(this));
+//    this.processEvent(handler, event, context, callback);
 }
 
 PrologEngine.prototype.triggerSystemEvent = function(handler, event, context, callback)
 {
-//    this.withEventQueue("system",
-//                        function(then)
-//                        {
-//                            this.processEvent(handler, event, context, function(t) { callback(t); then();}.bind(this));
-    //                        }.bind(this));
-        this.processEvent(handler, event, context, callback);
+    this.withEventQueue("system",
+                        function(then)
+                        {
+                            this.processEvent(handler, event, context, function(t) { callback(t); then();}.bind(this));
+                        }.bind(this));
 }
 
 PrologEngine.prototype.withEventQueue = function(origin, fn)
 {
-    /*
+/*
     if (this.processing_event == true)
     {
         if (origin == "user")
