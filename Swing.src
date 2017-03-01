@@ -5,9 +5,9 @@ BASE=src/React.java                                           \
      src/ReactComponent.java                                  \
      src/ReactWidget.java                                     \
      src/ReactComponentFactory.java                           \
-     src/CodeChangeListener.java                              \
      src/StyleSheetListener.java                              \
      src/StyleSheet.java                                      \
+     src/Version.java                                         \
      src/ReactLeafComponent.java                              \
      src/ReactComponentFactoryConfiguration.java
 

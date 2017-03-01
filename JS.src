@@ -3,6 +3,7 @@ JS_SRC=src/button.js                                        \
        src/combo_item.js                                    \
        src/constants.js                                     \
        src/core.js                                          \
+       src/version.js                                       \
        src/errors.js                                        \
        src/field.js                                         \
        src/frame.js                                         \
