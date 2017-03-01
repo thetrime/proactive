@@ -59,7 +59,7 @@ public class ProactiveLayoutManager implements LayoutManager2
       if (layout == Layout.HORIZONTAL)
          return new Dimension(major + parentInsets.left + parentInsets.right, minor + parentInsets.top + parentInsets.bottom);
       else if (layout == Layout.VERTICAL)
-         return new Dimension(minor + parentInsets.top + parentInsets.bottom, major + parentInsets.left + parentInsets.right);
+         return new Dimension(minor + parentInsets.left + parentInsets.right, major + parentInsets.top + parentInsets.bottom);
       else
          return new Dimension(0, 0);
    }
@@ -89,7 +89,7 @@ public class ProactiveLayoutManager implements LayoutManager2
       if (layout == Layout.HORIZONTAL)
          return new Dimension(major + parentInsets.left + parentInsets.right, minor + parentInsets.top + parentInsets.bottom);
       else if (layout == Layout.VERTICAL)
-         return new Dimension(minor + parentInsets.top + parentInsets.bottom, major + parentInsets.left + parentInsets.right);
+         return new Dimension(minor + parentInsets.left + parentInsets.right, major + parentInsets.top + parentInsets.bottom);
       else
          return new Dimension(0, 0);
    }
