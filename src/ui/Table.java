@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.awt.Component;
 import org.proactive.prolog.PrologObject;
 import org.proactive.prolog.Engine;
+import org.proactive.ui.ProactiveConstraints;
 import org.proactive.ReactComponent;
 
 public class Table extends ReactComponent 
@@ -374,6 +375,14 @@ public class Table extends ReactComponent
       configureViewport();
       super.replaceChild(newChild, oldChild);
    }
+
+   public ProactiveConstraints.Fill getFill()
+   {
+      if (super.getFill() == ProactiveConstraints.Fill.NONE)
+         return ProactiveConstraints.Fill.HORIZONTAL;
+      return super.getFill();
+   }
+
 
    private void configureViewport()
    {
