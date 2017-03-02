@@ -29,10 +29,8 @@ public class Predicate_atomic_list_concat extends ExecuteOnlyCode
 
       StringBuilder sb = new StringBuilder();
       Term list = atomics.dereference();
-      System.out.println("list: " + list);
       while (list instanceof CompoundTerm && ((CompoundTerm)list).tag == TermConstants.listTag)
       {
-         System.out.println("Is a list: " + list);
          Term head = ((CompoundTerm)list).args[0].dereference();
          list = ((CompoundTerm)list).args[1].dereference();
          if (head instanceof AtomTerm)
