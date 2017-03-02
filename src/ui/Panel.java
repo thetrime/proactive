@@ -345,12 +345,15 @@ public class Panel extends ReactComponent
       children.set(i, newChild);
       Component oldComponent = awtMap.get(oldChild);
       childComponents.remove(oldChild);
-      oldChild.setOwnerDocument(null);
-      oldChild.setParentNode(null);
-      newChild.setOwnerDocument(owner);
-      newChild.setParentNode(this);
-      awtMap.remove(oldChild);
-      awtMap.put(newChild, newChild.getAWTComponent());
+      if (oldChild != newChild)
+      {
+         oldChild.setOwnerDocument(null);
+         oldChild.setParentNode(null);
+         newChild.setOwnerDocument(owner);
+         newChild.setParentNode(this);
+         awtMap.remove(oldChild);
+         awtMap.put(newChild, newChild.getAWTComponent());
+      }
       if (orientation == VERTICAL || orientation == HORIZONTAL)
       {
          ProactiveConstraints constraints = ((ProactiveLayoutManager)layoutManager).getConstraints(oldComponent);
