@@ -94,7 +94,6 @@ public class Grid extends ReactComponent
 
    private void addChildToPanel(ReactComponent child)
    {
-      System.out.println("Adding at " + x + ", " + y + " (of " + columnCount + ")");
       component.add(child.getAWTComponent(),
                     new GridBagConstraints(x, y, 1, 1, weights.elementAt(x), 0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, new Insets(0,0,0,0), 0, 0));
       if (x+1 == columnCount)
