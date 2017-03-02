@@ -1,5 +1,31 @@
 /* Layout */
 
+/* A container should not overflow */
+.proactive_container
+{
+    overflow: hidden;
+}
+
+/* Except sometimes, because the fieldset is positioned using a negative margin.
+   If we set the overflow to hidden, this is truncated
+*/
+.fieldset_legend
+{
+    overflow: visible;
+}
+
+.fieldset
+{
+    overflow: visible;
+}
+
+
+/* However, we want the content pane inside to not overflow */
+.fieldset_main
+{
+    overflow: hidden;
+}
+
 .scrollx
 {
     overflow-x: scroll;
@@ -30,7 +56,11 @@
     -webkit-flex-direction: column;
     flex-direction: column;
     box-sizing: border-box;
+}
 
+.vertical_layout > *
+{
+    flex-shrink: 0;
 }
 
 .vertical_layout > .horizontal_fill
@@ -87,7 +117,7 @@
     display: -ms-flex;
     display: flex;
     box-sizing: border-box;
-    /*
+/*
     -webkit-box-pack: center;
     -moz-box-pack: center;
     -webkit-justify-content: center;
@@ -242,4 +272,24 @@ table
     background-color: #000000;
     border: 2px solid white;
     padding: 10px;
+}
+
+.grid-shrink
+{
+    white-space:nowrap;
+}
+
+.grid-expand
+{
+    width: 100%;
+}
+
+.grid
+{
+    table-layout: auto;
+}
+
+.table_container
+{
+    flex-shrink: 1 !important;
 }

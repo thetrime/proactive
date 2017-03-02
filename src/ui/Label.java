@@ -15,6 +15,11 @@ public class Label extends ReactLeafComponent
 {
    JLabel label = new JLabel();
 
+   public Label()
+   {
+      //label.setBorder(javax.swing.BorderFactory.createLineBorder(Color.GREEN));
+   }
+
    private void setStyles()
    {
       Color colour = (Color)React.getStyle(id, className, "label", "colour");

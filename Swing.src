@@ -13,6 +13,8 @@ BASE=src/React.java                                           \
 
 UI=  src/ui/Panel.java                                        \
      src/ui/Broken.java                                       \
+     src/ui/ProactiveLayoutManager.java                       \
+     src/ui/ProactiveConstraints.java                         \
      src/ui/Button.java                                       \
      src/ui/Field.java                                        \
      src/ui/PopupMenu.java                                    \
@@ -41,6 +43,7 @@ UI=  src/ui/Panel.java                                        \
      src/ui/Frame.java                                        \
      src/ui/ReactApp.java                                     \
      src/ui/ReactPanel.java                                   \
+     src/ui/Grid.java                                         \
      src/ui/DefaultReactComponentFactoryConfiguration.java
 
 ENGINE= src/prolog/Predicate_remove_child.java                \

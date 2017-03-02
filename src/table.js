@@ -7,6 +7,7 @@ function Table()
     // table does not play nice with flexbox. Instead put it inside a div which will and set it to 100% width
     this.table.style.width = "100%";
     var node = document.createElement("div");
+    this.baseClassName = "table_container"
     node.appendChild(this.table);
     this.setDOMNode(node);
 }

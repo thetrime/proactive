@@ -4,6 +4,7 @@ import org.proactive.prolog.PrologObject;
 import org.proactive.prolog.PrologState;
 import org.proactive.prolog.Engine;
 import org.proactive.prolog.FluxDispatcher;
+import org.proactive.ui.ProactiveConstraints;
 import gnu.prolog.term.Term;
 import gnu.prolog.term.CompoundTerm;
 import gnu.prolog.term.AtomTerm;
@@ -88,14 +89,19 @@ public class ReactWidget extends ReactComponent
       return "<Widget:" + elementId + " " + props+ ">";
    }
 
-   public int getFill()
+   public ProactiveConstraints.Fill getFill()
    {
-      // Originally, we would allow the child to provide the fill, but this is a bit weird in reality
-      // and it sort of breaks the encapsulation paradigm since things can 'leak out' and take control
-      // of the next level up.
-      //      if (internalComponent != null)
-      //         return internalComponent.getFill();
+      if (internalComponent != null)
+         return internalComponent.getFill();
       return super.getFill();
+   }
+
+   @Override
+   public ProactiveConstraints.Alignment getSelfAlignment()
+   {
+      if (internalComponent != null)
+         return internalComponent.getSelfAlignment();
+      return super.getSelfAlignment();
    }
 
    public PrologState getState()

@@ -4,6 +4,7 @@ JS_SRC=src/button.js                                        \
        src/constants.js                                     \
        src/core.js                                          \
        src/version.js                                       \
+       src/grid.js                                          \
        src/errors.js                                        \
        src/field.js                                         \
        src/frame.js                                         \

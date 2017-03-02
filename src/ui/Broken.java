@@ -1,6 +1,6 @@
 package org.proactive.ui;
 
-import javax.swing.JPanel;
+import javax.swing.JLabel;
 import java.util.List;
 import java.util.HashMap;
 import java.awt.Component;
@@ -13,8 +13,14 @@ import java.awt.Font;
 
 public class Broken extends ReactLeafComponent 
 {
-   JPanel instance = new JPanel();
-
+   JLabel instance = new JLabel();
+   public Broken(String name)
+   {
+      instance.setText("Broken-" + name);
+      // If you prefer to have a red, possible invisible box, try changing instance to JPanel and use one or both of the following:
+//      instance.setBackground(Color.RED);
+//      instance.setPreferredSize(new java.awt.Dimension(0,0));
+   }
    public void setProperties(HashMap<String,PrologObject> properties)
    {
       super.setProperties(properties);
