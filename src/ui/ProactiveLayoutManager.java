@@ -8,6 +8,9 @@ import java.awt.Rectangle;
 import java.awt.Insets;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.Vector;
+import java.util.Comparator;
+import java.util.Collections;
 
 public class ProactiveLayoutManager implements LayoutManager2
 {
@@ -38,7 +41,6 @@ public class ProactiveLayoutManager implements LayoutManager2
          return new Dimension (0, 0);
       int major = 0;
       int minor = 0;
-//      System.out.println("Computing preferred layout for " + parent.getComponents().length + " components in " + parent);
       Insets parentInsets = parent.getInsets();
       for (Component c : parent.getComponents())
       {
@@ -104,7 +106,6 @@ public class ProactiveLayoutManager implements LayoutManager2
       Component[] components = parent.getComponents();
       if (components.length == 0)
          return;
-      //System.out.println("Laying out " + parent);
       Map<Component, Rectangle> proposedLayout = makeLayout(parent);
       for (Component c : components)
       {
@@ -125,9 +126,12 @@ public class ProactiveLayoutManager implements LayoutManager2
       int sum = 0;
       int minsum = 0;
       Map<Component, Rectangle> proposedLayout = new HashMap<Component, Rectangle>();
+      Vector<Component> sortedComponents = new Vector<Component>();
+
       for (Component c : parent.getComponents())
       {
          if (!c.isVisible()) continue;
+         sortedComponents.add(c);
          if (layout == Layout.HORIZONTAL)
          {
             sum += c.getPreferredSize().getWidth();
@@ -139,6 +143,14 @@ public class ProactiveLayoutManager implements LayoutManager2
             minsum += c.getMinimumSize().getHeight();
          }
       }
+      Collections.sort(sortedComponents, new Comparator<Component>()
+                       {
+                       @Override
+                       public int compare(Component o1, Component o2)
+                       {
+                       return map.get(o1).index - map.get(o2).index;
+                       }
+      });
       int major_available = 0;
       int minor_available = 0;
       int major_pad = 0;
@@ -216,8 +228,7 @@ public class ProactiveLayoutManager implements LayoutManager2
 
          // Now we can set the placing on all the components
          int major_position = beforePad + major_pad;
-
-         for (Component c : parent.getComponents())
+         for (Component c : sortedComponents)
          {
             if (!c.isVisible()) continue;
             ProactiveConstraints constraints = map.get(c);
@@ -274,7 +285,7 @@ public class ProactiveLayoutManager implements LayoutManager2
          // Which we do is governed by the static final field 'panic'
          int major_position = major_pad;
          int minor_position = minor_pad;
-         for (Component c : parent.getComponents())
+         for (Component c : sortedComponents)
          {
             if (!c.isVisible()) continue;
             ProactiveConstraints constraints = map.get(c);
