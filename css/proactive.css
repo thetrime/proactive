@@ -4,7 +4,7 @@
 .proactive_container
 {
     overflow: hidden;
-    flex: 0 0 auto;
+    flex: 0 1 auto;
 }
 
 /* Except sometimes, because the fieldset is positioned using a negative margin.
@@ -284,4 +284,9 @@ table
 .grid
 {
     table-layout: auto;
+}
+
+.table_container
+{
+    flex-shrink: 1;
 }
