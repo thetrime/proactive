@@ -1,5 +1,32 @@
 /* Layout */
 
+/* A container should not overflow */
+.proactive_container
+{
+    overflow: hidden;
+    flex: 0 0 auto;
+}
+
+/* Except sometimes, because the fieldset is positioned using a negative margin.
+   If we set the overflow to hidden, this is truncated
+*/
+.fieldset_legend
+{
+    overflow: visible;
+}
+
+.fieldset
+{
+    overflow: visible;
+}
+
+
+/* However, we want the content pane inside to not overflow */
+.fieldset_main
+{
+    overflow: hidden;
+}
+
 .scrollx
 {
     overflow-x: scroll;
@@ -87,7 +114,7 @@
     display: -ms-flex;
     display: flex;
     box-sizing: border-box;
-    /*
+/*
     -webkit-box-pack: center;
     -moz-box-pack: center;
     -webkit-justify-content: center;
