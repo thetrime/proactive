@@ -291,9 +291,18 @@ public class Table extends ReactComponent
          if (header.getSize() > columnCount)
             columnCount = header.getSize();
          fireTableStructureChanged();
+         int w = 0;
+         for (ReactComponent o : header.getColumnHeaders())
+            if (o.getWeight() > 1)
+               w+=o.getWeight();
+         double factor = ((double)table.getPreferredSize().width * 10) / (double)w;
          for (ReactComponent o : header.getColumnHeaders())
          {
             table.getColumnModel().getColumn(i).setHeaderRenderer(new ReactHeaderRenderer(o));
+            if (o.getWeight() != -1)
+            {
+               table.getColumnModel().getColumn(i).setPreferredWidth((int)(factor*o.getWeight()));
+            }
             i++;
          }
       }
