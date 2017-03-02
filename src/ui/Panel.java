@@ -6,8 +6,11 @@ import org.proactive.ReactComponentFactory;
 
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.Scrollable;
+import javax.swing.JViewport;
 import javax.swing.JFrame;
 import java.awt.Dimension;
+import java.awt.Rectangle;
 import java.awt.LayoutManager;
 import java.awt.GridLayout;
 import java.awt.Insets;
@@ -34,20 +37,79 @@ public class Panel extends ReactComponent
 
    private LayoutManager layoutManager;
    private Component awtComponent;
-   private JPanel panel = new JPanel();
+   private JPanel panel;
    private String id;
    private static int global_id = 0;
-
+   private String scrollInfo = "none";
+   private JScrollPane scroll = null;
    LinkedList<ReactComponent> childComponents = new LinkedList<ReactComponent>();
+
+   private class ScrollablePanel extends JPanel implements Scrollable
+   {
+      public int getScrollableBlockIncrement(Rectangle visibleRect,
+                                             int orientation,
+                                             int direction)
+      {
+         // I'm not really sure how to implement this
+         JViewport vp;
+         if (getParent() instanceof JViewport)
+         {
+            vp = (JViewport)getParent();
+            if (orientation == VERTICAL)
+               return vp.getExtentSize().height;
+            return vp.getExtentSize().width;
+         }
+         return 5;
+      }
+      public int getScrollableUnitIncrement(Rectangle visibleRect,
+                                            int orientation,
+                                            int direction)
+      {
+         // I'm not sure how to implement this
+         return 1;
+      }
+      public Dimension getPreferredScrollableViewportSize()
+      {
+         return getPreferredSize();
+      }
+      public Dimension getPreferredSize()
+      {
+         return super.getPreferredSize();
+      }
+      public boolean getScrollableTracksViewportHeight()
+      {
+         // First of all, if the panel is set to not scroll, or only scroll vertically, then we must always try and squash the scrollable
+         // into the height of the scrollpane
+         if ("horizontal".equals(scrollInfo) || "none".equals(scrollInfo))
+            return true;
+         // Next, we must be sometimes trying to scroll vertically. But if the viewport is bigger than the scrollable then return true anyway
+         // otherwise we will have blank space at the bottom
+         if (getParent() instanceof JViewport && ((JViewport)getParent()).getHeight() > getPreferredSize().height)
+            return true;
+         // The scrollable really is taller than the viewport. Let it scroll
+         return false;
+      }
+      public boolean getScrollableTracksViewportWidth()
+      {
+         // See getScrollableTracksViewportHeight for an explanation, swapping width/height for this
+         if ("vertical".equals(scrollInfo) || "none".equals(scrollInfo))
+             return true;
+         if (getParent() instanceof JViewport && ((JViewport)getParent()).getWidth() > getPreferredSize().width)
+            return true;
+         return false;
+      }
+
+   }
 
    public Panel()
    {
       super();
+      panel = new ScrollablePanel();
       this.id = "{" + (global_id++) + "}";
       awtComponent = panel;
       panel.setBackground(new Color(150, 168, 200));
       reconfigureLayout();
-      //panel.setBorder(BorderFactory.createLineBorder(Color.RED));
+//      panel.setBorder(BorderFactory.createLineBorder(Color.RED));
    }
 
    private void reconfigureLayout()
@@ -176,12 +238,15 @@ public class Panel extends ReactComponent
          //   * Could be changing from scroll->different scroll
          if (properties.get("scroll") == null || "none".equals(properties.get("scroll")))
          {
+            scrollInfo = "none";
+            scroll = null;
             awtComponent = panel;
          }
          else
          {
             String key = properties.get("scroll").asScroll();
-            JScrollPane scroll = new JScrollPane(panel);
+            scrollInfo = key;
+            scroll = new JScrollPane(panel);
             if (key.equals("vertical"))
             {
                scroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
