@@ -4,7 +4,6 @@
 .proactive_container
 {
     overflow: hidden;
-    flex: 0 1 auto;
 }
 
 /* Except sometimes, because the fieldset is positioned using a negative margin.
@@ -57,7 +56,11 @@
     -webkit-flex-direction: column;
     flex-direction: column;
     box-sizing: border-box;
+}
 
+.vertical_layout > *
+{
+    flex-shrink: 0;
 }
 
 .vertical_layout > .horizontal_fill
@@ -288,5 +291,5 @@ table
 
 .table_container
 {
-    flex-shrink: 1;
+    flex-shrink: 1 !important;
 }
