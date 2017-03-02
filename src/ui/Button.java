@@ -53,6 +53,8 @@ public class Button extends ReactLeafComponent
          button.setText(properties.get("label").asString());
       if (properties.containsKey("onClick"))
          setClickHandler(properties.get("onClick"));
+      if (properties.containsKey("disabled"))
+          button.setEnabled(!properties.get("disabled").asBoolean());
    }
 
    public Component getAWTComponent()
