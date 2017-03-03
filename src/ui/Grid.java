@@ -46,14 +46,9 @@ public class Grid extends ReactComponent
          {
             weights.add(p.asInteger());
          }
+         columnCount = weights.size();
          relayout = true;
       }
-      if (properties.containsKey("columns"))
-      {
-         columnCount = properties.get("columns").asInteger();
-         relayout = true;
-      }
-
       if (relayout)
          relayout();
    }
