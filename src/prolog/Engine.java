@@ -31,6 +31,8 @@ import java.util.Vector;
 import java.util.List;
 import java.io.IOException;
 import java.net.URI;
+import java.net.URL;
+import java.net.MalformedURLException;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import org.java_websocket.client.WebSocketClient;
@@ -69,6 +71,11 @@ public class Engine
       this.rootElementId = rootElementId;
       serverConnection = new ServerConnection(listenURI);
       make();
+   }
+
+   public URL relativeURL(String rel) throws MalformedURLException
+   {
+      return new URL(new URL(componentURL), rel);
    }
 
    // This creates an engine for testing

@@ -34,6 +34,7 @@ public class DefaultReactComponentFactoryConfiguration implements ReactComponent
          constructorHash.put("PopupMenu", PopupMenu.class.getConstructor());
          constructorHash.put("MenuItem", MenuItem.class.getConstructor());
          constructorHash.put("Grid", Grid.class.getConstructor());
+         constructorHash.put("Image", Image.class.getConstructor());
       }
       catch(Exception e)
       {
