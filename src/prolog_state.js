@@ -10,7 +10,7 @@ var Prolog = require('proscript');
 
 function make_null()
 {
-    return Prolog._make_compound(Constants.curlyFunctor, [Constants.nullAtom]);
+    return Prolog._make_local(Prolog._make_compound(Constants.curlyFunctor, [Constants.nullAtom]));
 }
 
 var util = require('util');
@@ -126,7 +126,7 @@ function isState(t)
 
 function reify(t)
 {
-    if (Prolog._is_constant(t) || Prolog._is_variable(t))
+    if (Prolog._is_constant(t))
         return t;
     if (Prolog._is_compound(t))
     {
@@ -160,7 +160,9 @@ PrologState.prototype.processKeyPair = function(key, value, functor)
         if (isState(value))
             this.map[key] = new PrologState(value).blob;
         else if (Prolog._is_variable(value))
+        {
             this.map[key] = make_null();
+        }
         else
         {
             this.map[key] = reify(value);
