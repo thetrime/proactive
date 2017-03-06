@@ -23,7 +23,8 @@ function Panel()
     this.baseClassName = "proactive_container";
     this.contentElement = document.createElement("div");
     this.setDOMNode(this.contentElement);
-    this.deletion = new RegExp('(\\s|^)fieldset(\\s|$)');
+    this.delete_fieldset = new RegExp('(\\s|^)fieldset(\\s|$)');
+    this.delete_layout = new RegExp('(\\s|^)(vertical|horizontal)_layout(\\s|$)');
     this.legendElement = null;
     this.fieldSetTextElement = null;
 }
@@ -50,7 +51,7 @@ Panel.prototype.setProperties = function(t)
             var post = document.createElement("div"); // this is the --- at the top-right
             post.className = "post_fieldset horizontal_fill";
             this.legendElement.appendChild(post);
-            this.baseClassName = "proactive_container fieldset vertical_layout";
+            this.baseClassName = "proactive_container fieldset";
             var f = "no_fill";
             if (this.fill == "horizontal")
                 f = "horizontal_fill";
@@ -108,7 +109,8 @@ Panel.prototype.setProperties = function(t)
 Panel.prototype.restyle = function()
 {
     ReactComponent.prototype.restyle.call(this);
-    this.contentElement.className = this.getStyle().replace(this.deletion, ' fieldset_main ');
+    this.domNode.className = this.getStyle().replace(this.delete_layout, ' vertical_layout ')
+    this.contentElement.className = this.getStyle().replace(this.delete_fieldset, ' fieldset_main ');
 }
 
 Panel.prototype.appendChild = function(t)
