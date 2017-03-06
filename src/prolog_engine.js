@@ -117,7 +117,7 @@ PrologEngine.prototype.checkForMessageHandlers = function(widget, callback)
                         {
                             var ex = Prolog._get_exception();
                             if (ex != 0)
-                                console.log("findMessageHandlers/4 raised an error: " + ex  + Prolog._format_term(null, 1200, ex));
+                                console.log("findMessageHandlers/4 raised an error: " + Prolog._format_term(null, 1200, ex));
                             Prolog._restore_state(savePoint);
                         }
                         callback();
@@ -241,7 +241,7 @@ PrologEngine.prototype.render = function(widget, component, state, props, callba
                                                 {
                                                     var ex = Prolog._get_exception();
                                                     if (ex != 0)
-                                                        console.log("expand_children/2 raised an error: " + ex  + Prolog._format_term(null, 1200, ex));
+                                                        console.log("expand_children/2 raised an error: "  + Prolog._format_term(null, 1200, ex));
                                                     else
                                                         console.log("expand_children/2 failed");
                                                     throw new Error("Stop: Render fail");
@@ -254,7 +254,7 @@ PrologEngine.prototype.render = function(widget, component, state, props, callba
                             Prolog._restore_state(savePoint);
                             var ex = Prolog._get_exception();
                             if (ex != 0)
-                                console.log("render/3 raised an error: " + ex  + Prolog._format_term(null, 1200, ex));
+                                console.log("render/3 raised an error: "  + Prolog._format_term(null, 1200, ex));
                             else
                                 console.log("render/3 failed");
                             throw new Error("Stop: Render fail");
