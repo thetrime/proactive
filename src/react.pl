@@ -4,6 +4,7 @@
           broadcast_proactive_message/1,
           trigger_react_recompile/1,
           vdiff_warning/1,
+          related_react_modules/2,
           jsx/2]).
 
 %       You MUST provide an implementation of react:goal_is_safe/1 or on_server/1 will always fail on the client.
@@ -46,7 +47,7 @@ serve_react(Request):-
         ),
         ( current_module(Module)->
             findall(Candidate,
-                    related_modules(Module, Candidate),
+                    related_react_modules(Module, Candidate),
                     Modules),
             sort(Modules, ModulesWithoutDuplicates),
             findall(Clause,
@@ -93,13 +94,13 @@ react_clause(Module, Head):-
         call(SourceModule:Head).
 
 
-related_modules(Root, Root).
-related_modules(Module, Related):-
+related_react_modules(Root, Root).
+related_react_modules(Module, Related):-
         current_predicate(_, Module:depends_on(_)),
         predicate_property(Module:depends_on(_), interpreted),
         \+predicate_property(Module:depends_on(_), imported_from(_)),
         clause(Module:depends_on(SubModule), _, _),
-        related_modules(SubModule, Related).
+        related_react_modules(SubModule, Related).
 
 
 
@@ -113,7 +114,7 @@ listen_react_loop(Websocket):-
             Data = Message.data,
             read_term_from_atom(Data, RootComponent, []),
             setof(RelatedModule,
-                  related_modules(RootComponent, RelatedModule),
+                  related_react_modules(RootComponent, RelatedModule),
                   Modules),
             thread_create(ws_listen_slave(Websocket, Self), Slave, [detached(false)]),
             setup_call_cleanup(assert(react_listener(Self, Modules)),
