@@ -30,7 +30,9 @@ Grid.prototype.setProperties = function(t)
         if (list != Constants.emptyListAtom)
             console.log("Bad weights list!");
         // If the weights have changed, relayout
-        if (!(newWeights.length == this.weights.length && newWeights.every(function(v,i) { return v === this.weights[i]})))
+        console.log(newWeights);
+        console.log(this.weights);
+        if (newWeights.length != this.weights.length || !newWeights.every(function(v,i) { return v === this.weights[i]}.bind(this)))
             must_relayout = true;
         this.weights = newWeights;
     }
