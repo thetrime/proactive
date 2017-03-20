@@ -6,7 +6,9 @@ function TableHeader()
 {
     ReactComponent.call(this);
     this.weights = [];
-    this.setDOMNode(document.createElement("tr"));
+    var node = document.createElement("tr");
+    node.className = "react_table_header_row";
+    this.setDOMNode(node);
     this.sum = 0;
 }
 
@@ -19,6 +21,7 @@ TableHeader.prototype = new ReactComponent;
 TableHeader.prototype.appendChild = function(t)
 {
     var cell = document.createElement("th");
+    cell.className = "react_table_header_cell";
     cell.appendChild(t.domNode);
     this.domNode.appendChild(cell);
     this.weights[this.children.indexOf(t)] = t.weight || default_weight;
@@ -56,6 +59,7 @@ TableHeader.prototype.insertBefore = function(t, s)
     this.recomputeRatios();
     t.setParent(this);
     var cell = document.createElement("th");
+    cell.className = "react_table_header_cell";
     cell.appendChild(t.domNode);
     getDOMNode().insertBefore(cell, this.getDOMNode().childNodes[this.children.indexOf(s)]);
 }

@@ -6,6 +6,7 @@ function Table()
     this.table = document.createElement("table");
     // table does not play nice with flexbox. Instead put it inside a div which will and set it to 100% width
     this.table.style.width = "100%";
+    this.table.className = "react_table";
     var node = document.createElement("div");
     this.baseClassName = "table_container"
     node.appendChild(this.table);
