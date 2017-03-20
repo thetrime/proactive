@@ -30,8 +30,6 @@ Grid.prototype.setProperties = function(t)
         if (list != Constants.emptyListAtom)
             console.log("Bad weights list!");
         // If the weights have changed, relayout
-        console.log(newWeights);
-        console.log(this.weights);
         if (newWeights.length != this.weights.length || !newWeights.every(function(v,i) { return v === this.weights[i]}.bind(this)))
             must_relayout = true;
         this.weights = newWeights;
@@ -138,6 +136,8 @@ Grid.prototype.removeChild = function(t)
     var col = index % this.weights.length;
     var rowDOM = this.table.rows[row];
     rowDOM.removeChild(rowDOM.childNodes[col]);
+    if (rowDOM.childNodes.length == 0)
+        this.table.deleteRow(row);
     t.setParent(null);
     //this.relayout(); This is too hard. It relies on this.children being already updated, and since it is almost always wrong to remove a single element
     //                 anyway, I can live with the mess that you get if you try it
