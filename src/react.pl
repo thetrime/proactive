@@ -256,14 +256,22 @@ execute_react_ws(OriginalRequest, WebSocket):-
         ws_receive(WebSocket, Message, []),
         ( Message.opcode == text->
             Data = Message.data,
+            catch(read_react_goal_and_execute_if_safe(WebSocket, OriginalRequest, Data),
+                  Exception,
+                  ( handle_react_goal_exception(Exception, WebSocket),
+                    throw(Exception)
+                  ))
+        ; Message.opcode == close->
+            !
+        ).
+
+read_react_goal_and_execute_if_safe(WebSocket, OriginalRequest, Data):-
             read_term_from_atom(Data, Goal, []),
             ( goal_is_safe(Goal)->
                 execute_react_ws(OriginalRequest, WebSocket, Goal, Goal)
             ; permission_error(execute, goal, Goal)
-            )
-        ; Message.opcode == close->
-            !
-        ).
+            ).
+
 
 check:string_predicate(react:check_data/1).
 check_data(";").
@@ -318,7 +326,16 @@ react_cleanup(Goal, exit, WebSocket):-
 react_cleanup(Goal, external_exception(E), WebSocket):-
 	react_cleanup(Goal, WebSocket, exception(E)).
 
-react_cleanup(_Goal, exception(E), WebSocket):-
+react_cleanup(_Goal, exception(_), _):- true. % Handled later in handle_react_goal_exception/2.
+
+react_cleanup(_Goal, fail, WebSocket):-
+        send_reply(WebSocket, fail).
+
+react_cleanup(Goal, !, WebSocket):-
+        send_reply(WebSocket, cut(Goal)).
+
+
+handle_react_goal_exception(E, WebSocket):-
 	( E = error(Error, Context)->
 	    format(atom(ContextAtom), '~p', [Context]),
 	    send_reply(WebSocket, exception(error(Error, ContextAtom)))
@@ -330,12 +347,6 @@ react_cleanup(_Goal, exception(E), WebSocket):-
 	    send_reply(WebSocket, exception(E))
 	).
 
-
-react_cleanup(_Goal, fail, WebSocket):-
-        send_reply(WebSocket, fail).
-
-react_cleanup(Goal, !, WebSocket):-
-        send_reply(WebSocket, cut(Goal)).
 
 send_reply(WebSocket, Term):-
         format(atom(Text), '~k', [Term]),
