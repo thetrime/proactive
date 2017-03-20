@@ -24,7 +24,7 @@ function ReactWidget(parentContext, engine, elementId, props, callback)
     engine.registerWidget(this);
     this.setProperties(props.getProperties());
     this.listeners = Constants.emptyListAtom;
-    engine.getInitialState(elementId, props, function(state)
+    engine.getInitialState(this, elementId, props, function(state)
                            {
                                this.state = state;
                                this.engine.render(this, this.elementId, this.state, this.props, function(vDom)

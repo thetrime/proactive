@@ -154,7 +154,7 @@ PrologEngine.prototype.make = function(callback)
         Prolog.define_foreign(user_foreign_predicates[i].name, user_foreign_predicates[i].fn);
 }
 
-PrologEngine.prototype.getInitialState = function(component, props, callback)
+PrologEngine.prototype.getInitialState = function(widget, component, props, callback)
 {
     if (!Prolog._exists_predicate(Prolog._make_atom(component), getInitialStateFunctor))
     {
@@ -164,10 +164,12 @@ PrologEngine.prototype.getInitialState = function(component, props, callback)
     var savePoint = Prolog._save_state();
     var replyTerm = Prolog._make_variable();
     var goal = crossModuleCall(component, Prolog._make_compound(getInitialStateFunctor, [props.blob, replyTerm]));
+    this.env.pushProactiveContext(widget.blob);
     Prolog._execute(this.env,
                     goal,
                     function(success)
                     {
+                        this.env.popProactiveContext();
                         if (success)
                         {
                             var state = new PrologState(Prolog._deref(replyTerm));
