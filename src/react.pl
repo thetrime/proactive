@@ -4,7 +4,8 @@
           broadcast_proactive_message/1,
           trigger_react_recompile/1,
           vdiff_warning/1,
-          related_react_modules/2,
+          related_react_module/2,
+          react_system_message/2,
           jsx/2]).
 
 %       You MUST provide an implementation of react:goal_is_safe/1 or on_server/1 will always fail on the client.
@@ -47,7 +48,7 @@ serve_react(Request):-
         ),
         ( current_module(Module)->
             findall(Candidate,
-                    related_react_modules(Module, Candidate),
+                    related_react_module(Module, Candidate),
                     Modules),
             sort(Modules, ModulesWithoutDuplicates),
             findall(Clause,
@@ -94,35 +95,65 @@ react_clause(Module, Head):-
         call(SourceModule:Head).
 
 
-related_react_modules(Root, Root).
-related_react_modules(Module, Related):-
+%!      related_react_module(+BaseModule, ?OtherModule) is semidet.
+%       Succeeds if OtherModule is a module which BaseModule depends on
+%       If OtherModule is unbound, on backtracking all modules related to the root
+%       are enumerated.
+%       Note that BaseModule is defined to be dependent on BaseModule itself. This tends
+%       to make code which finds all code related to a particular module simpler to implement
+
+related_react_module(Root, Root).
+related_react_module(Module, Related):-
         current_predicate(_, Module:depends_on(_)),
         predicate_property(Module:depends_on(_), interpreted),
         \+predicate_property(Module:depends_on(_), imported_from(_)),
         clause(Module:depends_on(SubModule), _, _),
-        related_react_modules(SubModule, Related).
+        related_react_module(SubModule, Related).
 
 
 
 listen_react(Request):-
-        http_upgrade_to_websocket(listen_react_loop, [], Request).
+        ( http_in_session(SessionID)->
+            true
+        ; SessionID = {null}
+        ),
+        http_upgrade_to_websocket(listen_react_loop(SessionID), [], Request).
 
-listen_react_loop(Websocket):-
+listen_react_loop(SessionID, Websocket):-
+        ( SessionID == {null}->
+            true
+        ; b_setval(http_session_id, SessionID)
+        ),
         thread_self(Self),
         ws_receive(Websocket, Message),
         ( Message.opcode == text->
             Data = Message.data,
             read_term_from_atom(Data, RootComponent, []),
-            setof(RelatedModule,
-                  related_react_modules(RootComponent, RelatedModule),
-                  Modules),
             thread_create(ws_listen_slave(Websocket, Self), Slave, [detached(false)]),
-            setup_call_cleanup(assert(react_listener(Self, Modules)),
+            setup_call_cleanup(open_react_session(Self, RootComponent),
                                listen_react_loop_1(Websocket, Slave),
-                               retractall(react_listener(Self, Modules)))
+                               close_react_session(Self))
         ; otherwise->
             true
         ).
+
+:-multifile(open_react_session_hook/1).
+:-multifile(close_react_session_hook/1).
+
+open_react_session(Self, RootComponent):-
+        forall(open_react_session_hook(Self), true),
+        ( setof(RelatedModule,
+                related_react_module(RootComponent, RelatedModule),
+                Modules)->
+            true
+        ; Modules = []
+        ),
+        assert(react_listener(Self, Modules)).
+
+close_react_session(Self):-
+        retractall(react_listener(Self, _)),
+        forall(close_react_session_hook(Self), true).
+
 
 
 :-multifile(react:react_message_hook/1).
@@ -178,12 +209,18 @@ listen_react_loop_1(Websocket, Slave):-
         ; Message = listen_for_messages(Handlers)->
             listen_for_messages(Handlers)
         ; Message = consulted(_)->
+            format(atom(Text), 'system(~k)', [Message]),
+            ws_send(Websocket, text(Text))
+        ; Message = system(_)->
             format(atom(Text), '~k', [Message]),
             ws_send(Websocket, text(Text))
         ; format(user_error, 'Bad proactive message: ~q~n', [Message])
         ),
         !,
         listen_react_loop_1(Websocket, Slave).
+
+react_system_message(SessionID, Message):-
+        thread_send_message(SessionID, system(Message)).
 
 :-dynamic(react_listener/2).
 

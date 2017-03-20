@@ -5,13 +5,17 @@ var Constants = require('./constants.js');
 function Row()
 {
     ReactComponent.call(this);
-    this.setDOMNode(document.createElement("tr"));
+    var row = document.createElement("tr");
+    this.baseClassName = "react_table_row";
+    this.setDOMNode(row);
+
 }
 
 Row.prototype = new ReactComponent;
 Row.prototype.appendChild = function(t)
 {
     var cell = document.createElement("td");
+    cell.className = "react_table_cell"
     cell.appendChild(t.getDOMNode());
     this.domNode.appendChild(cell);
     t.setParent(this);
@@ -20,6 +24,7 @@ Row.prototype.appendChild = function(t)
 Row.prototype.insertBefore = function(t, s)
 {
     var cell = document.createElement("td");
+    cell.className = "react_table_cell"
     cell.appendChild(t.getDOMNode());
     this.domNode.insertBefore(cell, s.getDOMNode().parentNode);
     t.setParent(this);
@@ -28,6 +33,7 @@ Row.prototype.insertBefore = function(t, s)
 Row.prototype.replaceChild = function(n, o)
 {
     var cell = document.createElement("td");
+    cell.className = "react_table_cell"
     cell.appendChild(n.getDOMNode());
     this.domNode.replaceChild(cell, o.getDOMNode().parentNode);
     n.setParent(this);

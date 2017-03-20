@@ -18,6 +18,8 @@ var vDiffFunctor = Prolog._make_functor(Prolog._make_atom("vdiff"), 3);
 var vPatchFunctor = Prolog._make_functor(Prolog._make_atom("vpatch"), 4);
 var expandChildrenFunctor = Prolog._make_functor(Prolog._make_atom("expand_children"), 2);
 var messageFunctor = Prolog._make_functor(Prolog._make_atom("message"), 3);
+var userFunctor = Prolog._make_functor(Prolog._make_atom("user"), 1);
+var systemFunctor = Prolog._make_functor(Prolog._make_atom("system"), 1);
 var consultedFunctor = Prolog._make_functor(Prolog._make_atom("consulted"), 1);
 var server_connection = null;
 var qOp = null;
@@ -35,12 +37,13 @@ function install_foreign()
         Prolog.define_foreign(foreign_predicates[p], foreign_module[foreign_predicates[p]]);
 }
 
-function PrologEngine(baseURL, rootElementId, errorHandler, callback)
+function PrologEngine(baseURL, rootElementId, errorHandler, messageHandler, callback)
 {
     this.env = {};
     this.event_queue = [];
     this.processing_event = false;
     this.errorHandler = errorHandler;
+    this.messageHandler = messageHandler;
     this.rootWidget = null;
     // Set up a few of our own properties
     this.env.proactive_context = [];
@@ -497,20 +500,32 @@ PrologEngine.prototype.onMessage = function(event)
     var t = Prolog._string_to_local_term(event.data);
     if (t == 0)
         console.log("Failed to parse message: " + event.data);
-    else
+    else if (Prolog._is_compound(t))
     {
-        if (Prolog._term_functor(t) == consultedFunctor)
+        if (Prolog._term_functor(t) == systemFunctor)
         {
-            Prolog._free_local(t);
-            this.withEventQueue("internal",
-                                function(then)
-                                {
-                                    this.make(function()
-                                              {
-                                                  this.rootWidget.reRender(function() { console.log("Rebuilt due to code change on server"); });
-                                                  then();
-                                              }.bind(this));
-                                }.bind(this));
+            var v = Prolog._term_arg(t, 0);
+            if (Prolog._is_compound(v) && Prolog._term_functor(v) == consultedFunctor)
+            {
+                Prolog._free_local(t);
+                this.withEventQueue("internal",
+                                    function(then)
+                                    {
+                                        this.make(function()
+                                                  {
+                                                      this.rootWidget.reRender(function() { console.log("Rebuilt due to code change on server"); });
+                                                      then();
+                                                  }.bind(this));
+                                    }.bind(this));
+            }
+            else
+            {
+                if (this.messageHandler != undefined)
+                    this.messageHandler(v);
+                else
+                    console.log("System message received but no message handler has been registered");
+                Prolog._free_local(t);
+            }
         }
         else if (Prolog._term_functor(t) == messageFunctor)
         {
@@ -524,6 +539,12 @@ PrologEngine.prototype.onMessage = function(event)
             Prolog._free_local(t);
         }
     }
+    else
+    {
+        console.log("Unexpected message format: " + Prolog._portray(t) + " from " + event.data);
+        Prolog._free_local(t);
+    }
+
 }
 
 function dispatchMessages(w, i, t)

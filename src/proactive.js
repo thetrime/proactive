@@ -11,15 +11,15 @@ window.onPrologReady = function(Prolog)
     var ReactComponent = require('./react_component.js');
     console.log("Proactive v" + Version + " is ready");
     if (onProactiveReady !== undefined)
-        onProactiveReady({render: function(url, propSpec, rootElementId, container, callback, errorHandler)
-			  {
-                              var engine = new PrologEngine(url, rootElementId, errorHandler, function(status, error)
+        onProactiveReady({render: function(url, rootElementId, container, settings)
+                          {
+                              var engine = new PrologEngine(url, rootElementId, settings.errorHandler, settings.messageHandler, function(status, error)
                                                             {
                                                                 if (status)
                                                                 {
                                                                     // Make the initial props
                                                                     var initialPropsObject = PrologState.emptyState;
-                                                                    if (propSpec != null)
+                                                                    if (settings.propSpec != undefined && settings.propSpec != null)
                                                                     {
                                                                         var p = decodeURIComponent(propSpec);
                                                                         initialPropsObject = new PrologState(Prolog._string_to_local_term(p));
@@ -27,12 +27,13 @@ window.onPrologReady = function(Prolog)
                                                                     engine.setRootWidget(new ReactWidget(null, engine, rootElementId, initialPropsObject, function(widget)
 										    {
 											container.className += " proactive_container vertical_layout vertical_fill horizontal_fill";
-											container.appendChild(widget.getDOMNode());
-                                                                                        callback(true, error);
+                                                                                        container.appendChild(widget.getDOMNode());
+                                                                                        if (settings.callback != undefined)
+                                                                                            settings.callback(true, error);
                                                                                     }));
                                                                 }
-                                                                else
-                                                                    callback(false, error);
+                                                                else if (settings.callback != undefined)
+                                                                    settings.callback(false, error);
 							      });
                           },
                           registerPredicate: PrologEngine.registerPredicate,
