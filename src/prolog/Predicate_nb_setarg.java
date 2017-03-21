@@ -56,6 +56,6 @@ public class Predicate_nb_setarg extends ExecuteOnlyCode
       {
          return RC.FAIL;
       }
-      return RC.SUCCESS;
+      return RC.SUCCESS_LAST;
    }
 }
