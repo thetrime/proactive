@@ -217,7 +217,10 @@ public class ProactiveLayoutManager implements LayoutManager2
             else if (justification == ProactiveConstraints.Justification.SPACE_BETWEEN)
             {
                beforePad = 0;
-               intraPad = (int)((major_available - sum)/(componentCount-1));
+               if (componentCount > 1)
+                  intraPad = (int)((major_available - sum)/(componentCount-1));
+               else
+                  intraPad = 0;
             }
             else if (justification == ProactiveConstraints.Justification.SPACE_AROUND)
             {
