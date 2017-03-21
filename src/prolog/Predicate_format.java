@@ -55,6 +55,7 @@ public class Predicate_format extends ExecuteOnlyCode
       CompoundTerm.toCollection(args[2], formatArgs);
       try
       {
+         boolean is_locale_format = false;
 	 Iterator<Term> a = formatArgs.iterator();
          byte[] input = formatString.value.getBytes("ISO-8859-1");
          int r = 0;
@@ -72,6 +73,24 @@ public class Predicate_format extends ExecuteOnlyCode
                   {
                      switch(input[i])
                      {
+                        case 'a': // atom
+                        {
+                           Term arg = a.next();
+			   if (arg instanceof AtomTerm)
+                              ps.print(((AtomTerm)arg).value);
+                           else
+                              PrologException.typeError(AtomTerm.get("atom"), arg);
+                           break;
+                        }
+                        case 'c': // character code
+                        {
+                           Term arg = a.next();
+                           if (arg instanceof IntegerTerm && ((IntegerTerm)arg).value >= 0 && ((IntegerTerm)arg).value < 255)
+                              ps.print(new String(new char[]{(char)((IntegerTerm)arg).value}));
+                           else
+                              PrologException.typeError(AtomTerm.get("character_code"), arg);
+                           break;
+                        }
                         case 'D':
                         {
                            int v = ((IntegerTerm)a.next()).value;
@@ -100,10 +119,10 @@ public class Predicate_format extends ExecuteOnlyCode
 			   NumericTerm numeric = (NumericTerm)arg;
 			   String s;
 			   if (r == 0)
-			      s = "###,##0";
+                              s = "##0";
 			   else
 			   {
-			      s = "###,##0.";
+                              s = "##0.";
 			      for (int k = 0; k < r; k++)
 				 s = s + "0";
 			   }
@@ -149,6 +168,10 @@ public class Predicate_format extends ExecuteOnlyCode
                            }
                            continue; // ie goto top
                         }
+                        case ':':
+                           is_locale_format = true;
+                           i++;
+                           continue;
                         case 'X':
                         {
 			   Term arg = a.next();
