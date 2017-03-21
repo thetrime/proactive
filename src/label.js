@@ -38,7 +38,10 @@ Label.prototype.setProperties = function(t)
     }
     if (t.align !== undefined)
     {
-        this.domNode.style["text-align"] = Prolog._atom_chars(t.align);
+        if (ReactComponent.isNull(t.align))
+            this.domNode.style["text-align"] = "";
+        else
+            this.domNode.style["text-align"] = Prolog._atom_chars(t.align);
     }
     if (t.overflow !== undefined)
     {
