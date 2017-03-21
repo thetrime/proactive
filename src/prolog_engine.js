@@ -393,10 +393,12 @@ PrologEngine.prototype.processEvent = function(handler, event, context, callback
         callback(false);
         return;
     }
+    this.env.pushProactiveContext(context.blob);
     Prolog._execute(this.env,
                     goal,
                     function(success)
                     {
+                        this.env.popProactiveContext();
                          var ss = null;
                          if (success)
                              ss = context.getState().cloneWith(Prolog._deref(newState))
