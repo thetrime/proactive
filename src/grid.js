@@ -123,7 +123,7 @@ Grid.prototype.replaceChild = function(n, o)
     var row = Math.floor(index / this.weights.length)
     var col = index % this.weights.length;
     var rowDOM = this.table.rows[row];
-    rowDOM.childNodes[col].replaceChild(rowDOM.childNodes[col].firstChild, n.getDOMNode());
+    rowDOM.childNodes[col].replaceChild(n.getDOMNode(), rowDOM.childNodes[col].firstChild);
     n.setParent(this);
     o.setParent(null);
 }
