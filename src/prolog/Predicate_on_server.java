@@ -10,13 +10,14 @@ import gnu.prolog.vm.ExecuteOnlyMetaCode;
 import gnu.prolog.vm.PrologException;
 import gnu.prolog.vm.interpreter.Predicate_call;
 import gnu.prolog.vm.BacktrackInfoWithCleanup;
+import gnu.prolog.vm.BacktrackInfo;
 import gnu.prolog.vm.Environment;
 import gnu.prolog.io.PrologStream;
 import java.io.IOException;
 
 public class Predicate_on_server extends ExecuteOnlyMetaCode
 {
-   public class ServerBacktrackInfo extends BacktrackInfoWithCleanup
+   public class ServerBacktrackInfo extends BacktrackInfo
    {
       protected int startUndoPosition;
       private Engine.ExecutionState state;
@@ -24,7 +25,7 @@ public class Predicate_on_server extends ExecuteOnlyMetaCode
 
       protected ServerBacktrackInfo(Term goal)
       {
-         super(null);
+         super(-1, -1);
          this.goal = goal;
       }
       
@@ -56,12 +57,14 @@ public class Predicate_on_server extends ExecuteOnlyMetaCode
          if (rc == Engine.ExecutionState.RC.SUCCESS_LAST)
             return RC.SUCCESS_LAST;
          interpreter.pushBacktrackInfo(this);
+         interpreter.pushBacktrackInfo(new BacktrackInfoWithCleanup(null)
+            {
+               public void cleanup(Interpreter interpreter)
+               {
+                  state.cut();
+               }
+            });
          return RC.SUCCESS;
-      }
-
-      public void cleanup(Interpreter interpreter)
-      {
-         state.cut();
       }
 
       private Term deleteStates(Term t)
