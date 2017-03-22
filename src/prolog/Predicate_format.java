@@ -23,6 +23,7 @@ import gnu.prolog.io.TermWriter;
 import java.util.Iterator;
 import java.util.List;
 import java.util.LinkedList;
+import java.util.Arrays;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.IOException;
@@ -44,6 +45,8 @@ public class Predicate_format extends ExecuteOnlyCode
       ByteArrayOutputStream bos = null;
       Term target = null;
       BufferedOutputStream ps = null;
+      BufferedOutputStream last_output = null;
+      ByteArrayOutputStream tab_buffer = null;
       if (args[0] instanceof CompoundTerm && ((CompoundTerm)args[0]).tag == tagAtom1)
       {
          CompoundTerm sink = (CompoundTerm)args[0];
@@ -64,9 +67,12 @@ public class Predicate_format extends ExecuteOnlyCode
       try
       {
          boolean is_locale_format = false;
+         int tab_stop = 0;
+         int tab_base = 0;
 	 Iterator<Term> a = formatArgs.iterator();
          byte[] input = formatString.value.getBytes("ISO-8859-1");
          int r = -1;
+         char tab_character = ' ';
          for(int i = 0; i < input.length; i++)
          {
             if (input[i] == '~')
@@ -297,18 +303,52 @@ public class Predicate_format extends ExecuteOnlyCode
                         }
                         case '|': // reset-tab-stop
                         {
-                           // FIXME: Not implemented
-                           PrologException.systemError();
+                           tab_stop = ps.length();
+                           break;
                         }
                         case '+': // create-tab-stop
                         {
-                           // FIXME: Not implemented
-                           PrologException.systemError();
+                           int pad_length;
+                           if (r == -1)
+                              pad_length = 6 - ps.length() - tab_base;
+                           else
+                              pad_length = r - ps.length() - tab_base;
+                           String pad = null;
+                           if (pad_length > 0)
+                           {
+                              char[] chars = new char[pad_length];
+                              Arrays.fill(chars, tab_character);
+                              pad = new String(chars);
+                           }
+                           if (last_output == null)
+                           {
+                              // Not buffering
+                              if (pad != null)
+                                 ps.print(pad);
+                           }
+                           else
+                           {
+                              // left-pad
+                              if (pad != null)
+                                 last_output.print(pad);
+                              ps.flush();
+                              ps = last_output;
+                              ps.write(tab_buffer.toByteArray());
+                              last_output = null;
+                           }
+                           tab_stop = ps.length();
+                           break;
                         }
                         case 't': // tab
                         {
-                           // FIXME: Not implemented
-                           PrologException.systemError();
+                           last_output = ps;
+                           tab_buffer = new ByteArrayOutputStream();
+                           ps = new StreamFilter(tab_buffer);
+                           tab_base = last_output.length() - tab_stop;
+                           if (tab_base < 0)
+                              tab_base = 0;
+                           tab_character = (char)r;
+                           break;
                         }
                         case 'w': // write
                         {
@@ -370,6 +410,14 @@ public class Predicate_format extends ExecuteOnlyCode
                ps.write((char)input[i]);
          }
          ps.flush();
+         if (last_output != null)
+         {
+            last_output.flush();
+            ps = last_output;
+            ps.write(tab_buffer.toByteArray());
+         }
+         if (ps.getError() != null)
+            throw ps.getError();
          if (bos != null)
          {
             AtomTerm data = AtomTerm.get(bos.toString("ISO-8859-1"));
@@ -386,13 +434,16 @@ public class Predicate_format extends ExecuteOnlyCode
       }
       catch(IOException ioe)
       {
-         return RC.FAIL;
+         PrologException.systemError(ioe);
       }
+      return RC.FAIL;
    }
 
    private abstract class BufferedOutputStream extends OutputStream
    {
       public abstract int lastChar();
+      public abstract int length();
+      protected PrologException error = null;
       public void print(int b) throws IOException
       {
          write(b);
@@ -402,25 +453,87 @@ public class Predicate_format extends ExecuteOnlyCode
          byte buf[] = s.getBytes();
          write(buf, 0, buf.length);
       }
+      public PrologException getError()
+      {
+         return error;
+      }
    }
 
    private class StreamFilter extends BufferedOutputStream
    {
-      private OutputStream out;
+      private OutputStream sink;
       int lastChar = -1;
+      int length = 0;
       public StreamFilter(OutputStream o)
       {
-         out = o;
+         sink = o;
       }
       public int lastChar()
       {
          return lastChar;
       }
-      public void write(int b) throws IOException
+      public int length()
       {
-         out.write(b);
-         lastChar = b;
+         return length;
       }
+      public void write(int b)
+      {
+         try
+         {
+            sink.write(b);
+            lastChar = b;
+            length++;
+         }
+         catch(IOException ex)
+         {
+            try
+            {
+               PrologException.systemError(ex);
+            }
+            catch(PrologException p)
+            {
+               error = p;
+            }
+         }
+      }
+      public void close()
+      {
+         try
+         {
+            sink.close();
+         }
+         catch(IOException ex)
+         {
+            try
+            {
+               PrologException.systemError(ex);
+            }
+            catch(PrologException p)
+            {
+               error = p;
+            }
+         }
+      }
+      
+      public void flush()
+      {
+         try
+         {
+            sink.flush();
+         }
+         catch(IOException ex)
+         {
+            try
+            {
+               PrologException.systemError(ex);
+            }
+            catch(PrologException p)
+            {
+               error = p;
+            }
+         }
+      }
+
 
    }
 
@@ -431,6 +544,7 @@ public class Predicate_format extends ExecuteOnlyCode
       PrologStream sink;
       Interpreter interpreter;
       int lastChar = -1;
+      int length = 0;
       public PrologStreamAdapter(PrologStream sink, Interpreter interpreter)
       {
          this.sink = sink;
@@ -442,32 +556,47 @@ public class Predicate_format extends ExecuteOnlyCode
          try
          {
             sink.close(true);
-         } 
-         catch(Exception e) {}
+         }
+         catch(PrologException notAllowed)
+         {
+            error = notAllowed;
+         }
       }
       
-      public void flush() 
+      public void flush()
       {
          try
          {
             sink.flushOutput(null);
-         } 
-         catch(Exception e) {}
+         }
+         catch(PrologException notAllowed)
+         {
+            error = notAllowed;
+         }
       }
 
-      public void write(int b) 
+      public void write(int b) throws IOException
       {
          try
          {
             sink.putCode(null, interpreter, b);
             lastChar = b;
-         } 
-         catch(Exception e) {}
+            length++;
+         }
+         catch(PrologException notAllowed)
+         {
+            error = notAllowed;
+         }
       }
 
       public int lastChar()
       {
          return lastChar;
       }
+      public int length()
+      {
+         return length;
+      }
+
    }
 }
