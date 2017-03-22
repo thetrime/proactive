@@ -41,20 +41,20 @@ public class Predicate_format extends ExecuteOnlyCode
    {
       Environment environment = interpreter.getEnvironment();
       List<Term> formatArgs = new LinkedList<Term>();
-      PrintStream ps = null;
       ByteArrayOutputStream bos = null;
       Term target = null;
+      BufferedOutputStream ps = null;
       if (args[0] instanceof CompoundTerm && ((CompoundTerm)args[0]).tag == tagAtom1)
       {
          CompoundTerm sink = (CompoundTerm)args[0];
          target = sink.args[0].dereference();
          bos = new ByteArrayOutputStream();
-         ps = new PrintStream(bos);
+         ps = new StreamFilter(bos);
       }
       else
       {
          PrologStream stream = interpreter.getEnvironment().resolveStream(args[0]);
-         ps = new PrintStream(new PrologStreamAdapter(stream, interpreter));
+         ps = new PrologStreamAdapter(stream, interpreter);
       }
 
       if (!(args[1] instanceof AtomTerm))
@@ -73,7 +73,7 @@ public class Predicate_format extends ExecuteOnlyCode
             {
                if (input[i+1] == '~')
                {
-                  ps.print('~');
+                  ps.print("~");
                   i++;
                }
                else
@@ -211,13 +211,13 @@ public class Predicate_format extends ExecuteOnlyCode
                         }
                         case 'n': // newline
                         {
-                           ps.println();
+                           ps.print("\n");
                            break;
                         }
                         case 'N': // soft newline
                         {
-                           // FIXME: wrong
-                           ps.println();
+                           if (ps.lastChar() != '\n')
+                              ps.print("\n");
                            break;
                         }
                         case 'p': // print
@@ -292,22 +292,23 @@ public class Predicate_format extends ExecuteOnlyCode
                         case 's': // string
                         case '@': // execute
                         {
-                           throw new PrologException(new CompoundTerm(errorTag, new CompoundTerm(formatErrorTag, AtomTerm.get("Format not implemented: " + input[i])), new VariableTerm()), null);
+                           // FIXME: Not implemented
+                           PrologException.systemError();
                         }
                         case '|': // reset-tab-stop
                         {
                            // FIXME: Not implemented
-                           throw new PrologException(new CompoundTerm(formatErrorTag, AtomTerm.get("Format not implemented: " + input[i]), new VariableTerm()), null);
+                           PrologException.systemError();
                         }
                         case '+': // create-tab-stop
                         {
                            // FIXME: Not implemented
-                           throw new PrologException(new CompoundTerm(formatErrorTag, AtomTerm.get("Format not implemented: " + input[i]), new VariableTerm()), null);
+                           PrologException.systemError();
                         }
                         case 't': // tab
                         {
                            // FIXME: Not implemented
-                           throw new PrologException(new CompoundTerm(formatErrorTag, AtomTerm.get("Format not implemented: " + input[i]), new VariableTerm()), null);
+                           PrologException.systemError();
                         }
                         case 'w': // write
                         {
@@ -383,14 +384,53 @@ public class Predicate_format extends ExecuteOnlyCode
       {
          return RC.FAIL;
       }
+      catch(IOException ioe)
+      {
+         return RC.FAIL;
+      }
+   }
+
+   private abstract class BufferedOutputStream extends OutputStream
+   {
+      public abstract int lastChar();
+      public void print(int b) throws IOException
+      {
+         write(b);
+      }
+      public void print(String s) throws IOException
+      {
+         byte buf[] = s.getBytes();
+         write(buf, 0, buf.length);
+      }
+   }
+
+   private class StreamFilter extends BufferedOutputStream
+   {
+      private OutputStream out;
+      int lastChar = -1;
+      public StreamFilter(OutputStream o)
+      {
+         out = o;
+      }
+      public int lastChar()
+      {
+         return lastChar;
+      }
+      public void write(int b) throws IOException
+      {
+         out.write(b);
+         lastChar = b;
+      }
+
    }
 
    // Adapts a prolog stream so it implements the same interface as the ByteArrayOutputStream
    // This lets us write to either an atom or a stream
-   private class PrologStreamAdapter extends OutputStream
+   private class PrologStreamAdapter extends BufferedOutputStream
    {
       PrologStream sink;
       Interpreter interpreter;
+      int lastChar = -1;
       public PrologStreamAdapter(PrologStream sink, Interpreter interpreter)
       {
          this.sink = sink;
@@ -420,8 +460,14 @@ public class Predicate_format extends ExecuteOnlyCode
          try
          {
             sink.putCode(null, interpreter, b);
+            lastChar = b;
          } 
          catch(Exception e) {}
+      }
+
+      public int lastChar()
+      {
+         return lastChar;
       }
    }
 }
