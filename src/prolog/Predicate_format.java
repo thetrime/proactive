@@ -9,6 +9,7 @@ import gnu.prolog.term.NumericTerm;
 import gnu.prolog.term.IntegerTerm;
 import gnu.prolog.term.CompoundTerm;
 import gnu.prolog.term.CompoundTermTag;
+import gnu.prolog.term.VariableTerm;
 import gnu.prolog.vm.TermConstants;
 import gnu.prolog.vm.Interpreter;
 import gnu.prolog.vm.ExecuteOnlyCode;
@@ -16,19 +17,26 @@ import gnu.prolog.vm.PrologException;
 import gnu.prolog.vm.Environment;
 import gnu.prolog.vm.Evaluate;
 import gnu.prolog.io.PrologStream;
+import gnu.prolog.io.WriteOptions;
+import gnu.prolog.io.OperatorSet;
+import gnu.prolog.io.TermWriter;
 import java.util.Iterator;
 import java.util.List;
 import java.util.LinkedList;
 import java.io.OutputStream;
+import java.io.PrintWriter;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.io.PrintStream;
 import java.io.ByteArrayOutputStream;
 import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 
 public class Predicate_format extends ExecuteOnlyCode
 {
    public static final CompoundTermTag tagAtom1 = CompoundTermTag.get("atom", 1);
+   public static final CompoundTermTag formatErrorTag = CompoundTermTag.get("format_error", 1);
+   public static final CompoundTermTag errorTag = CompoundTermTag.get("error", 2);
    public RC execute(Interpreter interpreter, boolean backtrackMode, gnu.prolog.term.Term args[]) throws PrologException
    {
       Environment environment = interpreter.getEnvironment();
@@ -39,7 +47,7 @@ public class Predicate_format extends ExecuteOnlyCode
       if (args[0] instanceof CompoundTerm && ((CompoundTerm)args[0]).tag == tagAtom1)
       {
          CompoundTerm sink = (CompoundTerm)args[0];
-         target = sink.args[0];
+         target = sink.args[0].dereference();
          bos = new ByteArrayOutputStream();
          ps = new PrintStream(bos);
       }
@@ -58,13 +66,16 @@ public class Predicate_format extends ExecuteOnlyCode
          boolean is_locale_format = false;
 	 Iterator<Term> a = formatArgs.iterator();
          byte[] input = formatString.value.getBytes("ISO-8859-1");
-         int r = 0;
+         int r = -1;
          for(int i = 0; i < input.length; i++)
          {
             if (input[i] == '~')
             {
                if (input[i+1] == '~')
+               {
                   ps.print('~');
+                  i++;
+               }
                else
                {
                   i++;
@@ -85,61 +96,230 @@ public class Predicate_format extends ExecuteOnlyCode
                         case 'c': // character code
                         {
                            Term arg = a.next();
-                           if (arg instanceof IntegerTerm && ((IntegerTerm)arg).value >= 0 && ((IntegerTerm)arg).value < 255)
+                           if (!(arg instanceof IntegerTerm))
+                              PrologException.typeError(AtomTerm.get("integer"), arg);
+                           if (((IntegerTerm)arg).value >= 0 && ((IntegerTerm)arg).value < 255)
                               ps.print(new String(new char[]{(char)((IntegerTerm)arg).value}));
                            else
-                              PrologException.typeError(AtomTerm.get("character_code"), arg);
+                              PrologException.representationError(AtomTerm.get("character_code"));
                            break;
+                        }
+                        case 'd': // decimal
+                        {
+                           Term arg = a.next();
+                           DecimalFormat df;
+                           if (arg instanceof IntegerTerm || arg instanceof BigIntegerTerm)
+                           {
+                              if (is_locale_format)
+                                 df = new DecimalFormat("###,###");
+                              else
+                                 df = new DecimalFormat("###");
+                              if (arg instanceof IntegerTerm)
+                                 ps.print(df.format(((IntegerTerm)arg).value));
+                              else
+                                 ps.print(df.format(((BigIntegerTerm)arg).value));
+                              break;
+                           }
+                           else
+                              PrologException.typeError(AtomTerm.get("integer"), arg);
                         }
                         case 'D':
                         {
-                           int v = ((IntegerTerm)a.next()).value;
+                           Term arg = a.next();
                            DecimalFormat df = new DecimalFormat("###,###");
-                           ps.print(df.format(v));
+                           if (arg instanceof IntegerTerm)
+                              ps.print(df.format(((IntegerTerm)arg).value));
+                           else if (arg instanceof BigIntegerTerm)
+                              ps.print(df.format(((BigIntegerTerm)arg).value));
+                           else
+                              PrologException.typeError(AtomTerm.get("integer"), arg);
                            break;
                         }
-                        case 'w':
-                        case 'p':
-			case 'q':
-			{
-			   Term arg = a.next();
-			   if (arg instanceof AtomTerm)
-			      ps.print(((AtomTerm)arg).value);
-			   else
-			      ps.print(arg.toString());
-			   break;
-			}
-                        case 'f':
+                        case 'e': // floating point as exponential
+                        case 'E': // floating point as exponential in upper-case
+                        case 'f': // floating point as non-exponential
+                        case 'g': // shorter of e or f
+                        case 'G': // shorter of E or f
                         {
-			   Term arg = a.next();
-			   if (!(arg instanceof NumericTerm))
-			   {
-			      arg = Evaluate.evaluate(arg); // raises an exception if not evaluable
-			   }
-			   NumericTerm numeric = (NumericTerm)arg;
-			   String s;
-			   if (r == 0)
-                              s = "##0";
+                           NumericTerm arg = (NumericTerm)Evaluate.evaluate(a.next()); // raises an exception if not evaluable
+                           String s;
+                           if (r == -1)
+                           {
+                              if (is_locale_format)
+                                 s = "###,##0.000000";
+                              else
+                                 s = "##0.000000";
+
+                           }
+                           else if (r == 0)
+                           {
+                              if (is_locale_format)
+                                 s = "###,##0";
+                              else
+                                 s = "##0";
+                           }
 			   else
-			   {
-                              s = "##0.";
+                           {
+                              if (is_locale_format)
+                                 s = "###,##0.";
+                              else
+                                 s = "##0.";
 			      for (int k = 0; k < r; k++)
 				 s = s + "0";
 			   }
 			   DecimalFormat df = new DecimalFormat(s);
-			   if (numeric instanceof FloatTerm)
-			      ps.print(df.format(((FloatTerm)numeric).value));
+                           if (arg instanceof FloatTerm)
+                              ps.print(df.format(((FloatTerm)arg).value));
 			   else if (arg instanceof IntegerTerm)
-			      ps.print(df.format(((IntegerTerm)numeric).value));
+                              ps.print(df.format(((IntegerTerm)arg).value));
 			   else if (arg instanceof BigIntegerTerm)
-			      ps.print(df.format(((BigIntegerTerm)numeric).value));
+                              ps.print(df.format(((BigIntegerTerm)arg).value));
 			   else if (arg instanceof RationalTerm)
-			      ps.print(df.format(((RationalTerm)numeric).value.doubleValue()));
-			}
-                        break;
-                        case 'n':
+                              ps.print(df.format(((RationalTerm)arg).value.doubleValue()));
+                           break;
+                        }
+                        case 'i': // ignore
+                        {
+                           a.next();
+                           break;
+                        }
+                        case 'I':
+                        {
+                           Term arg = a.next();
+                           DecimalFormatSymbols symbols = new DecimalFormatSymbols();
+                           symbols.setGroupingSeparator('_');
+                           String s;
+                           if (r == -1)
+                              s = "###,###";
+                           else if (r == 0)
+                              s = "###";
+                           else
+                           {
+                              s = "";
+                              for (int k = 0; k < r; k++)
+                                 s = s + "#";
+                              s = s + "," + s;
+                           }
+                           DecimalFormat df = new DecimalFormat(s, symbols);
+                           if (arg instanceof IntegerTerm)
+                              ps.print(df.format(((IntegerTerm)arg).value));
+                           else if (arg instanceof BigIntegerTerm)
+                              ps.print(df.format(((BigIntegerTerm)arg).value));
+                           else
+                              PrologException.typeError(AtomTerm.get("integer"), arg);
+                           break;
+                        }
+                        case 'n': // newline
+                        {
                            ps.println();
                            break;
+                        }
+                        case 'N': // soft newline
+                        {
+                           // FIXME: wrong
+                           ps.println();
+                           break;
+                        }
+                        case 'p': // print
+                        {
+                           WriteOptions options = new WriteOptions(new OperatorSet());
+                           options.ignoreOps = false;
+                           options.quoted = false;
+                           options.numbervars = true;
+                           PrintWriter pw = new PrintWriter(ps);
+                           new TermWriter(pw).print(options, a.next());
+                           pw.flush();
+                           break;
+                        }
+                        case 'q': // writeq
+                        {
+                           WriteOptions options = new WriteOptions(new OperatorSet());
+                           options.ignoreOps = false;
+                           options.quoted = true;
+                           options.numbervars = true;
+                           PrintWriter pw = new PrintWriter(ps);
+                           new TermWriter(pw).print(options, a.next());
+                           pw.flush();
+                           break;
+                        }
+                        case 'r': // radix
+                        case 'R': // uppercase radix
+                        {
+                           Term arg = a.next();
+                           String s = null;
+                           if (arg instanceof IntegerTerm)
+                           {
+                              if (((IntegerTerm)arg).value >= 0)
+                                 s = Integer.toHexString(((IntegerTerm)arg).value);
+                              else
+                              {
+                                 ps.print("-");
+                                 s = Integer.toHexString(-((IntegerTerm)arg).value);
+                              }
+                           }
+                           else if (arg instanceof BigIntegerTerm)
+                           {
+                              if (((BigIntegerTerm)arg).value.signum() == -1)
+                              {
+                                 ps.print("-");
+                                 s = (((BigIntegerTerm)arg).value.negate()).toString(16);
+                              }
+                              else
+                                 s = (((BigIntegerTerm)arg).value).toString(16);
+                           }
+                           else
+                              PrologException.typeError(AtomTerm.get("integer"), arg);
+                           if (input[i] == 'R')
+                              s = s.toUpperCase();
+                           if (is_locale_format)
+                           {
+                              int len = s.length();
+                              int k = len % 3;
+                              if (k == 0) k = 3;
+                              for (int j = 0; j < len;)
+                              {
+                                 ps.print(s.charAt(j));
+                                 if (j+3 < len)
+                                    ps.print(",");
+                                 j += k;
+                                 k = 3;
+                              }
+                           }
+                           else
+                              ps.print(s);
+                           break;
+                        }
+                        case 's': // string
+                        case '@': // execute
+                        {
+                           throw new PrologException(new CompoundTerm(errorTag, new CompoundTerm(formatErrorTag, AtomTerm.get("Format not implemented: " + input[i])), new VariableTerm()), null);
+                        }
+                        case '|': // reset-tab-stop
+                        {
+                           // FIXME: Not implemented
+                           throw new PrologException(new CompoundTerm(formatErrorTag, AtomTerm.get("Format not implemented: " + input[i]), new VariableTerm()), null);
+                        }
+                        case '+': // create-tab-stop
+                        {
+                           // FIXME: Not implemented
+                           throw new PrologException(new CompoundTerm(formatErrorTag, AtomTerm.get("Format not implemented: " + input[i]), new VariableTerm()), null);
+                        }
+                        case 't': // tab
+                        {
+                           // FIXME: Not implemented
+                           throw new PrologException(new CompoundTerm(formatErrorTag, AtomTerm.get("Format not implemented: " + input[i]), new VariableTerm()), null);
+                        }
+                        case 'w': // write
+                        {
+                           WriteOptions options = new WriteOptions(new OperatorSet());
+                           options.ignoreOps = false;
+                           options.quoted = false;
+                           options.numbervars = true;
+                           PrintWriter pw = new PrintWriter(ps);
+                           new TermWriter(pw).print(options, a.next());
+                           pw.flush();
+                           break;
+                        }
                         case '*':
                         {
                            Term arg = a.next();
@@ -148,6 +328,12 @@ public class Predicate_format extends ExecuteOnlyCode
                            else
                               PrologException.typeError(TermConstants.integerAtom, arg);
                            i++;
+                           continue;
+                        }
+                        case '`':
+                        {
+                           r = input[i+1];
+                           i+=2;
                            continue;
                         }
                         case '0':
@@ -172,29 +358,8 @@ public class Predicate_format extends ExecuteOnlyCode
                            is_locale_format = true;
                            i++;
                            continue;
-                        case 'X':
-                        {
-			   Term arg = a.next();
-                           double val = 0;
-                           if (arg instanceof IntegerTerm)
-                              val = ((IntegerTerm)arg).value;
-                           else if (arg instanceof FloatTerm)
-                              val = ((FloatTerm)arg).value;
-                           String s;
-                           if (r == 0)
-                              s = "###,##0";
-                           else
-                           {
-                              s = "###,##0.";
-                              for (int k = 0; k < r; k++)
-                                 s = s + "0";
-                           }                           
-                           DecimalFormat df = new DecimalFormat(s);
-                           ps.print(df.format(val));
-                           break;
-                        }
                         default:
-                           ps.print("<??" + input[i] + "?>");
+                           throw new PrologException(new CompoundTerm(formatErrorTag, AtomTerm.get("No such format character: " + input[i])), null);
                      }
                      break;
                   }
