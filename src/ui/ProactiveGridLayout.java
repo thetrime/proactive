@@ -45,7 +45,7 @@ public class ProactiveGridLayout implements LayoutManager2
          return new Dimension (0, 0);
       preferred_column_widths = new int[weights.length];
       row_heights = new Vector<Integer>();
-
+      Insets parentInsets = parent.getInsets();
       // This is the preferred width of the widest row by the sum of the preferred height of the maximum element in each row
       int height = 0;
       int width = 0;
@@ -79,8 +79,7 @@ public class ProactiveGridLayout implements LayoutManager2
          row_heights.add(row_height);
          height += row_height;
       }
-      System.out.println("Would prefer " + width + "x" + height);
-      return new Dimension(width, height);
+      return new Dimension(width + parentInsets.left + parentInsets.right, height + parentInsets.top + parentInsets.bottom);
    }
    public Dimension minimumLayoutSize(Container parent)
    {
@@ -89,7 +88,7 @@ public class ProactiveGridLayout implements LayoutManager2
       // This is the minimum width of the widest row by the sum of the minimum height of the maximum element in each row
       int height = 0;
       int width = 0;
-
+      Insets parentInsets = parent.getInsets();
       Component[] sortedComponents = parent.getComponents();
       Arrays.sort(sortedComponents, new Comparator<Component>()
                        {
@@ -119,8 +118,7 @@ public class ProactiveGridLayout implements LayoutManager2
             width = row_width;
          height += row_height;
       }
-      System.out.println("Can tolerate " + width + "x" + height);
-      return new Dimension(width, height);
+      return new Dimension(width + parentInsets.left + parentInsets.right, height + parentInsets.top + parentInsets.bottom);
    }
 
    public Dimension maximumLayoutSize(Container parent)
@@ -130,7 +128,6 @@ public class ProactiveGridLayout implements LayoutManager2
 
    public void layoutContainer(Container parent)
    {
-      System.out.println("Laying out " + parent);
       Component[] sortedComponents = parent.getComponents();
       Arrays.sort(sortedComponents, new Comparator<Component>()
                        {
@@ -155,7 +152,7 @@ public class ProactiveGridLayout implements LayoutManager2
 
       if (available_width >= preferredSize.getWidth())
       {
-         System.out.println("Happy case: " + available_width + " vs " + preferredSize.getWidth());
+         //System.out.println("Happy width case: " + available_width + " vs " + preferredSize.getWidth());
          // Happy case - there is enough space, plus we can expand some components out according to their weight
          // If everything has weight 0 and there is space left over, then just ignore it
          double extra_width = available_width - preferredSize.getWidth();
@@ -169,7 +166,7 @@ public class ProactiveGridLayout implements LayoutManager2
       }
       else if (available_width >= minimumSize.getWidth())
       {
-         System.out.println("Tolerable case");
+         //System.out.println("Tolerable width case");
          // Tolerable case - we can display things at the minimum size and still fit everything without truncation
          // To avoid the jarring 'collapsing' behaviour of GridBagLayout, we should distribute any leftover space
          // (after setting each one to the minimum size) between all the components evenly, ignoring the weights
@@ -183,7 +180,7 @@ public class ProactiveGridLayout implements LayoutManager2
       {
          // Sad case - even at minimum size we cannot fit everything in. Display components at either
          // minimum-size * crush-factor or display them at minimum-size until we cannot fit any more in, then truncate
-         System.out.println("Sad case");
+         //System.out.println("Sad width case");
          for (int i = 0; i < column_widths.length; i++)
          {
             column_widths[i] = (int)(((double)available_width)/((double)weights.length));
@@ -199,12 +196,17 @@ public class ProactiveGridLayout implements LayoutManager2
 
       int x = 0;
       int y = 0;
+      int required_height = 0;
+      for (Integer i : row_heights)
+         required_height += i;
       for (int row = 0; counted < componentCount; row++)
       {
          x = 0;
          int height = 0;
-         if (available_height >= preferredSize.getHeight())
+         if (available_height >= required_height)
+         {
             height = row_heights.get(row);
+         }
          else
          {
             height = (int)((double)available_height / (double)((double)componentCount / (double)weights.length));
