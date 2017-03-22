@@ -54,6 +54,7 @@ public class Engine
    private WebSocketClient serverConnection = null;
    private Map<String, List<ReactWidget>> knownWidgets = new HashMap<String, List<ReactWidget>>();
    private static final CompoundTermTag consultedFunctor = CompoundTermTag.get("consulted", 1);
+   private static final CompoundTermTag systemFunctor = CompoundTermTag.get("system", 1);
    private static final CompoundTermTag messageFunctor = CompoundTermTag.get("message", 3);
 
    public Engine(String baseURL, String rootElementId, HTTPContext httpContext) throws Exception
@@ -841,11 +842,14 @@ public class Engine
             }
             System.out.println("expand_children/2 failed?");
          }
+         else
+            System.out.println("Render failed");
       }
       finally
       {
          env.popContext(interpreter);
       }
+      System.out.println("Render returned null");
       return null;
    }
 
@@ -911,10 +915,18 @@ public class Engine
          try
          {
             Term t = gnu.prolog.io.TermReader.stringToTerm((String)message, env);
-            if (t instanceof CompoundTerm && ((CompoundTerm)t).tag == consultedFunctor)
+            if (t instanceof CompoundTerm && ((CompoundTerm)t).tag == systemFunctor)
             {
-               make();
-               rootWidget.reRender();
+               t = ((CompoundTerm)t).args[0];
+               if (t instanceof CompoundTerm && ((CompoundTerm)t).tag == consultedFunctor)
+               {
+                  make();
+                  rootWidget.reRender();
+               }
+               else
+               {
+                  // FIXME: Pass message up via API
+               }
             }
             else if (t instanceof CompoundTerm && ((CompoundTerm)t).tag == messageFunctor)
             {
