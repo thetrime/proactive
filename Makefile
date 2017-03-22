@@ -5,7 +5,7 @@
 #  uglifyjs
 # Note also that this makefile does NOT build proscript, gmpjs (yet) or the ios version (Probably ever)
 
-PORT=10080
+PORT?=10080
 VERSION := $(shell cat VERSION)
 
 include Swing.src
@@ -14,6 +14,7 @@ include JS.src
 
 CLIENTS?=swing-client js-client
 MINIFY?=true
+TEST_APP?=App
 REACT_SRC=proactive-${VERSION}/src/jsx.pl                     \
 	  proactive-${VERSION}/src/vdiff.pl                   \
 	  proactive-${VERSION}/src/react.pl                   \
@@ -87,7 +88,7 @@ proactive-${VERSION}/lib/proscript.js.mem:	node_modules/proscript/proscript.js.m
 	cp $< $@
 
 run-swing-client:	swing-client
-	java -cp dist/gpj.jar${CLASSPATH_SEPARATOR}dist/java_websocket.jar${CLASSPATH_SEPARATOR}proactive-${VERSION}/lib/proactive.jar org.proactive.React "http://localhost:${PORT}/react" "App"
+	java -cp dist/gpj.jar${CLASSPATH_SEPARATOR}dist/java_websocket.jar${CLASSPATH_SEPARATOR}proactive-${VERSION}/lib/proactive.jar org.proactive.React ${SWING_ARGS} "http://localhost:${PORT}/react" ${TEST_APP}
 
 run-server:
 	swipl -f src/server.pl -g "start_react_server(${PORT}), ['demo/App']"
