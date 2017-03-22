@@ -19,7 +19,7 @@ public class ProactiveLayoutManager implements LayoutManager2
    private enum Panic {TRUNCATE, CRUSH};
    public static Layout HORIZONTAL = Layout.HORIZONTAL;
    public static Layout VERTICAL = Layout.VERTICAL;
-   private static final Panic panic = Panic.TRUNCATE;
+   private static final Panic panic = Panic.CRUSH;
 
    private ProactiveConstraints.Alignment alignment = ProactiveConstraints.Alignment.CENTER;
    private ProactiveConstraints.Justification justification = ProactiveConstraints.Justification.CENTER;

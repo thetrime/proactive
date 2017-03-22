@@ -3,8 +3,6 @@ package org.proactive.ui;
 import javax.swing.JPanel;
 import java.awt.Component;
 import java.awt.Color;
-import java.awt.GridBagLayout;
-import java.awt.GridBagConstraints;
 import java.awt.Insets;
 import java.util.List;
 import java.util.HashMap;
@@ -18,15 +16,14 @@ public class Grid extends ReactComponent
    private JPanel component;
    private int columnCount = 0;
    private Vector<Integer> weights = new Vector<Integer>();
-   private int x = 0;
-   private int y = 0;
-   private GridBagLayout layout;
+   private int index = 0;
+   private ProactiveGridLayout layout;
    public Grid()
    {
       super();
       component = new JPanel();
       component.setBackground(new Color(150, 168, 200));
-      layout = new GridBagLayout();
+      layout = new ProactiveGridLayout(weights);
       component.setLayout(layout);
    }
 
@@ -47,6 +44,8 @@ public class Grid extends ReactComponent
             weights.add(p.asInteger());
          }
          columnCount = weights.size();
+         layout = new ProactiveGridLayout(weights);
+         component.setLayout(layout);
          relayout = true;
       }
       if (relayout)
@@ -71,7 +70,7 @@ public class Grid extends ReactComponent
    public void replaceChild(ReactComponent newChild, ReactComponent oldChild)
    {
       Component oldComponent = awtMap.get(oldChild);
-      GridBagConstraints constraints = layout.getConstraints(oldComponent);
+      ProactiveConstraints constraints = layout.getConstraints(oldComponent);
       component.remove(oldComponent);
       component.add(newChild.getAWTComponent(), constraints);
       super.replaceChild(newChild, oldChild);
@@ -81,8 +80,7 @@ public class Grid extends ReactComponent
    private void relayout()
    {
       component.removeAll();
-      x = 0;
-      y = 0;
+      index = 0;
       for (ReactComponent c : children)
          addChildToPanel(c);
    }
@@ -90,15 +88,9 @@ public class Grid extends ReactComponent
    private void addChildToPanel(ReactComponent child)
    {
       component.add(child.getAWTComponent(),
-                    new GridBagConstraints(x, y, 1, 1, weights.elementAt(x), 0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, new Insets(0,0,0,0), 0, 0));
-      if (x+1 == columnCount)
-      {
-         x = 0;
-         y++;
-      }
-      else
-         x++;
-
+                    new ProactiveConstraints(ProactiveConstraints.Fill.NONE,
+                                             ProactiveConstraints.Alignment.AUTO,
+                                             index++));
    }
 
 }
