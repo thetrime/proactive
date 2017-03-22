@@ -18,6 +18,7 @@ public class ProactiveGridLayout implements LayoutManager2
    private Map<Component, ProactiveConstraints> map;
    private int[] preferred_column_widths;
    private int[] minimum_column_widths;
+   private Vector<Integer> row_heights;
 
    public ProactiveGridLayout(Vector<Integer> weights)
    {
@@ -25,6 +26,7 @@ public class ProactiveGridLayout implements LayoutManager2
       this.weights = new int[weights.size()];
       preferred_column_widths = new int[weights.size()];
       minimum_column_widths = new int[weights.size()];
+      row_heights = new Vector<Integer>();
       int j = 0;
       for(int i: weights)
       {
@@ -41,6 +43,9 @@ public class ProactiveGridLayout implements LayoutManager2
    {
       if (parent == null)
          return new Dimension (0, 0);
+      preferred_column_widths = new int[weights.length];
+      row_heights = new Vector<Integer>();
+
       // This is the preferred width of the widest row by the sum of the preferred height of the maximum element in each row
       int height = 0;
       int width = 0;
@@ -71,6 +76,7 @@ public class ProactiveGridLayout implements LayoutManager2
          }
          if (row_width > width)
             width = row_width;
+         row_heights.add(row_height);
          height += row_height;
       }
       System.out.println("Would prefer " + width + "x" + height);
@@ -83,6 +89,7 @@ public class ProactiveGridLayout implements LayoutManager2
       // This is the minimum width of the widest row by the sum of the minimum height of the maximum element in each row
       int height = 0;
       int width = 0;
+
       Component[] sortedComponents = parent.getComponents();
       Arrays.sort(sortedComponents, new Comparator<Component>()
                        {
@@ -113,7 +120,6 @@ public class ProactiveGridLayout implements LayoutManager2
          height += row_height;
       }
       System.out.println("Can tolerate " + width + "x" + height);
-      // FIXME: Returning width of 0 here
       return new Dimension(width, height);
    }
 
@@ -184,13 +190,25 @@ public class ProactiveGridLayout implements LayoutManager2
          }
       }
 
-      // And now the heights?
+      // And now the heights
+      if (available_height >= preferredSize.getHeight())
+      {
+         // Happy case
+      }
+
+
       int x = 0;
       int y = 0;
       for (int row = 0; counted < componentCount; row++)
       {
          x = 0;
-         int height = 100;
+         int height = 0;
+         if (available_height >= preferredSize.getHeight())
+            height = row_heights.get(row);
+         else
+         {
+            height = (int)((double)available_height / (double)((double)componentCount / (double)weights.length));
+         }
          for (int col = 0; col < weights.length; col++)
          {
             int width = column_widths[col];
@@ -203,7 +221,6 @@ public class ProactiveGridLayout implements LayoutManager2
 
    public void invalidateLayout(Container target)
    {
-      System.out.println("Hello?");
       // FIXME: Implement?
    }
 
