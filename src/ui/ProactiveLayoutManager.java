@@ -254,6 +254,7 @@ public class ProactiveLayoutManager implements LayoutManager2
                {
                   major_position += (major_scale + slush - c.getMaximumSize().getWidth());
                   major_scale = (int)c.getMaximumSize().getWidth();
+                  slush = 0;
                }
                if (constraints.fill == ProactiveConstraints.Fill.VERTICAL || constraints.fill == ProactiveConstraints.Fill.BOTH)
                   minor_scale = minor_available;

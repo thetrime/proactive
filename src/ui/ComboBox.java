@@ -4,6 +4,7 @@ import org.proactive.prolog.PrologObject;
 import org.proactive.React;
 import org.proactive.ReactComponent;
 import java.awt.Component;
+import java.awt.Dimension;
 import javax.swing.JComboBox;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.text.DocumentFilter;
@@ -25,7 +26,7 @@ public class ComboBox extends ReactComponent
    JComboBox<ComboItem> field = null;
    JComponent component = null;
    private boolean stillConstructing = false;
-
+   private int maxWidth = -1;
    public ComboBox()
    {
       field = new JComboBox<ComboItem>(new ReactComboBoxModel());
@@ -75,6 +76,37 @@ public class ComboBox extends ReactComponent
          field.setEnabled(!properties.get("disabled").asBoolean());
       if (properties.containsKey("onChange"))
          setChangeListener(properties.get("onChange"));
+      if (properties.containsKey("maxWidth"))
+      {
+         PrologObject t = properties.get("maxWidth");
+         if (t == null || t.isNull())
+         {
+            maxWidth = -1;
+            field.setMaximumSize(null);
+         }
+         else
+         {
+            // We add 20 px to any width because we may have to add the down arrow icon on the field
+            // 20 is just a guess. There may be a better way to calculate this
+            String s = t.asString();
+            maxWidth = -1;
+            if (s.endsWith("em"))
+            {
+               int em = (((javax.swing.JComponent)field).getFontMetrics(field.getFont()).charWidth('M'));
+               maxWidth = (int)(Integer.parseInt(s.substring(0, s.length()-2)) * em) + 20;
+            }
+            else if (s.endsWith("px"))
+               maxWidth = Integer.parseInt(s.substring(0, s.length()-2)) + 20;
+            else
+               System.out.println("Bad maxWidth: " + s);
+            int height = (int)field.getPreferredSize().getHeight();
+            if (maxWidth != -1)
+            {
+               System.out.println("Setting max-width to " + new Dimension(maxWidth, height));
+               field.setMaximumSize(new Dimension(maxWidth, height));
+            }
+         }
+      }
    }
 
    private PrologObject serializeObject()
