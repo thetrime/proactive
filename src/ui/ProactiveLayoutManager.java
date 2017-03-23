@@ -239,9 +239,22 @@ public class ProactiveLayoutManager implements LayoutManager2
             int major_scale = 0;
             int minor_scale = 0;
             int minor_position = minor_pad;
+
+            // Compute how much extra space this component will be granted - the 'slush'
+            int slush = 0;
+            if (constraints.fill == ProactiveConstraints.Fill.BOTH ||
+                (constraints.fill == ProactiveConstraints.Fill.HORIZONTAL && layout == Layout.HORIZONTAL) ||
+                (constraints.fill == ProactiveConstraints.Fill.VERTICAL && layout == Layout.VERTICAL))
+               slush =  (int)(extraSpace / (double)fillCount);
+
             if (layout == Layout.HORIZONTAL)
             {
                major_scale = (int)c.getPreferredSize().getWidth();
+               if (c.getMaximumSize() != null && c.getMaximumSize().getWidth() < major_scale + slush)
+               {
+                  major_position += (major_scale + slush - c.getMaximumSize().getWidth());
+                  major_scale = (int)c.getMaximumSize().getWidth();
+               }
                if (constraints.fill == ProactiveConstraints.Fill.VERTICAL || constraints.fill == ProactiveConstraints.Fill.BOTH)
                   minor_scale = minor_available;
                else if (constraints.fill == ProactiveConstraints.Fill.HORIZONTAL)
@@ -261,19 +274,8 @@ public class ProactiveLayoutManager implements LayoutManager2
             }
 
             minor_position = minor_pad + getAlignmentOffset(constraints, minor_available, minor_scale);
-
-            if (constraints.fill == ProactiveConstraints.Fill.BOTH ||
-                (constraints.fill == ProactiveConstraints.Fill.HORIZONTAL && layout == Layout.HORIZONTAL) ||
-                (constraints.fill == ProactiveConstraints.Fill.VERTICAL && layout == Layout.VERTICAL))
-            {
-               proposedLayout.put(c, new Rectangle(major_position, minor_position, major_scale + (int)(extraSpace / (double)fillCount), minor_scale));
-               major_position += (major_scale + (int)(extraSpace / (double)fillCount)) + intraPad;
-            }
-            else
-            {
-               proposedLayout.put(c, new Rectangle(major_position, minor_position, major_scale, minor_scale));
-               major_position += major_scale + intraPad;
-            }
+            proposedLayout.put(c, new Rectangle(major_position, minor_position, major_scale + slush, minor_scale));
+            major_position += major_scale + intraPad;
          }
       }
       else

@@ -20,6 +20,7 @@ import java.awt.event.FocusEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseEvent;
+import java.awt.Dimension;
 import org.proactive.prolog.PrologObject;
 import org.proactive.ReactComponent;
 
@@ -33,6 +34,7 @@ public class Field extends ReactComponent
    private PopupMenu popup = null;
    private InputWidget widget;
    private int type = TEXT;
+   private int maxWidth = -1;
    public Field()
    {
       widget = new TextField();
@@ -186,6 +188,8 @@ public class Field extends ReactComponent
                   widget = new CheckBox();
                   break;
             }
+            if (maxWidth != -1)
+               widget.getAWTComponent().setMaximumSize(new Dimension(maxWidth, (int)widget.getAWTComponent().getPreferredSize().getHeight()));
             if (internalPopupListener != null)
                widget.getAWTComponent().addMouseListener(internalPopupListener);
             if (getParentNode() != null)
@@ -198,6 +202,36 @@ public class Field extends ReactComponent
             setValue(null);
          else
             setValue(properties.get("value"));
+      }
+      if (properties.containsKey("maxWidth"))
+      {
+         PrologObject t = properties.get("maxWidth");
+         if (t == null || t.isNull())
+         {
+            maxWidth = -1;
+            widget.getAWTComponent().setMaximumSize(null);
+         }
+         else
+         {
+            String s = t.asString();
+            maxWidth = -1;
+            if (s.endsWith("em"))
+            {
+               //maxWidth = (int)(Integer.parseInt(s.substring(0, s.length()-2)) * (widget.getAWTComponent().getFont().getSize() / (java.awt.Toolkit.getDefaultToolkit().getScreenResolution() / 72.0)));
+               int em = (((javax.swing.JComponent)widget.getAWTComponent()).getFontMetrics(widget.getAWTComponent().getFont()).charWidth('M'));
+               maxWidth = (int)(Integer.parseInt(s.substring(0, s.length()-2)) * em);
+            }
+            else if (s.endsWith("px"))
+               maxWidth = Integer.parseInt(s.substring(0, s.length()-2));
+            else
+               System.out.println("Bad maxWidth: " + s);
+            int height = (int)widget.getAWTComponent().getPreferredSize().getHeight();
+            if (maxWidth != -1)
+            {
+               System.out.println("Setting max-width to " + new Dimension(maxWidth, height));
+               widget.getAWTComponent().setMaximumSize(new Dimension(maxWidth, height));
+            }
+         }
       }
       if (properties.containsKey("onBlur"))
          setFocusListener(properties.get("onBlur"));
