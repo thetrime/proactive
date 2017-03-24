@@ -63,7 +63,7 @@ PrologState.prototype.processElement = function(t, functor)
     }
     else
     {
-        console.log(t.toString());
+        console.log(Prolog._portray(t));
         throw("Bad state 2");
     }
 }

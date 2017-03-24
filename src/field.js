@@ -170,6 +170,7 @@ function Field()
 {
     ReactComponent.call(this);
     this.baseClassName = "field";
+    this.layout = "none";
     this.changeHandler = null;
     var node = document.createElement("input");
     //node.id = "field_" + (global_field_id++);
