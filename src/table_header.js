@@ -6,8 +6,10 @@ function TableHeader()
 {
     ReactComponent.call(this);
     this.weights = [];
-    var node = document.createElement("tr");
-    node.className = "react_table_header_row";
+    var node = document.createElement("thead");
+    this.row = document.createElement("tr");
+    this.row.className = "react_table_header_row";
+    node.appendChild(this.row);
     this.setDOMNode(node);
     this.sum = 0;
 }
@@ -23,7 +25,7 @@ TableHeader.prototype.appendChild = function(t)
     var cell = document.createElement("th");
     cell.className = "react_table_header_cell";
     cell.appendChild(t.domNode);
-    this.domNode.appendChild(cell);
+    this.row.appendChild(cell);
     this.weights[this.children.indexOf(t)] = t.weight || default_weight;
     this.sum += (Number(t.weight) || default_weight);
     t.setParent(this);
@@ -36,7 +38,7 @@ TableHeader.prototype.removeChild = function(c)
     this.weights.splice(this.children.indexOf(c), 1);
     this.recomputeRatios();
     c.setParent(null);
-    this.getDOMNode().removeChild(this.getDOMNode().childNodes[this.children.indexOf(c)]);
+    this.row.removeChild(this.row.childNodes[this.children.indexOf(c)]);
 }
 
 TableHeader.prototype.replaceChild = function(n, o)
@@ -48,7 +50,7 @@ TableHeader.prototype.replaceChild = function(n, o)
     this.recomputeRatios();
     o.setParent(null);
     n.setParent(this);
-    this.getDOMNode().replaceChild(this.getDOMNode().childNodes[this.children.indexOf(n), o.getDOMNode()]);
+    this.row.replaceChild(this.row.childNodes[this.children.indexOf(n), o.getDOMNode()]);
 }
 
 TableHeader.prototype.insertBefore = function(t, s)
@@ -61,12 +63,12 @@ TableHeader.prototype.insertBefore = function(t, s)
     var cell = document.createElement("th");
     cell.className = "react_table_header_cell";
     cell.appendChild(t.domNode);
-    getDOMNode().insertBefore(cell, this.getDOMNode().childNodes[this.children.indexOf(s)]);
+    this.row.insertBefore(cell, this.row.childNodes[this.children.indexOf(s)]);
 }
 
 TableHeader.prototype.recomputeRatios = function()
 {
-    var th = this.domNode.childNodes;
+    var th = this.row.childNodes;
     for (i = 0; i < this.children.length; i++)
     {
         if (this.weights[i] == default_weight)

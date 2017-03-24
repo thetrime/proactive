@@ -292,4 +292,16 @@ table
 .table_container
 {
     flex-shrink: 1 !important;
+    height: 300px;
+    overflow: auto;
+}
+
+.table_container table
+{
+    border-spacing: 0;
+}
+
+th
+{
+    background-color: black;
 }
