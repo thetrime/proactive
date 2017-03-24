@@ -520,6 +520,7 @@ PrologEngine.prototype.onMessage = function(event)
                                                       then();
                                                   }.bind(this));
                                     }.bind(this));
+                this.processEvents();
             }
             else
             {
