@@ -299,6 +299,21 @@ PrologEngine.prototype.checkForFluxListeners = function(context)
     // FIXME: implement
 }
 
+PrologEngine.prototype.queueEvent = function(handler, event, context, callback)
+{
+    console.log(Prolog._portray(handler));
+    this.withEventQueue("queue",
+                        function(then)
+                        {
+                            this.processEvent(handler, event, context, function(t)
+                                              {
+                                                  Prolog._free_local(handler);
+                                                  Prolog._free_local(event);
+                                                  callback(t);
+                                                  then();}.bind(this));
+                        }.bind(this));
+}
+
 PrologEngine.prototype.triggerEvent = function(handler, event, context, callback)
 {
     this.withEventQueue("user",
@@ -306,7 +321,7 @@ PrologEngine.prototype.triggerEvent = function(handler, event, context, callback
                         {
                             this.processEvent(handler, event, context, function(t) { callback(t); then();}.bind(this));
                         }.bind(this));
-//    this.processEvent(handler, event, context, callback);
+    this.processEvents();
 }
 
 PrologEngine.prototype.triggerSystemEvent = function(handler, event, context, callback)
@@ -316,34 +331,18 @@ PrologEngine.prototype.triggerSystemEvent = function(handler, event, context, ca
                         {
                             this.processEvent(handler, event, context, function(t) { callback(t); then();}.bind(this));
                         }.bind(this));
+    this.processEvents();
 }
 
 PrologEngine.prototype.withEventQueue = function(origin, fn)
 {
-/*
-    if (this.processing_event == true)
-    {
-        if (origin == "user")
-            console.log("Ignoring user-initiated event because I am busy");
-        else
-        {
-            console.log("I'm busy. I'll do that in a moment");
-            this.event_queue.push(fn);
-        }
-        return;
-    }
-    console.log("Processing that event, since I was otherwise unoccupied");
-*/
-    this.processing_event = true;
     this.event_queue.push(fn);
-    this.processEvents();
 }
 
 PrologEngine.prototype.processEvents = function()
 {
     if (this.event_queue.length > 0)
     {
-//        console.log("Dispatching an event from my queue...");
         this.event_queue.shift()(function(t)
                                  {
                                      this.processEvents();
@@ -351,8 +350,7 @@ PrologEngine.prototype.processEvents = function()
     }
     else
     {
-//        console.log("All events are now dispatched");
-        this.processing_event = false;
+        //console.log("All events are now dispatched");
     }
 }
 PrologEngine.prototype.processEvent = function(handler, event, context, callback)
@@ -421,6 +419,7 @@ PrologEngine.prototype.processEvent = function(handler, event, context, callback
                             }
                             else
                                 console.log("trigger_event/4 failed");
+                            callback(false);
                         }
                      }.bind(this));
 }

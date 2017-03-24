@@ -1,5 +1,18 @@
-See about fixing ~+, ~| and ~t in format
-Investigate AGC
-Tidy up exception printing - there's a number in there?
-Add regression tests for ~t
-Add regression tests for aggregate
+Proscript
+---------
+Implement AGC
+Implement GC
+
+JS
+--
+Implement right-click in tables and fields
+Allow for scrolling in grids
+If the weight of anything except the last element in a grid is non-zero the grid takes up 1,000,000 pixels of width (?!)
+
+Swing
+-----
+Allow for scrolling in grids
+
+General
+-------
+How to do things like images on buttons? an Image child to a Button, or a image attribute on the Button? If the former we can control the attributes more directly. But it could also get out of hand. If the latter, it seems kind of hacky.

@@ -255,6 +255,8 @@ module.exports["bubble_event"] = function(handler, event)
     if (Prolog._is_compound(handler) && Prolog._term_functor(handler) == Constants.thisFunctor)
     {
         var target = Prolog._get_blob("react_component", Prolog._term_arg(handler, 0));
+        target.queueEvent(Prolog._make_local(Prolog._term_arg(handler, 1)), Prolog._make_local(event), function(t) {});
+        /*
         var savedState = Prolog._save_state();
         var resume = Prolog._yield();
         target.triggerEvent(Prolog._term_arg(handler, 1),
@@ -265,6 +267,8 @@ module.exports["bubble_event"] = function(handler, event)
                                 resume(t)
                             });
         return 3; // YIELD;
+        */
+        return true;
     }
     // Otherwise it is just a goal - go ahead and call it with one extra arg
     var goal;
@@ -292,7 +296,7 @@ module.exports["bubble_event"] = function(handler, event)
                         Prolog._restore_state(savedState);
                         resume(t)
                     });
-    return 3; // YIELD
+    return true;
 }
 
 /* And now the DOM glue */

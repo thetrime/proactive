@@ -22,9 +22,18 @@ public class Predicate_bubble_event extends ExecuteOnlyCode
          CompoundTerm handlerTerm = (CompoundTerm)handler;
          ReactWidget target = (ReactWidget)((JavaObjectTerm)(handlerTerm.args[0])).value;
          //System.out.println("Bubbling trigger to " + target + ": " + handlerTerm.args[1]);
-         if (target.triggerEvent(handlerTerm.args[1], args[1]))
-            return RC.SUCCESS_LAST;
-         return RC.FAIL;
+         javax.swing.SwingUtilities.invokeLater(new Runnable()
+            {
+               public void run()
+               {
+                  try
+                  {
+                     target.triggerEvent(handlerTerm.args[1], args[1]);
+                  }
+                  catch(Exception q) {}
+               }
+            });
+         return RC.SUCCESS_LAST;
       }
       // Otherwise it is just a goal - go ahead and call it with one extra arg
       Term goal = null;
