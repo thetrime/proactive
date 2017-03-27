@@ -69,19 +69,29 @@
     align-self: stretch;
 }
 
+/* We set flex-shrink to 1 here because otherwise this gets a width of hundreds of thousands of pixels:
+        <Panel layout="horizontal">
+          <Panel fill="horizontal" label="xxx">
+            <Grid weights={[0,1]}>
+              <Label label="foo"/>
+              <Button label="bar"/>
+            </Grid>
+          </Panel>
+        </Panel>
+*/
+
 .vertical_layout > .vertical_fill
 {
     -webkit-flex: 1; 
     -webkit-box-flex: 1;
-    flex: 1 0 auto;
-    /*min-height: -webkit-min-content;*/
+    flex: 1 1 auto;
 }
 
 .horizontal_layout > .horizontal_fill
 {
     -webkit-flex: 1;  
     -webkit-box-flex: 1;
-    flex: 1 0 auto;
+    flex: 1 1 auto;
     min-height: -webkit-min-content;
 }
 
