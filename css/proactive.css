@@ -346,13 +346,13 @@ table
     white-space: nowrap;
 }
 
-.react_table thead tr th *
+.react_table thead tr th div
 {
     position: absolute;
     display: block;
     x-margin-left: -10px;
     line-height: normal;
-    width: 100%;
+    xwidth: 100%;
     z-index: 2;
     text-align: left;
     font-weight: bold;
@@ -379,3 +379,7 @@ table
     border-left: none;
 }
 
+.react_table_header_wrapper *
+{
+    width: 100%;
+}

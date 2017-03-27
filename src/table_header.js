@@ -24,7 +24,10 @@ TableHeader.prototype.appendChild = function(t)
 {
     var cell = document.createElement("th");
     cell.className = "react_table_header_cell";
-    cell.appendChild(t.domNode);
+    var wrapper = document.createElement("div");
+    wrapper.className = "react_table_header_wrapper";
+    cell.appendChild(wrapper);
+    wrapper.appendChild(t.domNode);
     this.row.appendChild(cell);
     this.weights[this.children.indexOf(t)] = t.weight || default_weight;
     this.sum += (Number(t.weight) || default_weight);
@@ -62,7 +65,10 @@ TableHeader.prototype.insertBefore = function(t, s)
     t.setParent(this);
     var cell = document.createElement("th");
     cell.className = "react_table_header_cell";
-    cell.appendChild(t.domNode);
+    var wrapper = document.createElement("div");
+    wrapper.className = "react_table_header_wrapper";
+    cell.appendChild(wrapper);
+    wrapper.appendChild(t.domNode);
     this.row.insertBefore(cell, this.row.childNodes[this.children.indexOf(s)]);
 }
 
