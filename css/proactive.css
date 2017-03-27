@@ -58,7 +58,13 @@
     box-sizing: border-box;
 }
 
-.vertical_layout > *
+/* Do not crush buttons or inputs even if there seems to be limited space */
+.vertical_layout > button
+{
+    flex-shrink: 0;
+}
+
+.vertical_layout > input
 {
     flex-shrink: 0;
 }
