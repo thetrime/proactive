@@ -7,7 +7,6 @@ JS
 --
 Implement right-click in tables and fields
 Allow for scrolling in grids
-If the weight of anything except the last element in a grid is non-zero the grid takes up 1,000,000 pixels of width (?!)
 
 Swing
 -----
