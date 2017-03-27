@@ -447,12 +447,11 @@ fire_test('$this'(Context, Handler), Event, _This):-
 
 fire_test(Handler, Event, ThisPtr):-
         ( get_attr(ThisPtr, react_dom, Widget)->
-            This = ThisPtr,
-            Widget = react_widget(Module, State, Props, Id, OldVDOM, OldDOM)
+            Widget = react_widget(Module, State, Props, _Id, _OldVDOM, _OldDOM)
         ; ThisPtr = dom_element(Attributes),
           memberchk(widget-This, Attributes),
           get_attr(This, react_dom, Widget),
-          Widget = react_widget(Module, State, Props, Id, OldVDOM, OldDOM)
+          Widget = react_widget(Module, State, Props, _Id, _OldVDOM, _OldDOM)
         ; existence_error(widget, ThisPtr)
         ),
         ( atom(Handler)->
