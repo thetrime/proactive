@@ -9,20 +9,11 @@ function Table()
     this.table.className = "react_table";
     this.table.style["border-spacing"] = 0;
     var node = document.createElement("div");
-    node.addEventListener("scroll", function()
-                          {
-                              var translate = "translate(0,"+this.domNode.scrollTop+"px)";
-                              console.log(translate);
-                              if (this.table.tHead !== undefined)
-                              {
-                                  this.table.tHead.style.transform = translate;
-                                  console.log(this.table.tHead);
-                                  console.log(this.table.tHead.style);
-                                  console.log(this.table.tHead.style.transform);
-                              }
-                          }.bind(this));
     this.baseClassName = "table_container"
-    node.appendChild(this.table);
+    var w2 = document.createElement("div");
+    w2.className = "table_header_container";
+    w2.appendChild(this.table);
+    node.appendChild(w2);
     this.setDOMNode(node);
 }
 Table.prototype = new ReactComponent;

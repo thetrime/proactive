@@ -58,13 +58,12 @@
     box-sizing: border-box;
 }
 
-/* Do not crush buttons or inputs even if there seems to be limited space */
-.vertical_layout > button
+input
 {
     flex-shrink: 0;
 }
 
-.vertical_layout > input
+button
 {
     flex-shrink: 0;
 }
@@ -75,22 +74,12 @@
     align-self: stretch;
 }
 
-/* We set flex-shrink to 1 here because otherwise this gets a width of hundreds of thousands of pixels:
-        <Panel layout="horizontal">
-          <Panel fill="horizontal" label="xxx">
-            <Grid weights={[0,1]}>
-              <Label label="foo"/>
-              <Button label="bar"/>
-            </Grid>
-          </Panel>
-        </Panel>
-*/
-
 .vertical_layout > .vertical_fill
 {
     -webkit-flex: 1; 
     -webkit-box-flex: 1;
     flex: 1 1 auto;
+    /*min-height: -webkit-min-content;*/
 }
 
 .horizontal_layout > .horizontal_fill
@@ -305,19 +294,88 @@ table
     table-layout: auto;
 }
 
+
+
+/* Table bits */
+
+
 .table_container
 {
-    flex-shrink: 1 !important;
-    height: 300px;
-    overflow: auto;
+    position: relative;
+    border: 1px solid #000;
+    overflow: hidden;
+    display: flex;
+    flex: 1 0;
 }
 
-.table_container table
+.table_header_container
+{
+    overflow-y: scroll;
+    zheight: 200px;
+    border-top: 22px solid transparent;
+    /* If tfoot present then add this border-bottom (and duplicate all the thead things below): 2px solid transparent; */
+}
+
+.react_table
 {
     border-spacing: 0;
+    border-collapse: collapse;
+    width: 100%;
 }
 
-th
+.react_table td
 {
-    background-color: black;
+    x-border: 1px solid white;
 }
+
+
+.react_table thead tr
+{
+    left: 0;
+}
+
+.react_table thead tr th
+{
+    height: 0;
+    line-height: 0;
+    margin: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    color: transparent;
+    border: none;
+    white-space: nowrap;
+}
+
+.react_table thead tr th *
+{
+    position: absolute;
+    display: block;
+    x-margin-left: -10px;
+    line-height: normal;
+    width: 100%;
+    z-index: 2;
+    text-align: left;
+    font-weight: bold;
+}
+
+.react_table thead tr th *
+{
+    x-border-left: 1px solid white;
+    x-border-bottom: 1px solid white;
+}
+
+.react_table thead tr th *
+{
+    x-background: violet;
+}
+
+.react_table thead tr th *
+{
+    top: 0;
+}
+
+.react_table thead tr th:first-child *
+{
+    border-left: none;
+}
+
