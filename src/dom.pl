@@ -20,6 +20,7 @@
 
           proactive/3,
           bubble_event/3,
+          bubble_test/3,
           render_dom/2,
           render_document/2,
           get_store_state/2,
@@ -439,6 +440,31 @@ fire_event(Handler, Event, ThisPtr):-
         vpatch(OldDOM, Patch, [document(This)], NewDOM),
         put_attr(This, react_dom, react_widget(Module, UpdatedState, Props, Id, NewVDOM, NewDOM)).
 
+
+fire_test('$this'(Context, Handler), Event, _This):-
+        !,
+        fire_test(Handler, Event, Context).
+
+fire_test(Handler, Event, ThisPtr):-
+        ( get_attr(ThisPtr, react_dom, Widget)->
+            This = ThisPtr,
+            Widget = react_widget(Module, State, Props, Id, OldVDOM, OldDOM)
+        ; ThisPtr = dom_element(Attributes),
+          memberchk(widget-This, Attributes),
+          get_attr(This, react_dom, Widget),
+          Widget = react_widget(Module, State, Props, Id, OldVDOM, OldDOM)
+        ; existence_error(widget, ThisPtr)
+        ),
+        ( atom(Handler)->
+            Goal =.. [Handler, Event, State, Props]
+        ; otherwise->
+            Handler =.. A,
+            append(A, [Event, State, Props], B),
+            Goal =.. B
+        ),
+        Module:Goal.
+
+
 curly_term_to_state(Term, State):-
         ( Term == {} ->
             State = proactive{}
@@ -623,6 +649,15 @@ bubble_event(Props, Key, Event):-
           get_dict(Key, Props, Handler)->
             % TBD: This will go wrong if the handler is not a $this/2
             fire_event(Handler, Event, _)
+        ; otherwise->
+            true
+        ).
+
+bubble_test(Props, Key, Event):-
+        ( is_dict(Props, proactive),
+          get_dict(Key, Props, Handler)->
+            % TBD: This will go wrong if the handler is not a $this/2
+            fire_test(Handler, Event, _)
         ; otherwise->
             true
         ).
