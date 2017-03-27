@@ -301,7 +301,7 @@ PrologEngine.prototype.checkForFluxListeners = function(context)
 
 PrologEngine.prototype.queueEvent = function(handler, event, context, callback)
 {
-    console.log(Prolog._portray(handler));
+    //console.log(Prolog._portray(handler));
     this.withEventQueue("queue",
                         function(then)
                         {
