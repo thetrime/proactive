@@ -251,7 +251,7 @@ public class Field extends ReactComponent
                   {
                      try
                      {
-                        return getOwnerDocument().triggerEvent(handler.asTerm(), newValue.asTerm());
+                        return getOwnerDocument().triggerTest(handler.asTerm(), newValue.asTerm());
                      }
                      catch(Exception e)
                      {

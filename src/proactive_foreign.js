@@ -248,26 +248,31 @@ module.exports["widget_id"] = function(t)
     return Prolog._unify(t, Prolog._make_atom(id));
 }
 
+module.exports["bubble_test"] = function(handler, event)
+{
+    if (Prolog._is_compound(handler) && Prolog._term_functor(handler) == Constants.thisFunctor)
+    {
+        var resume = Prolog._yield();
+        var savedState = Prolog._save_state();
+        var target = Prolog._get_blob("react_component", Prolog._term_arg(handler, 0));
+        target.triggerTest(Prolog._make_local(Prolog._term_arg(handler, 1)), Prolog._make_local(event), function(t)
+                          {
+                              Prolog._restore_state(savedState);
+                              resume(t);
 
+                          });
+        return 3; // YIELD
+    }
+    return false;
+}
 
 module.exports["bubble_event"] = function(handler, event)
 {
     if (Prolog._is_compound(handler) && Prolog._term_functor(handler) == Constants.thisFunctor)
     {
         var target = Prolog._get_blob("react_component", Prolog._term_arg(handler, 0));
+        // This basically just simulates an entirely external event occurring
         target.queueEvent(Prolog._make_local(Prolog._term_arg(handler, 1)), Prolog._make_local(event), function(t) {});
-        /*
-        var savedState = Prolog._save_state();
-        var resume = Prolog._yield();
-        target.triggerEvent(Prolog._term_arg(handler, 1),
-                            event,
-                            function(t)
-                            {
-                                Prolog._restore_state(savedState);
-                                resume(t)
-                            });
-        return 3; // YIELD;
-        */
         return true;
     }
     // Otherwise it is just a goal - go ahead and call it with one extra arg

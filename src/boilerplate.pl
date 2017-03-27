@@ -40,6 +40,14 @@ bubble_event(List, Key, Event):-
             true
         ).
 
+bubble_test(List, Key, Event):-
+	'.'(List, Key, Handler),
+	( Handler \== {null}->
+            bubble_test(Handler, Event)
+        ; otherwise->
+            true
+        ).
+
 between(Low, High, I):-
         High >= Low,
         ( I = Low

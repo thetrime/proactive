@@ -158,6 +158,12 @@ public class ReactWidget extends ReactComponent
       return engine.triggerEvent(handler, event, this);
    }
 
+   public boolean triggerTest(Term handler, Term event) throws PrologException
+   {
+      return engine.triggerTest(handler, event, this);
+   }
+
+
    public ReactComponent renderContextualElement(Term handler, Term event) throws PrologException
    {
       Term elementDom = engine.renderContextualElement(handler, event, this);

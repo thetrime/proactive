@@ -568,6 +568,57 @@ public class Engine
       // State is not updated if we get to here
    }
 
+   public boolean triggerTest(Term handler, Term event, ReactWidget context) throws PrologException
+   {
+      PrologState state;
+      PrologState props;
+      if (handler instanceof CompoundTerm && ((CompoundTerm)handler).tag == tagThis)
+      {
+         CompoundTerm handlerTerm = (CompoundTerm)handler;
+         ReactWidget target = (ReactWidget)((JavaObjectTerm)(handlerTerm.args[0])).value;
+         Term newHandler = handlerTerm.args[1];
+         return triggerEvent(newHandler, event, target);
+      }
+
+      state = context.getState();
+      props = context.getProps();
+
+      Term goal;
+      if (handler instanceof AtomTerm)
+         goal = Module.crossModuleCall(context.getComponentName(), new CompoundTerm((AtomTerm)handler, new Term[]{event, state, props}));
+      else if (handler instanceof CompoundTerm)
+      {
+         CompoundTerm c_handler = (CompoundTerm)handler;
+         Term[] args = new Term[c_handler.tag.arity + 4];
+         for (int i = 0; i < c_handler.tag.arity; i++)
+            args[i] = c_handler.args[i];
+            //args[i] = unpack_recursive(c_handler.args[i]);
+         args[c_handler.tag.arity+0] = event;
+	 args[c_handler.tag.arity+1] = state;
+         args[c_handler.tag.arity+2] = props;
+         goal = Module.crossModuleCall(context.getComponentName(), new CompoundTerm(c_handler.tag.functor, args));
+      }
+      else
+      {
+         System.out.println("Handler is not callable: " + handler);
+         return false;
+      }
+      int undoPosition = interpreter.getUndoPosition();
+      Interpreter.Goal g = interpreter.prepareGoal(goal);
+      try
+      {
+         PrologCode.RC rc = interpreter.execute(g);
+         if (rc == PrologCode.RC.SUCCESS)
+            interpreter.stop(g);
+         return (rc == PrologCode.RC.SUCCESS || rc == PrologCode.RC.SUCCESS_LAST);
+      }
+      catch (PrologException notDefined)
+      {
+         notDefined.printStackTrace();
+      }
+      return false;
+   }
+
    public void waitForFluxStores(List<String> stores) throws PrologException
    {
       fluxDispatcher.waitFor(stores);

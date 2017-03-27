@@ -87,7 +87,6 @@ function keypressHandler(event)
 function pasteHandler(event)
 {
     event.preventDefault();
-    console.log(event);
     var oldValue = this.domNode.value;
     var clipboardData = event.clipboardData || window.clipboardData;
     var pastedData = clipboardData.getData('Text');
@@ -141,7 +140,7 @@ function blurHandler(event)
 {
     if (this.verifyValue != null)
     {
-        this.getOwnerDocument().triggerEvent(this.verifyValue, ReactComponent.serialize({value: Prolog._make_atom(this.domNode.value)}), function(success)
+        this.getOwnerDocument().triggerTest(this.verifyValue, ReactComponent.serialize({value: Prolog._make_atom(this.domNode.value)}), function(success)
                                              {
                                                  if (success != true)
                                                  {

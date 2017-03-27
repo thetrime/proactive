@@ -68,7 +68,8 @@ ENGINE= src/prolog/Predicate_remove_child.java                \
 	src/prolog/Predicate_get_state.java                   \
         src/prolog/Predicate_state_to_term.java               \
         src/prolog/Predicate_broadcast_proactive_message.java \
-	src/prolog/Predicate_bubble_event.java                \
+        src/prolog/Predicate_bubble_event.java                \
+        src/prolog/Predicate_bubble_test.java                 \
         src/prolog/Predicate_nth0.java                        \
 	src/prolog/Predicate_writeln.java                     \
         src/prolog/Predicate_memberchk.java                   \

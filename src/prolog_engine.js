@@ -324,6 +324,14 @@ PrologEngine.prototype.triggerEvent = function(handler, event, context, callback
     this.processEvents();
 }
 
+PrologEngine.prototype.triggerTest = function(handler, event, context, callback)
+{
+    this.processTest(handler,
+                     event,
+                     context,
+                     callback);
+}
+
 PrologEngine.prototype.triggerSystemEvent = function(handler, event, context, callback)
 {
     this.withEventQueue("system",
@@ -353,6 +361,62 @@ PrologEngine.prototype.processEvents = function()
         //console.log("All events are now dispatched");
     }
 }
+
+PrologEngine.prototype.processTest = function(handler, event, context, callback)
+{
+    var state, props;
+    while (Prolog._is_compound(handler) && Prolog._term_functor(handler) == Constants.thisFunctor)
+    {
+        context = Prolog._get_blob("react_component", Prolog._term_arg(handler, 0));
+        handler = Prolog._term_arg(handler, 1);
+    }
+    var savePoint = Prolog._save_state();
+    state = context.getState();
+    props = context.getProps();
+    var goal;
+    if (Prolog._is_atom(handler))
+    {
+        goal = crossModuleCall(context.getComponentName(), Prolog._make_compound(handler, [event, state.blob, props.blob]));
+    }
+    else if (Prolog._is_compound(handler))
+    {
+        var functor = Prolog._term_functor(handler);
+        var arity = Prolog._term_functor_arity(handler);
+        var args = [];
+        var i;
+        for (i = 0 ; i < arity; i++)
+            args[i] = Prolog._term_arg(handler, i);
+        args[i++] = event;
+        args[i++] = state.blob;
+        args[i++] = props.blob;
+        goal = crossModuleCall(context.getComponentName(), Prolog._make_compound(Prolog._term_functor_name(handler), args));
+    }
+    else
+    {
+        console.log("Invalid handler: " + handler);
+        Prolog._restore_state(savePoint);
+        callback(false);
+        return;
+    }
+    this.env.pushProactiveContext(context.blob);
+    Prolog._execute(this.env,
+                    goal,
+                    function(success)
+                    {
+                        this.env.popProactiveContext();
+                        Prolog._restore_state(savePoint);
+                        var ex = Prolog._get_exception();
+                        if (ex != 0)
+                        {
+                            if (this.errorHandler != undefined)
+                                this.errorHandler(ex);
+                            console.log("trigger_test/3 raised an error: "+ Prolog._format_term(null, 1200, ex));
+                        }
+                        callback(success);
+                    }.bind(this));
+}
+
+
 PrologEngine.prototype.processEvent = function(handler, event, context, callback)
 {
     var state, props;
