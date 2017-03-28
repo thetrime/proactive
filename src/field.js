@@ -138,9 +138,15 @@ function handlerCallback(success)
 
 function blurHandler(event)
 {
+    var value;
+    if (this.type == "checkbox" || this.type == "radio")
+        value = this.domNode.checked ? "true" : "false";
+    else
+        value = this.domNode.value;
+
     if (this.verifyValue != null)
     {
-        this.getOwnerDocument().triggerTest(this.verifyValue, ReactComponent.serialize({value: Prolog._make_atom(this.domNode.value)}), function(success)
+        this.getOwnerDocument().triggerTest(this.verifyValue, ReactComponent.serialize({value: Prolog._make_atom(value)}), function(success)
                                              {
                                                  if (success != true)
                                                  {
