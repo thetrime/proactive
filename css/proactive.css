@@ -78,7 +78,7 @@ button
 {
     -webkit-flex: 1; 
     -webkit-box-flex: 1;
-    flex: 1 1 auto;
+    flex: 1 1;
     /*min-height: -webkit-min-content;*/
 }
 
@@ -86,7 +86,7 @@ button
 {
     -webkit-flex: 1;  
     -webkit-box-flex: 1;
-    flex: 1 1 auto;
+    flex: 1 1;
     min-height: -webkit-min-content;
 }
 
@@ -305,13 +305,12 @@ table
     border: 1px solid #000;
     overflow: hidden;
     display: flex;
-    flex: 1 0;
+    flex-basis: 1.5em;
 }
 
 .table_header_container
 {
     overflow-y: scroll;
-    zheight: 200px;
     border-top: 22px solid transparent;
     /* If tfoot present then add this border-bottom (and duplicate all the thead things below): 2px solid transparent; */
 }
@@ -382,4 +381,4 @@ table
 .react_table_header_wrapper *
 {
     width: 100%;
-}
+} 
