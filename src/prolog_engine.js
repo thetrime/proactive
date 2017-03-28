@@ -40,6 +40,7 @@ function install_foreign()
 function PrologEngine(baseURL, rootElementId, errorHandler, messageHandler, callback)
 {
     this.env = {};
+    this.busy = false;
     this.event_queue = [];
     this.processing_event = false;
     this.errorHandler = errorHandler;
@@ -349,12 +350,16 @@ PrologEngine.prototype.withEventQueue = function(origin, fn)
 
 PrologEngine.prototype.processEvents = function()
 {
-    if (this.event_queue.length > 0)
+    if (this.event_queue.length > 0 && !this.busy)
     {
         this.event_queue.shift()(function(t)
                                  {
                                      this.processEvents();
                                  }.bind(this));
+    }
+    else if (this.busy)
+    {
+        console.log("Busy. Will do that in a moment");
     }
     else
     {
@@ -637,6 +642,7 @@ function dispatchMessages(w, i, t)
 
 PrologEngine.prototype.indicateBusy = function()
 {
+    this.busy = true;
     var spinner = document.getElementById("$spinner");
     if (spinner !== null)
         spinner.className = "busy";
@@ -644,6 +650,7 @@ PrologEngine.prototype.indicateBusy = function()
 
 PrologEngine.prototype.indicateReady = function()
 {
+    this.busy = false;
     var spinner = document.getElementById("$spinner");
     if (spinner !== null)
         spinner.className = "free";
