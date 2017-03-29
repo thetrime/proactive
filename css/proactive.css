@@ -304,6 +304,7 @@ table
     border: 1px solid #000;
     overflow: hidden;
     display: flex;
+    min-height: 22px;
 }
 
 .table_header_container
