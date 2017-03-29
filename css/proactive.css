@@ -41,7 +41,6 @@
     overflow: scroll;
 }
 
-
 .horizontal_layout
 {
     -webkit-box-orient: horizontal;
@@ -87,7 +86,7 @@ button
     -webkit-flex: 1;  
     -webkit-box-flex: 1;
     flex: 1 1 auto;
-    min-height: -webkit-min-content;
+    /*min-height: -webkit-min-content;*/
 }
 
 .horizontal_layout > .vertical_fill
@@ -176,9 +175,9 @@ button
 
 .fieldset
 {
+    padding: 0.5em;
     border: 2px groove threedface;
     border-top: none;
-    padding: 0.5em;
     margin: 1em 2px;
 }
 
@@ -299,28 +298,18 @@ table
 /* Table bits */
 
 
-.vertical_layout > .table_container
-{
-    flex-basis: 1.5em;
-}
-
-.horizontal_layout > .table_container
-{
-    flex-basis: 1.5em;
-}
-
 .table_container
 {
     position: relative;
     border: 1px solid #000;
     overflow: hidden;
     display: flex;
-    flex-basis: 1.5em;
 }
 
 .table_header_container
 {
     overflow-y: scroll;
+    display: flex;
     border-top: 22px solid transparent;
     /* If tfoot present then add this border-bottom (and duplicate all the thead things below): 2px solid transparent; */
 }
@@ -355,13 +344,12 @@ table
     white-space: nowrap;
 }
 
-.react_table thead tr th div
+.react_table thead tr th > *
 {
     position: absolute;
     display: block;
     x-margin-left: -10px;
     line-height: normal;
-    xwidth: 100%;
     z-index: 2;
     text-align: left;
     font-weight: bold;
@@ -391,4 +379,5 @@ table
 .react_table_header_wrapper *
 {
     width: 100%;
-} 
+}
+
