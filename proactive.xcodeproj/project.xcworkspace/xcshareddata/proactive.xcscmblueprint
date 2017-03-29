@@ -1,22 +1,26 @@
 {
-  "DVTSourceControlWorkspaceBlueprintPrimaryRemoteRepositoryKey" : "08C6031E212CD030291537F2C5CDBAA1013D6A58",
+  "DVTSourceControlWorkspaceBlueprintPrimaryRemoteRepositoryKey" : "F3EFAE19AE5440C29FA01E009410AC75EE61E5E7",
   "DVTSourceControlWorkspaceBlueprintWorkingCopyRepositoryLocationsKey" : {
 
   },
   "DVTSourceControlWorkspaceBlueprintWorkingCopyStatesKey" : {
-    "ABB939127996C66F7E852A780552ADEEF03C6B13" : 9223372036854775807,
-    "376D02D17509BDFD19F7426F0B8328E0F935C1A8" : 9223372036854775807,
-    "08C6031E212CD030291537F2C5CDBAA1013D6A58" : 9223372036854775807,
+    "0DCFF0852789D5A49F67B6C8EA2636735D303748" : 9223372036854775807,
     "2BDDA899D3F9418286E738DFBBCC7EEA0BD1BD2F" : 9223372036854775807,
+    "F3EFAE19AE5440C29FA01E009410AC75EE61E5E7" : 9223372036854775807,
+    "ABB939127996C66F7E852A780552ADEEF03C6B13" : 9223372036854775807,
+    "08C6031E212CD030291537F2C5CDBAA1013D6A58" : 9223372036854775807,
+    "376D02D17509BDFD19F7426F0B8328E0F935C1A8" : 9223372036854775807,
     "EF4E0D78BD66D72DA5A8D5BC350B60E01C5A9EF4" : 9223372036854775807
   },
   "DVTSourceControlWorkspaceBlueprintIdentifierKey" : "6F928D80-2BC1-4B28-953B-64A9C93E073D",
   "DVTSourceControlWorkspaceBlueprintWorkingCopyPathsKey" : {
-    "ABB939127996C66F7E852A780552ADEEF03C6B13" : "proactivejs\/SocketRocket\/",
-    "376D02D17509BDFD19F7426F0B8328E0F935C1A8" : "gmp-ios-builder\/",
+    "0DCFF0852789D5A49F67B6C8EA2636735D303748" : "proactive-se\/SocketRocket\/Vendor\/xctoolchain\/",
+    "2BDDA899D3F9418286E738DFBBCC7EEA0BD1BD2F" : "proactive-se\/node_modules\/proscript\/",
+    "F3EFAE19AE5440C29FA01E009410AC75EE61E5E7" : "proactive-se\/",
+    "ABB939127996C66F7E852A780552ADEEF03C6B13" : "proactive-se\/SocketRocket\/",
     "08C6031E212CD030291537F2C5CDBAA1013D6A58" : "proactivejs\/",
-    "2BDDA899D3F9418286E738DFBBCC7EEA0BD1BD2F" : "proactivejs\/node_modules\/proscript\/",
-    "EF4E0D78BD66D72DA5A8D5BC350B60E01C5A9EF4" : "proactivejs\/yoga\/yoga\/"
+    "376D02D17509BDFD19F7426F0B8328E0F935C1A8" : "gmp-ios-builder\/",
+    "EF4E0D78BD66D72DA5A8D5BC350B60E01C5A9EF4" : "proactive-se\/yoga\/yoga\/"
   },
   "DVTSourceControlWorkspaceBlueprintNameKey" : "proactive",
   "DVTSourceControlWorkspaceBlueprintVersion" : 204,
@@ -26,6 +30,11 @@
       "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "https:\/\/github.com\/thetrime\/proactivejs.git",
       "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Git",
       "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "08C6031E212CD030291537F2C5CDBAA1013D6A58"
+    },
+    {
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "https:\/\/github.com\/ParsePlatform\/xctoolchain.git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "0DCFF0852789D5A49F67B6C8EA2636735D303748"
     },
     {
       "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "https:\/\/github.com\/thetrime\/proscript2.git",
@@ -46,6 +55,11 @@
       "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "https:\/\/github.com\/facebook\/yoga.git",
       "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Git",
       "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "EF4E0D78BD66D72DA5A8D5BC350B60E01C5A9EF4"
+    },
+    {
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "https:\/\/github.com\/thetrime\/proactive",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "F3EFAE19AE5440C29FA01E009410AC75EE61E5E7"
     }
   ]
 }

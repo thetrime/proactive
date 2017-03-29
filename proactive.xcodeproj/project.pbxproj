@@ -38,13 +38,23 @@
 		F4298F3E1E27A34B0008BDEF /* ReactComponent.m in Sources */ = {isa = PBXBuildFile; fileRef = F4298F201E27A34B0008BDEF /* ReactComponent.m */; };
 		F4298F3F1E27A34B0008BDEF /* ReactWidget.m in Sources */ = {isa = PBXBuildFile; fileRef = F4298F211E27A34B0008BDEF /* ReactWidget.m */; };
 		F4298F471E27A3A90008BDEF /* proscript.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F4298F461E27A3950008BDEF /* proscript.framework */; };
-		F4298F541E27B1950008BDEF /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = F4298F531E27B1950008BDEF /* main.m */; };
-		F4298F571E27B1950008BDEF /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = F4298F561E27B1950008BDEF /* AppDelegate.m */; };
-		F4298F5A1E27B1950008BDEF /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = F4298F591E27B1950008BDEF /* ViewController.m */; };
-		F4298F5F1E27B1950008BDEF /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = F4298F5E1E27B1950008BDEF /* Assets.xcassets */; };
-		F4298F621E27B1950008BDEF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = F4298F601E27B1950008BDEF /* LaunchScreen.storyboard */; };
 		F4298F6A1E27B2830008BDEF /* boilerplate.pl in Resources */ = {isa = PBXBuildFile; fileRef = F4298F681E27B2830008BDEF /* boilerplate.pl */; };
 		F4298F6B1E27B2830008BDEF /* vdiff.pl in Resources */ = {isa = PBXBuildFile; fileRef = F4298F691E27B2830008BDEF /* vdiff.pl */; };
+		F434C6CF1E8BDE7A00FF04D4 /* libicucore.A.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = F434C6CE1E8BDE7A00FF04D4 /* libicucore.A.tbd */; };
+		F434C6DF1E8BDEDF00FF04D4 /* AppDelegate.h in Headers */ = {isa = PBXBuildFile; fileRef = F434C6D51E8BDEDF00FF04D4 /* AppDelegate.h */; };
+		F434C6E01E8BDEDF00FF04D4 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = F434C6D61E8BDEDF00FF04D4 /* AppDelegate.m */; };
+		F434C6E11E8BDEDF00FF04D4 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = F434C6D71E8BDEDF00FF04D4 /* Assets.xcassets */; };
+		F434C6E21E8BDEDF00FF04D4 /* Base.lproj in Resources */ = {isa = PBXBuildFile; fileRef = F434C6D81E8BDEDF00FF04D4 /* Base.lproj */; };
+		F434C6E31E8BDEDF00FF04D4 /* Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = F434C6D91E8BDEDF00FF04D4 /* Info.plist */; };
+		F434C6E41E8BDEDF00FF04D4 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = F434C6DA1E8BDEDF00FF04D4 /* main.m */; };
+		F434C6E51E8BDEDF00FF04D4 /* ViewController.h in Headers */ = {isa = PBXBuildFile; fileRef = F434C6DB1E8BDEDF00FF04D4 /* ViewController.h */; };
+		F434C6E61E8BDEDF00FF04D4 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = F434C6DC1E8BDEDF00FF04D4 /* ViewController.m */; };
+		F434C6E71E8BDEDF00FF04D4 /* YogaView.h in Headers */ = {isa = PBXBuildFile; fileRef = F434C6DD1E8BDEDF00FF04D4 /* YogaView.h */; };
+		F434C6E81E8BDEDF00FF04D4 /* YogaView.m in Sources */ = {isa = PBXBuildFile; fileRef = F434C6DE1E8BDEDF00FF04D4 /* YogaView.m */; };
+		F434C6E91E8BDF3F00FF04D4 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = F434C6D61E8BDEDF00FF04D4 /* AppDelegate.m */; };
+		F434C6EA1E8BDF3F00FF04D4 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = F434C6DA1E8BDEDF00FF04D4 /* main.m */; };
+		F434C6EB1E8BDF3F00FF04D4 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = F434C6DC1E8BDEDF00FF04D4 /* ViewController.m */; };
+		F434C6ED1E8BE05900FF04D4 /* launchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = F434C6EC1E8BE05900FF04D4 /* launchScreen.storyboard */; };
 		F46BE5461E27E7DF00DA8359 /* proactive.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F4AC5C6C1E27A21800F2384C /* proactive.framework */; };
 		F46BE5471E27E7DF00DA8359 /* proactive.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = F4AC5C6C1E27A21800F2384C /* proactive.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		F46BE54A1E27E7F900DA8359 /* YogaKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F40B23F21E27C5F700B14997 /* YogaKit.framework */; };
@@ -233,15 +243,20 @@
 		F4298F411E27A3950008BDEF /* proscript.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = proscript.xcodeproj; path = node_modules/proscript/proscript.xcodeproj; sourceTree = "<group>"; };
 		F4298F501E27B1950008BDEF /* proactive-demo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "proactive-demo.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		F4298F531E27B1950008BDEF /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
-		F4298F551E27B1950008BDEF /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
-		F4298F561E27B1950008BDEF /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
-		F4298F581E27B1950008BDEF /* ViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ViewController.h; sourceTree = "<group>"; };
-		F4298F591E27B1950008BDEF /* ViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ViewController.m; sourceTree = "<group>"; };
-		F4298F5E1E27B1950008BDEF /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		F4298F611E27B1950008BDEF /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
-		F4298F631E27B1950008BDEF /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		F4298F681E27B2830008BDEF /* boilerplate.pl */ = {isa = PBXFileReference; lastKnownFileType = text.script.perl; name = boilerplate.pl; path = src/boilerplate.pl; sourceTree = "<group>"; };
 		F4298F691E27B2830008BDEF /* vdiff.pl */ = {isa = PBXFileReference; lastKnownFileType = text.script.perl; name = vdiff.pl; path = src/vdiff.pl; sourceTree = "<group>"; };
+		F434C6CE1E8BDE7A00FF04D4 /* libicucore.A.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libicucore.A.tbd; path = usr/lib/libicucore.A.tbd; sourceTree = SDKROOT; };
+		F434C6D51E8BDEDF00FF04D4 /* AppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AppDelegate.h; path = "ios-demo/AppDelegate.h"; sourceTree = SOURCE_ROOT; };
+		F434C6D61E8BDEDF00FF04D4 /* AppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AppDelegate.m; path = "ios-demo/AppDelegate.m"; sourceTree = SOURCE_ROOT; };
+		F434C6D71E8BDEDF00FF04D4 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Assets.xcassets; path = "ios-demo/Assets.xcassets"; sourceTree = SOURCE_ROOT; };
+		F434C6D81E8BDEDF00FF04D4 /* Base.lproj */ = {isa = PBXFileReference; lastKnownFileType = folder; name = Base.lproj; path = "ios-demo/Base.lproj"; sourceTree = SOURCE_ROOT; };
+		F434C6D91E8BDEDF00FF04D4 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = "ios-demo/Info.plist"; sourceTree = SOURCE_ROOT; };
+		F434C6DA1E8BDEDF00FF04D4 /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = main.m; path = "ios-demo/main.m"; sourceTree = SOURCE_ROOT; };
+		F434C6DB1E8BDEDF00FF04D4 /* ViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ViewController.h; path = "ios-demo/ViewController.h"; sourceTree = SOURCE_ROOT; };
+		F434C6DC1E8BDEDF00FF04D4 /* ViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ViewController.m; path = "ios-demo/ViewController.m"; sourceTree = SOURCE_ROOT; };
+		F434C6DD1E8BDEDF00FF04D4 /* YogaView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = YogaView.h; path = "ios-demo/YogaView.h"; sourceTree = SOURCE_ROOT; };
+		F434C6DE1E8BDEDF00FF04D4 /* YogaView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = YogaView.m; path = "ios-demo/YogaView.m"; sourceTree = SOURCE_ROOT; };
+		F434C6EC1E8BE05900FF04D4 /* launchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = launchScreen.storyboard; path = "ios-demo/launchScreen.storyboard"; sourceTree = SOURCE_ROOT; };
 		F46BE5561E2A7C3B00DA8359 /* CodeListener.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CodeListener.h; path = src/CodeListener.h; sourceTree = SOURCE_ROOT; };
 		F46BE5571E2A7C3B00DA8359 /* CodeListener.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = CodeListener.m; path = src/CodeListener.m; sourceTree = SOURCE_ROOT; };
 		F46BE56F1E2A7D4F00DA8359 /* SocketRocket.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = SocketRocket.xcodeproj; path = SocketRocket/SocketRocket.xcodeproj; sourceTree = "<group>"; };
@@ -272,6 +287,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F434C6CF1E8BDE7A00FF04D4 /* libicucore.A.tbd in Frameworks */,
 				F46BE58C1E2A807000DA8359 /* SocketRocket.framework in Frameworks */,
 				F40B23F31E27C60A00B14997 /* YogaKit.framework in Frameworks */,
 				F4298F471E27A3A90008BDEF /* proscript.framework in Frameworks */,
@@ -301,14 +317,18 @@
 		F4298F511E27B1950008BDEF /* proactive-demo */ = {
 			isa = PBXGroup;
 			children = (
-				F4298F551E27B1950008BDEF /* AppDelegate.h */,
-				F4298F561E27B1950008BDEF /* AppDelegate.m */,
-				F4298F581E27B1950008BDEF /* ViewController.h */,
-				F4298F591E27B1950008BDEF /* ViewController.m */,
-				F4298F5E1E27B1950008BDEF /* Assets.xcassets */,
-				F4298F601E27B1950008BDEF /* LaunchScreen.storyboard */,
-				F4298F631E27B1950008BDEF /* Info.plist */,
+				F434C6D51E8BDEDF00FF04D4 /* AppDelegate.h */,
+				F434C6D61E8BDEDF00FF04D4 /* AppDelegate.m */,
+				F434C6D71E8BDEDF00FF04D4 /* Assets.xcassets */,
+				F434C6D81E8BDEDF00FF04D4 /* Base.lproj */,
+				F434C6D91E8BDEDF00FF04D4 /* Info.plist */,
+				F434C6DA1E8BDEDF00FF04D4 /* main.m */,
+				F434C6DB1E8BDEDF00FF04D4 /* ViewController.h */,
+				F434C6DC1E8BDEDF00FF04D4 /* ViewController.m */,
+				F434C6DD1E8BDEDF00FF04D4 /* YogaView.h */,
+				F434C6DE1E8BDEDF00FF04D4 /* YogaView.m */,
 				F4298F521E27B1950008BDEF /* Supporting Files */,
+				F434C6EC1E8BE05900FF04D4 /* launchScreen.storyboard */,
 			);
 			path = "proactive-demo";
 			sourceTree = "<group>";
@@ -319,6 +339,14 @@
 				F4298F531E27B1950008BDEF /* main.m */,
 			);
 			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		F434C6CD1E8BDE7A00FF04D4 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				F434C6CE1E8BDE7A00FF04D4 /* libicucore.A.tbd */,
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 		F46BE5701E2A7D4F00DA8359 /* Products */ = {
@@ -345,6 +373,7 @@
 				F46BE56F1E2A7D4F00DA8359 /* SocketRocket.xcodeproj */,
 				F40B23EA1E27C5F700B14997 /* yoga.xcodeproj */,
 				F4298F411E27A3950008BDEF /* proscript.xcodeproj */,
+				F434C6CD1E8BDE7A00FF04D4 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -416,6 +445,7 @@
 				F4298F2A1E27A34B0008BDEF /* Prolog.h in Headers */,
 				F4298F301E27A34B0008BDEF /* ReactComponent.h in Headers */,
 				F4298F2F1E27A34B0008BDEF /* PrologState.h in Headers */,
+				F434C6DF1E8BDEDF00FF04D4 /* AppDelegate.h in Headers */,
 				F46BE5581E2A7C3B00DA8359 /* CodeListener.h in Headers */,
 				F4298F261E27A34B0008BDEF /* Panel.h in Headers */,
 				F4298F2C1E27A34B0008BDEF /* PrologEnvironment.h in Headers */,
@@ -425,12 +455,14 @@
 				F4E63AF01E34D05200A22FCA /* Row.h in Headers */,
 				F4298F2D1E27A34B0008BDEF /* PrologObject.h in Headers */,
 				F4E63AE81E34D00600A22FCA /* Table.h in Headers */,
+				F434C6E71E8BDEDF00FF04D4 /* YogaView.h in Headers */,
 				F4298F2E1E27A34B0008BDEF /* PrologSourceDownloader.h in Headers */,
 				F46BE5961E2BB09100DA8359 /* Button.h in Headers */,
 				F4298F291E27A34B0008BDEF /* ProactiveForeign.h in Headers */,
 				F4E63AE01E3282F500A22FCA /* Field.h in Headers */,
 				F4298F311E27A34B0008BDEF /* ReactWidget.h in Headers */,
 				F4298F281E27A34B0008BDEF /* ProactiveComponentFactory.h in Headers */,
+				F434C6E51E8BDEDF00FF04D4 /* ViewController.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -605,8 +637,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				F4298F621E27B1950008BDEF /* LaunchScreen.storyboard in Resources */,
-				F4298F5F1E27B1950008BDEF /* Assets.xcassets in Resources */,
+				F434C6ED1E8BE05900FF04D4 /* launchScreen.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -615,6 +646,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				F4298F6A1E27B2830008BDEF /* boilerplate.pl in Resources */,
+				F434C6E11E8BDEDF00FF04D4 /* Assets.xcassets in Resources */,
+				F434C6E21E8BDEDF00FF04D4 /* Base.lproj in Resources */,
+				F434C6E31E8BDEDF00FF04D4 /* Info.plist in Resources */,
 				F4298F6B1E27B2830008BDEF /* vdiff.pl in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -626,9 +660,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				F4298F5A1E27B1950008BDEF /* ViewController.m in Sources */,
-				F4298F571E27B1950008BDEF /* AppDelegate.m in Sources */,
-				F4298F541E27B1950008BDEF /* main.m in Sources */,
+				F434C6E91E8BDF3F00FF04D4 /* AppDelegate.m in Sources */,
+				F434C6EA1E8BDF3F00FF04D4 /* main.m in Sources */,
+				F434C6EB1E8BDF3F00FF04D4 /* ViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -640,20 +674,24 @@
 				F4298F341E27A34B0008BDEF /* Panel.m in Sources */,
 				F4298F391E27A34B0008BDEF /* PrologEngine.m in Sources */,
 				F4298F3E1E27A34B0008BDEF /* ReactComponent.m in Sources */,
+				F434C6E01E8BDEDF00FF04D4 /* AppDelegate.m in Sources */,
 				F4E63AE11E3282F500A22FCA /* Field.m in Sources */,
 				F4298F3C1E27A34B0008BDEF /* PrologSourceDownloader.m in Sources */,
 				F4298F3D1E27A34B0008BDEF /* PrologState.m in Sources */,
 				F4298F331E27A34B0008BDEF /* Label.m in Sources */,
 				F4E63AE91E34D00600A22FCA /* Table.m in Sources */,
 				F4298F381E27A34B0008BDEF /* Prolog.m in Sources */,
+				F434C6E81E8BDEDF00FF04D4 /* YogaView.m in Sources */,
 				F4298F3B1E27A34B0008BDEF /* PrologObject.m in Sources */,
 				F4298F361E27A34B0008BDEF /* ProactiveComponentFactory.m in Sources */,
 				F4298F321E27A34B0008BDEF /* Constants.m in Sources */,
 				F4E63AF11E34D05200A22FCA /* Row.m in Sources */,
 				F46BE5591E2A7C3B00DA8359 /* CodeListener.m in Sources */,
+				F434C6E61E8BDEDF00FF04D4 /* ViewController.m in Sources */,
 				F4298F3A1E27A34B0008BDEF /* PrologEnvironment.m in Sources */,
 				F4298F351E27A34B0008BDEF /* proactive.m in Sources */,
 				F4298F3F1E27A34B0008BDEF /* ReactWidget.m in Sources */,
+				F434C6E41E8BDEDF00FF04D4 /* main.m in Sources */,
 				F46BE5971E2BB09100DA8359 /* Button.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -698,24 +736,13 @@
 		};
 /* End PBXTargetDependency section */
 
-/* Begin PBXVariantGroup section */
-		F4298F601E27B1950008BDEF /* LaunchScreen.storyboard */ = {
-			isa = PBXVariantGroup;
-			children = (
-				F4298F611E27B1950008BDEF /* Base */,
-			);
-			name = LaunchScreen.storyboard;
-			sourceTree = "<group>";
-		};
-/* End PBXVariantGroup section */
-
 /* Begin XCBuildConfiguration section */
 		F4298F651E27B1950008BDEF /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				DEVELOPMENT_TEAM = NFE4HPYDWF;
-				INFOPLIST_FILE = "proactive-demo/Info.plist";
+				INFOPLIST_FILE = "$(SRCROOT)/ios-demo/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.trime.proactive-demo";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -727,7 +754,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				DEVELOPMENT_TEAM = NFE4HPYDWF;
-				INFOPLIST_FILE = "proactive-demo/Info.plist";
+				INFOPLIST_FILE = "$(SRCROOT)/ios-demo/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.trime.proactive-demo";
 				PRODUCT_NAME = "$(TARGET_NAME)";
