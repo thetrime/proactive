@@ -78,7 +78,7 @@ button
 {
     -webkit-flex: 1; 
     -webkit-box-flex: 1;
-    flex: 1 1;
+    flex: 1 1 auto;
     /*min-height: -webkit-min-content;*/
 }
 
@@ -86,7 +86,7 @@ button
 {
     -webkit-flex: 1;  
     -webkit-box-flex: 1;
-    flex: 1 1;
+    flex: 1 1 auto;
     min-height: -webkit-min-content;
 }
 
@@ -298,6 +298,16 @@ table
 
 /* Table bits */
 
+
+.vertical_layout > .table_container
+{
+    flex-basis: 1.5em;
+}
+
+.horizontal_layout > .table_container
+{
+    flex-basis: 1.5em;
+}
 
 .table_container
 {
