@@ -59,7 +59,14 @@
 
 input
 {
-    flex-shrink: 0;
+    min-width: 0px;
+    min-height: 23px;
+}
+
+select
+{
+    min-width: 0px;
+    min-height: 23px;
 }
 
 button
