@@ -113,6 +113,7 @@ button
     align-self: center;
     /* max-width: 100% is a bit paradoxical. Without it, items with no-fill will never get shrunk if there is overflow */
     max-width: 100%;
+    max-height: 100%;
 }
 
 *
