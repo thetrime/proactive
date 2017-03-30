@@ -111,6 +111,8 @@ button
 {
     -webkit-align-self: center;
     align-self: center;
+    /* max-width: 100% is a bit paradoxical. Without it, items with no-fill will never get shrunk if there is overflow */
+    max-width: 100%;
 }
 
 *
@@ -128,6 +130,7 @@ button
     display: -ms-flex;
     display: flex;
     box-sizing: border-box;
+    min-width: 0px;
 /*
     -webkit-box-pack: center;
     -moz-box-pack: center;
