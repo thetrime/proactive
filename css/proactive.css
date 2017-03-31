@@ -127,7 +127,7 @@ button
    Since a component inside a no-fill panel *already* has no extra space (I think?), it is safe to set it to stretch here, since effectively
    it will never stretch *larger*, but can now actually shrink *smaller*
 */
-.no_fill > .no_fill
+.no_fill > .proactive_container.no_fill
 {
     align-self: stretch;
 }
