@@ -1,5 +1,7 @@
 /* Layout */
 
+
+
 /* A container should not overflow */
 .proactive_container
 {
@@ -57,18 +59,20 @@
     box-sizing: border-box;
 }
 
-input
-{
-    min-width: 0px;
-    min-height: 23px;
-
-}
-
 select
 {
     min-width: 0px;
     min-height: 23px;
 }
+
+input
+{
+    min-width: 0px;
+    min-height: 23px;
+}
+
+
+
 
 button
 {
@@ -106,13 +110,13 @@ button
 
 .proactive_container > .scrollpane
 {
+    display: block;
     flex: 1;
 }
 
 .no_fill
 {
     max-width: 100%;
-    xmax-height: 100%;
     -webkit-align-self: center;
     align-self: center;
 }
@@ -251,6 +255,7 @@ label
 {
     padding-left: 5px;
     padding-right: 5px;
+    min-height: 0px;
 }
 
 .field
@@ -402,4 +407,3 @@ table
 {
     width: 100%;
 }
-
