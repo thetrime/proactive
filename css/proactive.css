@@ -110,7 +110,6 @@ button
 
 .proactive_container > .scrollpane
 {
-    display: block;
     flex: 1;
 }
 
