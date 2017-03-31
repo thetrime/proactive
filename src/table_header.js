@@ -26,6 +26,10 @@ TableHeader.prototype.appendChild = function(t)
     cell.className = "react_table_header_cell";
     var wrapper = document.createElement("div");
     wrapper.className = "react_table_header_wrapper";
+    var hacker = document.createElement("div");
+    hacker.className = "table_header_hack";
+    hacker.appendChild(t.domNode.cloneNode(true));
+    cell.appendChild(hacker);
     cell.appendChild(wrapper);
     wrapper.appendChild(t.domNode);
     this.row.appendChild(cell);
@@ -67,6 +71,10 @@ TableHeader.prototype.insertBefore = function(t, s)
     cell.className = "react_table_header_cell";
     var wrapper = document.createElement("div");
     wrapper.className = "react_table_header_wrapper";
+    var hacker = document.createElement("div");
+    hacker.className = "table_header_hack";
+    hacker.appendChild(t.domNode.cloneNode(true));
+    cell.appendChild(hacker);
     cell.appendChild(wrapper);
     wrapper.appendChild(t.domNode);
     this.row.insertBefore(cell, this.row.childNodes[this.children.indexOf(s)]);

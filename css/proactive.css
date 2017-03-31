@@ -182,6 +182,13 @@ button
 }
 
 
+.justify_space_around
+{
+    -webkit-justify-content: space-around;
+    justify-content: space-around;
+}
+
+
 .not_selected_tab
 {
     display: none;
@@ -340,13 +347,14 @@ table
     display: flex;
     min-height: 22px;
     align-self: stretch;
+    flex-basis: 22px;
+    flex-grow: 1;
 }
 
 .table_header_container
 {
     overflow-y: scroll;
     display: flex;
-    border-top: 22px solid transparent;
     /* If tfoot present then add this border-bottom (and duplicate all the thead things below): 2px solid transparent; */
 }
 
@@ -354,7 +362,6 @@ table
 {
     border-spacing: 0;
     border-collapse: collapse;
-    x-width: 100%;
 }
 
 .react_table thead tr
@@ -374,7 +381,7 @@ table
     white-space: nowrap;
 }
 
-.react_table thead tr th > *
+.react_table_header_wrapper
 {
     position: absolute;
     display: block;
@@ -382,17 +389,6 @@ table
     z-index: 2;
     text-align: left;
     font-weight: bold;
-}
-
-.react_table thead tr th *
-{
-    x-border-left: 1px solid white;
-    x-border-bottom: 1px solid white;
-}
-
-.react_table thead tr th *
-{
-    x-background: violet;
 }
 
 .react_table thead tr th *
@@ -408,4 +404,13 @@ table
 .react_table_header_wrapper *
 {
     width: 100%;
+}
+
+/* The headings in the tables are displayed twice: once in an absolute location to float them
+   and once in the actual header, but hidden, so that we can correctly size the table: Absolute
+   children do not count towards the size of the parent
+*/
+.table_header_hack
+{
+    visibility: hidden;
 }
