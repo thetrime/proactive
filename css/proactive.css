@@ -121,10 +121,12 @@ button
     align-self: center;
 }
 
-.vertical_layout > label.no_fill
+.vertical_layout > .no_fill
 {
-    margin: auto;
+    margin-left: auto;
+    margin-right: auto;
 }
+
 
 /* This bears some explaining. If you have a no_fill component inside a no_fill panel, then without this next rule they will both have
    align-self of center. This causes the inner one to be displayed without shrinking, overflowing out of the outer one.
