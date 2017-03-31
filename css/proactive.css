@@ -61,6 +61,7 @@ input
 {
     min-width: 0px;
     min-height: 23px;
+
 }
 
 select
@@ -73,6 +74,7 @@ button
 {
     flex-shrink: 0;
 }
+
 
 .vertical_layout > .horizontal_fill
 {
@@ -109,11 +111,20 @@ button
 
 .no_fill
 {
-    -webkit-align-self: center;
-    align-self: center;
-    /* max-width: 100% is a bit paradoxical. Without it, items with no-fill will never get shrunk if there is overflow */
     max-width: 100%;
     max-height: 100%;
+    -webkit-align-self: center;
+    align-self: center;
+}
+
+/* This bears some explaining. If you have a no_fill component inside a no_fill panel, then without this next rule they will both have
+   align-self of center. This causes the inner one to be displayed without shrinking, overflowing out of the outer one.
+   Since a component inside a no-fill panel *already* has no extra space (I think?), it is safe to set it to stretch here, since effectively
+   it will never stretch *larger*, but can now actually shrink *smaller*
+*/
+.no_fill > .no_fill
+{
+    align-self: stretch;
 }
 
 *
@@ -316,6 +327,7 @@ table
     overflow: hidden;
     display: flex;
     min-height: 22px;
+    align-self: stretch;
 }
 
 .table_header_container
@@ -330,14 +342,8 @@ table
 {
     border-spacing: 0;
     border-collapse: collapse;
-    width: 100%;
+    x-width: 100%;
 }
-
-.react_table td
-{
-    x-border: 1px solid white;
-}
-
 
 .react_table thead tr
 {
@@ -360,7 +366,6 @@ table
 {
     position: absolute;
     display: block;
-    x-margin-left: -10px;
     line-height: normal;
     z-index: 2;
     text-align: left;
