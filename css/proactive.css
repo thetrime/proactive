@@ -112,9 +112,14 @@ button
 .no_fill
 {
     max-width: 100%;
-    max-height: 100%;
+    xmax-height: 100%;
     -webkit-align-self: center;
     align-self: center;
+}
+
+.vertical_layout > label.no_fill
+{
+    margin: auto;
 }
 
 /* This bears some explaining. If you have a no_fill component inside a no_fill panel, then without this next rule they will both have
