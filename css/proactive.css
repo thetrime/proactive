@@ -91,7 +91,7 @@ button
     -webkit-flex: 1; 
     -webkit-box-flex: 1;
     flex: 1 1 auto;
-    /*min-height: -webkit-min-content;*/
+    xmin-height: -webkit-min-content;
 }
 
 .horizontal_layout > .horizontal_fill
@@ -99,7 +99,7 @@ button
     -webkit-flex: 1;  
     -webkit-box-flex: 1;
     flex: 1 1 auto;
-    /*min-height: -webkit-min-content;*/
+    xmin-height: -webkit-min-content;
 }
 
 .horizontal_layout > .vertical_fill
@@ -112,6 +112,7 @@ button
 {
     flex: 1;
 }
+
 
 .no_fill
 {
@@ -161,8 +162,6 @@ button
     justify-content: center;
 */
 }
-
-
 
 .align_center
 {
@@ -412,4 +411,13 @@ table
 .table_header_hack
 {
     visibility: hidden;
+}
+
+/* I feel a bit like I am grasping at straws now. If there is something in a scrollpane then we can
+   set a minimum height on it since if the panel gets too small to display everything it will just scroll.
+   If we dont have a scrollpane then we want everything to slowly shrink
+*/
+.scrollpane .vertical_fill
+{
+    min-height: -webkit-min-content;
 }
