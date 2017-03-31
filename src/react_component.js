@@ -143,6 +143,8 @@ ReactComponent.prototype.getStyle = function()
 
     if (this.justify_content == "space-between")
         newClassName += " justify_space_between";
+    if (this.justify_content == "space-around")
+        newClassName += " justify_space_around";
     return newClassName;
 }
 
