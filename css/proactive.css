@@ -71,7 +71,19 @@ input
     min-height: 23px;
 }
 
+.field[type="checkbox"]
+{
+    min-height: 13;
+    margin-top: 4px;
+    margin-bottom: 3px;
+}
 
+.field[type="radio"]
+{
+    min-height: 13;
+    margin-top: 4px;
+    margin-bottom: 3px;
+}
 
 
 button
@@ -345,7 +357,7 @@ table
     display: flex;
     min-height: 22px;
     align-self: stretch;
-    flex-basis: 22px;
+    x-flex-basis: 22px;
     flex-grow: 1;
 }
 
