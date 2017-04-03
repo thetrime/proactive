@@ -344,16 +344,6 @@ table
 }
 
 
-
-/* I feel a bit like I am grasping at straws now. If there is something in a scrollpane then we can
-   set a minimum height on it since if the panel gets too small to display everything it will just scroll.
-   If we dont have a scrollpane then we want everything to slowly shrink
-*/
-.scrollpane .vertical_fill
-{
-    min-height: -webkit-min-content;
-}
-
 /* Table bits */
 
 
