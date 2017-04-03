@@ -369,7 +369,8 @@ user:on_server(X):- X.
 raise_event(Key, _):- permission_error(raise, server_side_event, Key).
 wait_for(List):- permission_error(wait_for, server_side_event, List).
 
-user:term_expansion(requires(X), [depends_on(X), :-use_module(X)]).
+user:term_expansion(requires(X), [depends_on(X), :-use_module(Filename)]):-
+    module_property(X, file(Filename)).
 
 vdiff_warning(X):-
         format(user_error, 'Warning: ~w', [X]).
