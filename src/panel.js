@@ -111,9 +111,9 @@ Panel.prototype.setProperties = function(t)
 Panel.prototype.restyle = function()
 {
     ReactComponent.prototype.restyle.call(this);
-    this.configureHeight();
     this.domNode.className = this.getStyle().replace(this.delete_layout, ' vertical_layout ')
     this.contentElement.className = this.getStyle().replace(this.delete_fieldset, ' fieldset_main ');
+    this.configureHeight();
 }
 
 Panel.prototype.appendChild = function(t)
@@ -152,10 +152,15 @@ Panel.prototype.configureHeight = function ()
     // If we use min-content, then the panel will be sized to include the scrollable object as if it
     // had no overflow - ie the scrollpane will never appear
     // Similarly, if we always set it to 0 then things like buttons can get squashed into oblivion by a large table
-    if (this.contentElement.getElementsByClassName("scrollpane").length == 0 && this.layout == "horizontal")
-        this.contentElement.style["min-height"] = "min-content";
+    if (this.layout == "horizontal")
+    {
+        if (this.contentElement.getElementsByClassName("scrollpane").length == 0)
+            this.contentElement.className += " nocrush";
+        else
+            this.contentElement.className += " maycrush";
+    }
     else
-        this.contentElement.style["min-height"] = "0";
+        this.contentElement.className += " notsure";
 }
 
 module.exports = Panel;

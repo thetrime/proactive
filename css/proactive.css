@@ -284,7 +284,7 @@ label
 
 th > *
 {
-    width: 100%;
+    x-width: 100%;
 }
 
 /* Make each table cell object take up the entire td.
@@ -409,9 +409,19 @@ table
     border-left: none;
 }
 
-.react_table_header_wrapper *
+.react_table_header_wrapper
 {
     width: 100%;
+}
+
+.react_table_header_wrapper > *
+{
+    width: 100%;
+}
+
+.react_table_header_cell
+{
+    position: relative;
 }
 
 /* The headings in the tables are displayed twice: once in an absolute location to float them
@@ -428,3 +438,22 @@ table
     min-height: min-content;
 }
 
+.scrollpane
+{
+    min-height: 0;
+}
+
+.nocrush
+{
+    min-height: min-content;
+}
+
+.maycrush
+{
+    min-height: 0;
+}
+
+.notsure
+{
+    min-height: "illegal";
+}
