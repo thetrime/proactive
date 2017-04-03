@@ -82,7 +82,6 @@ Panel.prototype.setProperties = function(t)
             while (this.contentElement.firstChild != null)
                 this.getDOMNode().appendChild(this.contentElement.firstChild);
             this.contentElement = this.getDOMNode();
-            this.configureHeight();
             this.baseClassName = "proactive_container";
             this.restyle();
         }
@@ -120,14 +119,14 @@ Panel.prototype.appendChild = function(t)
 {
     this.contentElement.appendChild(t.getDOMNode());
     t.setParent(this);
-    this.configureHeight();
+    this.restyle();
 }
 
 Panel.prototype.insertBefore = function(t, s)
 {
     this.contentElement.insertBefore(t.getDOMNode(), s.getDOMNode());
     t.setParent(this);
-    this.configureHeight();
+    this.restyle();
 }
 
 Panel.prototype.replaceChild = function(n, o)
@@ -135,7 +134,7 @@ Panel.prototype.replaceChild = function(n, o)
     this.contentElement.replaceChild(n.getDOMNode(), o.getDOMNode());
     n.setParent(this);
     o.setParent(null);
-    this.configureHeight();
+    this.restyle();
 }
 
 
@@ -143,7 +142,7 @@ Panel.prototype.removeChild = function(t)
 {
     this.contentElement.removeChild(t.getDOMNode());
     t.setParent(null);
-    this.configureHeight();
+    this.restyle();
 }
 
 Panel.prototype.configureHeight = function ()
