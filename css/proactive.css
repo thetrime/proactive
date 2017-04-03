@@ -361,7 +361,7 @@ table
 {
     overflow-y: scroll;
     display: flex;
-    /* If tfoot present then add this border-bottom (and duplicate all the thead things below): 2px solid transparent; */
+    flex-grow: 1;
 }
 
 .react_table
