@@ -158,13 +158,13 @@ function blurHandler(event)
                                                  }
                                                  else if (this.blurHandler != null)
                                                  {
-                                                     this.getOwnerDocument().triggerEvent(this.blurHandler, ReactComponent.serialize({value: Prolog._make_atom(this.domNode.value)}), handlerCallback);
+                                                     this.getOwnerDocument().triggerEvent(this.blurHandler, ReactComponent.serialize({value: Prolog._make_atom(value)}), handlerCallback);
                                                  }
                                              }.bind(this));
     }
     else if (this.blurHandler != null)
     {
-        this.getOwnerDocument().triggerEvent(this.blurHandler, ReactComponent.serialize({value: Prolog._make_atom(this.domNode.value)}), handlerCallback);
+        this.getOwnerDocument().triggerEvent(this.blurHandler, ReactComponent.serialize({value: Prolog._make_atom(value)}), handlerCallback);
     }
 
 }
