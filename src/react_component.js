@@ -9,6 +9,7 @@ function ReactComponent()
     this.fill = "none";
     this.layout = "vertical";
     this.baseClassName = "";
+    this.overrideClass = ""
     this.children = [];
     this.parent = null;
     this.align_children = "start";
@@ -45,12 +46,12 @@ ReactComponent.prototype.setProperties = function(t)
     var mustNotifyParent = false;
     if (t.id !== undefined && this.getDOMNode() != null)
         this.getDOMNode().id = t.id;
-    if (t.className !== undefined)
+    if (t["class"] !== undefined)
     {
-        if (ReactComponent.isNull(t.className))
-            this.baseClassName = "";
+        if (ReactComponent.isNull(t["class"]))
+            this.overrideClass = "";
         else
-            this.baseClassName = Prolog._atom_chars(t.className);
+            this.overrideClass = Prolog._atom_chars(t["class"]);
         restyleRequired = true;
     }
     if (t.fill !== undefined)
@@ -121,7 +122,7 @@ ReactComponent.prototype.getDOMNode = function()
 
 ReactComponent.prototype.getStyle = function()
 {
-    var newClassName = this.baseClassName;
+    var newClassName = this.baseClassName + " " + this.overrideClass;
     if (this.fill == "none")
         newClassName += " no_fill";
     else if (this.fill == "horizontal")

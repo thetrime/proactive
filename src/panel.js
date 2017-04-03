@@ -64,6 +64,7 @@ Panel.prototype.setProperties = function(t)
             this.getDOMNode().appendChild(this.legendElement);
             this.getDOMNode().appendChild(newContentElement);
             this.contentElement = newContentElement;
+            this.configureHeight();
         }
         else
         {
@@ -81,6 +82,7 @@ Panel.prototype.setProperties = function(t)
             while (this.contentElement.firstChild != null)
                 this.getDOMNode().appendChild(this.contentElement.firstChild);
             this.contentElement = this.getDOMNode();
+            this.configureHeight();
             this.baseClassName = "proactive_container";
             this.restyle();
         }
@@ -109,6 +111,7 @@ Panel.prototype.setProperties = function(t)
 Panel.prototype.restyle = function()
 {
     ReactComponent.prototype.restyle.call(this);
+    this.configureHeight();
     this.domNode.className = this.getStyle().replace(this.delete_layout, ' vertical_layout ')
     this.contentElement.className = this.getStyle().replace(this.delete_fieldset, ' fieldset_main ');
 }
@@ -117,12 +120,14 @@ Panel.prototype.appendChild = function(t)
 {
     this.contentElement.appendChild(t.getDOMNode());
     t.setParent(this);
+    this.configureHeight();
 }
 
 Panel.prototype.insertBefore = function(t, s)
 {
     this.contentElement.insertBefore(t.getDOMNode(), s.getDOMNode());
     t.setParent(this);
+    this.configureHeight();
 }
 
 Panel.prototype.replaceChild = function(n, o)
@@ -130,6 +135,7 @@ Panel.prototype.replaceChild = function(n, o)
     this.contentElement.replaceChild(n.getDOMNode(), o.getDOMNode());
     n.setParent(this);
     o.setParent(null);
+    this.configureHeight();
 }
 
 
@@ -137,7 +143,19 @@ Panel.prototype.removeChild = function(t)
 {
     this.contentElement.removeChild(t.getDOMNode());
     t.setParent(null);
+    this.configureHeight();
 }
 
+Panel.prototype.configureHeight = function ()
+{
+    // If the panel contains a scrollpane then it can be crushed to effectively zero size
+    // If we use min-content, then the panel will be sized to include the scrollable object as if it
+    // had no overflow - ie the scrollpane will never appear
+    // Similarly, if we always set it to 0 then things like buttons can get squashed into oblivion by a large table
+    if (this.contentElement.getElementsByClassName("scrollpane").length == 0 && this.layout == "horizontal")
+        this.contentElement.style["min-height"] = "min-content";
+    else
+        this.contentElement.style["min-height"] = "0";
+}
 
 module.exports = Panel;
