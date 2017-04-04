@@ -27,6 +27,8 @@ function Panel()
     this.delete_layout = new RegExp('(\\s|^)(vertical|horizontal)_layout(\\s|$)');
     this.legendElement = null;
     this.fieldSetTextElement = null;
+    this.crush = "notsure";
+    this.hasScrollpaneChildren = false;
 }
 
 Panel.prototype = new ReactComponent;
@@ -119,14 +121,26 @@ Panel.prototype.appendChild = function(t)
 {
     this.contentElement.appendChild(t.getDOMNode());
     t.setParent(this);
-    this.restyle();
+    if (this.scrollChildChange())
+    {
+        this.restyle();
+        if (this.parent != null && this.parent !== undefined)
+            this.parent.notifyParentOfLayoutChange(this);
+    }
+
 }
 
 Panel.prototype.insertBefore = function(t, s)
 {
     this.contentElement.insertBefore(t.getDOMNode(), s.getDOMNode());
     t.setParent(this);
-    this.restyle();
+    if (this.scrollChildChange())
+    {
+        this.restyle();
+        if (this.parent != null && this.parent !== undefined)
+            this.parent.notifyParentOfLayoutChange(this);
+    }
+
 }
 
 Panel.prototype.replaceChild = function(n, o)
@@ -134,7 +148,12 @@ Panel.prototype.replaceChild = function(n, o)
     this.contentElement.replaceChild(n.getDOMNode(), o.getDOMNode());
     n.setParent(this);
     o.setParent(null);
-    this.restyle();
+    if (this.scrollChildChange())
+    {
+        this.restyle();
+        if (this.parent != null && this.parent !== undefined)
+            this.parent.notifyParentOfLayoutChange(this);
+    }
 }
 
 
@@ -142,7 +161,12 @@ Panel.prototype.removeChild = function(t)
 {
     this.contentElement.removeChild(t.getDOMNode());
     t.setParent(null);
-    this.restyle();
+    if (this.scrollChildChange())
+    {
+        this.restyle();
+        if (this.parent != null && this.parent !== undefined)
+            this.parent.notifyParentOfLayoutChange(this);
+    }
 }
 
 Panel.prototype.configureHeight = function ()
@@ -151,15 +175,33 @@ Panel.prototype.configureHeight = function ()
     // If we use min-content, then the panel will be sized to include the scrollable object as if it
     // had no overflow - ie the scrollpane will never appear
     // Similarly, if we always set it to 0 then things like buttons can get squashed into oblivion by a large table
+    this.hasScrollpaneChildren = (this.contentElement.getElementsByClassName("scrollpane").length > 0);
     if (this.layout == "horizontal")
     {
-        if (this.contentElement.getElementsByClassName("scrollpane").length == 0)
-            this.contentElement.className += " nocrush";
+        if (!this.hasScrollpaneChildren)
+            this.crush = "nocrush";
         else
-            this.contentElement.className += " maycrush";
+            this.crush = "maycrush"
     }
     else
-        this.contentElement.className += " notsure";
+        this.crush = "notsure";
+    this.contentElement.className += " " + this.crush;
+}
+
+Panel.prototype.notifyParentOfLayoutChange = function(n)
+{
+    ReactComponent.prototype.notifyParentOfLayoutChange.call(n);
+    if (this.scrollChildChange())
+    {
+        this.restyle();
+        if (this.parent != null && this.parent !== undefined)
+            this.parent.notifyParentOfLayoutChange(this);
+    }
+}
+
+Panel.prototype.scrollChildChange = function()
+{
+    return this.hasScrollpaneChildren != (this.contentElement.getElementsByClassName("scrollpane").length > 0);
 }
 
 module.exports = Panel;
