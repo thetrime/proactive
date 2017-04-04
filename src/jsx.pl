@@ -164,7 +164,8 @@ jsx_children(Dict, Children, Goal, GoalTail, Singletons, SingletonsTail)-->
         `findall(`, !,
          read_until_close_paren(Codes, [41], 1),
         `)`,
-        {read_term_from_atom([102, 105, 110, 100, 97, 108, 108, 40|Codes], Term, [variable_names(TermVariableNames)]),
+        {expand_embedded_jsx(Codes1, Codes, []),
+         read_term_from_atom([102, 105, 110, 100, 97, 108, 108, 40|Codes1], Term, [variable_names(TermVariableNames)]),
          Term = findall(Template, BagGoal),
          unify_variables(TermVariableNames, Dict),
          Goal = (findall(Template, BagGoal, Children, T1), G1)},
@@ -177,6 +178,18 @@ jsx_children(Dict, [Element|Elements], Goal, GoalTail, Singletons, SingletonsTai
         jsx_children(Dict, Elements, G1, GoalTail, S1, SingletonsTail).
 
 jsx_children(_Dict, [], G, G, S, S)--> [].
+
+expand_embedded_jsx(Out)-->
+        `jsx(`, !, variable_name(Var), optional_spaces, `,`, optional_spaces, read_until_close_paren(Codes, [41], 1), `)`,
+        {atom_codes(Var, VarCodes),
+         append(C1, [41], Codes),
+         append([123, 124, 106, 115, 120, 40|VarCodes], [41, 124, 124|T1], Out),
+         append(C1, [124, 125|T2], T1)
+        },
+        expand_embedded_jsx(T2).
+
+expand_embedded_jsx([C|Cs])--> [C], !, expand_embedded_jsx(Cs).
+expand_embedded_jsx([])--> !.
 
 
 jsx_attributes(Dict, [Name=Value|Attributes], Goals, GoalsTail)-->
