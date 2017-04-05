@@ -21,7 +21,7 @@ window.onPrologReady = function(Prolog)
                                                                     var initialPropsObject = PrologState.emptyState;
                                                                     if (settings.propSpec != undefined && settings.propSpec != null)
                                                                     {
-                                                                        var p = decodeURIComponent(propSpec);
+                                                                        var p = decodeURIComponent(settings.propSpec);
                                                                         initialPropsObject = new PrologState(Prolog._string_to_local_term(p));
                                                                     }
                                                                     engine.setRootWidget(new ReactWidget(null, engine, rootElementId, initialPropsObject, function(widget)
