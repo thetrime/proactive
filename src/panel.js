@@ -184,7 +184,12 @@ Panel.prototype.configureHeight = function ()
             this.crush = "maycrush"
     }
     else
-        this.crush = "notsure";
+    {
+        if (!this.hasScrollpaneChildren && this.baseClassName.substring("scrollpane") == -1)
+            this.crush = "nocrush";
+        else
+            this.crush = "notsure";
+    }
     this.contentElement.className += " " + this.crush;
 }
 
