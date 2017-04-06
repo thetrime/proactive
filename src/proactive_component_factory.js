@@ -6,6 +6,7 @@ var List = require('./list');
 var ListItem = require('./list_item');
 var Table = require('./table');
 var TableHeader = require('./table_header');
+var TableFooter = require('./table_footer');
 var TabbedPane = require('./tabbed_pane');
 var Tab = require('./tab');
 var Row = require('./row');
@@ -35,6 +36,7 @@ module.exports.createElement = function(name)
         case "Table": return new Table();
         case "Title": return new Title();
         case "TableHeader": return new TableHeader();
+        case "TableFooter": return new TableFooter();
         case "Row": return new Row();
         case "Field": return new Field();
         case "TabbedPane": return new TabbedPane();

@@ -342,94 +342,7 @@ table
 }
 
 
-/* Table bits */
 
-
-.table_container
-{
-    position: relative;
-    border: 1px solid #000;
-    overflow: hidden;
-    display: flex;
-    min-height: 22px;
-    align-self: stretch;
-    x-flex-basis: 22px;
-    flex-grow: 1;
-}
-
-.table_header_container
-{
-    overflow-y: scroll;
-    display: flex;
-    flex-grow: 1;
-}
-
-.react_table
-{
-    border-spacing: 0;
-    border-collapse: collapse;
-}
-
-.react_table thead tr
-{
-    left: 0;
-}
-
-.react_table thead tr th
-{
-    height: 0;
-    line-height: 0;
-    margin: 0;
-    padding-top: 0;
-    padding-bottom: 0;
-    color: transparent;
-    border: none;
-    white-space: nowrap;
-}
-
-.react_table_header_wrapper
-{
-    position: absolute;
-    display: block;
-    line-height: normal;
-    z-index: 2;
-    text-align: left;
-    font-weight: bold;
-}
-
-.react_table thead tr th *
-{
-    top: 0;
-}
-
-.react_table thead tr th:first-child *
-{
-    border-left: none;
-}
-
-.react_table_header_wrapper
-{
-    width: 100%;
-}
-
-.react_table_header_wrapper > *
-{
-    width: 100%;
-}
-
-.react_table_header_cell
-{
-    xposition: relative;
-}
-
-/* The headings in the tables are displayed twice: once in an absolute location to float them
-   and once in the actual header, but hidden, so that we can correctly size the table: Absolute
-   children do not count towards the size of the parent
-*/
-.table_header_hack
-{
-    visibility: hidden;
-}
 
 .horizontal_layout
 {
@@ -460,3 +373,71 @@ table
 {
     flex-shrink: 0;
 }
+
+label
+{
+    min-height: min-content;
+}
+
+
+/* Table bits */
+
+.react_table td
+{
+    background-clip: padding-box;
+}
+
+.react_table thead
+{
+    position: sticky;
+    position: -webkit-sticky;
+    top: 0;
+}
+
+.react_table tfoot
+{
+    position: sticky;
+    position: -webkit-sticky;
+    bottom: 0;
+}
+
+.react_table tfoot td
+{
+    /* box-shadow: 0 0 0 1px green; Use this if you want borders, otherwise they end up on the table, scrolling underneath */
+    background-clip: padding-box;
+    background: #1a1a1c;
+}
+
+.react_table tfoot td > *
+{
+    width: 100%;
+}
+
+.react_table tfoot > tr:first-child td
+{
+    box-shadow: 1px 0 0 1px white
+}
+
+.react_table thead th
+{
+    /* box-shadow: 0 0 0 1px green; Use this if you want borders, otherwise they end up on the table, scrolling underneath */
+    background-clip: padding-box;
+    background: #1a1a1c;
+}
+
+.react_table thead th > *
+{
+    width: 100%;
+}
+
+.table_container
+{
+    overflow-y: scroll;
+    display: flex;
+    flex-grow: 1;
+}
+
+.react_table::-webkit-scrollbar {-webkit-appearance: none; width: 7px;}
+.react_table::-webkit-scrollbar-track {background-color: rgba(0,0,0, .3);border-radius: 7px;}
+.react_table::-webkit-scrollbar-thumb {border-radius: 7px; background-color: rgba(255,255,255, .4);}
+
