@@ -41,6 +41,7 @@
 .scroll
 {
     overflow: scroll;
+    -webkit-overflow-scrolling: touch;
 }
 
 .horizontal_layout
@@ -376,7 +377,7 @@ table
 
 label
 {
-    min-height: min-content;
+    min-height: inherit;
 }
 
 
@@ -384,6 +385,7 @@ label
 
 .react_table td
 {
+    padding: 0;
     background-clip: padding-box;
 }
 
@@ -413,10 +415,11 @@ label
     width: 100%;
 }
 
-.react_table tfoot > tr:first-child td
+.react_table tfoot > tr:first-child td > *
 {
-    box-shadow: 1px 0 0 1px white
+    border-top: 1px solid white
 }
+
 
 .react_table thead th
 {
@@ -432,6 +435,7 @@ label
 
 .table_container
 {
+    -webkit-overflow-scrolling: touch;
     overflow-y: scroll;
     display: flex;
     flex-grow: 1;
