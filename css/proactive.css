@@ -353,11 +353,18 @@ table
 .scrollpane
 {
     min-height: 0;
+    height: 0px;
 }
 
 .nocrush
 {
-    min-height: min-content;
+    min-height: unset;
+    flex-shrink: 0;
+}
+
+label
+{
+    min-height: unset;
 }
 
 .maycrush
@@ -375,23 +382,16 @@ table
     flex-shrink: 0;
 }
 
-label
-{
-    min-height: inherit;
-}
-
 
 /* Table bits */
 
 .react_table td
 {
-    padding: 0;
     background-clip: padding-box;
 }
 
 .react_table thead
 {
-    z-index: 1;
     position: sticky;
     position: -webkit-sticky;
     top: 0;
@@ -416,11 +416,10 @@ label
     width: 100%;
 }
 
-.react_table tfoot > tr:first-child td > *
+.react_table tfoot > tr:first-child td
 {
-    border-top: 1px solid white
+    box-shadow: 1px 0 0 1px white
 }
-
 
 .react_table thead th
 {
