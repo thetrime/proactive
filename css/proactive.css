@@ -295,13 +295,8 @@ td > *
     width: 100%;
 }
 
-/* This was added to enable overflow="ellipsis" to work on tables.
-   It may have other unintended consequences, though...
-*/
-table
-{
-    table-layout:fixed;
-}
+
+
 
 .proactive_frame_glasspane
 {
@@ -445,3 +440,35 @@ label
 .react_table::-webkit-scrollbar-track {background-color: rgba(0,0,0, .3);border-radius: 7px;}
 .react_table::-webkit-scrollbar-thumb {border-radius: 7px; background-color: rgba(255,255,255, .4);}
 
+.horizontal_fill > .react_table
+{
+    width: 100%;
+}
+
+/* This is all here to make tables layout correctly.
+Originally I went with table-layout: fixed, but this meant that setting a table to 100% width (as is needed to make them fill up the
+parent container) caused them to push neighbouring containers off the screen.
+Instead, we inject a wrapper into each cell to force the use of flexbox INSIDE tables as well. This might have a pretty severe performance
+penalty, but it seems to actually work
+*/
+
+.react_table td
+{
+    display: table-cell;
+}
+
+.react_table_cell_wrapper
+{
+    display: flex;
+    width: 100%;
+}
+
+.react_table_cell_wrapper > *
+{
+    /* Note that we have to set the width to 0 since the automatic table layout will try and make sure that no cells overflow
+       and since they may have white-space: nowrap inside them, this will force the table to scroll rather than crushing the cells.
+       Dont worry though; the flex-grow: 1 will make them actually take up space
+   */
+    width: 0;
+    flex: 1;
+}

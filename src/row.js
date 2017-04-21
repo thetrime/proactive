@@ -16,7 +16,10 @@ Row.prototype.appendChild = function(t)
 {
     var cell = document.createElement("td");
     cell.className = "react_table_cell"
-    cell.appendChild(t.getDOMNode());
+    var wrapper = document.createElement("div");
+    wrapper.className = "react_table_cell_wrapper";
+    cell.appendChild(wrapper);
+    wrapper.appendChild(t.getDOMNode());
     this.domNode.appendChild(cell);
     t.setParent(this);
 }
@@ -25,7 +28,10 @@ Row.prototype.insertBefore = function(t, s)
 {
     var cell = document.createElement("td");
     cell.className = "react_table_cell"
-    cell.appendChild(t.getDOMNode());
+    var wrapper = document.createElement("div");
+    wrapper.className = "react_table_cell_wrapper";
+    cell.appendChild(wrapper);
+    wrapper.appendChild(t.getDOMNode());
     this.domNode.insertBefore(cell, s.getDOMNode().parentNode);
     t.setParent(this);
 }
@@ -34,15 +40,18 @@ Row.prototype.replaceChild = function(n, o)
 {
     var cell = document.createElement("td");
     cell.className = "react_table_cell"
-    cell.appendChild(n.getDOMNode());
-    this.domNode.replaceChild(cell, o.getDOMNode().parentNode);
+    var wrapper = document.createElement("div");
+    wrapper.className = "react_table_cell_wrapper";
+    cell.appendChild(wrapper);
+    wrapper.appendChild(n.getDOMNode());
+    this.domNode.replaceChild(cell, o.getDOMNode().parentNode.parentNode);
     n.setParent(this);
     o.setParent(null);
 }
 
 Row.prototype.removeChild = function(t)
 {
-    this.domNode.removeChild(t.getDOMNode().parentNode);
+    this.domNode.removeChild(t.getDOMNode().parentNode.parentNode);
     t.setParent(null);
 }
 

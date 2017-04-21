@@ -14,10 +14,10 @@ function Table()
 }
 Table.prototype = new ReactComponent;
 
-Table.prototype.getStyle = function()
-{
-    return "table_container";
-}
+//Table.prototype.getStyle = function()
+//{
+//    return "table_container";
+//}
 
 Table.prototype.appendChild = function(t)
 {
