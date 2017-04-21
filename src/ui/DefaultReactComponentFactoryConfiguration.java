@@ -22,6 +22,7 @@ public class DefaultReactComponentFactoryConfiguration implements ReactComponent
          constructorHash.put("Label", Label.class.getConstructor());
          constructorHash.put("Table", Table.class.getConstructor());
          constructorHash.put("TableHeader", TableHeader.class.getConstructor());
+         constructorHash.put("TableFooter", TableFooter.class.getConstructor());
          constructorHash.put("Row", Row.class.getConstructor());
          constructorHash.put("List", List.class.getConstructor());
          constructorHash.put("ListItem", ListItem.class.getConstructor());

@@ -6,7 +6,12 @@ import javax.swing.JTable;
 import javax.swing.JScrollPane;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableColumnModel;
+import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableCellRenderer;
+import javax.swing.event.TableColumnModelListener;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.TableColumnModelEvent;
+import javax.swing.event.ChangeEvent;
 import javax.swing.JComponent;
 import javax.swing.AbstractButton;
 import javax.swing.JPanel;
@@ -15,6 +20,7 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.Dimension;
+import java.awt.BorderLayout;
 import java.util.List;
 import java.util.LinkedList;
 import java.util.HashMap;
@@ -24,10 +30,13 @@ import org.proactive.prolog.Engine;
 import org.proactive.ui.ProactiveConstraints;
 import org.proactive.ReactComponent;
 
-public class Table extends ReactComponent 
+public class Table extends ReactComponent  implements TableColumnModelListener
 {
    JTable table;
+   JTable footer;
+   JPanel panel;
    JScrollPane scrollPane;
+   TableFooter footerElement = null;
    ReactTableModel model = new ReactTableModel();
    TableCellRenderer cellRenderer = new ReactTableCellRenderer();
    private ReactHeaderRenderer currentlyArmedHeader = null;
@@ -35,6 +44,7 @@ public class Table extends ReactComponent
 
    public Table()
    {
+      panel = new JPanel();
       cellRenderer = new ReactTableCellRenderer();
       table = new JTable(model)
          {
@@ -109,6 +119,8 @@ public class Table extends ReactComponent
 	    }
 	 });
       scrollPane = new JScrollPane(table);
+      panel.setLayout(new BorderLayout());
+      panel.add(scrollPane, BorderLayout.CENTER);
    }
 
    private MouseListener internalPopupListener = null;
@@ -150,6 +162,22 @@ public class Table extends ReactComponent
             }
          };
       table.addMouseListener(internalPopupListener);
+   }
+
+   public void columnRemoved(TableColumnModelEvent e) {}
+   public void columnMoved(TableColumnModelEvent e) {}
+   public void columnAdded(TableColumnModelEvent e) {}
+   public void columnSelectionChanged(ListSelectionEvent e) {}
+   public void columnMarginChanged(ChangeEvent event)
+   {
+      final TableColumnModel eventModel = (DefaultTableColumnModel)event.getSource();
+      final TableColumnModel thisModel = table.getColumnModel();
+      final int columnCount = eventModel.getColumnCount();
+      for (int i = 0; i < columnCount; i++)
+      {
+         thisModel.getColumn(i).setWidth(eventModel.getColumn(i).getWidth());
+      }
+      table.repaint();
    }
    
    public class ReactTableCellRenderer implements TableCellRenderer
@@ -318,7 +346,7 @@ public class Table extends ReactComponent
    }
    public Component getAWTComponent()
    {
-      return scrollPane;
+      return panel;
    }
 
    public void insertChildBefore(ReactComponent child, ReactComponent sibling)
@@ -340,6 +368,10 @@ public class Table extends ReactComponent
          // It doesnt matter (currently) where the header is in the table. Later this might change
          model.setHeader((TableHeader)child);
       }
+      else if (child instanceof TableFooter)
+      {
+         createFooter((TableFooter)child);
+      }
       configureViewport();
    }
 
@@ -354,6 +386,17 @@ public class Table extends ReactComponent
       {
          // This means there is no longer to be any header?
       }
+      else if (child instanceof TableFooter)
+      {
+         // In theory you could add more than one footer. We only remove the footer if it is the current one.
+         if (child == footerElement)
+         {
+            footerElement = null;
+            panel.remove(footer);
+         }
+
+      }
+
       configureViewport();
    }
 
@@ -369,6 +412,15 @@ public class Table extends ReactComponent
       {
          //
       }
+      else if (oldChild instanceof TableFooter)
+      {
+         // In theory you could add more than one footer. We only remove the footer if it is the current one.
+         if (oldChild == footerElement)
+         {
+            footerElement = null;
+            panel.remove(footer);
+         }
+      }
 
       if (newChild instanceof Row)
       {
@@ -381,8 +433,47 @@ public class Table extends ReactComponent
       {
          //
       }
+      else if (newChild instanceof TableFooter)
+      {
+         createFooter((TableFooter)newChild);
+      }
+
       configureViewport();
       super.replaceChild(newChild, oldChild);
+   }
+
+   private void createFooter(TableFooter f)
+   {
+      footerElement = f;
+      footer = new JTable(new FooterModel(footerElement))
+         {
+            public TableCellRenderer getCellRenderer(int row, int column)
+            {
+               return cellRenderer;
+            }
+         };
+      footer.setColumnModel(table.getColumnModel());
+      TableColumnModelListener footerListener = new TableColumnModelListener()
+         {
+            public void columnRemoved(TableColumnModelEvent e) {}
+            public void columnMoved(TableColumnModelEvent e) {}
+            public void columnAdded(TableColumnModelEvent e) {}
+            public void columnSelectionChanged(ListSelectionEvent e) {}
+            public void columnMarginChanged(ChangeEvent event)
+            {
+               final TableColumnModel eventModel = (DefaultTableColumnModel)event.getSource();
+               final TableColumnModel thisModel = footer.getColumnModel();
+               final int columnCount = eventModel.getColumnCount();
+               for (int i = 0; i < columnCount; i++)
+               {
+                  thisModel.getColumn(i).setWidth(eventModel.getColumn(i).getWidth());
+               }
+               footer.repaint();
+            }
+         };
+      table.getColumnModel().addColumnModelListener(footerListener);
+      footer.getColumnModel().addColumnModelListener(this);
+      panel.add(footer, BorderLayout.SOUTH);
    }
 
    public ProactiveConstraints.Fill getFill()
@@ -398,4 +489,32 @@ public class Table extends ReactComponent
       //table.setPreferredScrollableViewportSize(new Dimension(table.getWidth(), table.getRowCount() * (1+table.getRowHeight())));
       table.setPreferredScrollableViewportSize(table.getPreferredSize());
    }
+
+   public class FooterModel extends AbstractTableModel
+   {
+      TableFooter footer;
+      public FooterModel(TableFooter f)
+      {
+         // FIXME: Need to add a listener to the footer here. When it changes, trigger appropriate table events to
+         // let Java know that the number of rows, columns, and values may have changed.
+         this.footer = f;
+      }
+      public int getRowCount()
+      {
+         return footer.getRowCount();
+      }
+      public int getColumnCount()
+      {
+         // Same number of columns as main table
+         return model.getColumnCount();
+      }
+      public Object getValueAt(int row, int column)
+      {
+         Row r = (Row)footer.getRow(row);
+         if (r == null)
+            return null;
+         return r.get(column);
+      }
+   }
+
 }

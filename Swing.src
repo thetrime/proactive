@@ -32,6 +32,7 @@ UI=  src/ui/Panel.java                                        \
      src/ui/PasswordField.java                                \
      src/ui/Label.java                                        \
      src/ui/Table.java                                        \
+     src/ui/TableFooter.java                                  \
      src/ui/TableHeader.java                                  \
      src/ui/Row.java                                          \
      src/ui/RowChangeListener.java                            \
