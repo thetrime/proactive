@@ -148,6 +148,12 @@ button
     align-self: stretch;
 }
 
+/* However, the above does NOT apply to tables! */
+.no_fill > .table_container.no_fill
+{
+    align-self: auto;
+}
+
 *
 {
     vertical-align: top;   
