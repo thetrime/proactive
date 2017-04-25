@@ -48,7 +48,7 @@ public class Table extends ReactComponent  implements TableColumnModelListener
          {
             public Dimension getMinimumSize()
             {
-               return new Dimension((int)getPreferredSize().getWidth(), 0);
+               return new Dimension(0, 0);
             }
             public Dimension getPreferredSize()
             {
