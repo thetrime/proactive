@@ -76,6 +76,10 @@ public class Panel extends ReactComponent
       {
          return super.getPreferredSize();
       }
+      public Dimension getMinimumSize()
+      {
+         return new Dimension((int)super.getPreferredSize().getWidth(), 0);
+      }
       public boolean getScrollableTracksViewportHeight()
       {
          // First of all, if the panel is set to not scroll, or only scroll vertically, then we must always try and squash the scrollable

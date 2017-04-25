@@ -44,7 +44,18 @@ public class Table extends ReactComponent  implements TableColumnModelListener
 
    public Table()
    {
-      panel = new JPanel();
+      panel = new JPanel()
+         {
+            public Dimension getMinimumSize()
+            {
+               return new Dimension((int)getPreferredSize().getWidth(), 0);
+            }
+            public Dimension getPreferredSize()
+            {
+               return table.getPreferredSize();
+            }
+
+         };
       cellRenderer = new ReactTableCellRenderer();
       table = new JTable(model)
          {

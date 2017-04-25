@@ -26,8 +26,6 @@ public class Label extends ReactLeafComponent
       if (colour != null) label.setForeground(colour);
       Integer size = (Integer)React.getStyle(id, className, "label", "font-size");
       if (size != null) label.setFont(new Font(label.getFont().getName(), label.getFont().getStyle(), size.intValue()));
-
-
    }
 
    public void setProperties(HashMap<String,PrologObject> properties)

@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.Vector;
 import java.util.Comparator;
 import java.util.Collections;
+import javax.swing.JScrollPane;
 
 public class ProactiveLayoutManager implements LayoutManager2
 {
@@ -120,6 +121,18 @@ public class ProactiveLayoutManager implements LayoutManager2
       }
    }
 
+   private static boolean isCrushable(Container c)
+   {
+      for (Component t: c.getComponents())
+      {
+         if (t instanceof JScrollPane)
+            return true;
+         if (t instanceof Container && isCrushable((Container)t))
+            return true;
+      }
+      return false;
+   }
+
    Map<Component, Rectangle> makeLayout(Container parent)
    {
       // First see what the total preferred major size is
@@ -127,6 +140,7 @@ public class ProactiveLayoutManager implements LayoutManager2
       int minsum = 0;
       Map<Component, Rectangle> proposedLayout = new HashMap<Component, Rectangle>();
       Vector<Component> sortedComponents = new Vector<Component>();
+      Vector<Component> crushables = new Vector<Component>();
 
       for (Component c : parent.getComponents())
       {
@@ -140,8 +154,13 @@ public class ProactiveLayoutManager implements LayoutManager2
          else if (layout == Layout.VERTICAL)
          {
             sum += c.getPreferredSize().getHeight();
+            //System.out.println(c + " -> " + c.getMinimumSize().getHeight());
             minsum += c.getMinimumSize().getHeight();
          }
+         if (c instanceof JScrollPane)
+            crushables.add(c);
+         else if (c instanceof Container && isCrushable((Container)c))
+            crushables.add(c);
       }
       Collections.sort(sortedComponents, new Comparator<Component>()
                        {
@@ -281,6 +300,25 @@ public class ProactiveLayoutManager implements LayoutManager2
       }
       else
       {
+
+         // This is where we need to think about scrollpanes. If we have more space than is needed to display everything at the minimum size then
+         // we need to treat scrollpanes differently; not just proportional to the preferred major size. If we keep track of the minimum size of
+         // all the components that arent scrollpanes, we can find out how much is left over, divide that by the number of scrollpanes, and
+         // make each scrollpane that big. If there are NO scrollpanes, then we must proceed as before
+         // Note that this applies to scrollpanes nested deep in children, too, but they should return their minimum size as 0x0, which means they
+         // wont count toward the minimum size of the panels that they're embedded in anyway.
+         int crushable_space = 0;
+         if (crushables.size() > 0 && minsum <= major_available)
+         {
+            // Ok, we can just display everything at minimum size and leave the remaining space to the crushables (ie scrollpanes)
+            crushable_space = (int)((major_available - minsum) / crushables.size());
+            //System.out.println("Crushable space: " + crushable_space);
+            //System.out.println("Major space: " + major_available);
+            //System.out.println("Minsum: " + minsum);
+            //System.exit(-1);
+         }
+
+
          //System.out.println("    -> Not enough space: " + sum + " < " + major_available);
          // We do not have enough space to display everything at its requested size. This is where we would potentially reflow components
          // but for now, just display everything in proportion to its preferred major size
@@ -300,7 +338,10 @@ public class ProactiveLayoutManager implements LayoutManager2
             int major_minimum = 0;
             if (layout == Layout.HORIZONTAL)
             {
-               major_minimum = (int)c.getMinimumSize().getWidth();
+               if (crushables.contains(c))
+                  major_scale = crushable_space;
+               else
+                  major_minimum = (int)c.getMinimumSize().getWidth();
                major_scale = (int)((c.getPreferredSize().getWidth() / (double)sum) * (double)major_available);
                if (major_scale < major_minimum && panic == Panic.TRUNCATE)
                {
@@ -320,7 +361,12 @@ public class ProactiveLayoutManager implements LayoutManager2
             else if (layout == Layout.VERTICAL)
             {
                major_minimum = (int)c.getMinimumSize().getHeight();
-               major_scale = (int)((c.getPreferredSize().getHeight() / (double)sum) * (double)major_available);
+               if (crushables.contains(c))
+                  major_scale = crushable_space;
+               else if (crushables.size() > 0)
+                  major_scale = (int)(c.getMinimumSize().getHeight());
+               else
+                  major_scale = (int)((c.getPreferredSize().getHeight() / (double)sum) * (double)major_available);
                if (major_scale < major_minimum && panic == Panic.TRUNCATE)
                {
                   // We have stolen some space. Reduce the major_available to reflect that
