@@ -78,7 +78,7 @@ public class Panel extends ReactComponent
       }
       public Dimension getMinimumSize()
       {
-         return new Dimension((int)super.getPreferredSize().getWidth(), 0);
+         return new Dimension(0, 0);
       }
       public boolean getScrollableTracksViewportHeight()
       {
