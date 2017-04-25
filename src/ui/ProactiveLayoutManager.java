@@ -338,11 +338,13 @@ public class ProactiveLayoutManager implements LayoutManager2
             int major_minimum = 0;
             if (layout == Layout.HORIZONTAL)
             {
+               major_minimum = (int)c.getMinimumSize().getWidth();
                if (crushables.contains(c))
                   major_scale = crushable_space;
+               else if (crushables.size() > 0)
+                  major_scale = (int)(c.getMinimumSize().getWidth());
                else
-                  major_minimum = (int)c.getMinimumSize().getWidth();
-               major_scale = (int)((c.getPreferredSize().getWidth() / (double)sum) * (double)major_available);
+                  major_scale = (int)((c.getPreferredSize().getWidth() / (double)sum) * (double)major_available);
                if (major_scale < major_minimum && panic == Panic.TRUNCATE)
                {
                   // We have stolen some space. Reduce the major_available to reflect that
