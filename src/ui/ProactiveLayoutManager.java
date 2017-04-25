@@ -190,8 +190,10 @@ public class ProactiveLayoutManager implements LayoutManager2
          minor_available = (int)parent.getBounds().getWidth() - parentInsets.left - parentInsets.right;
          minor_pad = parentInsets.left;
       }
-      //System.out.println("    We have " + major_available + " x " + minor_available +" to work with");
-      //System.out.println("Layout: " + layout);
+      //System.out.println("    Laying out a " + layout + " panel with " + sortedComponents.size() + " components on it");
+      //System.out.println("    We have " + major_available + " (major), " + minor_available +" (minor) to work with");
+      //System.out.println("    We need " + sum + " in the major direction for full layout, and at least " + minsum + " to lay out the " + sortedComponents.size() + " components");
+
       if (sum <= major_available)
       {
          double extraSpace = major_available - sum;
@@ -254,7 +256,6 @@ public class ProactiveLayoutManager implements LayoutManager2
          {
             if (!c.isVisible()) continue;
             ProactiveConstraints constraints = map.get(c);
-
             int major_scale = 0;
             int minor_scale = 0;
             int minor_position = minor_pad;
@@ -292,10 +293,10 @@ public class ProactiveLayoutManager implements LayoutManager2
                else
                   minor_scale = (int)Math.min(c.getPreferredSize().getWidth(), minor_available);
             }
-
             minor_position = minor_pad + getAlignmentOffset(constraints, minor_available, minor_scale);
             proposedLayout.put(c, new Rectangle(major_position, minor_position, major_scale + slush, minor_scale));
-            major_position += major_scale + intraPad;
+            //System.out.println("   -> Placing child at major=" + major_position + ", minor=" + minor_position + ", with major_width=" + (major_scale + slush) + " and minor_width=" + minor_scale);
+            major_position += major_scale + slush + intraPad;
          }
       }
       else
