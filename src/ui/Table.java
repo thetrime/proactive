@@ -342,6 +342,12 @@ public class Table extends ReactComponent  implements TableColumnModelListener
             {
                table.getColumnModel().getColumn(i).setPreferredWidth((int)(factor*o.getWeight()));
             }
+            else // No info, so set the the preferred size of the header
+            {
+               TableCellRenderer renderer = table.getColumnModel().getColumn(i).getHeaderRenderer();
+               Component comp = renderer.getTableCellRendererComponent(table, o, false, false, -1, i);
+               table.getColumnModel().getColumn(i).setPreferredWidth(comp.getPreferredSize().width +1);
+            }
             i++;
          }
       }
