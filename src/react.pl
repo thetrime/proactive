@@ -60,7 +60,8 @@ serve_react(Request):-
             ( memberchk(accept_encoding(AcceptEncoding), Request),
               sub_atom(AcceptEncoding, _, _, _, deflate)->
                 format(current_output, 'Content-Encoding: deflate~n', []),
-                zopen(current_output, TargetStream, [])
+                % We shouldnt close the CGI-stream ourself. The wrapper will do that when the handler is finished
+                zopen(current_output, TargetStream, [close_parent(false)])
             ; otherwise->
                 TargetStream = current_output
             ),
