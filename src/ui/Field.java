@@ -223,6 +223,8 @@ public class Field extends ReactComponent
             }
             else if (s.endsWith("px"))
                maxWidth = Integer.parseInt(s.substring(0, s.length()-2));
+            else if (s.equals("inherit"))
+               maxWidth = -1;
             else
                System.out.println("Bad maxWidth: " + s);
             int height = (int)widget.getAWTComponent().getPreferredSize().getHeight();
