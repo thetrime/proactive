@@ -24,8 +24,9 @@ The Panel is the basic layout unit. In Swing it's represented as a JPanel, and i
 
 Grid
 ----
-The Grid is a layout component with slightly more complex rules for layout. It has only a single attribute:
+The Grid is a layout component with slightly more complex rules for layout. It has these attributes:
    * weights: A list of integers (currently only zero and non-zero are differentiated in the JS client). A value of 0 indicates that the column should be as big as needed to display the longest cell in it, whereas 1 indicates that the column should be allocated a share of any extra space. This can be used to align a group of components in a tabular layout.
+   * padding: A value (in pixels or em, css-style) which corresponds to inter-cell width padding. Padding is only added on the left and right of cells, and is omitted from before the first and after the last element in a row.
 
 Button
 ------
@@ -62,6 +63,11 @@ The Table is a component to display tabular data. It can contain 0 or 1 TableHea
 TableHeader
 -----------
 The TableHeader is the component displayed at the top of a table (typically including column headers). It can contain any number of components; each one will specify a column. The weight attribute of these objects governs the relative widths of the columns. It has no attributes of its own.
+
+TableFooter
+-----------
+The TableHeader is the component displayed at the bottom of a table (typically something like a total or summary table). It should contain Row objects (you can have a footer with multiple rows, but a header must have only a single row, so for brevity you add the cells directly to the TableHeader).
+
 
 Row
 ---
