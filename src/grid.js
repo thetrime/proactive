@@ -11,6 +11,7 @@ function Grid()
     node.appendChild(this.table);
     this.setDOMNode(node);
     this.weights = [0];
+    this.padding = null;
 }
 Grid.prototype = new ReactComponent;
 
@@ -33,6 +34,11 @@ Grid.prototype.setProperties = function(t)
         if (newWeights.length != this.weights.length || !newWeights.every(function(v,i) { return v === this.weights[i]}.bind(this)))
             must_relayout = true;
         this.weights = newWeights;
+    }
+    if (t.padding !== undefined)
+    {
+        this.padding = Prolog._atom_chars(t.padding);
+        must_relayout = true;
     }
     if (must_relayout)
         this.relayout();
@@ -57,6 +63,8 @@ Grid.prototype.appendChild = function(t)
             cell.className = 'grid-shrink';
         else
             cell.className = 'grid-expand';
+        if (this.padding != null)
+            cell.style['padding-right'] = this.padding;
         row.appendChild(cell);
         this.table.appendChild(row);
     }
@@ -70,13 +78,19 @@ Grid.prototype.appendChild = function(t)
                 cell.className = 'grid-shrink';
             else
                 cell.className = 'grid-expand';
+            if (this.padding != null)
+                cell.style['padding-right'] = this.padding;
             row.appendChild(cell);
             this.table.appendChild(row);
         }
         else
         {
             if (this.weights.length < lastRow.childNodes.length)
+            {
                 cell.className = 'grid-shrink';
+                if (this.padding != null)
+                    cell.style['padding-left'] = this.padding;
+            }
             else
             {
                 var weight = this.weights[lastRow.childNodes.length];
@@ -84,6 +98,16 @@ Grid.prototype.appendChild = function(t)
                     cell.className = 'grid-shrink';
                 else
                     cell.className = 'grid-expand';
+                if (this.weights.length == lastRow.childNodes.length + 1)
+                {
+                    if (this.padding != null)
+                        cell.style['padding-left'] = this.padding;
+                }
+                else if (this.padding != null)
+                {
+                    cell.style['padding-left'] = this.padding;
+                    cell.style['padding-right'] = this.padding;
+                }
             }
             lastRow.appendChild(cell);
         }
