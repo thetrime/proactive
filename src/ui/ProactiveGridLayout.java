@@ -19,8 +19,9 @@ public class ProactiveGridLayout implements LayoutManager2
    private int[] preferred_column_widths;
    private int[] minimum_column_widths;
    private Vector<Integer> row_heights;
+   private int padding = 0;
 
-   public ProactiveGridLayout(Vector<Integer> weights)
+   public ProactiveGridLayout(Vector<Integer> weights, int padding)
    {
       map = new HashMap<Component, ProactiveConstraints>();
       this.weights = new int[weights.size()];
@@ -28,6 +29,7 @@ public class ProactiveGridLayout implements LayoutManager2
       minimum_column_widths = new int[weights.size()];
       row_heights = new Vector<Integer>();
       int j = 0;
+      this.padding = padding;
       for(int i: weights)
       {
          this.weights[j] = i;
@@ -41,7 +43,7 @@ public class ProactiveGridLayout implements LayoutManager2
    public void removeLayoutComponent(Component c) {}        // Deliberately does nothing
    public Dimension preferredLayoutSize(Container parent)
    {
-      if (parent == null)
+      if (parent == null || weights.length == 0)
          return new Dimension (0, 0);
       preferred_column_widths = new int[weights.length];
       row_heights = new Vector<Integer>();
@@ -67,6 +69,14 @@ public class ProactiveGridLayout implements LayoutManager2
          for (int col = 0; col < weights.length; col++)
          {
             int item_width = (int)sortedComponents[counted].getPreferredSize().getWidth();
+            //System.out.println("Col " + col + " has item width of " + item_width);
+            if (weights.length > 0)
+            {
+               if (col == 0 || col == weights.length-1)
+                  item_width += padding;
+               else
+                  item_width += 2*padding;
+            }
             row_width += item_width;
             if (preferred_column_widths[col] < item_width)
                preferred_column_widths[col] = item_width;
@@ -83,7 +93,7 @@ public class ProactiveGridLayout implements LayoutManager2
    }
    public Dimension minimumLayoutSize(Container parent)
    {
-      if (parent == null)
+      if (parent == null || weights.length == 0)
          return new Dimension (0, 0);
       // This is the minimum width of the widest row by the sum of the minimum height of the maximum element in each row
       int height = 0;
@@ -107,6 +117,13 @@ public class ProactiveGridLayout implements LayoutManager2
          for (int col = 0; col < weights.length; col++)
          {
             int item_width = (int)sortedComponents[counted].getMinimumSize().getWidth();
+            if (weights.length > 0)
+            {
+               if (col == 0 || col == weights.length-1)
+                  item_width += padding;
+               else
+                  item_width += 2*padding;
+            }
             row_width += item_width;
             if (minimum_column_widths[col] < item_width)
                minimum_column_widths[col] = item_width;
@@ -159,9 +176,9 @@ public class ProactiveGridLayout implements LayoutManager2
          for (int i = 0; i < column_widths.length; i++)
          {
             if (weights[i] == 0)
-               column_widths[i] = preferred_column_widths[i];
+               column_widths[i] = preferred_column_widths[i] - ((i == 0 || i == weights.length-1)?padding:2*padding);
             else
-               column_widths[i] = (int)(preferred_column_widths[i] + (((double)(weights[i])/(double)total_weight) * extra_width));
+               column_widths[i] = (int)(preferred_column_widths[i] + (((double)(weights[i])/(double)total_weight) * extra_width)) - ((i == 0 || i == weights.length-1)?padding:2*padding);
          }
       }
       else if (available_width >= minimumSize.getWidth())
@@ -170,10 +187,16 @@ public class ProactiveGridLayout implements LayoutManager2
          // Tolerable case - we can display things at the minimum size and still fit everything without truncation
          // To avoid the jarring 'collapsing' behaviour of GridBagLayout, we should distribute any leftover space
          // (after setting each one to the minimum size) between all the components evenly, ignoring the weights
+         // NB: This is not actually right. If you do this then when we shrink to the minimum size for a component suddenly everything springs out to equal sizes
+         // which looks weird. Instead I try to use the weights, see below
          double extra_width = available_width - minimumSize.getWidth();
          for (int i = 0; i < column_widths.length; i++)
          {
-            column_widths[i] = (int)(minimum_column_widths[i] + ((double)extra_width)/((double)weights.length));
+            if (weights[i] == 0)
+               column_widths[i] = minimum_column_widths[i] - ((i == 0 || i == weights.length-1)?padding:2*padding);
+            else
+               column_widths[i] = (int)(minimum_column_widths[i] + (((double)(weights[i])/(double)total_weight) * extra_width)) - ((i == 0 || i == weights.length-1)?padding:2*padding);
+            //column_widths[i] = (int)(minimum_column_widths[i] + ((double)extra_width)/((double)weights.length)) - ((i == 0 || i == weights.length-1)?padding:2*padding);
          }
       }
       else
@@ -183,7 +206,7 @@ public class ProactiveGridLayout implements LayoutManager2
          //System.out.println("Sad width case");
          for (int i = 0; i < column_widths.length; i++)
          {
-            column_widths[i] = (int)(((double)available_width)/((double)weights.length));
+            column_widths[i] = (int)(((double)available_width)/((double)weights.length)) - ((i == 0 || i == weights.length-1)?padding:2*padding);;
          }
       }
 
@@ -215,7 +238,7 @@ public class ProactiveGridLayout implements LayoutManager2
          {
             int width = column_widths[col];
             sortedComponents[counted++].setBounds(x, y, width, height);
-            x = x + width;
+            x = x + width + 2*padding;
          }
          y = y + height;
       }
