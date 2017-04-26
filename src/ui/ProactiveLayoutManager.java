@@ -313,14 +313,13 @@ public class ProactiveLayoutManager implements LayoutManager2
          {
             // Ok, we can just display everything at minimum size and leave the remaining space to the crushables (ie scrollpanes)
             crushable_space = (int)((major_available - minsum) / crushables.size());
-            //System.out.println("Crushable space: " + crushable_space);
-            //System.out.println("Major space: " + major_available);
-            //System.out.println("Minsum: " + minsum);
-            //System.exit(-1);
+            //System.out.println("   Crushable space: " + crushable_space);
+            //System.out.println("   Major space: " + major_available);
+            //System.out.println("   Minsum: " + minsum);
          }
 
 
-         //System.out.println("    -> Not enough space: " + sum + " < " + major_available);
+         //System.out.println("    -> Not enough space: " + sum + " < " + major_available + " minsum = " + minsum);
          // We do not have enough space to display everything at its requested size. This is where we would potentially reflow components
          // but for now, just display everything in proportion to its preferred major size
          // One more final consideration: TRY and not make any component smaller than its minimum size in the major direction
@@ -330,6 +329,7 @@ public class ProactiveLayoutManager implements LayoutManager2
          // Which we do is governed by the static final field 'panic'
          int major_position = major_pad;
          int minor_position = minor_pad;
+         //System.out.println("   Laying out " + sortedComponents.size() + " components in " + major_available + " space");
          for (Component c : sortedComponents)
          {
             if (!c.isVisible()) continue;
@@ -341,7 +341,7 @@ public class ProactiveLayoutManager implements LayoutManager2
             {
                major_minimum = (int)c.getMinimumSize().getWidth();
                if (crushables.contains(c))
-                  major_scale = crushable_space;
+                  major_scale = crushable_space + major_minimum;
                else if (crushables.size() > 0)
                   major_scale = (int)(c.getMinimumSize().getWidth());
                else
@@ -365,11 +365,12 @@ public class ProactiveLayoutManager implements LayoutManager2
             {
                major_minimum = (int)c.getMinimumSize().getHeight();
                if (crushables.contains(c))
-                  major_scale = crushable_space;
+                  major_scale = crushable_space + major_minimum;
                else if (crushables.size() > 0)
                   major_scale = (int)(c.getMinimumSize().getHeight());
                else
                   major_scale = (int)((c.getPreferredSize().getHeight() / (double)sum) * (double)major_available);
+               //System.out.println("      Setting major scale to " + major_scale);
                if (major_scale < major_minimum && panic == Panic.TRUNCATE)
                {
                   // We have stolen some space. Reduce the major_available to reflect that
@@ -386,7 +387,7 @@ public class ProactiveLayoutManager implements LayoutManager2
                   minor_scale = (int)Math.min(c.getPreferredSize().getWidth(), minor_available);
             }
             minor_position = minor_pad + getAlignmentOffset(constraints, minor_available, minor_scale);
-
+            //System.out.println("      -> Setting at " + major_position + "," + minor_position + " with size " + major_scale + "x" + minor_scale);
             proposedLayout.put(c, new Rectangle(major_position, minor_position, major_scale, minor_scale));
             major_position += major_scale;
          }

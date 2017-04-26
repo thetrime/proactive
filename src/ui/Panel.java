@@ -78,6 +78,13 @@ public class Panel extends ReactComponent
       }
       public Dimension getMinimumSize()
       {
+         Dimension m = super.getMinimumSize();
+         if ("none".equals(scrollInfo))
+            return m;
+         else if ("vertical".equals(scrollInfo))
+            return new Dimension((int)m.getWidth(), 0);
+         else if ("horizontal".equals(scrollInfo))
+            return new Dimension(0, (int)m.getHeight());
          return new Dimension(0, 0);
       }
       public boolean getScrollableTracksViewportHeight()
@@ -113,7 +120,7 @@ public class Panel extends ReactComponent
       awtComponent = panel;
       panel.setBackground(new Color(150, 168, 200));
       reconfigureLayout();
-//      panel.setBorder(BorderFactory.createLineBorder(Color.RED));
+      //panel.setBorder(BorderFactory.createLineBorder(Color.RED));
    }
 
    private void reconfigureLayout()
