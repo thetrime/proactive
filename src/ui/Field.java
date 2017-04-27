@@ -230,7 +230,7 @@ public class Field extends ReactComponent
             int height = (int)widget.getAWTComponent().getPreferredSize().getHeight();
             if (maxWidth != -1)
             {
-               System.out.println("Setting max-width to " + new Dimension(maxWidth, height));
+               //System.out.println("Setting max-width to " + new Dimension(maxWidth, height));
                widget.getAWTComponent().setMaximumSize(new Dimension(maxWidth, height));
             }
          }
