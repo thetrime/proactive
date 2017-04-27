@@ -34,7 +34,7 @@ public class Panel extends ReactComponent
    ProactiveConstraints.Justification justification = ProactiveConstraints.Justification.START;
    int total_x_weight = 0;
    int total_y_weight = 0;
-
+   private ProactiveLayoutManager.Wrap wrap = ProactiveLayoutManager.Wrap.NOWRAP;
    private LayoutManager layoutManager;
    private Component awtComponent;
    private JPanel panel;
@@ -126,9 +126,9 @@ public class Panel extends ReactComponent
    private void reconfigureLayout()
    {
       if (orientation == HORIZONTAL)
-         layoutManager = new ProactiveLayoutManager(ProactiveLayoutManager.HORIZONTAL, alignment, justification);
+         layoutManager = new ProactiveLayoutManager(ProactiveLayoutManager.HORIZONTAL, alignment, justification, wrap);
       else if (orientation == VERTICAL)
-         layoutManager = new ProactiveLayoutManager(ProactiveLayoutManager.VERTICAL, alignment, justification);
+         layoutManager = new ProactiveLayoutManager(ProactiveLayoutManager.VERTICAL, alignment, justification, wrap);
       panel.setLayout(layoutManager);
    }
 
@@ -239,6 +239,26 @@ public class Panel extends ReactComponent
                justification = ProactiveConstraints.Justification.SPACE_AROUND;
          }
          if (oldJustification != justification)
+            reconfigureLayout();
+      }
+      if (properties.containsKey("wrap"))
+      {
+         ProactiveLayoutManager.Wrap oldWrap = wrap;
+         if (properties.get("wrap") == null)
+         {
+            wrap = ProactiveLayoutManager.Wrap.NOWRAP;
+         }
+         else
+         {
+            String key = properties.get("wrap").asString();
+            if (key.equals("nowrap"))
+               wrap = ProactiveLayoutManager.Wrap.NOWRAP;
+            else if (key.equals("wrap"))
+               wrap = ProactiveLayoutManager.Wrap.WRAP;
+            else if (key.equals("wrap-reverse"))
+               wrap = ProactiveLayoutManager.Wrap.WRAP_REVERSE;
+         }
+         if (oldWrap != wrap)
             reconfigureLayout();
       }
       if (properties.containsKey("scroll"))

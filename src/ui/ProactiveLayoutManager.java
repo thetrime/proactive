@@ -17,6 +17,7 @@ public class ProactiveLayoutManager implements LayoutManager2
 {
    private Map<Component, ProactiveConstraints> map;
    public enum Layout {HORIZONTAL, VERTICAL};
+   public enum Wrap {NOWRAP, WRAP, WRAP_REVERSE};
    private enum Panic {TRUNCATE, CRUSH};
    public static Layout HORIZONTAL = Layout.HORIZONTAL;
    public static Layout VERTICAL = Layout.VERTICAL;
@@ -25,10 +26,12 @@ public class ProactiveLayoutManager implements LayoutManager2
    private ProactiveConstraints.Alignment alignment = ProactiveConstraints.Alignment.CENTER;
    private ProactiveConstraints.Justification justification = ProactiveConstraints.Justification.CENTER;
    private Layout layout = Layout.VERTICAL;
-   public ProactiveLayoutManager(Layout layout, ProactiveConstraints.Alignment alignment, ProactiveConstraints.Justification justification)
+   private Wrap wrap = Wrap.NOWRAP;
+   public ProactiveLayoutManager(Layout layout, ProactiveConstraints.Alignment alignment, ProactiveConstraints.Justification justification, Wrap wrap)
    {
       map = new HashMap<Component, ProactiveConstraints>();
       this.layout = layout;
+      this.wrap = wrap;
       this.alignment = alignment;
       this.justification = justification;
    }
@@ -299,7 +302,77 @@ public class ProactiveLayoutManager implements LayoutManager2
             major_position += major_scale + slush + intraPad;
          }
       }
-      else
+      else if (crushables.size() == 0 && wrap != Wrap.NOWRAP)
+      {
+         // Not enough space and no handy scrollpanes. But we have been asked to wrap instead. So, display everything at its preferred size (if possible), but bump
+         // down (or across) to the next row (or column) as needed. If we do not have enough major space even for a single unit, then crush it
+         // If we run out of minor space, truncate.
+         // FIXME: We need to adjust preferredLayoutSize and minimumLayoutSize above as well
+
+         int major_position = major_pad;
+         int minor_position = minor_pad;
+         int major_remaining = major_available;
+         int components_so_far_this_block = 0;
+         int slush = 0;
+         int intraPad = 0;
+         for (Component c : sortedComponents)
+         {
+            if (!c.isVisible()) continue;
+            ProactiveConstraints constraints = map.get(c);
+            int major_scale = 0;
+            int minor_scale = 0;
+            major_remaining = major_available - major_position;
+            if (layout == Layout.HORIZONTAL)
+            {
+               if (major_remaining < c.getMinimumSize().getWidth() && components_so_far_this_block > 0)
+               {
+                  // Bump to the next row
+                  major_position = major_pad;
+                  minor_position += c.getPreferredSize().getHeight();
+                  components_so_far_this_block = 0;
+               }
+               major_scale = (int)c.getPreferredSize().getWidth();
+               if (major_scale > major_available)
+               {
+                  // Otherwise, we have to make do
+                  major_scale = major_available;
+               }
+               if (c.getMaximumSize() != null && c.getMaximumSize().getWidth() < major_scale)
+               {
+                  major_position += (major_scale - c.getMaximumSize().getWidth());
+                  major_scale = (int)c.getMaximumSize().getWidth();
+               }
+               minor_scale = (int)c.getPreferredSize().getHeight();
+            }
+            else if (layout == Layout.VERTICAL)
+            {
+               if (major_remaining < c.getMinimumSize().getHeight() && components_so_far_this_block > 0)
+               {
+                  // Bump to the next row
+                  major_position = major_pad;
+                  minor_position += c.getPreferredSize().getWidth();
+                  components_so_far_this_block = 0;
+               }
+               major_scale = (int)c.getPreferredSize().getHeight();
+               if (major_scale > major_available)
+               {
+                  // Otherwise, we have to make do
+                  major_scale = major_available;
+               }
+               if (c.getMaximumSize() != null && c.getMaximumSize().getHeight() < major_scale)
+               {
+                  major_position += (major_scale - c.getMaximumSize().getHeight());
+                  major_scale = (int)c.getMaximumSize().getHeight();
+               }
+               minor_scale = (int)c.getPreferredSize().getWidth();
+            }
+            proposedLayout.put(c, new Rectangle(major_position, minor_position, major_scale + slush, minor_scale));
+            //System.out.println("   -> Placing child at major=" + major_position + ", minor=" + minor_position + ", with major_width=" + (major_scale + slush) + " and minor_width=" + minor_scale);
+            major_position += major_scale + slush + intraPad;
+            components_so_far_this_block++;
+         }
+      }
+      else // Not enough room for everything at its preferred size. However, there is one more important thing to consider: scrollpanes.
       {
 
          // This is where we need to think about scrollpanes. If we have more space than is needed to display everything at the minimum size then
@@ -319,8 +392,7 @@ public class ProactiveLayoutManager implements LayoutManager2
          }
 
 
-         //System.out.println("    -> Not enough space: " + sum + " < " + major_available + " minsum = " + minsum);
-         // We do not have enough space to display everything at its requested size. This is where we would potentially reflow components
+         // We do not have enough space to display everything at its requested size. This
          // but for now, just display everything in proportion to its preferred major size
          // One more final consideration: TRY and not make any component smaller than its minimum size in the major direction
          // Note that if there is not enough space to display everything at its minimum size, then we have two options:
