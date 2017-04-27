@@ -8,6 +8,7 @@ function ReactComponent()
     this.id = null;
     this.fill = "none";
     this.layout = "vertical";
+    this.wrap = "nowrap";
     this.baseClassName = "";
     this.overrideClass = ""
     this.children = [];
@@ -86,6 +87,14 @@ ReactComponent.prototype.setProperties = function(t)
             this.layout = Prolog._atom_chars(t.layout);
         restyleRequired = true;
     }
+    if (t.wrap !== undefined)
+    {
+        if (ReactComponent.isNull(t.wrap))
+            this.wrap = "nowrap";
+        else
+            this.wrap = Prolog._atom_chars(t.wrap);
+        restyleRequired = true;
+    }
     if (t.weight !== undefined)
     {
         if (Prolog._is_integer(t.weight))
@@ -146,6 +155,12 @@ ReactComponent.prototype.getStyle = function()
         newClassName += " justify_space_between";
     if (this.justify_content == "space-around")
         newClassName += " justify_space_around";
+
+    if (this.wrap == "wrap")
+        newClassName += " wrap";
+    else if (this.wrap == "wrap-reverse")
+        newClassName += " wrap_reverse";
+
     return newClassName;
 }
 

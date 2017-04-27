@@ -479,3 +479,13 @@ penalty, but it seems to actually work
     width: 0;
     flex: 1;
 }
+
+.wrap
+{
+    flex-wrap: wrap;
+}
+
+.wrap-reverse
+{
+    flex-wrap: wrap-reverse;
+}
