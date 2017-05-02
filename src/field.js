@@ -323,14 +323,6 @@ Field.prototype.setProperties = function(t)
     {
         this.domNode.style["max-width"] = Prolog._atom_chars(t.maxWidth);
     }
-
-    if (t.id !== undefined)
-    {
-        if (ReactComponent.isNull(t.id))
-            this.domNode.id = null;
-        else
-            this.domNode.id = Prolog._portray(t.id);
-    }
     if (t.title !== undefined)
     {
         if (ReactComponent.isNull(t.title))

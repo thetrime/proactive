@@ -46,7 +46,7 @@ ReactComponent.prototype.setProperties = function(t)
     var restyleRequired = false;
     var mustNotifyParent = false;
     if (t.id !== undefined && this.getDOMNode() != null)
-        this.getDOMNode().id = t.id;
+        this.getDOMNode().id = Prolog._portray(t.id);
     if (t["class"] !== undefined)
     {
         if (ReactComponent.isNull(t["class"]))
