@@ -87,7 +87,13 @@ react_clause(Module, :-module(Module, Exports)):-
 react_clause(Module, Head:-Body):-
         current_predicate(_, Module:Head),
         predicate_property(Module:Head, interpreted),
+        functor(Head, Name, Arity),
         \+predicate_property(Module:Head, imported_from(_)),
+        % Do not provide the source code of tabled predicates if they are also in the same module
+        ( current_predicate(_, Module:tabled_predicate(_, _))->
+            \+clause(Module:tabled_predicate(Module, Name/Arity), true)
+        ; true
+        ),
         clause(Module:Head, Body, _).
 react_clause(Module, Head):-
         current_predicate(_, Module:tabled_predicate(_, _)),
