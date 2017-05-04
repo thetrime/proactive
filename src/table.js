@@ -1,6 +1,8 @@
 var ReactComponent = require('./react_component');
 var TableHeader = require('./table_header');
 
+// Note that the fixed-header/footer is broken in Chrome-58 due to https://codereview.chromium.org/2711803002/#ps1
+
 function Table()
 {
     ReactComponent.call(this);
