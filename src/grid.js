@@ -40,6 +40,19 @@ Grid.prototype.setProperties = function(t)
         this.padding = Prolog._atom_chars(t.padding);
         must_relayout = true;
     }
+    if (t.maxWidth !== undefined)
+    {
+        if (ReactComponent.isNull(t.maxWidth))
+        {
+            this.domNode.style["max-width"] = "inherit";
+            //this.domNode.style["margin"] = "";
+        }
+        else
+        {
+            this.domNode.style["max-width"] = Prolog._atom_chars(t.maxWidth);
+            this.domNode.style["margin"] = "auto";
+        }
+    }
     if (must_relayout)
         this.relayout();
 }
