@@ -30,17 +30,17 @@
 
 .scrollx
 {
-    overflow-x: scroll;
+    overflow-x: auto;
 }
 
 .scrolly
 {
-    overflow-y: scroll;
+    overflow-y: auto;
 }
 
 .scroll
 {
-    overflow: scroll;
+    overflow: auto;
     -webkit-overflow-scrolling: touch;
 }
 
@@ -100,7 +100,8 @@ button
 
 .vertical_layout > .vertical_fill
 {
-    flex: 1 1 auto;
+    flex-grow: 1;
+    flex-basis: auto;
     xmin-height: -webkit-min-content;
 }
 
@@ -120,7 +121,7 @@ button
 
 .proactive_container > .scrollpane
 {
-    flex: 1;
+    flex-grow: 1;
 }
 
 
@@ -353,8 +354,8 @@ td > *
 
 .scrollpane
 {
+    flex-shrink: 500;
     min-height: 0;
-    height: 0px;
 }
 
 .nocrush
@@ -441,6 +442,11 @@ label
     overflow-y: scroll;
     display: flex;
     flex-grow: 1;
+}
+
+.table_container
+{
+    flex-shrink: 1000;
 }
 
 .react_table::-webkit-scrollbar {-webkit-appearance: none; width: 7px;}
