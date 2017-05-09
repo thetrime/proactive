@@ -158,6 +158,7 @@ module.exports["_on_server"] = function(goal)
         this.engine.indicateReady();
         if (this.foreign)
             Prolog._release_blob("websocket", this.foreign);
+        this.foreign = 0;
         ws.close();
     }.bind(this);
     ws.onmessage = function(event)
