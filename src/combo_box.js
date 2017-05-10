@@ -36,10 +36,6 @@ ComboBox.prototype.setProperties = function(t)
     {
         this.domNode.disabled = ReactComponent.booleanValue(t.disabled);
     }
-    if (t.maxWidth !== undefined)
-    {
-        this.domNode.style["max-width"] = Prolog._atom_chars(t.maxWidth);
-    }
     if (t.onChange !== undefined)
     {
         if (this.changeHandler != null)

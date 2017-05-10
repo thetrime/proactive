@@ -66,7 +66,7 @@ ReactComponent.prototype.setProperties = function(t)
     if (t["align-children"] !== undefined)
     {
         if (ReactComponent.isNull(t["align-children"]))
-            this.align_children = "start";
+            this.align_children = "center";
         else
             this.align_children = Prolog._atom_chars(t["align-children"]);
         restyleRequired = true;
@@ -117,7 +117,14 @@ ReactComponent.prototype.setProperties = function(t)
         }
         mustNotifyParent = true;
     }
-
+    if (t.maxWidth !== undefined)
+    {
+        if (ReactComponent.isNull(t.maxWidth))
+            this.maxWidth = null;
+        else
+            this.maxWidth = Prolog._atom_chars(t.maxWidth);
+        restyleRequired = true;
+    }
     if (mustNotifyParent && this.parent != null)
         this.parent.notifyParentOfLayoutChange(this);
     if (restyleRequired && this.getDOMNode() != null) // react_widget will restyle itself later once it has actually instantiated the DOM
@@ -148,8 +155,10 @@ ReactComponent.prototype.getStyle = function()
     else if (this.layout == "grid") // FIXME: This is a hack for testing!
         newClassName += " horizontal_layout";
 
-    if (this.align_children == "center")
-        newClassName += " align_center";
+    if (this.align_children == "start")
+        newClassName += " align_start";
+    if (this.align_children == "end")
+        newClassName += " align_end";
 
     if (this.justify_content == "space-between")
         newClassName += " justify_space_between";
@@ -160,13 +169,34 @@ ReactComponent.prototype.getStyle = function()
         newClassName += " wrap";
     else if (this.wrap == "wrap-reverse")
         newClassName += " wrap_reverse";
-
     return newClassName;
 }
 
 ReactComponent.prototype.restyle = function()
 {
     this.getDOMNode().className = this.getStyle();
+    // the DOM node may not be an actual DOM node. For example, ChartDataSet
+    if (this.getDOMNode().style != null)
+    {
+        if (this.maxWidth == null)
+        {
+            this.getDOMNode().style["max-width"] = "";
+            this.getDOMNode().style["margin"] = "";
+        }
+        else
+        {
+            this.getDOMNode().style["max-width"] = this.maxWidth
+            if (this.align_children == "start")
+                this.getDOMNode().style["margin-right"] = "";
+            else if (this.align_children == "end")
+                this.getDOMNode().style["margin-left"] = "auto";
+            else if (this.align_children == "center")
+                this.getDOMNode().style["margin"] = "auto";
+            else
+                this.getDOMNode().style["margin"] = "inherit";
+        }
+    }
+
 }
 
 ReactComponent.prototype.setOwnerDocument = function(d)

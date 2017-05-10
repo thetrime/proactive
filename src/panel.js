@@ -107,19 +107,6 @@ Panel.prototype.setProperties = function(t)
             this.baseClassName = "proactive_container scrollpane scrolly";
         this.restyle();
     }
-    if (t.maxWidth !== undefined)
-    {
-        if (ReactComponent.isNull(t.maxWidth))
-        {
-            this.domNode.style["max-width"] = "inherit";
-            //this.domNode.style["margin"] = "";
-        }
-        else
-        {
-            this.domNode.style["max-width"] = Prolog._atom_chars(t.maxWidth);
-            this.domNode.style["margin"] = "auto";
-        }
-    }
     if (t.maxHeight !== undefined)
     {
         if (ReactComponent.isNull(t.maxHeight))
