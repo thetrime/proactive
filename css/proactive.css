@@ -102,7 +102,6 @@ button
 {
     flex-grow: 1;
     flex-basis: auto;
-    xmin-height: -webkit-min-content;
 }
 
 .horizontal_layout > .horizontal_fill
@@ -110,7 +109,6 @@ button
     -webkit-flex: 1;  
     -webkit-box-flex: 1;
     flex: 1 1 auto;
-    xmin-height: -webkit-min-content;
 }
 
 .horizontal_layout > .vertical_fill
@@ -132,10 +130,24 @@ button
     align-self: center;
 }
 
+.vertical_layout
+{
+    align-items: flex-start;
+}
+
 .vertical_layout > .no_fill
 {
-    margin-left: auto;
-    margin-right: auto;
+    align-self: center;
+}
+
+.vertical_layout.align_start > .no_fill
+{
+    align-self: flex-start;
+}
+
+.vertical_layout.align_start
+{
+    align-items: flex-start;
 }
 
 
@@ -288,11 +300,6 @@ label
     padding-right: 5px;
 }
 
-th > *
-{
-    x-width: 100%;
-}
-
 /* Make each table cell object take up the entire td.
    Note that only block objects can have a width
 */
@@ -349,7 +356,7 @@ td > *
 
 .horizontal_layout
 {
-    min-height: min-content;
+    min-height: unset;
 }
 
 .scrollpane
@@ -374,9 +381,14 @@ label
     min-height: 0;
 }
 
+.scrollpane > .notsure
+{
+    min-height: unset;
+}
+
 .notsure
 {
-    min-height: "illegal";
+    min-height: inherit;
 }
 
 .scrollpane .vertical_layout > .vertical_fill

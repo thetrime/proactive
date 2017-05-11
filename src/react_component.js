@@ -13,7 +13,7 @@ function ReactComponent()
     this.overrideClass = ""
     this.children = [];
     this.parent = null;
-    this.align_children = "start";
+    this.align_children = "default";
     this.justify_content = "start";
     this.blob = Prolog._make_blob("react_component", this);
 }
@@ -66,7 +66,7 @@ ReactComponent.prototype.setProperties = function(t)
     if (t["align-children"] !== undefined)
     {
         if (ReactComponent.isNull(t["align-children"]))
-            this.align_children = "center";
+            this.align_children = "default";
         else
             this.align_children = Prolog._atom_chars(t["align-children"]);
         restyleRequired = true;
