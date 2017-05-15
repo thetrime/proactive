@@ -3,6 +3,8 @@ package org.proactive.ui;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.BorderLayout;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
@@ -53,6 +55,22 @@ public class ReactApp extends JFrame implements StyleSheetListener
       getContentPane().setLayout(new BorderLayout());
       getContentPane().add(context.getAWTComponent(), BorderLayout.CENTER);
       setSize(800, 600);
+      addComponentListener(new ComponentAdapter()
+         {
+            public void componentResized(ComponentEvent e)
+            {
+               try
+               {
+                  context.reRender();
+                  validate();
+                  repaint();
+               }
+                catch(Exception f)
+               {
+                  f.printStackTrace();
+               }
+            }
+         });
       setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
       setVisible(true);
    }

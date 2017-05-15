@@ -149,6 +149,7 @@ public class Engine
       newEnv.installBuiltin("code_type", 2);
       newEnv.installBuiltin("ground", 1);
       newEnv.installBuiltin("broadcast_proactive_message", 1);
+      newEnv.installBuiltin("media_size", 2);
 
 
       newEnv.ensureLoaded(new CompoundTerm(CompoundTermTag.get("resource", 1), AtomTerm.get("/boilerplate.pl")));

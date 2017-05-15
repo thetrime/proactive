@@ -70,6 +70,8 @@ public class ReactWidget extends ReactComponent
 
    public Component getAWTComponent()
    {
+      if (internalComponent == null)
+         return null;
       return internalComponent.getAWTComponent();
    }
 

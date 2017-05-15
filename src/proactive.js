@@ -24,17 +24,28 @@ window.onPrologReady = function(Prolog)
                                                                         var p = decodeURIComponent(settings.propSpec);
                                                                         initialPropsObject = new PrologState(Prolog._string_to_local_term(p));
                                                                     }
-                                                                    engine.setRootWidget(new ReactWidget(null, engine, rootElementId, initialPropsObject, function(widget)
-										    {
-											container.className += " proactive_container vertical_layout vertical_fill horizontal_fill";
-                                                                                        container.appendChild(widget.getDOMNode());
-                                                                                        if (settings.callback != undefined)
-                                                                                            settings.callback(true, error);
-                                                                                    }));
+                                                                    var rootWidget = new ReactWidget(null, engine, rootElementId, initialPropsObject, function(widget)
+                                                                                                     {
+                                                                                                         container.className += " proactive_container vertical_layout vertical_fill horizontal_fill";
+                                                                                                         container.appendChild(widget.getDOMNode());
+                                                                                                         if (settings.callback != undefined)
+                                                                                                             settings.callback(true, error);
+                                                                                                     });
+                                                                    engine.setRootWidget(rootWidget);
+                                                                    window.addEventListener('resize', function()
+                                                                                            {
+                                                                                                window.requestAnimationFrame(function()
+                                                                                                                             {
+                                                                                                                                 rootWidget.reRender(function()
+                                                                                                                                                     {
+                                                                                                                                                     });
+                                                                                                                             });
+                                                                                            });
+
                                                                 }
                                                                 else if (settings.callback != undefined)
                                                                     settings.callback(false, error);
-							      });
+                                                            });
                           },
                           registerPredicate: PrologEngine.registerPredicate,
 			  registerComponent: ProactiveComponentFactory.registerComponent,

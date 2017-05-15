@@ -545,8 +545,15 @@ module.exports["broadcast_proactive_message"] = function(term)
     return 1;
 }
 
+module.exports["media_size"] = function(width, height)
+{
+    return Prolog._unify(width, Prolog._make_integer(document.body.clientWidth)) &&
+        Prolog._unify(height, Prolog._make_integer(document.body.clientHeight));
+}
+
 module.exports["qqq"] = function()
 {
     Prolog._qqq();
     return 1;
 }
+

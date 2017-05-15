@@ -3,6 +3,8 @@ package org.proactive.ui;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.BorderLayout;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import java.util.List;
@@ -46,6 +48,22 @@ public class ReactPanel extends JPanel implements StyleSheetListener
       React.addStyleSheetListener(this);
       setLayout(new BorderLayout());
       add(context.getAWTComponent(), BorderLayout.CENTER);
+      addComponentListener(new ComponentAdapter()
+         {
+            public void componentResized(ComponentEvent e)
+            {
+               try
+               {
+                  context.reRender();
+                  validate();
+                  repaint();
+               }
+                catch(Exception f)
+               {
+                  f.printStackTrace();
+               }
+            }
+         });
    }
 
    public void setProps(PrologState props) throws PrologException

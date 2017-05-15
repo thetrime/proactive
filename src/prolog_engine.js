@@ -93,9 +93,11 @@ PrologEngine.prototype.checkForMessageHandlers = function(widget, callback)
 {
     // This function does not call callback() directly, but defers it to a new execution cycle
     // Otherwise we can easily exceed the JS stack depth :(
+    // NB: This is NOT a good idea!
     if (!Prolog._exists_predicate(Prolog._make_atom(widget.elementId), onMessageFunctor))
     {
-        setTimeout(callback, 0);
+        callback();
+//        setTimeout(callback, 0);
         return;
     }
     var savePoint = Prolog._save_state();
@@ -126,7 +128,8 @@ PrologEngine.prototype.checkForMessageHandlers = function(widget, callback)
                                 console.log("findMessageHandlers/4 raised an error: " + Prolog._format_term(null, 1200, ex));
                             Prolog._restore_state(savePoint);
                         }
-                        setTimeout(callback, 0);
+                        //setTimeout(callback, 0);
+                        callback();
                     }.bind(this));
 }
 

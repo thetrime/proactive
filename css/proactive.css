@@ -194,11 +194,7 @@ button
 
 .align_center
 {
-    -webkit-box-pack: center;
-    -moz-box-pack: center;
-    -webkit-justify-content: center;
-    -ms-flex-pack: center;
-    justify-content: center;
+    align-items: center;
 }
 
 .justify_space_between
