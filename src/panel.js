@@ -29,6 +29,7 @@ function Panel()
     this.fieldSetTextElement = null;
     this.crush = "notsure";
     this.hasScrollpaneChildren = false;
+    this.hasLegend = false;
 }
 
 Panel.prototype = new ReactComponent;
@@ -53,7 +54,7 @@ Panel.prototype.setProperties = function(t)
             var post = document.createElement("div"); // this is the --- at the top-right
             post.className = "post_fieldset horizontal_fill";
             this.legendElement.appendChild(post);
-            this.baseClassName = "proactive_container fieldset";
+            this.hasLegend = true;
             var f = "no_fill";
             if (this.fill == "horizontal")
                 f = "horizontal_fill";
@@ -84,7 +85,7 @@ Panel.prototype.setProperties = function(t)
             while (this.contentElement.firstChild != null)
                 this.getDOMNode().appendChild(this.contentElement.firstChild);
             this.contentElement = this.getDOMNode();
-            this.baseClassName = "proactive_container";
+            this.hasLegend = false;
             this.restyle();
         }
     }
@@ -98,13 +99,9 @@ Panel.prototype.setProperties = function(t)
     if (t.scroll !== undefined)
     {
         if (ReactComponent.isNull(t.scroll))
-            this.baseClassName = "proactive_container";
-        else if (Prolog._portray(t.scroll) == "both")
-            this.baseClassName = "proactive_container scrollpane scroll";
-        else if (Prolog._portray(t.scroll) == "horizontal")
-            this.baseClassName = "proactive_container scrollpane scrollx";
-        else if (Prolog._portray(t.scroll) == "vertical")
-            this.baseClassName = "proactive_container scrollpane scrolly";
+            this.scroll = "none";
+        else
+            this.scroll = Prolog._portray(t.scroll);
         this.restyle();
     }
     if (t.maxHeight !== undefined)
@@ -129,6 +126,15 @@ Panel.prototype.restyle = function()
     this.domNode.className = this.getStyle().replace(this.delete_layout, ' vertical_layout ')
     this.contentElement.className = this.getStyle().replace(this.delete_fieldset, ' fieldset_main ');
     this.configureHeight();
+    if (this.hasLegend)
+        this.domNode.className += " fieldset";
+    if (this.scroll == "both")
+        this.contentElement.className += " scrollpane scroll";
+    if (this.scroll == "horizontal")
+        this.contentElement.className += " scrollpane scrollx";
+    if (this.scroll == "vertical")
+        this.contentElement.className += " scrollpane scrolly";
+
 }
 
 Panel.prototype.appendChild = function(t)
