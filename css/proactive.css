@@ -31,11 +31,13 @@
 .scrollx
 {
     overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
 }
 
 .scrolly
 {
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
 }
 
 .scroll
@@ -358,7 +360,8 @@ td > *
 
 .horizontal_layout
 {
-    min-height: unset;
+    min-height: -webkit-min-content;
+    min-height: min-content;
 }
 
 .scrollpane
@@ -369,13 +372,15 @@ td > *
 
 .nocrush
 {
-    min-height: unset;
+    min-height: -webkit-min-content;
+    min-height: min-content;
     flex-shrink: 0;
 }
 
 label
 {
-    min-height: unset;
+    min-height: -webkit-min-content;
+    min-height: min-content;
 }
 
 .maycrush
@@ -385,7 +390,8 @@ label
 
 .scrollpane > .notsure
 {
-    min-height: unset;
+    min-height: -webkit-min-content;
+    min-height: min-content;
 }
 
 .notsure
