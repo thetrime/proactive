@@ -210,7 +210,7 @@ Panel.prototype.configureHeight = function ()
         else
             this.crush = "notsure";
     }
-    this.contentElement.className += " " + this.crush;
+    this.domNode.className += " " + this.crush;
 }
 
 Panel.prototype.notifyParentOfLayoutChange = function(n)
