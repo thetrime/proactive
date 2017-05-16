@@ -158,7 +158,9 @@ button
 */
 .no_fill > .proactive_container.no_fill
 {
-    align-self: stretch;
+    /* Having said that, I cannot find an actual example for where this seems to matter
+       align-self: stretch;
+    */
 }
 
 /* However, the above does NOT apply to tables! */
@@ -204,6 +206,10 @@ button
     justify-content: space-between;
 }
 
+.justify_center
+{
+    justify-content: center;
+}
 
 .justify_space_around
 {
