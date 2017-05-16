@@ -164,6 +164,8 @@ ReactComponent.prototype.getStyle = function()
         newClassName += " justify_space_between";
     if (this.justify_content == "space-around")
         newClassName += " justify_space_around";
+    if (this.justify_content == "center")
+        newClassName += " justify_center";
 
     if (this.wrap == "wrap")
         newClassName += " wrap";
