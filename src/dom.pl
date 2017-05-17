@@ -27,6 +27,7 @@
 	  state_to_term/2,
           get_this/1,
           widget_id/1,
+          media_size/2,
 
           op(400, fx, //),
           op(400, fx, /),
@@ -229,6 +230,8 @@ widget_id(Id):-
             Widget = react_widget(_Module, _State, _Props, Id, _VDOM, _DOM)
         ; existence_error(widget, This)
         ).
+
+media_size(800, 600).
 
 % DOM node is represented as dom_node(Attributes)
 %  Attributes must contain:
