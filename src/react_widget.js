@@ -156,6 +156,14 @@ ReactWidget.prototype.triggerTest = function(handler, event, callback)
     this.engine.triggerTest(handler, event, this, callback);
 }
 
+ReactWidget.prototype.renderAuxComponent = function(handler, event, callback)
+{
+    this.engine.renderAuxComponent(handler, event, this, function(vDom)
+                                   {
+                                       this.engine.createElementFromVDom(vDom, this, callback);
+                                   }.bind(this));
+}
+
 
 ReactWidget.prototype.queueEvent = function(handler, event, callback)
 {

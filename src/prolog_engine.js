@@ -330,6 +330,92 @@ PrologEngine.prototype.triggerEvent = function(handler, event, context, callback
     this.processEvents();
 }
 
+
+PrologEngine.prototype.renderAuxComponent = function(handler, event, context, callback)
+{
+    var state, props;
+    console.log("Here: " + Prolog._portray(handler));
+    while (Prolog._is_compound(handler) && Prolog._term_functor(handler) == Constants.thisFunctor)
+    {
+        context = Prolog._get_blob("react_component", Prolog._term_arg(handler, 0));
+        handler = Prolog._term_arg(handler, 1);
+    }
+    var savePoint = Prolog._save_state();
+    var vDom = Prolog._make_variable();
+    state = context.getState();
+    props = context.getProps();
+    var goal;
+    if (Prolog._is_atom(handler))
+    {
+        goal = crossModuleCall(context.getComponentName(), Prolog._make_compound(handler, [event, state.blob, props.blob, vDom]));
+    }
+    else if (Prolog._is_compound(handler))
+    {
+        var functor = Prolog._term_functor(handler);
+        var arity = Prolog._term_functor_arity(handler);
+        var args = [];
+        var i;
+        for (i = 0 ; i < arity; i++)
+            args[i] = Prolog._term_arg(handler, i);
+        args[i++] = event;
+        args[i++] = state.blob;
+        args[i++] = props.blob;
+        args[i++] = vDom;
+        goal = crossModuleCall(context.getComponentName(), Prolog._make_compound(Prolog._term_functor_name(handler), args));
+    }
+    else
+    {
+        console.log("Invalid handler: " + handler);
+        Prolog._restore_state(savePoint);
+        callback(false);
+        return;
+    }
+    console.log("Calling: " + Prolog._portray(goal));
+    this.env.pushProactiveContext(context.blob);
+    Prolog._execute(this.env,
+                    goal,
+                    function(success)
+                    {
+                        this.env.popProactiveContext();
+                        if (success)
+                        {
+                            // Expand child objects
+                            var expandedDom = Prolog._make_variable();
+                            Prolog._execute(this.env,
+                                            Prolog._make_compound(expandChildrenFunctor, [vDom, expandedDom]),
+                                            function(s2)
+                                            {
+                                                vDom = Prolog._make_local(expandedDom);
+                                                Prolog._restore_state(savePoint);
+                                                if (s2)
+                                                {
+                                                    callback(vDom);
+                                                }
+                                                else
+                                                {
+                                                    var ex = Prolog._get_exception();
+                                                    if (ex != 0)
+                                                        console.log("expand_children/2 raised an error: "  + Prolog._format_term(null, 1200, ex));
+                                                    else
+                                                        console.log("expand_children/2 failed");
+                                                }
+                                            });
+                        }
+                        else
+                        {
+                            Prolog._restore_state(savePoint);
+                            var ex = Prolog._get_exception();
+                            Prolog._clear_exception();
+                            if (ex != 0)
+                            {
+                                if (this.errorHandler != undefined)
+                                    this.errorHandler(ex);
+                                console.log("render_aux_component/3 raised an error: "+ Prolog._format_term(null, 1200, ex));
+                            }
+                        }
+                    }.bind(this));
+}
+
 PrologEngine.prototype.triggerTest = function(handler, event, context, callback)
 {
     this.processTest(handler,
@@ -487,6 +573,7 @@ PrologEngine.prototype.processEvent = function(handler, event, context, callback
                             var ex = Prolog._get_exception();
                             if (ex != 0)
                             {
+                                Prolog._clear_exception();
                                 if (this.errorHandler != undefined)
                                     this.errorHandler(ex);
                                 console.log("trigger_event/4 raised an error: "+ Prolog._format_term(null, 1200, ex));

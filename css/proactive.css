@@ -228,6 +228,7 @@ button
 .selected_tab
 {
     display: flex;
+    overflow: hidden;
     border: 2px groove threedface;
 }
 
@@ -289,6 +290,7 @@ body
 {
     display: flex;
     box-sizing: border-box;
+    overflow: hidden;
 }
 
 label
@@ -514,4 +516,30 @@ penalty, but it seems to actually work
 .wrap-reverse
 {
     flex-wrap: wrap-reverse;
+}
+
+/* Popup */
+.proactive_menu
+{
+    background: white;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    border-radius: 5px;
+    position: fixed;
+    z-index: 99;
+    border: 1px solid grey;
+}
+
+.proactive_menu_item
+{
+    padding: 2px 20px 2px 20px;
+    color: black;
+}
+
+.proactive_menu_item:hover
+{
+    background: 0000ff;
+    background: -webkit-linear-gradient(top, #045199 0%,#356aa0 100%);
+    color: white;
+    cursor:pointer;
 }

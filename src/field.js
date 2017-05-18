@@ -166,8 +166,8 @@ function blurHandler(event)
     {
         this.getOwnerDocument().triggerEvent(this.blurHandler, ReactComponent.serialize({value: Prolog._make_atom(value)}), handlerCallback);
     }
-
 }
+
 
 var global_field_id = 0;
 
@@ -279,14 +279,6 @@ Field.prototype.setProperties = function(t)
     if (t.disabled !== undefined)
     {
         this.domNode.disabled = ReactComponent.booleanValue(t.disabled);
-    }
-    if (t.renderContextMenu !== undefined)
-    {
-        // FIXME: implement
-    }
-    if (t.onContextMenu !== undefined)
-    {
-        // FIXME: implement
     }
     if (t.onBlur !== undefined)
     {

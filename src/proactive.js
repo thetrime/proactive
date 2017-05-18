@@ -32,6 +32,11 @@ window.onPrologReady = function(Prolog)
                                                                                                              settings.callback(true, error);
                                                                                                      });
                                                                     engine.setRootWidget(rootWidget);
+                                                                    document.body.addEventListener('click', function()
+                                                                                                   {
+                                                                                                       // Dismiss any popups
+                                                                                                       ReactComponent.dismissPopups();
+                                                                                                   });
                                                                     window.addEventListener('resize', function()
                                                                                             {
                                                                                                 window.requestAnimationFrame(function()

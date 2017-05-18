@@ -16,6 +16,25 @@ function ReactComponent()
     this.align_children = "default";
     this.justify_content = "start";
     this.blob = Prolog._make_blob("react_component", this);
+    this.makeContextMenu = null;
+}
+
+ReactComponent.prototype.renderContextMenu = function(event)
+{
+    if (this.makeContextMenu != null)
+    {
+        console.log(Prolog._portray(this.makeContextMenu));
+        this.getOwnerDocument().renderAuxComponent(this.makeContextMenu, ReactComponent.serialize({x: Prolog._make_integer(event.clientX),
+                                                                                                   y: Prolog._make_integer(event.clientY)}),
+                                                   function(dom)
+                                                   {
+                                                       ReactComponent.dismissPopups();
+                                                       document.getElementById("container").appendChild(dom.getDOMNode());
+                                                       dom.getDOMNode().style.top = event.clientY;
+                                                       dom.getDOMNode().style.left = event.clientX;
+                                                   });
+        event.preventDefault();
+    }
 }
 
 ReactComponent.prototype.freeComponent = function(v)
@@ -25,10 +44,19 @@ ReactComponent.prototype.freeComponent = function(v)
         children[i].freeComponent();
 }
 
+ReactComponent.dismissPopups = function()
+{
+    var oldmenus = document.getElementById("container").getElementsByClassName("proactive_menu");
+    while(oldmenus[0])
+        oldmenus[0].parentNode.removeChild(oldmenus[0]);
+}
+
+
 
 ReactComponent.prototype.setDOMNode = function(n)
 {
     this.domNode = n;
+    this.domNode.oncontextmenu = this.renderContextMenu.bind(this);
     this.restyle();
 }
 
@@ -124,6 +152,15 @@ ReactComponent.prototype.setProperties = function(t)
         else
             this.maxWidth = Prolog._atom_chars(t.maxWidth);
         restyleRequired = true;
+    }
+    if (t.renderContextMenu !== undefined)
+    {
+        if (this.makeContextMenu != null)
+            Prolog._free_local(this.makeContextMenu)
+        if (ReactComponent.isNull(t.renderContextMenu))
+            this.makeContextMenu = null;
+        else
+            this.makeContextMenu = Prolog._make_local(t.renderContextMenu);
     }
     if (mustNotifyParent && this.parent != null)
         this.parent.notifyParentOfLayoutChange(this);

@@ -12,7 +12,9 @@ JS_SRC=src/button.js                                        \
        src/label.js                                         \
        src/list.js                                          \
        src/list_item.js                                     \
+       src/menu_item.js                                     \
        src/panel.js                                         \
+       src/popup_menu.js                                    \
        src/proactive.js                                     \
        src/proactive_component_factory.js                   \
        src/proactive_foreign.js                             \

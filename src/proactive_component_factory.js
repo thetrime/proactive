@@ -18,6 +18,8 @@ var Frame = require('./frame');
 var Image = require('./image');
 var TextArea = require('./textarea');
 var Grid = require('./grid');
+var PopupMenu = require('./popup_menu');
+var MenuItem = require('./menu_item');
 
 var overrides = {};
 
@@ -47,6 +49,8 @@ module.exports.createElement = function(name)
         case "Image": return new Image();
         case "TextArea": return new TextArea();
         case "Grid": return new Grid();
+        case "PopupMenu": return new PopupMenu();
+        case "MenuItem": return new MenuItem();
         default: return new Broken(name);
     }
 }
