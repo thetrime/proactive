@@ -578,7 +578,7 @@ public class Engine
          CompoundTerm handlerTerm = (CompoundTerm)handler;
          ReactWidget target = (ReactWidget)((JavaObjectTerm)(handlerTerm.args[0])).value;
          Term newHandler = handlerTerm.args[1];
-         return triggerEvent(newHandler, event, target);
+         return triggerTest(newHandler, event, target);
       }
 
       state = context.getState();
