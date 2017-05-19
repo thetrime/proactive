@@ -16,3 +16,9 @@ module.exports.systemError = function(message)
     Prolog._set_exception(Prolog._make_compound(Constants.errorFunctor, [Prolog._make_compound(Constants.systemErrorFunctor, [message]), Prolog._make_variable()]));
     return 0;
 }
+
+module.exports.permissionError = function(op, type, cause)
+{
+    Prolog._set_exception(Prolog._make_compound(Constants.errorFunctor, [Prolog._make_compound(Constants.permissionErrorFunctor, [op, type, cause]), Prolog._make_variable()]));
+    return 0;
+}

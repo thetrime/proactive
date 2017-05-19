@@ -126,6 +126,10 @@ module.exports["_on_server"] = function(goal)
 {
     // This is quite complicated because we must mix all kinds of paradigms together :(
     // Later we must yield execution. Prepare the resume code
+    if (this.engine.rendering)
+    {
+        return Errors.permissionError(Constants.openAtom, Constants.serverConnectionAtom, Constants.duringRenderAtom);
+    }
     var resume = Prolog._yield();
     var ws;
     //console.log("on_server: " + this.foreign);

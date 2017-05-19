@@ -41,6 +41,7 @@ function PrologEngine(baseURL, rootElementId, errorHandler, messageHandler, call
 {
     this.env = {};
     this.busy = false;
+    this.rendering = false;
     this.event_queue = [];
     this.processing_event = false;
     this.errorHandler = errorHandler;
@@ -228,10 +229,12 @@ PrologEngine.prototype.render = function(widget, component, state, props, callba
     var vDom = Prolog._make_variable();
     var goal = crossModuleCall(component, Prolog._make_compound(renderFunctor, [state.blob, props.blob, vDom]));
     this.env.pushProactiveContext(widget.blob);
+    this.rendering = true;
     Prolog._execute(this.env,
                     goal,
                     function(success)
                     {
+                        this.rendering = false;
                         this.env.popProactiveContext();
                         if (success)
                         {
@@ -573,8 +576,8 @@ PrologEngine.prototype.processEvent = function(handler, event, context, callback
                             {
                                 if (this.errorHandler != undefined)
                                     this.errorHandler(ex);
-                                Prolog._clear_exception();
                                 console.log("trigger_event/4 raised an error: "+ Prolog._format_term(null, 1200, ex));
+                                Prolog._clear_exception();
                             }
                             else
                                 console.log("trigger_event/4 failed");
