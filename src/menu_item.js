@@ -9,6 +9,7 @@ function MenuItem(name)
     ReactComponent.call(this);
     var node = document.createElement("div");
     this.baseClassName = "proactive_menu_item"
+    this.clickHandler = null;
     this.setDOMNode(node);
 }
 
@@ -44,5 +45,6 @@ MenuItem.prototype.setClickHandler = function(value)
     this.domNode.onclick = clickHandler.bind(this);
 }
 
+// FIXME: Clean up the clickHandler when the menu is destroyed!
 
 module.exports = MenuItem;

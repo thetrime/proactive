@@ -334,7 +334,6 @@ PrologEngine.prototype.triggerEvent = function(handler, event, context, callback
 PrologEngine.prototype.renderAuxComponent = function(handler, event, context, callback)
 {
     var state, props;
-    console.log("Here: " + Prolog._portray(handler));
     while (Prolog._is_compound(handler) && Prolog._term_functor(handler) == Constants.thisFunctor)
     {
         context = Prolog._get_blob("react_component", Prolog._term_arg(handler, 0));
@@ -370,7 +369,6 @@ PrologEngine.prototype.renderAuxComponent = function(handler, event, context, ca
         callback(false);
         return;
     }
-    console.log("Calling: " + Prolog._portray(goal));
     this.env.pushProactiveContext(context.blob);
     Prolog._execute(this.env,
                     goal,
@@ -573,9 +571,9 @@ PrologEngine.prototype.processEvent = function(handler, event, context, callback
                             var ex = Prolog._get_exception();
                             if (ex != 0)
                             {
-                                Prolog._clear_exception();
                                 if (this.errorHandler != undefined)
                                     this.errorHandler(ex);
+                                Prolog._clear_exception();
                                 console.log("trigger_event/4 raised an error: "+ Prolog._format_term(null, 1200, ex));
                             }
                             else
