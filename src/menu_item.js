@@ -31,6 +31,12 @@ MenuItem.prototype.setProperties = function(t)
         this.domNode.disabled = ReactComponent.booleanValue(t.disabled);
 }
 
+MenuItem.prototype.freeComponent = function()
+{
+    if (this.clickHandler != null)
+        Prolog._free_local(this.clickHandler);
+}
+
 MenuItem.prototype.setClickHandler = function(value)
 {
     if (this.clickHandler != null)
