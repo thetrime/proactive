@@ -17,6 +17,11 @@ function ReactComponent()
     this.justify_content = "start";
     this.blob = Prolog._make_blob("react_component", this);
     this.makeContextMenu = null;
+    this.press_timer = null;
+    this.touchMoveRef = null;
+    this.touchStartRef = null;
+    this.touchEndRef = null;
+    this.contextMenuRef = null;
 }
 
 ReactComponent.prototype.renderContextMenu = function(event)
@@ -24,14 +29,18 @@ ReactComponent.prototype.renderContextMenu = function(event)
     if (this.makeContextMenu != null)
     {
         console.log(Prolog._portray(this.makeContextMenu));
-        this.getOwnerDocument().renderAuxComponent(this.makeContextMenu, ReactComponent.serialize({x: Prolog._make_integer(event.clientX),
-                                                                                                   y: Prolog._make_integer(event.clientY)}),
+        var x = event.clientX || event.pageX;
+        var y = event.clientY || event.pageY;
+        this.getOwnerDocument().renderAuxComponent(this.makeContextMenu, ReactComponent.serialize({x: Prolog._make_integer(x),
+                                                                                                   y: Prolog._make_integer(y)}),
                                                    function(dom)
                                                    {
+                                                       console.log("Rendered");
                                                        ReactComponent.dismissPopups();
                                                        document.getElementById("container").appendChild(dom.getDOMNode());
-                                                       dom.getDOMNode().style.top = event.clientY;
-                                                       dom.getDOMNode().style.left = event.clientX;
+                                                       dom.getDOMNode().style.top = y;
+                                                       dom.getDOMNode().style.left = x;
+                                                       dom.getDOMNode()['x-proactive-ref'] = dom;
                                                    });
         event.preventDefault();
     }
@@ -48,16 +57,65 @@ ReactComponent.dismissPopups = function()
 {
     var oldmenus = document.getElementById("container").getElementsByClassName("proactive_menu");
     while(oldmenus[0])
+    {
+        oldmenus[0]['x-proactive-ref'].freeComponent();
         oldmenus[0].parentNode.removeChild(oldmenus[0]);
+    }
 }
 
 
 
 ReactComponent.prototype.setDOMNode = function(n)
 {
+    this.unbindContextHandlers();
     this.domNode = n;
-    this.domNode.oncontextmenu = this.renderContextMenu.bind(this);
+    if (this.makeContextMenu != null)
+        this.bindContextHandlers();
     this.restyle();
+}
+
+ReactComponent.prototype.bindContextHandlers = function()
+{
+    this.contextMenuRef = this.domNode.addEventListener("contextmenu", this.renderContextMenu.bind(this));
+    if ('ontouchstart' in window || navigator.maxTouchPoints) // If touch, add a kind of long-press handler
+    {
+        this.touchEndRef = this.domNode.addEventListener('touchend', function()
+                                                         {
+                                                             clearTimeout(this.press_timer);
+                                                             return false;
+                                                         }.bind(this));
+        this.touchMoveRef = this.domNode.addEventListener('touchmove', function()
+                           {
+                               clearTimeout(this.press_timer);
+                               return false;
+                           }.bind(this));
+        this.touchStartRef = this.domNode.addEventListener('touchstart', function(e)
+                           {
+                               this.press_timer = window.setTimeout(function()
+                                                                    {
+                                                                        console.log("longpress detected");
+                                                                        console.log(e);
+                                                                        this.renderContextMenu(e);
+                                                                    }.bind(this), 1000);
+                               return false;
+                           }.bind(this));
+    }
+}
+
+ReactComponent.prototype.unbindContextHandlers = function()
+{
+    if (this.contextMenuRef != null)
+        this.domNode.removeEventListener(this.contextMenuRef);
+    if (this.touchEndRef != null)
+        this.domNode.removeEventListener(this.touchEndRef);
+    if (this.touchMoveRef != null)
+        this.domNode.removeEventListener(this.touchMoveRef);
+    if (this.touchStartRef != null)
+        this.domNode.removeEventListener(this.touchStartRef);
+    this.touchMoveRef = null;
+    this.touchStartRef = null;
+    this.touchEndRef = null;
+    this.contextMenuRef = null;
 }
 
 ReactComponent.prototype.notifyParentOfLayoutChange = function(n)
@@ -158,9 +216,18 @@ ReactComponent.prototype.setProperties = function(t)
         if (this.makeContextMenu != null)
             Prolog._free_local(this.makeContextMenu)
         if (ReactComponent.isNull(t.renderContextMenu))
+        {
             this.makeContextMenu = null;
+            if (this.domNode != null)
+                this.unbindContextHandlers();
+        }
         else
+        {
             this.makeContextMenu = Prolog._make_local(t.renderContextMenu);
+            if (this.domNode != null)
+                this.bindContextHandlers();
+        }
+
     }
     if (mustNotifyParent && this.parent != null)
         this.parent.notifyParentOfLayoutChange(this);
