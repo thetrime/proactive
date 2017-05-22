@@ -41,7 +41,6 @@ function ReactWidget(parentContext, engine, elementId, props, callback)
                                                                                                                            {
                                                                                                                                callback(this);
                                                                                                                            }.bind(this))
-                                                                                       //callback.bind(this)(this);
                                                                                    }.bind(this));
                                                   }.bind(this));
                            }.bind(this));
