@@ -40,10 +40,10 @@ function install_foreign()
 function PrologEngine(baseURL, rootElementId, errorHandler, messageHandler, callback)
 {
     this.env = {};
-    this.busy = false;
+    this.busy = 0;
     this.rendering = false;
     this.event_queue = [];
-    this.processing_event = false;
+    this.processing_event = 0;
     this.errorHandler = errorHandler;
     this.messageHandler = messageHandler;
     this.rootWidget = null;
@@ -437,16 +437,22 @@ PrologEngine.prototype.withEventQueue = function(origin, fn)
 
 PrologEngine.prototype.processEvents = function()
 {
-    if (this.event_queue.length > 0 && !this.busy)
+    if (this.event_queue.length > 0 && this.busy == 0 && this.processing_event == 0)
     {
+        this.processing_event = 1;
         this.event_queue.shift()(function(t)
                                  {
+                                     this.processing_event = 0;
                                      this.processEvents();
                                  }.bind(this));
     }
-    else if (this.busy)
+    else if (this.busy > 0)
     {
-        console.log("Busy. Will do that in a moment");
+        //console.log(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Busy. Will do that in a moment");
+    }
+    else if (this.processing_event > 0)
+    {
+        //console.log(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Already processing an event. Will do that one in a moment");
     }
     else
     {
@@ -730,7 +736,7 @@ function dispatchMessages(w, i, t)
 
 PrologEngine.prototype.indicateBusy = function()
 {
-    this.busy = true;
+    this.busy++;
     var spinner = document.getElementById("$spinner");
     if (spinner !== null)
         spinner.className = "busy";
@@ -738,10 +744,13 @@ PrologEngine.prototype.indicateBusy = function()
 
 PrologEngine.prototype.indicateReady = function()
 {
-    this.busy = false;
-    var spinner = document.getElementById("$spinner");
-    if (spinner !== null)
-        spinner.className = "free";
+    this.busy--;
+    if (this.busy == 0)
+    {
+        var spinner = document.getElementById("$spinner");
+        if (spinner !== null)
+            spinner.className = "free";
+    }
 }
 var user_foreign_predicates = [];
 PrologEngine.registerPredicate = function(name, fn)
