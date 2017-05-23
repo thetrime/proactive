@@ -483,24 +483,39 @@ module.exports["destroy_component"] = function(domNode, vNode)
     return true;
 }
 
-
+// This gives me a headache just thinking about it
+// There are two possible exeuction paths through this mess:
+// 1) the call to new ReactWidget() returns without calling the callback inside it
+//    -> This happens if the construction of the widget would block (for example, getInitialState calls on_server/1).
+//       In this case, resume gets set to Prolog._yield() (ie the current yield pointer), and we return YIELD.
+//       Later, once the system gets unstuck, the callback will execute, restore the state and resume the yield pointer.
+// 2) The call to new ReactWidget() executes the callback BEFORE returning
+//    -> This is the usual case. If this happens, "resume" is pointing to a simple function that binds the variable
+//       rc to the result of the unification, but DOES NOT RESUME THE MACHINE. Then, new ReactWidget() returns, we
+//       (pointlessly) update resume to be the current yield pointer, and return the unification RC.
 module.exports["init_widget"] = function(context, properties, domNode)
 {
     if (!Prolog._is_blob(context, "react_component"))
         return Errors.typeError(Constants.blobAtom, context);
     var parentContext = Prolog._get_blob("react_component", context);
-    var resume = Prolog._yield();
+    var rc = 3; // YIELD
+    var resume = function(t) { rc = t; };
     var savedState = Prolog._save_state();
+    console.log("About to create widget in init_widget");
     var widget = new ReactWidget(parentContext,
                                  parentContext.getEngine(),
                                  Prolog._atom_chars(Prolog._term_arg(properties, 0)),
                                  PrologState.fromList(Prolog._term_arg(properties, 1)),
                                  function(widget)
                                  {
+                                     console.log("Widget created");
                                      Prolog._restore_state(savedState);
+                                     console.log(resume);
                                      resume(Prolog._unify(domNode, widget.blob));
                                  }.bind(this));
-    return 3; // YIELD
+    console.log("init_widget is returning:" + rc);
+    resume = Prolog._yield();
+    return rc;
 }
 
 module.exports["update_widget"] = function(newVDom, oldVDom, widget, newDomNode)
