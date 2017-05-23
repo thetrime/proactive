@@ -501,19 +501,15 @@ module.exports["init_widget"] = function(context, properties, domNode)
     var rc = 3; // YIELD
     var resume = function(t) { rc = t; };
     var savedState = Prolog._save_state();
-    console.log("About to create widget in init_widget");
     var widget = new ReactWidget(parentContext,
                                  parentContext.getEngine(),
                                  Prolog._atom_chars(Prolog._term_arg(properties, 0)),
                                  PrologState.fromList(Prolog._term_arg(properties, 1)),
                                  function(widget)
                                  {
-                                     console.log("Widget created");
                                      Prolog._restore_state(savedState);
-                                     console.log(resume);
                                      resume(Prolog._unify(domNode, widget.blob));
                                  }.bind(this));
-    console.log("init_widget is returning:" + rc);
     resume = Prolog._yield();
     return rc;
 }
