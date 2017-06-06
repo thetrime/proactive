@@ -21,6 +21,7 @@ The Panel is the basic layout unit. In Swing it's represented as a JPanel, and i
    * layout: One of 'horizontal' or 'vertical'. Controls the major axis for which child objects will be laid out.
    * align-children: One of 'start', 'center', 'end', or 'stretch'. Controls how the children will be aligned in the minor axis. 'start' will arrange them at the left (or top), 'center' in the middle, 'end' at the right (or bottom) and 'stretch' will cause them to take up the entire minor axis
    * justify-content: One of 'start', 'end', 'center', 'space-between' or 'space-around'. Controls the alignment along the major axis if none of the components have a fill in the major direction. See align-children for a description of the first three. 'space-between' allocates free space between the components (so the first and last will be flush with the container edge) and 'space-around' allocates equal space before and after each component (so there will be a gap between the edge of the container and the first/last component).
+   * wrap: By default, if a panel is not large enough in the major axis to display all the components inside it, they will be either crushed beyond their minimum size or the extra components will be truncated. If you set the wrap attribute to the atom 'wrap' then instead the components will flow onto a second row (or column, in the case of vertical layout) instead. This can make designing responsive layouts much easier.
 
 Grid
 ----
