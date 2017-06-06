@@ -141,7 +141,7 @@ You can use the directive :-table_predicate(+Indicator) in your module to make t
 Note that these will be available in the module where you put the directive.
 
 ##### Data flow
-Like in React, data always flows down the tree. You CAN use the this pointer to get events to flow up the tree, or you can use the implementation of the Flux dispatcher.
+Like in React, data always flows down the tree. You can use the 'this' pointer to get events to flow up the tree, however. To make this easier, a predicate bubble_event/3 is provided: simply provide the props as the first argument, the name of the event handler you want to call in the parent, and the object you want to pass as the event data.
 
 A component can ONLY change its own state.
 A component can ONLY provide props to child components. These props may be hard coded or derived from the parents own state.
