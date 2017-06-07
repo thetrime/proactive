@@ -65,6 +65,7 @@ function PrologEngine(baseURL, rootElementId, errorHandler, messageHandler, call
         this.goalURI = "ws" + this.baseURL.substring(4) + "/goal";
         this.listenURI = "ws" + this.baseURL.substring(4) + "/listen";
     }
+    this.abortURI = this.baseURL + "/abort";
     this.componentURL = baseURL + "/component/";
     this.rootElementId = rootElementId;
     qOp = Prolog._create_options();
@@ -758,6 +759,13 @@ PrologEngine.registerPredicate = function(name, fn)
     user_foreign_predicates.push({name:name,
                                   fn:fn});
     Prolog.define_foreign(name, fn);
+}
+
+PrologEngine.prototype.abortCurrentServerGoal = function()
+{
+    var xhr = new XMLHttpRequest();
+    xhr.open('get', this.abortURI + '?id=' + this.currentServerGoal);
+    xhr.send();
 }
 
 module.exports = PrologEngine;

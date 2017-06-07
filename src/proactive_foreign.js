@@ -143,6 +143,7 @@ module.exports["_on_server"] = function(goal)
     // First, create the websocket
     this.engine.indicateBusy();
     ws = new WebSocket(this.engine.goalURI);
+    ws.state = "new";
     if (qOp == null)
     {
         qOp = Prolog._create_options();
@@ -168,6 +169,12 @@ module.exports["_on_server"] = function(goal)
     ws.onmessage = function(event)
     {
         //console.log("Got a message: " + util.inspect(event.data));
+        if (ws.state == "new")
+        {
+            ws.state = "connected";
+            this.engine.currentServerGoal = event.data;
+            return;
+        }
         var term = Prolog._string_to_local_term(event.data);
         if (term == 0) // parse error
         {

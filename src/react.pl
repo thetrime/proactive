@@ -29,6 +29,7 @@ user:term_expansion(:-table_predicate(Indicator), tabled_predicate(user, Indicat
 :-http_handler(root('react/component'), serve_react, [prefix]).
 :-http_handler(root('react/listen'), listen_react, [spawn([])]).
 :-http_handler(root('react/goal'), execute_react, []).
+:-http_handler(root('react/abort'), abort_react, []).
 
 :-initialization(message_queue_create(react_reload_queue), restore).
 
@@ -231,6 +232,15 @@ react_system_message(SessionID, Message):-
 
 :-dynamic(react_listener/2).
 
+:-dynamic(current_proactive_goal/3).
+abort_react(Request):-
+        memberchk(search([id=GoalId]), Request),
+        current_proactive_goal(GoalId, ThreadId, _),
+        thread_signal(ThreadId, throw(error('$aborted', _))),
+        format(current_output, 'Access-Control-Allow-Origin: *~n', []),
+        format(current_output, 'Content-Type: text/plain~n~n', []).
+
+
 execute_react(Request):-
         ( http_in_session(SessionID)->
             true
@@ -273,11 +283,16 @@ execute_react_ws(OriginalRequest, WebSocket):-
         ).
 
 read_react_goal_and_execute_if_safe(WebSocket, OriginalRequest, Data):-
-            read_term_from_atom(Data, Goal, []),
-            ( goal_is_safe(Goal)->
-                execute_react_ws(OriginalRequest, WebSocket, Goal, Goal)
-            ; permission_error(execute, goal, Goal)
-            ).
+        read_term_from_atom(Data, Goal, []),
+        gensym(goal_, GoalId),
+        thread_self(Self),
+        ( goal_is_safe(Goal)->
+            ws_send(WebSocket, text(GoalId)),
+            setup_call_cleanup(assert(current_proactive_goal(GoalId, Self, Goal)),
+                               execute_react_ws(OriginalRequest, WebSocket, Goal, Goal),
+                               retract(current_proactive_goal(GoalId, Self, Goal)))
+        ; permission_error(execute, goal, Goal)
+        ).
 
 
 check:string_predicate(react:check_data/1).
@@ -297,7 +312,7 @@ execute_react_ws(OriginalRequest, WebSocket, ReplyGoal, Goal):-
 
 :-meta_predicate(execute_react_ws_1(+, 0, +, +)).
 execute_react_ws_1(OriginalRequest, Goal, ReplyGoal, WebSocket):-
-	setup_call_catcher_cleanup(true,
+        setup_call_catcher_cleanup(true,
                                    execute_react_goal(OriginalRequest, Goal),
                                    Catcher,
                                    react_cleanup(ReplyGoal, Catcher, WebSocket)),

@@ -10,10 +10,11 @@ window.onPrologReady = function(Prolog)
     var PrologState = require('./prolog_state');
     var ReactComponent = require('./react_component.js');
     console.log("Proactive v" + Version + " is ready");
+    var engine;
     if (onProactiveReady !== undefined)
         onProactiveReady({render: function(url, rootElementId, container, settings)
                           {
-                              var engine = new PrologEngine(url, rootElementId, settings.errorHandler, settings.messageHandler, function(status, error)
+                              engine = new PrologEngine(url, rootElementId, settings.errorHandler, settings.messageHandler, function(status, error)
                                                             {
                                                                 if (status)
                                                                 {
@@ -90,6 +91,11 @@ window.onPrologReady = function(Prolog)
                               if (!Prolog._is_compound(t))
                                   return false;
                               return Prolog._term_functor(t) == f;
+                          },
+                          abortCurrentServerGoal: function()
+                          {
+                              console.log(engine);
+                              engine.abortCurrentServerGoal();
                           },
                           functorOf: Prolog._term_functor,
                           argOf: Prolog._term_arg
