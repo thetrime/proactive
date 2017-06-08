@@ -740,7 +740,10 @@ PrologEngine.prototype.indicateBusy = function()
     this.busy++;
     var spinner = document.getElementById("$spinner");
     if (spinner !== null)
+    {
         spinner.className = "busy";
+        spinner.focus();
+    }
 }
 
 PrologEngine.prototype.indicateReady = function()

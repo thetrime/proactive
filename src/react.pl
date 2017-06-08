@@ -24,6 +24,7 @@ user:term_expansion(:-table_predicate(Indicator), tabled_predicate(user, Indicat
 :- use_module(library(http/thread_httpd)).
 :- use_module(library(http/http_dispatch)).
 :- use_module(library(http/http_session)).
+:- use_module(library(uuid)).
 
 
 :-http_handler(root('react/component'), serve_react, [prefix]).
@@ -233,10 +234,15 @@ react_system_message(SessionID, Message):-
 :-dynamic(react_listener/2).
 
 :-dynamic(current_proactive_goal/3).
+:-multifile(react:react_abort_hook/1).
 abort_react(Request):-
         memberchk(search([id=GoalId]), Request),
         current_proactive_goal(GoalId, ThreadId, _),
-        thread_signal(ThreadId, throw(error('$aborted', _))),
+        ( react_abort_hook(ThreadId)->
+            true
+        ; otherwise->
+            thread_signal(ThreadId, throw(error('$aborted', _)))
+        ),
         format(current_output, 'Access-Control-Allow-Origin: *~n', []),
         format(current_output, 'Content-Type: text/plain~n~n', []).
 
@@ -284,7 +290,7 @@ execute_react_ws(OriginalRequest, WebSocket):-
 
 read_react_goal_and_execute_if_safe(WebSocket, OriginalRequest, Data):-
         read_term_from_atom(Data, Goal, []),
-        gensym(goal_, GoalId),
+        uuid(GoalId),
         thread_self(Self),
         ( goal_is_safe(Goal)->
             ws_send(WebSocket, text(GoalId)),
