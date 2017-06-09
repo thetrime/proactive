@@ -42,9 +42,11 @@ window.onPrologReady = function(Prolog)
                                                                                             {
                                                                                                 window.requestAnimationFrame(function()
                                                                                                                              {
-                                                                                                                                 rootWidget.reRender(function()
-                                                                                                                                                     {
-                                                                                                                                                     });
+                                                                                                                                 engine.withEventQueue("user", function(then)
+                                                                                                                                                       {
+                                                                                                                                                           rootWidget.reRender(then);
+                                                                                                                                                       });
+                                                                                                                                 engine.processEvents();
                                                                                                                              });
                                                                                             });
 

@@ -11,6 +11,7 @@ function ComboBox()
     this.setDOMNode(document.createElement("select"));
     this.domNode.onblur = blurHandler.bind(this);
     this.domNode.onchange = changeHandler.bind(this);
+    this.disabled = false;
 }
 
 ComboBox.prototype = new ReactComponent;
@@ -34,7 +35,12 @@ ComboBox.prototype.setProperties = function(t)
     }
     if (t.disabled !== undefined)
     {
-        this.domNode.disabled = ReactComponent.booleanValue(t.disabled);
+        this.disabled = ReactComponent.booleanValue(t.disabled);
+        for (var i = 0; i < this.children.length; i++)
+        {
+            if (this.children[i] instanceof ComboItem)
+                this.children[i].getDOMNode().disabled = this.disabled;
+        }
     }
     if (t.onChange !== undefined)
     {
@@ -92,6 +98,9 @@ ComboBox.prototype.appendChild = function(t)
         this.selectCurrentIndex();
     else
         t.setSelected(false);
+    if (t instanceof ComboItem)
+        t.getDOMNode().disabled = this.disabled;
+
 }
 
 ComboBox.prototype.replaceChild = function(n, o)
@@ -101,6 +110,8 @@ ComboBox.prototype.replaceChild = function(n, o)
         this.selectCurrentIndex();
     else
         n.setSelected(false);
+    if (n instanceof ComboItem)
+        n.getDOMNode().disabled = this.disabled;
 }
 
 ComboBox.prototype.insertBefore = function(n, s)
@@ -110,6 +121,8 @@ ComboBox.prototype.insertBefore = function(n, s)
         this.selectCurrentIndex();
     else
         n.setSelected(false);
+    if (n instanceof ComboItem)
+        n.getDOMNode().disabled = this.disabled;
 }
 
 ComboBox.prototype.setValue = function(t)
