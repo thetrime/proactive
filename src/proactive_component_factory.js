@@ -9,6 +9,8 @@ var TableHeader = require('./table_header');
 var TableFooter = require('./table_footer');
 var TabbedPane = require('./tabbed_pane');
 var Tab = require('./tab');
+var Tree = require('./tree');
+var TreeNode = require('./tree_node');
 var Row = require('./row');
 var Field = require('./field');
 var ComboBox = require('./combo_box');
@@ -51,6 +53,8 @@ module.exports.createElement = function(name)
         case "Grid": return new Grid();
         case "PopupMenu": return new PopupMenu();
         case "MenuItem": return new MenuItem();
+        case "Tree": return new Tree();
+        case "TreeNode": return new TreeNode();
         default: return new Broken(name);
     }
 }

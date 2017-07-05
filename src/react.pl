@@ -362,6 +362,7 @@ react_cleanup(_Goal, fail, WebSocket):-
 react_cleanup(Goal, !, WebSocket):-
         send_reply(WebSocket, cut(Goal)).
 
+:-multifile(react:react_exception_hook/1).
 
 handle_react_goal_exception(E, WebSocket):-
 	( E = error(Error, Context)->
@@ -373,7 +374,8 @@ handle_react_goal_exception(E, WebSocket):-
 	    send_reply(WebSocket, exception(application_error(Error, CauseAtom, ContextAtom)))
 	; otherwise->
 	    send_reply(WebSocket, exception(E))
-	).
+        ),
+        ignore(react_exception_hook(E)).
 
 
 send_reply(WebSocket, Term):-

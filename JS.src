@@ -29,5 +29,7 @@ JS_SRC=src/button.js                                        \
        src/table_footer.js                                  \
        src/table_header.js                                  \
        src/textarea.js                                      \
-       src/title.js
+       src/title.js                                         \
+       src/tree.js                                          \
+       src/tree_node.js
        

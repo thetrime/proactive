@@ -565,3 +565,126 @@ penalty, but it seems to actually work
 {
     visibility: hidden;
 }
+
+/* Trees */
+ol.subtree
+{
+    list-style-type: none;
+    padding: 0 5px 0 5px;
+    position: relative;
+}
+
+ol.subtree li
+{
+    padding-left: 10px;
+}
+
+/* Each subtree indents by 12px */
+.tree li
+{
+    line-height: 20px;
+    margin: 0;
+    padding: 0 12px;
+    position: relative;
+}
+
+/* Create the ::before and ::after spaces */
+.tree li::before, .tree li::after
+{
+    content: '';
+    position: absolute;
+    left: 0;
+}
+
+/* Every item gets a | border by default */
+.tree li
+{
+    border-left: 1px solid #999;
+    border-collapse: collapse;
+}
+
+/* ... except the last item. This prevents trailing |s off the bottom of the tree */
+.tree li:last-child
+{
+    border: none;
+}
+
+/* Draw a - on each node as well */
+.tree li::before
+{    
+    border-top: 1px solid #999;
+    top: 10px;
+    width: 7px;
+    height: 0;
+}
+
+/* Except the last one. In this case we draw a |_ shape */
+.tree li:last-child::before
+{
+    border-left: 1px solid #999;
+    border-bottom: 1px solid #999;
+    height: 10px;
+    top: 0px;
+    border-top: none;
+}
+
+/* First, do not display the real checkbox. We will draw our own image instead */
+input[TYPE="checkbox"].tree_input
+{
+    display: none;
+}
+
+input[TYPE="checkbox"].tree_input:before
+{
+    display: none;
+}
+
+/* Next, by default, do not display list items which are in an unordered list which is a sibling of a checkbox */
+input[TYPE="checkbox"].tree_input ~ ol > li
+{ 
+    display: none; 
+    q-padding-left: 1px;
+}
+
+/* However, DO display them if the checkbox is checked */
+input[TYPE="checkbox"].tree_input:checked ~ ol > li
+{ 
+    display: block; 
+    /* Add 0.25em space at the start of each row,
+       so that the vertical line hits the + symbol */
+    margin: 0 0 0em 0.25em;
+}
+
+/* All labels */
+.tree_input+label
+{
+    /* The margin moves the label start position 5px to the left. 
+       This puts the icon 10px to the right of the start of the horizontal line */
+    margin: 0 0 0 -5px;
+}
+
+/* Unchecked label */
+.tree_node > .trunk+label
+{
+    cursor: pointer; 
+    background: url(/images/toggle-small.png) 0px 0px no-repeat;
+    /* The padding moves the words on the label 15px to the right, making space for the icon */
+    padding: 0 0 0 15px;
+}
+
+/* Checked label. The same, but toggle the background to draw the 'collapse' icon */
+.tree_input.trunk:checked+label
+{
+    background: url(/images/toggle-small-expand.png) 0px 0px no-repeat;
+}
+
+INPUT[type="checkbox"].tree_input+label
+{
+    padding-left: 15px;
+}
+
+
+/* FIXME:
+   * Should not display toggle icon for items with no children. This sounds very hard. We will have to change the
+     className on the INPUT inside the li to something like 'leaf' from 'trunk' and then change the code above like in ZEN
+*/
