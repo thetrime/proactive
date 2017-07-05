@@ -574,17 +574,12 @@ ol.subtree
     position: relative;
 }
 
-ol.subtree li
-{
-    padding-left: 10px;
-}
-
 /* Each subtree indents by 12px */
 .tree li
 {
     line-height: 20px;
     margin: 0;
-    padding: 0 12px;
+    padding: 0 0 0 12px;
     position: relative;
 }
 
@@ -614,7 +609,7 @@ ol.subtree li
 {    
     border-top: 1px solid #999;
     top: 10px;
-    width: 7px;
+    width: 15px;
     height: 0;
 }
 
@@ -643,7 +638,7 @@ input[TYPE="checkbox"].tree_input:before
 input[TYPE="checkbox"].tree_input ~ ol > li
 { 
     display: none; 
-    q-padding-left: 1px;
+    padding-left: 12px;
 }
 
 /* However, DO display them if the checkbox is checked */
@@ -669,7 +664,8 @@ input[TYPE="checkbox"].tree_input:checked ~ ol > li
     cursor: pointer; 
     background: url(/images/toggle-small.png) 0px 0px no-repeat;
     /* The padding moves the words on the label 15px to the right, making space for the icon */
-    padding: 0 0 0 15px;
+    padding-left: 15px;
+    margin-left: 2px;
 }
 
 /* Checked label. The same, but toggle the background to draw the 'collapse' icon */
