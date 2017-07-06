@@ -1,40 +1,56 @@
 package org.proactive.ui;
 
 import javax.swing.JTree;
-import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.DefaultMutableTreeNode;
-import java.util.Map;
-import java.util.HashMap;
+import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreeModel;
+import java.util.List;
+import java.util.Enumeration;
 import java.awt.Component;
 import java.util.HashMap;
 import org.proactive.prolog.PrologObject;
 import org.proactive.prolog.Engine;
 import org.proactive.ReactComponent;
 
-public class Tree extends ReactComponent
+public class TreeNode extends ReactComponent
 {
-   DefaultTreeModel model = null;
-   DefaultMutableTreeNode node;
-   JTree tree = null;
-   public Tree()
+   private DefaultTreeModel model;
+   private DefaultMutableTreeNode node = null;
+
+   public TreeNode()
    {
       node = new DefaultMutableTreeNode("");
-      model = new DefaultTreeModel(node);
-      tree = new JTree(model);
    }
+
    public void setProperties(HashMap<String, PrologObject> properties)
    {
-     super.setProperties(properties);
-     if (properties.containsKey("label"))
-     {
-        node.setUserObject(properties.get("label").asString());
-        model.nodeChanged(node);
-     }
+      super.setProperties(properties);
+      if (properties.containsKey("label"))
+      {
+         node.setUserObject(properties.get("label").asString());
+         if (model != null)
+            model.nodeChanged(node);
+      }
+
    }
+
    public Component getAWTComponent()
    {
-      return tree;
+      return null;
    }
+
+   public DefaultMutableTreeNode getNode()
+   {
+      return node;
+   }
+
+   public void setModel(DefaultTreeModel m)
+   {
+      this.model = m;
+      for (ReactComponent c : children)
+         ((TreeNode)c).setModel(m);
+   }
+
 
    public void insertChildBefore(ReactComponent child, ReactComponent sibling)
    {
@@ -46,7 +62,8 @@ public class Tree extends ReactComponent
          if (sibling != null)
             index = node.getIndex(((TreeNode)sibling).getNode());
          node.insert(((TreeNode)child).getNode(), index);
-         model.nodeStructureChanged(node);
+         if (model != null)
+            model.nodeStructureChanged(node);
       }
    }
 
@@ -56,7 +73,8 @@ public class Tree extends ReactComponent
       super.replaceChild(newChild, oldChild);
       node.remove(((TreeNode)oldChild).getNode());
       node.insert(((TreeNode)newChild).getNode(), index);
-      model.nodeStructureChanged(node);
+      if (model != null)
+         model.nodeStructureChanged(node);
    }
 
    public void removeChild(ReactComponent child)
@@ -65,7 +83,8 @@ public class Tree extends ReactComponent
       if (child instanceof TreeNode)
       {
          node.remove(((TreeNode)child).getNode());
-         model.nodeStructureChanged(node);
+         if (model != null)
+            model.nodeStructureChanged(node);
       }
    }
 

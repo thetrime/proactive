@@ -42,6 +42,7 @@ UI=  src/ui/Panel.java                                        \
      src/ui/ListItem.java                                     \
      src/ui/TextArea.java                                     \
      src/ui/Tree.java                                         \
+     src/ui/TreeNode.java                                     \
      src/ui/EditorPane.java                                   \
      src/ui/Frame.java                                        \
      src/ui/ReactApp.java                                     \
