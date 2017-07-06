@@ -661,8 +661,8 @@ input[TYPE="checkbox"].tree_input:checked ~ ol > li
 /* Unchecked label */
 .trunk+label
 {
-    cursor: pointer; 
-    background: url(/images/toggle-small.png) 0px 0px no-repeat;
+    cursor: pointer;
+    background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAMAAAAoLQ9TAAAAmVBMVEUNFTQjRa8kRqsqTL4wUrVCZMhWeNxhg+n///8AAAAAAAAAAAAAAAAAAABjhesmOogmOog1V9JWeNxkhuw/YOIjRa8kRqsqTL4wUrU/YeVCZMhkhuy2wO+3wfDP2fbQ0NHV1dbY2Nra2t/f3+bl5fHm5ubm5ufq6vPr6+vr6/rt7fDu7u7v7/Ty8vL09PT39/f4+Pj8/Pz+/v5Tqm16AAAAFXRSTlMAAAAAAAAAAAALDRYZGlNub97e3uDLsHOYAAAAdElEQVR4AZXPxxoBMRhG4UxXzDCTkggSvZNw/xfn+X1WVpzluzus99VPUDV8RvGmApSde1KuKwGFfcQYLrujLQC5Cbf90vuVyQGpuitqrVJAIs9XaiMTQKYP23c6A7B2caLmLQMMx2JKiUkN6I/qTwPAv3MvgnsPfnj54t0AAAAASUVORK5CYII=) 0px 0px no-repeat;
     /* The padding moves the words on the label 15px to the right, making space for the icon */
     padding-left: 15px;
     margin-left: 2px;
@@ -671,7 +671,7 @@ input[TYPE="checkbox"].tree_input:checked ~ ol > li
 /* Checked label. The same, but toggle the background to draw the 'collapse' icon */
 .tree_input.trunk:checked+label
 {
-    background: url(/images/toggle-small-expand.png) 0px 0px no-repeat;
+    background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAMAAAAoLQ9TAAAAmVBMVEUNFTQjRa8kRqsqTL4wUrVCZMhWeNxhg+n///8AAAAAAAAAAAAAAAAAAABjhesmOogmOog1V9JWeNxkhuw/YOIjRa8kRqsqTL4wUrU/YeVCZMhkhuy2wO+3wfDP2fbQ0NHY2Nra2t/f3+bl5fHm5ubm5ufq6vPr6+vr6/rt7fDu7u7v7/Ty8vL09PT29v739/f4+Pj8/Pz+/v5PhCYhAAAAFXRSTlMAAAAAAAAAAAALDRYZGlNub97e3uDLsHOYAAAAfElEQVR42o3PxxKCMACE4dBRKVISQlSKAYzGgr7/w2lmPXHin9nLd1sSLloFQVIcTEUSAPy8+Zia3Ad44j3P4jZchAdw+es+8rbtuAuw2YOZemYDLHrVmmp9phbAqSYpK/mbAyDZSamnUseMAHZpWZvKfQzYRPG/7covi75TQg8qnElfdAAAAABJRU5ErkJggg==) 0px 0px no-repeat;
 }
 
 INPUT[type="checkbox"].tree_input+label
