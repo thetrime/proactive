@@ -605,7 +605,7 @@ ol.subtree
 }
 
 /* Draw a - on each node as well */
-.tree li::before
+.tree li:not(.root)::before
 {    
     border-top: 1px solid #999;
     top: 10px;
@@ -614,7 +614,7 @@ ol.subtree
 }
 
 /* Except the last one. In this case we draw a |_ shape */
-.tree li:last-child::before
+.tree li:not(.root):last-child::before
 {
     border-left: 1px solid #999;
     border-bottom: 1px solid #999;
@@ -659,7 +659,7 @@ input[TYPE="checkbox"].tree_input:checked ~ ol > li
 }
 
 /* Unchecked label */
-.tree_node > .trunk+label
+.trunk+label
 {
     cursor: pointer; 
     background: url(/images/toggle-small.png) 0px 0px no-repeat;

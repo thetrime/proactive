@@ -21,9 +21,8 @@ function TreeNode()
     li.appendChild(this.input);
     li.appendChild(this.label);
     li.appendChild(this.ol);
-    console.log("XXX");
-
 }
+
 TreeNode.prototype = new ReactComponent;
 
 TreeNode.prototype.setProperties = function(t)
