@@ -48,7 +48,7 @@ public class ReactApp extends JFrame implements StyleSheetListener
       sheet.setValueForClass("title", "colour", java.awt.Color.WHITE);
       sheet.setValueForClass("title", "font-size", 24);
       React.setStyleSheet(sheet);
-      engine = new Engine(URL, rootElementId, httpContext);
+      engine = new Engine(URL, rootElementId, httpContext, null);
       context = new ReactWidget(null, engine, rootElementId, PrologState.emptyState);
       engine.setRootWidget(context);
       React.addStyleSheetListener(this);

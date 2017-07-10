@@ -1,6 +1,5 @@
 Totally unimplemented components:
    * TextArea
-   * Tree
    * EditorPane (maybe call this something else)
    * Frame
    * PopupMenu
@@ -14,6 +13,7 @@ Fully Implemented components:
    * Button
    * Panel
    * Label
+   * Tree
    * TabbedPane
       * Tab
    * ComboBox (needs onChange and setting value does not actually select the child)

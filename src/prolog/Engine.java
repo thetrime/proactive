@@ -4,6 +4,7 @@ import org.proactive.ReactComponent;
 import org.proactive.ReactWidget;
 import org.proactive.React;
 import org.proactive.HTTPContext;
+import org.proactive.DisconnectionListener;
 
 import gnu.prolog.database.PrologTextLoaderError;
 import gnu.prolog.database.Module;
@@ -57,7 +58,7 @@ public class Engine
    private static final CompoundTermTag systemFunctor = CompoundTermTag.get("system", 1);
    private static final CompoundTermTag messageFunctor = CompoundTermTag.get("message", 3);
 
-   public Engine(String baseURL, String rootElementId, HTTPContext httpContext) throws Exception
+   public Engine(String baseURL, String rootElementId, HTTPContext httpContext, DisconnectionListener listener) throws Exception
    {
       goalURI = new URI(baseURL + "/goal");
       this.httpContext = httpContext;
@@ -70,7 +71,7 @@ public class Engine
       this.listenURI = new URI(baseURL + "/listen");
       listenURI = new URI(scheme, listenURI.getUserInfo(), listenURI.getHost(), listenURI.getPort(), listenURI.getPath(), listenURI.getQuery(), listenURI.getFragment());
       this.rootElementId = rootElementId;
-      serverConnection = new ServerConnection(listenURI);
+      serverConnection = new ServerConnection(listenURI, listener);
       make();
    }
 
@@ -955,9 +956,11 @@ public class Engine
 
    public class ServerConnection extends WebSocketClient
    {
-      public ServerConnection(URI uri)
+      private DisconnectionListener listener;
+      public ServerConnection(URI uri, DisconnectionListener listener)
       {
          super(uri);
+         this.listener = listener;
          connect();
       }
 
@@ -1008,14 +1011,20 @@ public class Engine
       @Override
       public void onClose(int code, String reason, boolean remote)
       {
-
+         if (listener != null)
+         {
+            if (listener.reconnect())
+            {
+               serverConnection = new ServerConnection(listenURI, listener);
+            }
+         }
       }
 
       @Override
       public void onError(Exception error)
       {
          error.printStackTrace();
-         serverConnection = new ServerConnection(listenURI);
+         serverConnection = new ServerConnection(listenURI, listener);
       }
    }
 

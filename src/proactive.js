@@ -14,7 +14,7 @@ window.onPrologReady = function(Prolog)
     if (onProactiveReady !== undefined)
         onProactiveReady({render: function(url, rootElementId, container, settings)
                           {
-                              engine = new PrologEngine(url, rootElementId, settings.errorHandler, settings.messageHandler, function(status, error)
+                              engine = new PrologEngine(url, rootElementId, settings.errorHandler, settings.messageHandler, settings.onConnectionLoss, function(status, error)
                                                             {
                                                                 if (status)
                                                                 {

@@ -22,6 +22,7 @@ import org.proactive.ReactComponentFactory;
 import org.proactive.prolog.PrologState;
 import org.proactive.HTTPContext;
 import org.proactive.Version;
+import org.proactive.DisconnectionListener;
 
 import gnu.prolog.term.Term;
 import gnu.prolog.term.CompoundTerm;
@@ -35,14 +36,14 @@ public class ReactPanel extends JPanel implements StyleSheetListener
    String URL = null;
    private Engine engine;
    private ReactWidget context;
-   public ReactPanel(String URL, String rootElementId, HTTPContext httpContext) throws Exception
+   public ReactPanel(String URL, String rootElementId, HTTPContext httpContext, DisconnectionListener listener) throws Exception
    {
       System.out.println("Proactive v" + Version.version + " is ready");
       StyleSheet sheet = new StyleSheet();
       sheet.setValueForClass("title", "colour", java.awt.Color.WHITE);
       sheet.setValueForClass("title", "font-size", 24);
       React.setStyleSheet(sheet);
-      engine = new Engine(URL, rootElementId, httpContext);
+      engine = new Engine(URL, rootElementId, httpContext, listener);
       context = new ReactWidget(null, engine, rootElementId, PrologState.emptyState);
       engine.setRootWidget(context);
       React.addStyleSheetListener(this);

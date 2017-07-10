@@ -37,7 +37,7 @@ function install_foreign()
         Prolog.define_foreign(foreign_predicates[p], foreign_module[foreign_predicates[p]]);
 }
 
-function PrologEngine(baseURL, rootElementId, errorHandler, messageHandler, callback)
+function PrologEngine(baseURL, rootElementId, errorHandler, messageHandler, onConnectionLoss, callback)
 {
     this.env = {};
     this.busy = 0;
@@ -70,24 +70,34 @@ function PrologEngine(baseURL, rootElementId, errorHandler, messageHandler, call
     this.rootElementId = rootElementId;
     qOp = Prolog._create_options();
     Prolog._set_option(qOp, Prolog._make_atom("quoted"), Prolog._make_atom("true"));
-    getServerConnection(this.listenURI, rootElementId, this.onMessage.bind(this));
+    getServerConnection(this.listenURI, rootElementId, this.onMessage.bind(this), onConnectionLoss);
     this.make(callback);
 }
 
 
-function getServerConnection(URI, rootElementId, callback)
+function getServerConnection(URI, rootElementId, callback, onConnectionLoss)
 {
     server_connection = new WebSocket(URI);
     server_connection.onmessage = callback;
     server_connection.onerror = function(event)
     {
-        console.log("WS error: " + event);
+        console.log("Warning: WS error: " + event);
         server_connection.close();
-        getServerConnection(URI, rootElementId, callback);
+        window.setTimeout(function() { getServerConnection(URI, rootElementId, callback, onConnectionLoss); }, 5000);
     }
+    server_connection.onclose = function()
+    {
+        if (onConnectionLoss != undefined)
+            onConnectionLoss(function()
+                             {
+                                 getServerConnection(URI, rootElementId, callback, onConnectionLoss);
+                             });
+
+    }.bind(this);
     server_connection.onopen = function()
     {
         server_connection.send(Prolog._format_term(qOp, 1200, Prolog._make_atom(rootElementId)) + ".\n");
+        console.log("Session [re-]established");
     }
 }
 
