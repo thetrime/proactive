@@ -709,7 +709,14 @@ public class Engine
          options = new ReadOptions(e.getOperatorSet());
          connectBlocking();
          String goal = gnu.prolog.io.TermWriter.toString(t) + ".\n";
-         send(goal);
+         try
+         {
+            send(goal);
+         }
+         catch(java.nio.channels.NotYetConnectedException f)
+         {
+            throw new IOException(f);
+         }
       }
       public Term getException()
       {
