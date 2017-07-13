@@ -5,6 +5,7 @@ import org.proactive.ReactWidget;
 import org.proactive.React;
 import org.proactive.HTTPContext;
 import org.proactive.DisconnectionListener;
+import org.proactive.ReconnectedListener;
 
 import gnu.prolog.database.PrologTextLoaderError;
 import gnu.prolog.database.Module;
@@ -692,6 +693,7 @@ public class Engine
       {
          FAIL, EXCEPTION, SUCCESS_LAST, SUCCESS;
       }
+      private String guid = "";
       private RC state;
       private Environment environment;
       //private TermParser input;
@@ -764,7 +766,13 @@ public class Engine
       @Override
       public void onMessage(String message)
       {
-	 try
+         // If there is no GUID then the first message we get will be that and not a Prolog term!
+         if (guid.equals(""))
+         {
+            guid = message;
+            return;
+         }
+         try
 	 {
 	    try
 	    {
@@ -1013,10 +1021,13 @@ public class Engine
       {
          if (listener != null)
          {
-            if (listener.reconnect())
-            {
-               serverConnection = new ServerConnection(listenURI, listener);
-            }
+            listener.serverConnectionLost(new ReconnectedListener()
+               {
+                  public void reconnected()
+                  {
+                     serverConnection = new ServerConnection(listenURI, listener);
+                  }
+               });
          }
       }
 
