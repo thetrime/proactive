@@ -5,6 +5,7 @@ BASE=src/React.java                                           \
      src/ReactComponent.java                                  \
      src/ReactWidget.java                                     \
      src/DisconnectionListener.java                           \
+     src/ReconnectedListener.java                             \
      src/ReactComponentFactory.java                           \
      src/StyleSheetListener.java                              \
      src/StyleSheet.java                                      \

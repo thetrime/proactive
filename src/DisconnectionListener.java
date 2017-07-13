@@ -2,7 +2,7 @@ package org.proactive;
 
 public interface DisconnectionListener
 {
-   public boolean reconnect();
+   public void serverConnectionLost(ReconnectedListener listener);
 }
 
 
