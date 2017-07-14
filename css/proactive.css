@@ -343,6 +343,7 @@ td > *
     max-width: 90%;
     border: 2px solid white;
     padding: 10px;
+    resize: both;
 }
 
 .grid-shrink

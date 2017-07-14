@@ -2,6 +2,32 @@ var ReactComponent = require('./react_component');
 var Prolog = require('proscript');
 var Constants = require('./constants.js');
 
+function handlerCallback(success)
+{
+    if (success == true)
+    {
+    }
+    else if (success == false)
+    {
+        console.log("Event failed");
+    }
+    else
+    {
+        console.log("Event raised: " + success.toString());
+    }
+
+}
+
+function keyDownHandler(event)
+{
+    if (this.keyDownHandler != null)
+    {
+        this.getOwnerDocument().triggerEvent(this.keyDownHandler,
+                                             ReactComponent.serialize({key: Prolog._make_atom(event.key),
+                                                                       keycode: Prolog._make_integer(event.keycode)}), handlerCallback);
+    }
+}
+
 function Frame()
 {
     ReactComponent.call(this);
@@ -14,6 +40,9 @@ function Frame()
     this.domNode.appendChild(this.glassPane);
     this.domNode.appendChild(this.contentPane);
     this.setZ();
+    this.keyDownHandler = null;
+    this.contentPane.onkeydown = keyDownHandler.bind(this);
+    this.contentPane.tabIndex = -1;
 }
 Frame.prototype = new ReactComponent;
 
@@ -75,6 +104,15 @@ Frame.prototype.setProperties = function(t)
         t["justify-content"] !== undefined)
     {
         this.contentPane.className = "proactive_frame_contentpane proactive_container " + this.getStyle();
+    }
+    if (t.onKeyDown !== undefined)
+    {
+        if (this.keyDownHandler != null)
+            Prolog._free_local(this.keyDownHandler);
+        if (ReactComponent.isNull(t.onKeyDown))
+            this.keyDownHandler = null;
+        else
+            this.keyDownHandler = Prolog._make_local(t.onKeyDown);
     }
 }
 
