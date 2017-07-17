@@ -71,6 +71,17 @@ Frame.prototype.replaceChild = function(n, o)
     o.setParent(null);
 }
 
+Frame.prototype.setParent = function(t)
+{
+    ReactComponent.prototype.setParent.call(this, t);
+    // This causes new popups to have focus. Its a bit of a hack though, since setParent is not semantically equivalent to 'add to document'
+    if (t !== null)
+        window.setTimeout(function()
+                          {
+                              this.contentPane.focus();
+                          }.bind(this), 0);
+}
+
 Frame.prototype.removeChild = function(t)
 {
     this.contentPane.removeChild(t.getDOMNode());
