@@ -22,9 +22,15 @@ function keyDownHandler(event)
 {
     if (this.keyDownHandler != null)
     {
+        var t = {};
+        if (event.keyCode != null)
+            t.keycode = Prolog._make_integer(event.keyCode)
+        if (event.keycode != null)
+            t.keycode= Prolog._make_integer(event.keycode)
+        if (event.key)
+            t.key = Prolog._make_atom(event.key);
         this.getOwnerDocument().triggerEvent(this.keyDownHandler,
-                                             ReactComponent.serialize({key: Prolog._make_atom(event.key),
-                                                                       keycode: Prolog._make_integer(event.keycode)}), handlerCallback);
+                                             ReactComponent.serialize(t), handlerCallback);
     }
 }
 
