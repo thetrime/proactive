@@ -217,6 +217,8 @@ public class PrologObject
          return (((Boolean)value).booleanValue())?AtomTerm.get("true"):AtomTerm.get("false");
       if (value instanceof PrologObject)
          return ((PrologObject)value).asTerm();
+      if (value instanceof Integer)
+         return IntegerTerm.get((Integer)value);
       return new CompoundTerm(CompoundTermTag.curly1, AtomTerm.get("null"));
    }
 
