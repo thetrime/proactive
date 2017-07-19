@@ -195,6 +195,8 @@ ws_listen_slave(Websocket, Owner):-
                 )
             ; Term = listen_for(T)->
                 thread_send_message(Owner, listen_for_messages(T))
+            ; Term == ping ->
+                thread_send_message(Owner, ping)
             ; format(user_error, 'Unexpected message from client: ~q~n', [Term])
             ),
             ws_listen_slave(Websocket, Owner)
@@ -208,6 +210,8 @@ listen_react_loop_1(Websocket, Slave):-
             thread_join(Slave, _),
             ws_close(Websocket, 1000, goodbye),
             throw(terminated)
+        ; Message == ping ->
+            ws_send(Websocket, text(pong))
         ; Message = message(Module, Term)->
             copy_term(Term, Copy),
             ( react_client_handles_message(Copy, Handler)->

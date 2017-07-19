@@ -21,9 +21,10 @@ var messageFunctor = Prolog._make_functor(Prolog._make_atom("message"), 3);
 var userFunctor = Prolog._make_functor(Prolog._make_atom("user"), 1);
 var systemFunctor = Prolog._make_functor(Prolog._make_atom("system"), 1);
 var consultedFunctor = Prolog._make_functor(Prolog._make_atom("consulted"), 1);
+var pongAtom = Prolog._make_atom("pong");
 var server_connection = null;
 var qOp = null;
-
+var pinger = null;
 function crossModuleCall(module, goal)
 {
     return Prolog._make_compound(Constants.crossModuleCallFunctor, [Prolog._make_atom(module), goal]);
@@ -85,8 +86,14 @@ function getServerConnection(URI, rootElementId, callback, onConnectionLoss)
         server_connection.close();
         window.setTimeout(function() { getServerConnection(URI, rootElementId, callback, onConnectionLoss); }, 5000);
     }
-    server_connection.onclose = function()
+    server_connection.onclose = function(why)
     {
+        console.log("Connection is closed!");
+        if (pinger != null)
+            clearInterval(pinger);
+        pinger = null;
+        console.log(why);
+        console.log(new Error().stack);
         if (onConnectionLoss != undefined)
             onConnectionLoss(function()
                              {
@@ -97,8 +104,16 @@ function getServerConnection(URI, rootElementId, callback, onConnectionLoss)
     server_connection.onopen = function()
     {
         server_connection.send(Prolog._format_term(qOp, 1200, Prolog._make_atom(rootElementId)) + ".\n");
+        if (pinger == null)
+        {
+            pinger = setInterval(function()
+                                      {
+                                          console.log("Sending ping");
+                                          server_connection.send("ping");
+                                      }, 60000);
+        }
         console.log("Session [re-]established");
-    }
+           }.bind(this);
 }
 
 PrologEngine.prototype.checkForMessageHandlers = function(widget, callback)
@@ -713,13 +728,17 @@ PrologEngine.prototype.onMessage = function(event)
         }
         else
         {
-            console.log("Unexpected message format: " + Prolog._portray(t) + " from " + event.data);
+            console.log("Unexpected message format1: " + Prolog._portray(t) + " from " + event.data);
             Prolog._free_local(t);
         }
     }
+    else if (t == pongAtom)
+    {
+        console.log("Received pong");
+    }
     else
     {
-        console.log("Unexpected message format: " + Prolog._portray(t) + " from " + event.data);
+        console.log("Unexpected message format2: " + Prolog._portray(t) + " from " + event.data);
         Prolog._free_local(t);
     }
 
