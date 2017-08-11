@@ -19,7 +19,7 @@ public abstract class ReactComponent
 
    protected String id = null;
    protected String className = null;
-   protected int weight = -1;
+   protected double weight = -1;
    protected ProactiveConstraints.Fill fill = ProactiveConstraints.Fill.NONE;
    protected ProactiveConstraints.Alignment selfAlignment = ProactiveConstraints.Alignment.AUTO;
    public ReactComponent()
@@ -44,7 +44,7 @@ public abstract class ReactComponent
       if (properties.containsKey("className"))
          className = properties.get("className").asString();
       if (properties.containsKey("weight"))
-         weight = properties.get("weight").asInteger();
+         weight = properties.get("weight").asDouble();
       if (properties.containsKey("id"))
 	 id = properties.get("id").asString();
       if (getParentNode() != null)
@@ -62,7 +62,7 @@ public abstract class ReactComponent
       return children;
    }
 
-   public int getWeight()
+   public double getWeight()
    {
       return weight;
    }

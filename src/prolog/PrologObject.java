@@ -99,6 +99,16 @@ public class PrologObject
       return 0;
    }
 
+   public double asDouble()
+   {
+      Term t = term;
+      if (t instanceof FloatTerm)
+         return ((FloatTerm)t).value;
+      else if (t instanceof AtomTerm)
+         return Double.parseDouble(((AtomTerm)t).value);
+      return 0;
+   }
+
    public boolean asBoolean()
    {
       Term t = term;
