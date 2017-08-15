@@ -241,14 +241,19 @@ react_system_message(SessionID, Message):-
 :-multifile(react:react_abort_hook/1).
 abort_react(Request):-
         memberchk(search([id=GoalId]), Request),
+        with_mutex(react_goal_abort_mutex,
+                   abort_react_1(GoalId)),
+        format(current_output, 'Access-Control-Allow-Origin: *~n', []),
+        format(current_output, 'Content-Type: text/plain~n~n', []).
+
+
+abort_react_1(GoalId):-
         current_proactive_goal(GoalId, ThreadId, _),
         ( react_abort_hook(ThreadId)->
             true
         ; otherwise->
             thread_signal(ThreadId, throw(error('$aborted', _)))
-        ),
-        format(current_output, 'Access-Control-Allow-Origin: *~n', []),
-        format(current_output, 'Content-Type: text/plain~n~n', []).
+        ).
 
 
 execute_react(Request):-
@@ -300,7 +305,12 @@ read_react_goal_and_execute_if_safe(WebSocket, OriginalRequest, Data):-
             ws_send(WebSocket, text(GoalId)),
             setup_call_cleanup(assert(current_proactive_goal(GoalId, Self, Goal)),
                                execute_react_ws(OriginalRequest, WebSocket, Goal, Goal),
-                               retract(current_proactive_goal(GoalId, Self, Goal)))
+                               % The mutex here ensures that we will not release this GoalId while someone is
+                               % trying to kill it. This ensures we will not kill the wrong thread by getting
+                               % the goal id, finding the thread currently executing it, and then then (many
+                               % cycles later), signalling that thread (now busy with another task) to abort.
+                               with_mutex(react_goal_abort_mutex,
+                                          retract(current_proactive_goal(GoalId, Self, Goal))))
         ; permission_error(execute, goal, Goal)
         ).
 
