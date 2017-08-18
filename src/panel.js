@@ -123,8 +123,8 @@ Panel.prototype.setProperties = function(t)
 Panel.prototype.restyle = function()
 {
     ReactComponent.prototype.restyle.call(this);
-    this.domNode.className = this.getStyle().replace(this.delete_layout, ' vertical_layout ')
-    this.contentElement.className = this.getStyle().replace(this.delete_fieldset, ' fieldset_main ');
+    this.domNode.className = this.getStyle().replace(this.delete_layout, ' vertical_layout ');
+    this.contentElement.className = this.getStyle().replace(this.delete_fieldset, ' fieldset_main ') + " fieldset_main";
     this.configureHeight();
     if (this.hasLegend)
         this.domNode.className += " fieldset";

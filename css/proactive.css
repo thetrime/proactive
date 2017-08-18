@@ -437,7 +437,6 @@ label
 {
     /* box-shadow: 0 0 0 1px green; Use this if you want borders, otherwise they end up on the table, scrolling underneath */
     background-clip: padding-box;
-    background: #1a1a1c;
 }
 
 .react_table tfoot td > *
@@ -454,7 +453,6 @@ label
 {
     /* box-shadow: 0 0 0 1px green; Use this if you want borders, otherwise they end up on the table, scrolling underneath */
     background-clip: padding-box;
-    background: #1a1a1c;
 }
 
 .react_table thead th > *
