@@ -126,11 +126,12 @@ public class Panel extends ReactComponent
    private void reconfigureLayout()
    {
       if (orientation == HORIZONTAL)
-         layoutManager = new ProactiveLayoutManager(ProactiveLayoutManager.HORIZONTAL, alignment, justification, wrap);
+         layoutManager = new ProactiveLayoutManager(layoutManager, ProactiveLayoutManager.HORIZONTAL, alignment, justification, wrap);
       else if (orientation == VERTICAL)
-         layoutManager = new ProactiveLayoutManager(ProactiveLayoutManager.VERTICAL, alignment, justification, wrap);
+         layoutManager = new ProactiveLayoutManager(layoutManager, ProactiveLayoutManager.VERTICAL, alignment, justification, wrap);
       panel.setLayout(layoutManager);
    }
+
 
    public void setProperties(HashMap<String, PrologObject> properties)
    {

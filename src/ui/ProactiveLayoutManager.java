@@ -12,6 +12,7 @@ import java.util.Vector;
 import java.util.Comparator;
 import java.util.Collections;
 import javax.swing.JScrollPane;
+import java.awt.LayoutManager;
 
 public class ProactiveLayoutManager implements LayoutManager2
 {
@@ -27,9 +28,12 @@ public class ProactiveLayoutManager implements LayoutManager2
    private ProactiveConstraints.Justification justification = ProactiveConstraints.Justification.CENTER;
    private Layout layout = Layout.VERTICAL;
    private Wrap wrap = Wrap.NOWRAP;
-   public ProactiveLayoutManager(Layout layout, ProactiveConstraints.Alignment alignment, ProactiveConstraints.Justification justification, Wrap wrap)
+   public ProactiveLayoutManager(LayoutManager oldManager, Layout layout, ProactiveConstraints.Alignment alignment, ProactiveConstraints.Justification justification, Wrap wrap)
    {
-      map = new HashMap<Component, ProactiveConstraints>();
+      if (oldManager != null && oldManager instanceof ProactiveLayoutManager)
+         map = ((ProactiveLayoutManager)oldManager).map;
+      else
+         map = new HashMap<Component, ProactiveConstraints>();
       this.layout = layout;
       this.wrap = wrap;
       this.alignment = alignment;
