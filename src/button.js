@@ -44,11 +44,14 @@ Button.prototype.setProperties = function(t)
 Button.prototype.setClickHandler = function(value)
 {
     if (this.clickHandler != null)
+    {
         Prolog._free_local(this.clickHandler);
+    }
     if (ReactComponent.isNull(value))
     {
         if (this.domNode.onClick !== undefined)
             this.domNode.onClick = undefined;
+        this.clickHandler = null;
         return;
     }
     this.clickHandler = Prolog._make_local(value);
