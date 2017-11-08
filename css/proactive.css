@@ -408,104 +408,67 @@ label
 
 /* Table bits */
 
-.react_table td
+.react_table
 {
-    background-clip: padding-box;
+    border-spacing: 0;
+    border-left: 2px solid black;
+    border-top: 2px solid black;
+    border-right: 1px solid black;
+    border-bottom: 2px solid black;
+    display: flex;
+    align-self: stretch;
 }
 
-.react_table thead
+.react_table tbody
 {
-    position: sticky;
-    position: -webkit-sticky;
-    top: 0;
-    z-index: 1;
+    display: grid;
+    background: #eeeeee;
+    overflow-y: auto;
+    overflow-x: hidden;
+    border-top: 2px solid black;
+    width: 100%;
+    
 }
 
 .react_table tfoot
 {
-    position: sticky;
-    position: -webkit-sticky;
-    bottom: 0;
-}
-
-.react_table tfoot td
-{
-    /* box-shadow: 0 0 0 1px green; Use this if you want borders, otherwise they end up on the table, scrolling underneath */
-    background-clip: padding-box;
-}
-
-.react_table tfoot td > *
-{
+    display: grid;
+    border-top: 2px solid black;
+    background: pink;
     width: 100%;
 }
 
-.react_table tfoot > tr:first-child td
+.react_table thead
 {
-    box-shadow: 1px 0 0 1px white
+    display: grid;
+    background: pink;
+    width: 100%;
+}
+
+.react_table tr
+{
+    display: contents;
+}
+
+.react_table tbody td
+{
+    border-right: 1px solid black;
+    background: #eeeeee;
+    padding: 5px;
 }
 
 .react_table thead th
 {
-    /* box-shadow: 0 0 0 1px green; Use this if you want borders, otherwise they end up on the table, scrolling underneath */
-    background-clip: padding-box;
-    position: sticky;
-    top: 0;
-    padding: 0;
+    background: pink;
+    border-right: 1px solid black;
+    padding: 5px;
 }
 
-.react_table thead th > *
+.react_table tfoot td
 {
-    width: 100%;
-}
-
-.table_container
-{
-    -webkit-overflow-scrolling: touch;
-    overflow-y: scroll;
-    display: flex;
-    flex-grow: 1;
-}
-
-.table_container
-{
-    flex-shrink: 1000;
-}
-
-.react_table::-webkit-scrollbar {-webkit-appearance: none; width: 7px;}
-.react_table::-webkit-scrollbar-track {background-color: rgba(0,0,0, .3);border-radius: 7px;}
-.react_table::-webkit-scrollbar-thumb {border-radius: 7px; background-color: rgba(255,255,255, .4);}
-
-.horizontal_fill > .react_table
-{
-    width: 100%;
-}
-
-/* This is all here to make tables layout correctly.
-Originally I went with table-layout: fixed, but this meant that setting a table to 100% width (as is needed to make them fill up the
-parent container) caused them to push neighbouring containers off the screen.
-Instead, we inject a wrapper into each cell to force the use of flexbox INSIDE tables as well. This might have a pretty severe performance
-penalty, but it seems to actually work
-*/
-
-.react_table td
-{
-    display: table-cell;
-}
-
-.react_table_cell_wrapper
-{
-    display: flex;
-    width: 100%;
-}
-
-.react_table_cell_wrapper > *
-{
-    /* Note that we have to set the width to 0 since the automatic table layout will try and make sure that no cells overflow
-       and since they may have white-space: nowrap inside them, this will force the table to scroll rather than crushing the cells.
-       Dont worry though; the flex-grow: 1 will make them actually take up space
-   */
-    width: 0;
-    flex: 1;
+    background: pink;
+    border-right: 1px solid black;
+    padding: 5px;
 }
 
 .wrap

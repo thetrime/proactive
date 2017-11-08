@@ -6,12 +6,10 @@ function TableHeader()
 {
     ReactComponent.call(this);
     this.weights = [];
-    var node = document.createElement("thead");
-    this.row = document.createElement("tr");
-    this.row.className = "react_table_header_row";
-    node.appendChild(this.row);
-    this.setDOMNode(node);
+    this.thead = document.createElement("thead");
+    this.setDOMNode(this.thead);
     this.sum = 0;
+    this.elements = [];
 }
 
 TableHeader.prototype = new ReactComponent;
@@ -25,68 +23,18 @@ TableHeader.prototype.appendChild = function(t)
     var cell = document.createElement("th");
     cell.className = "react_table_header_cell";
     cell.appendChild(t.domNode);
-    this.row.appendChild(cell);
+    this.elements.push(cell);
+    this.thead.appendChild(cell);
     this.weights[this.children.indexOf(t)] = t.weight || default_weight;
     this.sum += (Number(t.weight) || default_weight);
     t.setParent(this);
-    this.recomputeRatios();
+    // FIXME: Notify parent that it may need to relayout
 }
 
-TableHeader.prototype.removeChild = function(c)
+TableHeader.prototype.getElements = function()
 {
-    this.sum -= (c.weight || default_weight);
-    this.weights.splice(this.children.indexOf(c), 1);
-    this.recomputeRatios();
-    c.setParent(null);
-    this.row.removeChild(this.row.childNodes[this.children.indexOf(c)]);
+    return this.elements;
 }
-
-TableHeader.prototype.replaceChild = function(n, o)
-{
-    var old_weight = Number(o.weight) || default_weight;
-    var new_weight = Number(n.weight) || default_weight;
-    this.sum = this.sum - old_weight + new_weight;
-    this.weights[this.children.indexOf(o)] = (n.weight || default_weight);
-    this.recomputeRatios();
-    o.setParent(null);
-    n.setParent(this);
-    this.row.replaceChild(this.row.childNodes[this.children.indexOf(n), o.getDOMNode()]);
-}
-
-TableHeader.prototype.insertBefore = function(t, s)
-{
-    var new_weight = Number(t.weight) || default_weight;
-    this.weights.splice(children.indexOf(s), 0, (t.weight || default_weight));
-    this.sum += new_weight;
-    this.recomputeRatios();
-    t.setParent(this);
-    var cell = document.createElement("th");
-    cell.className = "react_table_header_cell";
-    cell.appendChild(t.domNode);
-    this.row.insertBefore(cell, this.row.childNodes[this.children.indexOf(s)]);
-}
-
-TableHeader.prototype.recomputeRatios = function()
-{
-    var th = this.row.childNodes;
-    for (i = 0; i < this.children.length; i++)
-    {
-        if (this.weights[i] == default_weight)
-            th[i].style['width'] = "";
-        else if (typeof this.weights[i] == "number")
-            th[i].style['width'] = (100 * (this.weights[i] / this.sum)) + "%";
-        else if (typeof this.weights[i] == "string")
-            th[i].style['width'] = this.weights[i];
-    }
-}
-
-TableHeader.prototype.notifyParentOfLayoutChange = function(n)
-{
-    var old_weight = Number(this.weights[this.children.indexOf(n)]) || default_weight;
-    var new_weight = Number(n.weight) || default_weight;
-    this.weights[this.children.indexOf(n)] = n.weight || default_weight;
-    this.sum = this.sum - old_weight + new_weight;
-    this.recomputeRatios();
-}
+// FIXME: Implement other methods
 
 module.exports = TableHeader;
