@@ -13,7 +13,8 @@ function Button()
 
 function clickHandler(event)
 {
-    this.getOwnerDocument().triggerEvent(this.clickHandler, Constants.emptyListAtom, function() {});
+    if (this.clickHandler != null)
+        this.getOwnerDocument().triggerEvent(this.clickHandler, Constants.emptyListAtom, function() {});
 }
 
 
