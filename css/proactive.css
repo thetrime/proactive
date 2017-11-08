@@ -213,6 +213,11 @@ button
     justify-content: center;
 }
 
+.justify_end
+{
+    justify-content: end;
+}
+
 .justify_space_around
 {
     -webkit-justify-content: space-around;
@@ -346,19 +351,9 @@ td > *
     resize: both;
 }
 
-.grid-shrink
-{
-    white-space:nowrap;
-}
-
-.grid-expand
-{
-    width: 100%;
-}
-
 .grid
 {
-    table-layout: auto;
+    display: grid;
 }
 
 
@@ -453,6 +448,9 @@ label
 {
     /* box-shadow: 0 0 0 1px green; Use this if you want borders, otherwise they end up on the table, scrolling underneath */
     background-clip: padding-box;
+    position: sticky;
+    top: 0;
+    padding: 0;
 }
 
 .react_table thead th > *

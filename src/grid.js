@@ -5,11 +5,8 @@ var Constants = require('./constants.js');
 function Grid()
 {
     ReactComponent.call(this);
-    this.table = document.createElement("table");
     this.baseClassName = "grid"
-    var node = document.createElement("div");
-    node.appendChild(this.table);
-    this.setDOMNode(node);
+    this.setDOMNode(document.createElement("div"));
     this.weights = [0];
     this.padding = null;
 }
@@ -33,7 +30,15 @@ Grid.prototype.setProperties = function(t)
         // If the weights have changed, relayout
         if (newWeights.length != this.weights.length || !newWeights.every(function(v,i) { return v === this.weights[i]}.bind(this)))
             must_relayout = true;
+        console.log(newWeights);
         this.weights = newWeights;
+    }
+    if (t.gap !== undefined)
+    {
+        if (ReactComponent.isNull(t.gap))
+            this.getDOMNode().style['grid-gap'] = "";
+        else
+            this.getDOMNode().style['grid-gap'] = Prolog._atom_chars(t.gap);
     }
     if (t.padding !== undefined)
     {
@@ -46,125 +51,18 @@ Grid.prototype.setProperties = function(t)
 
 Grid.prototype.relayout = function(t)
 {
-    while (this.table.rows.length != 0)
-        this.table.deleteRow(-1)
-    for (var i = 0; i < this.children.length; i++)
-        this.appendChild(this.children[i]);
-}
-
-Grid.prototype.appendChild = function(t)
-{
-    var cell = document.createElement("td");
-    cell.appendChild(t.getDOMNode());
-    if (this.table.rows.length == 0)
+    var template = "";
+    var total = 0;
+    for (var i = 0; i < this.weights.length; i++)
     {
-        var row = document.createElement("tr");
-        if (this.weights[0] == 0)
-            cell.className = 'grid-shrink';
+        if (this.weights[i] == 0)
+            template += "max-content ";
         else
-            cell.className = 'grid-expand';
-        if (this.padding != null)
-            cell.style['padding-right'] = this.padding;
-        row.appendChild(cell);
-        this.table.appendChild(row);
+            template += this.weights[i] + "fr ";
     }
-    else
-    {
-        var lastRow = this.table.rows[this.table.rows.length-1];
-        if (lastRow.childNodes.length == this.weights.length)
-        {
-            var row = document.createElement("tr");
-            if (this.weights[0] == 0)
-                cell.className = 'grid-shrink';
-            else
-                cell.className = 'grid-expand';
-            if (this.padding != null)
-                cell.style['padding-right'] = this.padding;
-            row.appendChild(cell);
-            this.table.appendChild(row);
-        }
-        else
-        {
-            if (this.weights.length < lastRow.childNodes.length)
-            {
-                cell.className = 'grid-shrink';
-                if (this.padding != null)
-                    cell.style['padding-left'] = this.padding;
-            }
-            else
-            {
-                var weight = this.weights[lastRow.childNodes.length];
-                if (weight == 0)
-                    cell.className = 'grid-shrink';
-                else
-                    cell.className = 'grid-expand';
-                if (this.weights.length == lastRow.childNodes.length + 1)
-                {
-                    if (this.padding != null)
-                        cell.style['padding-left'] = this.padding;
-                }
-                else if (this.padding != null)
-                {
-                    cell.style['padding-left'] = this.padding;
-                    cell.style['padding-right'] = this.padding;
-                }
-            }
-            lastRow.appendChild(cell);
-        }
-    }
-    t.setParent(this);
+    console.log("Grid template columns: " + template);
+    this.getDOMNode().style["grid-template-columns"] = template;
 }
 
-
-Grid.prototype.insertBefore = function(t, s)
-{
-    this.table.insertBefore(t.getDOMNode(), s.getDOMNode());
-    var index;
-    if (s == null)
-        index = -1;
-    else
-        index = this.children.indexOf(s);
-    // Relayout, adding the new one in when appropriate
-    while (this.table.firstChild != null)
-        this.table.firstChild.remove();
-    var added = false;
-    for (var i = 0; i < this.children.length; i++)
-    {
-        if (index < i && !added)
-        {
-            this.appendChild(t);
-            added = true
-        }
-        this.appendChild(this.children[i]);
-    }
-    t.setParent(this);
-}
-
-Grid.prototype.replaceChild = function(n, o)
-{
-    // First locate the cell
-    var index = this.children.indexOf(o);
-    var row = Math.floor(index / this.weights.length)
-    var col = index % this.weights.length;
-    var rowDOM = this.table.rows[row];
-    rowDOM.childNodes[col].replaceChild(n.getDOMNode(), rowDOM.childNodes[col].firstChild);
-    n.setParent(this);
-    o.setParent(null);
-}
-
-Grid.prototype.removeChild = function(t)
-{
-    // First locate the cell
-    var index = this.children.indexOf(t);
-    var row = Math.floor(index / this.weights.length)
-    var col = index % this.weights.length;
-    var rowDOM = this.table.rows[row];
-    rowDOM.removeChild(rowDOM.childNodes[col]);
-    if (rowDOM.childNodes.length == 0)
-        this.table.deleteRow(row);
-    t.setParent(null);
-    //this.relayout(); This is too hard. It relies on this.children being already updated, and since it is almost always wrong to remove a single element
-    //                 anyway, I can live with the mess that you get if you try it
-}
 
 module.exports = Grid;
