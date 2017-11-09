@@ -3,8 +3,22 @@ var TableHeader = require('./table_header');
 var TableFooter = require('./table_footer');
 var Row = require('./row');
 
-// We have to use javascript to set the grid-template-columns. This is ugly and inefficient.
-// This could be very tidily fixed using display: subgrid, if only someone would implement it >_<
+// We have to use javascript to set the grid-template-columns. This is pretty inefficient.
+// I think that this could be very tidily fixed using display: subgrid, if only someone would implement it >_<
+
+// The implementation here is quite complex but it seems to work. The gist is that we use three css-grid blocks to
+// represent the table. The items in the header, footer and body must all be flattened - since display:contents is
+// still very new (only Firefox supports it right now), in order for things to be aligned in the grid, they have to
+// be direct children. To facilitate this, Row, TableHeader and TableFooter all support a method getElements() which
+// returns a list of their child DOM elements.
+// This list is (appears to be?) live, so changing the elements in the Row will be reflected automatically in the
+// DOM for the table itself.
+
+// Problems:
+//   * When you change a cell containing (say) a Label, we do not get a notification to relayout. The only way to
+//     fix this is to add in a markDirty() call to everything and propagate all changes backwards. This sounds really
+//     expensive :( (either that, or poll. Even more horrifying)
+//   * I'm not convinced that adding a row will work properly
 
 function Table()
 {
@@ -87,7 +101,6 @@ Table.prototype.relayout = function()
     this.dirty = false;
 }
 
-
 Table.prototype.appendChild = function(t)
 {
     if (t instanceof TableHeader)
@@ -112,25 +125,21 @@ Table.prototype.appendChild = function(t)
     this.markDirty()
 }
 
-/* FIXME: Implement!
 Table.prototype.insertBefore = function(t, s)
 {
-    this.table.insertBefore(t.getDOMNode(), s.getDOMNode());
     t.setParent(this);
 }
 
 Table.prototype.replaceChild = function(n, o)
 {
-    this.table.replaceChild(n.getDOMNode(), o.getDOMNode());
     n.setParent(this);
     o.setParent(null);
 }
 
 Table.prototype.removeChild = function(t)
 {
-    this.table.removeChild(t.getDOMNode());
     t.setParent(null);
 }
-*/
+
 
 module.exports = Table;

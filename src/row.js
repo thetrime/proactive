@@ -18,7 +18,6 @@ Row.prototype.appendChild = function(t)
     cell.appendChild(t.getDOMNode());
     this.domNode.appendChild(cell);
     this.elements.push(cell);
-    this.children.push(t);
     t.setParent(this);
     if (this.parent != null)
         this.parent.markDirty();
@@ -29,7 +28,6 @@ Row.prototype.insertBefore = function(t, s)
     var cell = document.createElement("td");
     cell.appendChild(t.getDOMNode());
     var index = this.children.indexOf(s);
-    this.children.splice(index, 0, s);
     this.domNode.insertBefore(cell, s.getDOMNode().parentNode);
     this.elements.splice(index, 0, cell);
     t.setParent(this);
@@ -42,7 +40,6 @@ Row.prototype.replaceChild = function(n, o)
     var cell = document.createElement("td");
     cell.appendChild(t.getDOMNode());
     var index = this.children.indexOf(o);
-    this.children[index] = n;
     this.domNode.replaceChild(cell, o.getDOMNode().parentNode.parentNode);
     this.elements[index] = cell;
     n.setParent(this);
@@ -55,7 +52,6 @@ Row.prototype.removeChild = function(t)
 {
     var index = this.children.indexOf(t);
     this.elements.splice(index, 1);
-    this.children.splice(index, 1);
     this.domNode.removeChild(t.getDOMNode().parentNode);
     t.setParent(null);
     if (this.parent != null)
