@@ -15,10 +15,7 @@ var Row = require('./row');
 // DOM for the table itself.
 
 // Problems:
-//   * When you change a cell containing (say) a Label, we do not get a notification to relayout. The only way to
-//     fix this is to add in a markDirty() call to everything and propagate all changes backwards. This sounds really
-//     expensive :( (either that, or poll. Even more horrifying)
-//   * I'm not convinced that adding a row will work properly
+//   * Zebra-striping is no longer possible.
 
 function Table()
 {

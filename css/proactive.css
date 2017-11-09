@@ -416,6 +416,7 @@ label
     border-right: 1px solid black;
     border-bottom: 2px solid black;
     display: flex;
+    overflow: hidden;
     align-self: stretch;
 }
 
@@ -434,14 +435,23 @@ label
 {
     display: grid;
     border-top: 2px solid black;
-    background: pink;
     width: 100%;
+    flex-shrink: 0;
+}
+
+.react_table tfoot:empty
+{
+    border-top: none;
+}
+
+.react_table.empty
+{
+    border: none;
 }
 
 .react_table thead
 {
     display: grid;
-    background: pink;
     width: 100%;
 }
 
@@ -459,14 +469,12 @@ label
 
 .react_table thead th
 {
-    background: pink;
     border-right: 1px solid black;
     padding: 5px;
 }
 
 .react_table tfoot td
 {
-    background: pink;
     border-right: 1px solid black;
     padding: 5px;
 }
