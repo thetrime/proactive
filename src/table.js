@@ -50,6 +50,9 @@ Table.prototype.markDirty = function()
     this.thead.style['grid-template-columns'] = style;
     this.tfoot.style['grid-template-columns'] = style;
     this.tbody.style['grid-template-columns'] = style;
+    this.table.style['min-width'] = '';
+
+
     if (!this.dirty)
     {
         // Only put in one request to resize. If the number of columns changes that is fine - we will redo the auto style in the lines just
