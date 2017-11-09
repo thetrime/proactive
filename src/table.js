@@ -130,7 +130,7 @@ Table.prototype.appendChild = function(t)
 
 Table.prototype.insertBefore = function(t, s)
 {
-    console.log("Table.insertBefore");
+    console.log("Table.insertBefore is not implemented");
     t.setParent(this);
 }
 
@@ -235,6 +235,7 @@ Table.prototype.replaceChild = function(n, o)
     }
     n.setParent(this);
     o.setParent(null);
+    this.markDirty()
 }
 
 Table.prototype.removeChild = function(t)
@@ -258,12 +259,12 @@ Table.prototype.removeChild = function(t)
     if (t instanceof Row)
     {
         for (var i = 0; i < count; i++)
-            this.tbody.removeChild(this.tbody.childNodes[bodyIndex]);
+            this.tbody.removeChild(this.tbody.childNodes[bodyIndex*count]);
     }
     else if (t instanceof TableFooter)
     {
         for (var i = 0; i < count; i++)
-            this.tfoot.removeChild(this.tfoot.childNodes[footIndex]);
+            this.tfoot.removeChild(this.tfoot.childNodes[footIndex*count]);
     }
     else if (t instanceof TableHeader)
     {
@@ -271,6 +272,7 @@ Table.prototype.removeChild = function(t)
             this.thead.removeChild(this.thead.lastChild);
     }
     t.setParent(null);
+    this.markDirty()
 }
 
 
