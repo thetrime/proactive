@@ -12,6 +12,8 @@ function Row()
 }
 
 Row.prototype = new ReactComponent;
+
+
 Row.prototype.appendChild = function(t)
 {
     var cell = document.createElement("td");
@@ -38,7 +40,7 @@ Row.prototype.insertBefore = function(t, s)
 Row.prototype.replaceChild = function(n, o)
 {
     var cell = document.createElement("td");
-    cell.appendChild(t.getDOMNode());
+    cell.appendChild(n.getDOMNode());
     var index = this.children.indexOf(o);
     this.domNode.replaceChild(cell, o.getDOMNode().parentNode.parentNode);
     this.elements[index] = cell;
@@ -64,6 +66,18 @@ Row.prototype.setProperties = function(t)
    ReactComponent.prototype.setProperties.call(this, t);
     if (t.onDblClick !== undefined)
         this.setDblClickHandler(t.onDblClick);
+    if (t["class"] !== undefined)
+    {
+        var c;
+        if (ReactComponent.isNull(t["class"]))
+            c = '';
+        else
+            c = Prolog._atom_chars(t["class"]);
+        console.log("Class becomes " + c);
+        for (var i = 0; i < this.elements.length; i++)
+            this.elements[i].className = c
+    }
+
 }
 
 Row.prototype.setDblClickHandler = function(value)
