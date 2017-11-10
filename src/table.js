@@ -14,23 +14,38 @@ var Row = require('./row');
 // This list is (appears to be?) live, so changing the elements in the Row will be reflected automatically in the
 // DOM for the table itself.
 
-// Problems:
-//   * Zebra-striping is no longer possible.
+// The zebra-striping now becomes very hard. There is no way I could see to style the first N cells in a grid, leave
+// the following N alone, and then style the N after that. I could have applied classes to appropriate cells but then
+// what happens if they move? We have to re-number then all. Nasty.
+
+// So instead, we do something else that is also quite nasty - we dynamically create CSS and use nth-child rules to
+// style every second row. This requires one row per column (as far as I could tell). When the table changes shape
+// we only need to rewrite the N rules. To facilitate this, each tbody gets a 'unique' ID made of zebra_ and a counter
+
+var uuid = 0;
 
 function Table()
 {
     ReactComponent.call(this);
     this.table = document.createElement("table");
-    this.baseClassName = "react_table scrollpane";
+    this.uuid = "zebra_" + (uuid++);
+    this.baseClassName = "react_table scrollpane ";
     this.setDOMNode(this.table);
     this.thead = document.createElement("thead");
     this.tbody = document.createElement("tbody");
+    this.tbody.className = this.uuid;
     this.tfoot = document.createElement("tfoot");
     this.table.appendChild(this.thead);
     this.table.appendChild(this.tbody);
     this.table.appendChild(this.tfoot);
     this.dirty = false;
     this.dirtCount = 0;
+    this.column_count = 0;
+    // Zebra-sheet
+    var style = document.createElement("style");
+    style.appendChild(document.createTextNode(""));
+    document.head.appendChild(style);
+    this.sheet = style.sheet;
     this.markDirty();
 }
 Table.prototype = new ReactComponent;
@@ -70,6 +85,18 @@ Table.prototype.relayout = function()
     // First, unfortunately, we need to look at every single cell
     var columns = [];
     var count = this.thead.children.length;
+
+    // recalibrate the zebra-striping rules if count has changed
+    if (count != this.column_count)
+    {
+        var ruleCount = this.sheet.cssRules.length;
+        for (var i = 0; i < ruleCount; i++)
+            this.sheet.deleteRule(0);
+        for (var i = 0; i < count; i++)
+            this.sheet.insertRule('.' + this.uuid + ' td:nth-child(' + (2*count) + 'n - ' + i + ") { background: rgba(0,0,0,0.05) !important; }");
+        this.column_count = count;
+    }
+
     // Start by setting the size of each column to the size of the header
     for (var i = 0; i < this.thead.children.length; i++)
         columns[i] = this.thead.children[i].clientWidth;
@@ -97,7 +124,6 @@ Table.prototype.relayout = function()
     this.thead.style['grid-template-columns'] = style;
     this.tfoot.style['grid-template-columns'] = style;
     this.tbody.style['grid-template-columns'] = style;
-    this.table.style['min-width'] = (total + count * padding) + "px";
     this.dirty = false;
 }
 
