@@ -411,10 +411,6 @@ label
 .react_table
 {
     border-spacing: 0;
-    border-left: 2px solid black;
-    border-top: 2px solid black;
-    border-right: 1px solid black;
-    border-bottom: 2px solid black;
     display: flex;
     overflow: hidden;
     align-self: stretch;
@@ -426,7 +422,6 @@ label
     background: #eeeeee;
     overflow-y: auto;
     overflow-x: hidden;
-    border-top: 2px solid black;
     width: 100%;
     
 }
@@ -434,19 +429,8 @@ label
 .react_table tfoot
 {
     display: grid;
-    border-top: 2px solid black;
     width: 100%;
     flex-shrink: 0;
-}
-
-.react_table tfoot:empty
-{
-    border-top: none;
-}
-
-.react_table.empty
-{
-    border: none;
 }
 
 .react_table thead
@@ -462,20 +446,17 @@ label
 
 .react_table tbody td
 {
-    border-right: 1px solid black;
     background: #eeeeee;
     padding: 5px;
 }
 
 .react_table thead th
 {
-    border-right: 1px solid black;
     padding: 5px;
 }
 
 .react_table tfoot td
 {
-    border-right: 1px solid black;
     padding: 5px;
 }
 
