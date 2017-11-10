@@ -30,7 +30,6 @@ Grid.prototype.setProperties = function(t)
         // If the weights have changed, relayout
         if (newWeights.length != this.weights.length || !newWeights.every(function(v,i) { return v === this.weights[i]}.bind(this)))
             must_relayout = true;
-        console.log(newWeights);
         this.weights = newWeights;
     }
     if (t.gap !== undefined)
@@ -60,7 +59,6 @@ Grid.prototype.relayout = function(t)
         else
             template += this.weights[i] + "fr ";
     }
-    console.log("Grid template columns: " + template);
     this.getDOMNode().style["grid-template-columns"] = template;
 }
 
