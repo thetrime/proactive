@@ -93,7 +93,9 @@ Table.prototype.relayout = function()
         for (var i = 0; i < ruleCount; i++)
             this.sheet.deleteRule(0);
         for (var i = 0; i < count; i++)
-            this.sheet.insertRule('.' + this.uuid + ' td:nth-child(' + (2*count) + 'n - ' + i + ") { background: rgba(0,0,0,0.05) !important; }");
+        {
+            this.sheet.insertRule('.' + this.uuid + ' td:nth-child(' + (2*count) + 'n - ' + i + ")::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: .05; z-index: -1; background: black; }");
+        }
         this.column_count = count;
     }
 

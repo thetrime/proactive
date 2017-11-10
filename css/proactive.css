@@ -448,6 +448,8 @@ label
 {
     background: #eeeeee;
     padding: 5px;
+    position: relative;
+    z-index: 1;
 }
 
 .react_table thead th
