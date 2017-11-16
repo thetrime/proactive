@@ -1,5 +1,6 @@
 :-module(vdiff, [create_element_from_vdom/3,
-		 vdiff/3,
+                 vdiff/3,
+                 vmutate/5,
 		 vpatch/4]).
 
 vdiff(A, B, [a-A|PatchSet]):-
@@ -14,6 +15,118 @@ vdiff(A, B, [a-A|PatchSet]):-
         ),
         %writeq(diff(A, B, [a-A|PatchSet])), nl,
         true.
+
+vmutate(A, B, DomNode, Options, NewNode):-
+        vmutate_1(A,B,DomNode,Options,NewNode).
+
+
+vmutate_1(A, A, DomNode, _Options, DomNode):-
+        % Subtrees match: No action required.
+        !.
+
+vmutate_1(A, {null}, DomNode, _Options, NewNode):-
+        !,
+        % Subtree is deleted
+        patch_op(remove_patch(A, {null}), DomNode, Options, NewNode),
+        % Also, we may have to do more if A is not a widget:
+        ( is_widget(A) ->
+            true
+        ; otherwise->
+            destroy_widgets_quickly(A, DomNode, Options)
+        ).
+vmutate_1(A, B, DomNode, Options, NewNode):-
+        B = element(BTag, BProps, _),
+        !,
+        ( A = element(ATag, AProps, _)->
+            ( ATag == BTag,
+              ( memberchk(key=Key, AProps),
+                memberchk(key=Key, BProps)
+              ; \+memberchk(key=_, AProps),
+                \+memberchk(key=_, BProps)
+              )->
+                % diff_props/3 fails if there are no differences
+                ( diff_props(AProps, BProps, PropsPatch)->
+                    patch_op(props_patch(A, PropsPatch), DomNode, Options, N1)
+                ; otherwise->
+                    % In this case, only the children differ
+                    N1 = DomNode
+                ),
+                vmutate_children(A, B, N1, Options, NewNode)
+            ; otherwise->
+                % Nodes are totally different - different tags
+                patch_op(node_patch(A, B), DomNode, Options, NewNode),
+                destroy_widgets_quickly(A, DomNode, Options)
+            )
+        ; otherwise->
+            % This is a widget (or nothing at all?) becoming a node
+            patch_op(node_patch(A, B), DomNode, Options, NewNode),
+            destroy_widgets_quickly(A, DomNode, Options)
+        ).
+
+vmutate_1(A, B, DomNode, Options, {null}):-
+        is_widget(B),
+        !,
+        ( \+is_widget(A)->
+            % This is a node becoming a widget
+            destroy_widgets_quickly(A, DomNode, Options)
+        ; otherwise->
+            % This is a widget changing to a different widget
+            patch_op(widget_patch(A, B), DomNode, Options, _)
+        ).
+
+destroy_widgets_quickly(A, DomNode, Options):-
+        is_widget(A),
+        !,
+        patch_op(remove_patch(A, {null}), DomNode, Options, _).
+
+destroy_widgets_quickly(A, DomNode, Options):-
+        A = element(_, _, Children),
+        ( has_widgets(A)->
+            child_nodes(DomNode, ChildNodes),
+            destroy_widget_children(Children, ChildNodes, Options)
+        ; true
+        ).
+destroy_widget_children([], [], _).
+destroy_widget_children([Element|Elements], [DomNode|DomNodes], Options):-
+        destroy_widgets_quickly(Element, DomNode, Options),
+        destroy_widget_children(Elements, DomNodes, Options).
+
+
+vmutate_children(A, B, DomNode, Options, NewNode):-
+        expand_children(A, AChildren),
+        expand_children(B, BChildren),
+        reorder(AChildren, BChildren, Ordered, Moves),
+        child_nodes(DomNode, DomChildren),
+        vmutate_children_1(AChildren, Ordered, DomChildren, Options),
+        ( Moves == {no_moves} ->
+            NewNode = DomNode
+        ; patch_op(order_patch(A, Moves), DomNode, Options, NewNode)
+        ).
+
+vmutate_children_1([], [], [], _):- !.
+vmutate_children_1(A, B, [DomNode|DomNodes], Options):-
+        ( A = [Left|ASiblings] ->
+            true
+        ; otherwise->
+            ASiblings = A,
+            Left = {null}
+        ),
+        ( B = [Right|BSiblings]->
+            true
+        ; otherwise->
+            BSiblings = B,
+            Right = {null}
+        ),
+        ( Left == {null}, Right \== {null}->
+            patch_op(insert_patch({null}, Right, DomNode, Options, N))
+        ; Left \== {null}->
+            vmutate_1(Left, Right, DomNode, Options, N)
+        ; otherwise->
+            N = DomNode
+        ),
+        vmutate_children_1(ASiblings, BSiblings, DomNodes, Options).
+
+
 
 walk(A, A, _, _):- !, fail.
 

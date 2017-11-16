@@ -128,6 +128,7 @@ ReactWidget.prototype.freeComponent = function(vNode)
 
 ReactWidget.prototype.reRender = function(callback)
 {
+    /*
     this.engine.render(this, this.elementId, this.state, this.props, function(newVDom)
                        {
                            this.engine.diff(this.vDom, newVDom, function(patches)
@@ -143,6 +144,20 @@ ReactWidget.prototype.reRender = function(callback)
                                                                        }.bind(this));
                                             }.bind(this));
                        }.bind(this));
+    */
+    this.engine.render(this, this.elementId, this.state, this.props, function(newVDom)
+                       {
+                           this.engine.mutate(this.vDom, newVDom, this.internalComponent, function()
+                                              {
+                                                  this.internalComponent.setOwnerDocument(this);
+                                                  if (this.vDom != null)
+                                                      Prolog._free_local(this.vDom);
+                                                  this.vDom = newVDom;
+                                                  //console.log("All patches applied");
+                                                  callback(this);
+                                              }.bind(this));
+                       }.bind(this));
+
 }
 
 ReactWidget.prototype.triggerEvent = function(handler, event, callback)

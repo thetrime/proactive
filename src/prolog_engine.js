@@ -15,6 +15,7 @@ var renderFunctor = Prolog._make_functor(Prolog._make_atom("render"), 3);
 var documentFunctor = Prolog._make_functor(Prolog._make_atom("document"), 1);
 var createElementFromVDomFunctor = Prolog._make_functor(Prolog._make_atom("create_element_from_vdom"), 3);
 var vDiffFunctor = Prolog._make_functor(Prolog._make_atom("vdiff"), 3);
+var vMutateFunctor = Prolog._make_functor(Prolog._make_atom("vmutate"), 5);
 var vPatchFunctor = Prolog._make_functor(Prolog._make_atom("vpatch"), 4);
 var expandChildrenFunctor = Prolog._make_functor(Prolog._make_atom("expand_children"), 2);
 var messageFunctor = Prolog._make_functor(Prolog._make_atom("message"), 3);
@@ -611,6 +612,29 @@ PrologEngine.prototype.processEvent = function(handler, event, context, callback
                             callback(false);
                         }
                      }.bind(this));
+}
+
+PrologEngine.prototype.mutate = function(a, b, root, callback)
+{
+    var savePoint = Prolog._save_state();
+    var newRoot = Prolog._make_variable();
+    var renderOptions = Prolog._make_compound(Constants.listFunctor, [Prolog._make_compound(documentFunctor, [root.getOwnerDocument().blob]), Constants.emptyListAtom]);
+    var goal = crossModuleCall("vdiff", Prolog._make_compound(vMutateFunctor, [a, b, root.blob, renderOptions, newRoot]));
+    Prolog._execute(this.env,
+                    goal,
+                    function(result)
+                    {
+                        var element = null;
+                        if (result == 1)
+                            element = Prolog._get_blob("react_component", newRoot);
+                        Prolog._restore_state(savePoint);
+                        if (result == 1)
+                            callback(element);
+                        /* Do not call the callback if we did not succeed */
+                        else if (result == 2)
+                            console.log("mutate/3 raised an error");
+                    }.bind(this));
+
 }
 
 PrologEngine.prototype.diff = function(a, b, callback)
