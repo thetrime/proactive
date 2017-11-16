@@ -3,68 +3,37 @@ var TableHeader = require('./table_header');
 var TableFooter = require('./table_footer');
 var Row = require('./row');
 
-// We have to use javascript to set the grid-template-columns. This is pretty inefficient.
-// I think that this could be very tidily fixed using display: subgrid, if only someone would implement it >_<
-
-// The implementation here is quite complex but it seems to work. The gist is that we use three css-grid blocks to
-// represent the table. The items in the header, footer and body must all be flattened - since display:contents is
-// still very new (only Firefox supports it right now), in order for things to be aligned in the grid, they have to
-// be direct children. To facilitate this, Row, TableHeader and TableFooter all support a method getElements() which
-// returns a list of their child DOM elements.
-// This list is (appears to be?) live, so changing the elements in the Row will be reflected automatically in the
-// DOM for the table itself.
-
-// The zebra-striping now becomes very hard. There is no way I could see to style the first N cells in a grid, leave
-// the following N alone, and then style the N after that. I could have applied classes to appropriate cells but then
-// what happens if they move? We have to re-number then all. Nasty.
-
-// So instead, we do something else that is also quite nasty - we dynamically create CSS and use nth-child rules to
-// style every second row. This requires one row per column (as far as I could tell). When the table changes shape
-// we only need to rewrite the N rules. To facilitate this, each tbody gets a 'unique' ID made of zebra_ and a counter
-
-var uuid = 0;
+// FIXME: This is the third major attempt. Hopefully this time?
 
 function Table()
 {
     ReactComponent.call(this);
     this.table = document.createElement("table");
-    this.uuid = "zebra_" + (uuid++);
     this.baseClassName = "react_table scrollpane ";
     this.setDOMNode(this.table);
+    this.colgroup = document.createElement("colgroup");
     this.thead = document.createElement("thead");
     this.tbody = document.createElement("tbody");
-    this.tbody.className = this.uuid;
     this.tfoot = document.createElement("tfoot");
+    this.table.appendChild(this.colgroup);
     this.table.appendChild(this.thead);
     this.table.appendChild(this.tbody);
     this.table.appendChild(this.tfoot);
     this.dirty = false;
     this.dirtCount = 0;
     this.column_count = 0;
-    // Zebra-sheet
-    var style = document.createElement("style");
-    style.appendChild(document.createTextNode(""));
-    document.head.appendChild(style);
-    this.sheet = style.sheet;
     this.markDirty();
 }
 Table.prototype = new ReactComponent;
 
 Table.prototype.markDirty = function()
 {
-    var count = this.thead.children.length;
-    if (count == this.dirtCount && this.dirty)
+    if (this.column_count == this.dirtCount && this.dirty)
         return;
-    this.dirtCount = count;
+    this.dirtCount = this.column_count;
     var style = "";
-    for (var i = 0; i < count; i++)
-        style +="auto ";
-    this.thead.style['grid-template-columns'] = style;
-    this.tfoot.style['grid-template-columns'] = style;
-    this.tbody.style['grid-template-columns'] = style;
-    this.table.style['min-width'] = '';
-
-
+    while (this.colgroup.hasChildNodes())
+        this.colgroup.removeChild(this.colgroup.lastChild);
     if (!this.dirty)
     {
         // Only put in one request to resize. If the number of columns changes that is fine - we will redo the auto style in the lines just
@@ -77,55 +46,42 @@ Table.prototype.markDirty = function()
 
 Table.prototype.relayout = function()
 {
-    var headerRow = this.thead.firstChild;
-    var firstRow = this.tbody.firstChild;
-    var firstFoot = this.tfoot.firstChild;
     var padding = 3;
 
     // First, unfortunately, we need to look at every single cell
     var columns = [];
-    var count = this.thead.children.length;
-
-    // recalibrate the zebra-striping rules if count has changed
-    if (count != this.column_count)
-    {
-        var ruleCount = this.sheet.cssRules.length;
-        for (var i = 0; i < ruleCount; i++)
-            this.sheet.deleteRule(0);
-        for (var i = 0; i < count; i++)
-        {
-            this.sheet.insertRule('.' + this.uuid + ' td:nth-child(' + (2*count) + 'n - ' + i + ")::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: .05; z-index: -1; background: black; }");
-        }
-        this.column_count = count;
-    }
 
     // Start by setting the size of each column to the size of the header
-    for (var i = 0; i < this.thead.children.length; i++)
-        columns[i] = this.thead.children[i].clientWidth;
+    for (var i = 0; i < this.column_count; i++)
+        columns[i] = this.thead.lastChild.children[i].clientWidth;
     // Then for every cell, if it is wider than the current column, widen the column
     for (var j = 0; j < this.tbody.children.length; j++)
     {
-        if (columns[j % count] < this.tbody.children[j].clientWidth)
-            columns[j % count] = this.tbody.children[j].clientWidth;
+        for (var i = 0; i < this.tbody.children[j].children.length; i++)
+        {
+            if (columns[j] < this.tbody.children[j].children[i].clientWidth)
+                columns[j] = this.tbody.children[j].children[i].clientWidth;
+        }
     }
     // Finally, do the footer
     for (var j = 0; j < this.tfoot.children.length; j++)
-        if (columns[j % count] < this.tfoot.children[j].clientWidth)
-            columns[j % count] = this.tfoot.children[j].clientWidth;
+        if (columns[j % this.column_count] < this.tfoot.children[j].clientWidth)
+            columns[j % this.column_count] = this.tfoot.children[j].clientWidth;
 
     var total = 0;
     for (var i = 0; i < columns.length; i++)
     {
         total += columns[i];
     }
+    while (this.colgroup.hasChildNodes())
+        this.colgroup.removeChild(this.colgroup.lastChild);
 
-    var style = '';
     for (var i = 0; i < columns.length; i++)
-        style += (100 * columns[i] / total) + "% ";
-
-    this.thead.style['grid-template-columns'] = style;
-    this.tfoot.style['grid-template-columns'] = style;
-    this.tbody.style['grid-template-columns'] = style;
+    {
+        var col = document.createElement("col");
+        col.style = 'width: ' + (100 * columns[i] / total);
+        this.colgroup.appendChild(col);
+    }
     this.dirty = false;
 }
 
@@ -133,21 +89,16 @@ Table.prototype.appendChild = function(t)
 {
     if (t instanceof TableHeader)
     {
-        var row = t.getElements();
-        for (var i = 0; i < row.length; i++)
-            this.thead.appendChild(row[i]);
+        this.thead.appendChild(t.getDOMNode());
+        this.column_count = t.children.length;
     }
     else if (t instanceof TableFooter)
     {
-        var row = t.getElements();
-        for (var i = 0; i < row.length; i++)
-            this.tfoot.appendChild(row[i]);
+        this.tfoot.appendChild(t.getDOMNode());
     }
     else if (t instanceof Row)
     {
-        var row = t.getElements();
-        for (var i = 0; i < row.length; i++)
-            this.tbody.appendChild(row[i]);
+        this.tbody.appendChild(t.getDOMNode());
     }
     t.setParent(this);
     this.markDirty()
@@ -161,7 +112,6 @@ Table.prototype.insertBefore = function(t, s)
 
 Table.prototype.replaceChild = function(n, o)
 {
-    var count = this.thead.children.length;
     // This is quite complicated since there are 6 possible cases.
     if (n instanceof TableHeader && o instanceof TableHeader)
     {
@@ -179,7 +129,7 @@ Table.prototype.replaceChild = function(n, o)
         var footIndex = this.children.indexOf(o);
         // Now delete the count elements from tfoot starting at footIndex
         // Since the list will keep shrinking, we can just keep deleting the same index
-        for (var i = 0; i < count; i++)
+        for (var i = 0; i < this.column_count; i++)
             this.tfoot.removeChild(this.tfoot.childNodes[footIndex]);
         // Now we can add them back in
         var sibling = this.tfoot.childNodes[footIndex];
@@ -191,7 +141,7 @@ Table.prototype.replaceChild = function(n, o)
     {
         // This is basically the same as TableFooter -> TableFooter
         var bodyIndex = this.children.indexOf(o);
-        for (var i = 0; i < count; i++)
+        for (var i = 0; i < this.column_count; i++)
             this.tbody.removeChild(this.tbody.childNodes[bodyIndex]);
         var sibling = this.tbody.childNodes[bodyIndex];
         var row = n.getElements();
@@ -221,12 +171,12 @@ Table.prototype.replaceChild = function(n, o)
         // We want to remove the (footIndex)th footer and insert a new row after the (bodyIndex)th row
         // The actual position of the first item in the footer is (footIndex * count) since a footer
         // describes (count) actual nodes
-        for (var i = 0; i < count; i++)
-            this.tfoot.removeChild(this.tfoot.childNodes[footIndex * count]);
+        for (var i = 0; i < this.column_count; i++)
+            this.tfoot.removeChild(this.tfoot.childNodes[footIndex * this.column_count]);
 
         // Similarly, (bodyIndex*count) describes the index of the tbody that we want to insert before
         var row = n.getElements();
-        var beforeSibling = this.tbody.childNodes[bodyIndex * count];
+        var beforeSibling = this.tbody.childNodes[bodyIndex * this.column_count];
         for (var i = 0; i < row.length; i++)
             this.tbody.insertBefore(row[i], beforeSibling);
     }
@@ -243,10 +193,10 @@ Table.prototype.replaceChild = function(n, o)
             else if (this.children[i] instanceof TableFooter)
                 footIndex++;
         }
-        for (var i = 0; i < count; i++)
-            this.tbody.removeChild(this.tbody.childNodes[bodyIndex * count]);
+        for (var i = 0; i < this.column_count; i++)
+            this.tbody.removeChild(this.tbody.childNodes[bodyIndex * this.column_count]);
         var row = n.getElements();
-        var beforeSibling = this.tfoot.childNodes[footIndex * count];
+        var beforeSibling = this.tfoot.childNodes[footIndex * this.column_count];
         for (var i = 0; i < row.length; i++)
             this.tfoot.insertBefore(row[i], beforeSibling);
 
@@ -268,7 +218,6 @@ Table.prototype.removeChild = function(t)
     // Unfortunately we cannot just remove the nth child of tfoot (for example)
     // by looking up which index in this.children t belongs at, because there is
     // no (simple) relationship between this.children and the actual DOM
-    var count = this.thead.children.length;
     var bodyIndex = 0;
     var footIndex = 0;
     var headIndex = 0;
@@ -283,13 +232,13 @@ Table.prototype.removeChild = function(t)
     }
     if (t instanceof Row)
     {
-        for (var i = 0; i < count; i++)
-            this.tbody.removeChild(this.tbody.childNodes[bodyIndex*count]);
+        for (var i = 0; i < this.column_count; i++)
+            this.tbody.removeChild(this.tbody.childNodes[bodyIndex*this.column_count]);
     }
     else if (t instanceof TableFooter)
     {
-        for (var i = 0; i < count; i++)
-            this.tfoot.removeChild(this.tfoot.childNodes[footIndex*count]);
+        for (var i = 0; i < this.column_count; i++)
+            this.tfoot.removeChild(this.tfoot.childNodes[footIndex*this.column_count]);
     }
     else if (t instanceof TableHeader)
     {

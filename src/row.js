@@ -8,7 +8,6 @@ function Row()
     var row = document.createElement("tr");
     this.baseClassName = "react_table_row";
     this.setDOMNode(row);
-    this.elements = [];
 }
 
 Row.prototype = new ReactComponent;
@@ -19,7 +18,6 @@ Row.prototype.appendChild = function(t)
     var cell = document.createElement("td");
     cell.appendChild(t.getDOMNode());
     this.domNode.appendChild(cell);
-    this.elements.push(cell);
     t.setParent(this);
     if (this.parent != null)
         this.parent.markDirty();
@@ -31,7 +29,6 @@ Row.prototype.insertBefore = function(t, s)
     cell.appendChild(t.getDOMNode());
     var index = this.children.indexOf(s);
     this.domNode.insertBefore(cell, s.getDOMNode().parentNode);
-    this.elements.splice(index, 0, cell);
     t.setParent(this);
     if (this.parent != null)
         this.parent.markDirty();
@@ -43,7 +40,6 @@ Row.prototype.replaceChild = function(n, o)
     cell.appendChild(n.getDOMNode());
     var index = this.children.indexOf(o);
     this.domNode.replaceChild(cell, o.getDOMNode().parentNode.parentNode);
-    this.elements[index] = cell;
     n.setParent(this);
     o.setParent(null);
     if (this.parent != null)
@@ -53,7 +49,6 @@ Row.prototype.replaceChild = function(n, o)
 Row.prototype.removeChild = function(t)
 {
     var index = this.children.indexOf(t);
-    this.elements.splice(index, 1);
     this.domNode.removeChild(t.getDOMNode().parentNode);
     t.setParent(null);
     if (this.parent != null)
@@ -66,18 +61,6 @@ Row.prototype.setProperties = function(t)
    ReactComponent.prototype.setProperties.call(this, t);
     if (t.onDblClick !== undefined)
         this.setDblClickHandler(t.onDblClick);
-    if (t["class"] !== undefined)
-    {
-        var c;
-        if (ReactComponent.isNull(t["class"]))
-            c = '';
-        else
-            c = Prolog._atom_chars(t["class"]);
-        console.log("Class becomes " + c);
-        for (var i = 0; i < this.elements.length; i++)
-            this.elements[i].className = c
-    }
-
 }
 
 Row.prototype.setDblClickHandler = function(value)
@@ -92,11 +75,6 @@ Row.prototype.setDblClickHandler = function(value)
     }
     this.dblClickHandler = Prolog._make_local(value);
     this.domNode.ondblclick = dblClickHandler.bind(this);
-}
-
-Row.prototype.getElements = function()
-{
-    return this.elements;
 }
 
 function dblClickHandler(event)
