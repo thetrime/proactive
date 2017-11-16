@@ -22,6 +22,8 @@ var Row = require('./row');
 // style every second row. This requires one row per column (as far as I could tell). When the table changes shape
 // we only need to rewrite the N rules. To facilitate this, each tbody gets a 'unique' ID made of zebra_ and a counter
 
+// Unfortunately, it looks like css-grid is limited to 999 rows in Firefox and Chrome. WHY IS THIS SO HARD?
+
 var uuid = 0;
 
 function Table()
