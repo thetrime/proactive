@@ -632,7 +632,9 @@ PrologEngine.prototype.mutate = function(a, b, root, callback)
                             callback(element);
                         /* Do not call the callback if we did not succeed */
                         else if (result == 2)
-                            console.log("mutate/3 raised an error");
+                            console.log("mutate/5 raised an error");
+                        else if (result == 0)
+                            console.log("mutate/5 failed");
                     }.bind(this));
 
 }
