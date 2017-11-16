@@ -17,7 +17,8 @@ vdiff(A, B, [a-A|PatchSet]):-
         true.
 
 vmutate(A, B, DomNode, Options, NewNode):-
-        vmutate_1(A,B,DomNode,Options,NewNode).
+        vmutate_1(A,B,DomNode,Options,NewNode),
+        writeln(vmutate_success).
 
 
 vmutate_1(A, A, DomNode, _Options, DomNode):-
@@ -91,23 +92,25 @@ destroy_widget_children([Element|Elements], [DomNode|DomNodes], Options):-
         destroy_widgets_quickly(Element, DomNode, Options),
         destroy_widget_children(Elements, DomNodes, Options).
 
-
 vmutate_children(A, B, DomNode, Options, NewNode):-
         expand_children(A, AChildren),
         expand_children(B, BChildren),
         reorder(AChildren, BChildren, Ordered, Moves),
         child_nodes(DomNode, DomChildren),
-        vmutate_children_1(AChildren, Ordered, DomChildren, Options),
+        !,
+        vmutate_children_1(AChildren, Ordered, DomChildren, DomNode, Options),
         ( Moves == {no_moves} ->
             NewNode = DomNode
         ; patch_op(order_patch(A, Moves), DomNode, Options, NewNode)
         ).
 
-vmutate_children_1([], [], [], _):- !.
-vmutate_children_1(A, B, [DomNode|DomNodes], Options):-
+vmutate_children_1([], [], [], _, _):- !.
+vmutate_children_1(A, B, DomNodes, ParentDomNode, Options):-
         ( A = [Left|ASiblings] ->
-            true
+            DomNodes = [LeftDom|DomSiblings]
         ; otherwise->
+            DomSiblings = DomNodes,
+            LeftDom = {null},
             ASiblings = A,
             Left = {null}
         ),
@@ -118,13 +121,13 @@ vmutate_children_1(A, B, [DomNode|DomNodes], Options):-
             Right = {null}
         ),
         ( Left == {null}, Right \== {null}->
-            patch_op(insert_patch({null}, Right, DomNode, Options, N))
+            patch_op(insert_patch({null}, Right), ParentDomNode, Options, N)
         ; Left \== {null}->
-            vmutate_1(Left, Right, DomNode, Options, N)
+            vmutate_1(Left, Right, LeftDom, Options, N)
         ; otherwise->
             N = DomNode
         ),
-        vmutate_children_1(ASiblings, BSiblings, DomNodes, Options).
+        vmutate_children_1(ASiblings, BSiblings, DomSiblings, ParentDomNode, Options).
 
 
 
@@ -663,6 +666,7 @@ patch_op(remove_patch(VNode, _), DomNode, _Options, NewNode):-
 
 patch_op(insert_patch(_ActualVNode, VNode), ParentNode, Options, ParentNode):-
         render(Options, VNode, NewNode),
+        !,
         ( ParentNode \== {null}->
             append_child(ParentNode, NewNode)
         ; otherwise->
