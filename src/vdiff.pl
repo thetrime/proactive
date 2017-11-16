@@ -16,16 +16,12 @@ vdiff(A, B, [a-A|PatchSet]):-
         %writeq(diff(A, B, [a-A|PatchSet])), nl,
         true.
 
-vmutate(A, B, DomNode, Options, NewNode):-
-        vmutate_1(A,B,DomNode,Options,NewNode),
-        writeln(vmutate_success).
 
-
-vmutate_1(A, A, DomNode, _Options, DomNode):-
+vmutate(A, A, DomNode, _Options, DomNode):-
         % Subtrees match: No action required.
         !.
 
-vmutate_1(A, {null}, DomNode, _Options, NewNode):-
+vmutate(A, {null}, DomNode, _Options, NewNode):-
         !,
         % Subtree is deleted
         patch_op(remove_patch(A, {null}), DomNode, Options, NewNode),
@@ -35,7 +31,7 @@ vmutate_1(A, {null}, DomNode, _Options, NewNode):-
         ; otherwise->
             destroy_widgets_quickly(A, DomNode, Options)
         ).
-vmutate_1(A, B, DomNode, Options, NewNode):-
+vmutate(A, B, DomNode, Options, NewNode):-
         B = element(BTag, BProps, _),
         !,
         ( A = element(ATag, AProps, _)->
@@ -64,7 +60,7 @@ vmutate_1(A, B, DomNode, Options, NewNode):-
             destroy_widgets_quickly(A, DomNode, Options)
         ).
 
-vmutate_1(A, B, DomNode, Options, {null}):-
+vmutate(A, B, DomNode, Options, {null}):-
         is_widget(B),
         !,
         ( \+is_widget(A)->
@@ -123,7 +119,7 @@ vmutate_children_1(A, B, DomNodes, ParentDomNode, Options):-
         ( Left == {null}, Right \== {null}->
             patch_op(insert_patch({null}, Right), ParentDomNode, Options, N)
         ; Left \== {null}->
-            vmutate_1(Left, Right, LeftDom, Options, N)
+            vmutate(Left, Right, LeftDom, Options, N)
         ; otherwise->
             N = DomNode
         ),
