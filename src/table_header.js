@@ -6,8 +6,8 @@ function TableHeader()
 {
     ReactComponent.call(this);
     this.weights = [];
-    this.thead = document.createElement("thead");
-    this.setDOMNode(this.thead);
+    this.tr = document.createElement("tr");
+    this.setDOMNode(this.tr);
     this.sum = 0;
     this.elements = [];
 }
@@ -24,7 +24,7 @@ TableHeader.prototype.appendChild = function(t)
     cell.className = "react_table_header_cell";
     cell.appendChild(t.domNode);
     this.elements.push(cell);
-    this.thead.appendChild(cell);
+    this.getDOMNode().appendChild(cell);
     this.weights[this.children.indexOf(t)] = t.weight || default_weight;
     this.sum += (Number(t.weight) || default_weight);
     t.setParent(this);

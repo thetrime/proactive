@@ -416,32 +416,36 @@ label
     align-self: stretch;
 }
 
+.react_table table
+{
+    width: 100%;
+    border-spacing: 0;
+}
+
+.react_table_body
+{
+    overflow: auto;
+    width: 100%;
+    border-spacing: 0;
+}
+
 .react_table tbody
 {
-    display: grid;
     background: #eeeeee;
     overflow-y: auto;
     overflow-x: hidden;
     width: 100%;
-    
 }
 
 .react_table tfoot
 {
-    display: grid;
     width: 100%;
     flex-shrink: 0;
 }
 
 .react_table thead
 {
-    display: grid;
     width: 100%;
-}
-
-.react_table tr
-{
-    display: contents;
 }
 
 .react_table tbody td
@@ -450,6 +454,11 @@ label
     padding: 5px;
     position: relative;
     z-index: 1;
+}
+
+.react_table tbody tr:nth-child(2n) td
+{
+    background: #dddddd;
 }
 
 .react_table thead th
@@ -461,6 +470,8 @@ label
 {
     padding: 5px;
 }
+
+/* end table stuff */
 
 .wrap
 {
