@@ -579,3 +579,7 @@ module.exports["qqq"] = function()
     return 1;
 }
 
+module.exports["ticks"] = function(t)
+{
+    return Prolog._unify(Prolog._make_float(performance.now()), t);
+}
