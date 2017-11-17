@@ -2,24 +2,21 @@ var ReactComponent = require('./react_component');
 var TableHeader = require('./table_header');
 var TableFooter = require('./table_footer');
 var Row = require('./row');
-
+var Prolog = require('proscript');
+var Constants = require('./constants.js');
 // This is the third major attempt at tables with fixed headers and footers.
 // What a nightmare. For something so obvious, it is amazing how hard it is to implement in HTML.
 // After all, why have a tbody separate from the thead and tfoot if you cant scroll the tbody?
-
-// TODO:
-//   * weights
-//   * zebra striping
-//   * insertBefore
-
 
 function Table()
 {
     ReactComponent.call(this);
     this.container = document.createElement("div");
     this.header_table = document.createElement("table");
+    this.header_table.className = "react_header_table";
     this.table = document.createElement("table");
     this.footer_table = document.createElement("table");
+    this.footer_table.className = "react_footer_table";
     this.baseClassName = "react_table scrollpane ";
     this.setDOMNode(this.container);
     this.container.appendChild(this.header_table);
@@ -187,7 +184,7 @@ Table.prototype.setProperties = function(t)
             if (list != Constants.emptyListAtom)
                 console.log("Bad weights list!");
             // If the weights have changed, relayout
-            if (newWeights.length != this.weights.length || !newWeights.every(function(v,i) { return v === this.weights[i]}.bind(this)))
+            if (this.weights == null || newWeights.length != this.weights.length || !newWeights.every(function(v,i) { return v === this.weights[i]}.bind(this)))
                 this.markDirty();
             this.weights = newWeights;
         }
@@ -196,7 +193,33 @@ Table.prototype.setProperties = function(t)
 
 Table.prototype.insertBefore = function(t, s)
 {
-    console.log("Table.insertBefore is not implemented");
+    var targetClass;
+    var target;
+    if (t instanceof TableHeader)
+    {
+        targetClass = TableHeader;
+        target = this.thead;
+    }
+    else if (t instanceof Row)
+    {
+        targetClass = Row;
+        target = this.tbody;
+    }
+    else if (t instanceof TableFooter)
+    {
+        targetClass = TableFooter;
+        target = this.tfoot;
+    }
+    var sibling = null;
+    for (var i = this.children.indexOf(s); i < this.children.length; i++)
+    {
+        if (this.children[i] instanceof targetClass)
+        {
+            sibling = this.children[i].getDOMNode();
+            break;
+        }
+    }
+    target.insertBefore(n.getDOMNode(), sibling);
     t.setParent(this);
 }
 

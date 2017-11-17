@@ -419,15 +419,15 @@ label
 .react_table table
 {
     width: 100%;
+    border-spacing: 0;
 }
 
 .react_table_body
 {
     overflow: auto;
     width: 100%;
+    border-spacing: 0;
 }
-
-
 
 .react_table tbody
 {
@@ -435,7 +435,6 @@ label
     overflow-y: auto;
     overflow-x: hidden;
     width: 100%;
-    
 }
 
 .react_table tfoot
@@ -449,17 +448,17 @@ label
     width: 100%;
 }
 
-.react_table tr
-{
-    display: contents;
-}
-
 .react_table tbody td
 {
     background: #eeeeee;
     padding: 5px;
     position: relative;
     z-index: 1;
+}
+
+.react_table tbody tr:nth-child(2n) td
+{
+    background: #dddddd;
 }
 
 .react_table thead th
