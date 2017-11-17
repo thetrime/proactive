@@ -16,12 +16,18 @@ vdiff(A, B, [a-A|PatchSet]):-
         %writeq(diff(A, B, [a-A|PatchSet])), nl,
         true.
 
+vmutate(A, B, DomNode, Options, NewNode):-
+%        ticks(T0),
+        vmutate_1(A, B, DomNode, Options, NewNode),
+%        ticks(T1),
+%        D is T1 - T0,
+%        writeln(mutate_time(D)),
+        true.
 
-vmutate(A, A, DomNode, _Options, DomNode):-
+vmutate_1(A, A, DomNode, _Options, DomNode):-
         % Subtrees match: No action required.
         !.
-
-vmutate(A, {null}, DomNode, _Options, NewNode):-
+vmutate_1(A, {null}, DomNode, _Options, NewNode):-
         !,
         % Subtree is deleted
         patch_op(remove_patch(A, {null}), DomNode, Options, NewNode),
@@ -31,7 +37,8 @@ vmutate(A, {null}, DomNode, _Options, NewNode):-
         ; otherwise->
             destroy_widgets_quickly(A, DomNode, Options)
         ).
-vmutate(A, B, DomNode, Options, NewNode):-
+
+vmutate_1(A, B, DomNode, Options, NewNode):-
         B = element(BTag, BProps, _),
         !,
         ( A = element(ATag, AProps, _)->
@@ -59,8 +66,7 @@ vmutate(A, B, DomNode, Options, NewNode):-
             patch_op(node_patch(A, B), DomNode, Options, NewNode),
             destroy_widgets_quickly(A, DomNode, Options)
         ).
-
-vmutate(A, B, DomNode, Options, {null}):-
+vmutate_1(A, B, DomNode, Options, {null}):-
         is_widget(B),
         !,
         ( \+is_widget(A)->
@@ -89,8 +95,8 @@ destroy_widget_children([Element|Elements], [DomNode|DomNodes], Options):-
         destroy_widget_children(Elements, DomNodes, Options).
 
 vmutate_children(A, B, DomNode, Options, NewNode):-
-        expand_children(A, AChildren),
-        expand_children(B, BChildren),
+        children_of(A, AChildren),
+        children_of(B, BChildren),
         reorder(AChildren, BChildren, Ordered, Moves),
         child_nodes(DomNode, DomChildren),
         !,
@@ -99,6 +105,9 @@ vmutate_children(A, B, DomNode, Options, NewNode):-
             NewNode = DomNode
         ; patch_op(order_patch(A, Moves), DomNode, Options, NewNode)
         ).
+
+children_of(widget(_,_,Children), Children):- !.
+children_of(element(_,_,Children), Children):- !.
 
 vmutate_children_1([], [], [], _, _):- !.
 vmutate_children_1(A, B, DomNodes, ParentDomNode, Options):-
@@ -119,7 +128,7 @@ vmutate_children_1(A, B, DomNodes, ParentDomNode, Options):-
         ( Left == {null}, Right \== {null}->
             patch_op(insert_patch({null}, Right), ParentDomNode, Options, N)
         ; Left \== {null}->
-            vmutate(Left, Right, LeftDom, Options, N)
+            vmutate_1(Left, Right, LeftDom, Options, N)
         ; otherwise->
             N = DomNode
         ),
