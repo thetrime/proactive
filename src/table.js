@@ -93,8 +93,6 @@ Table.prototype.relayout = function()
     // Start by setting the size of each column to the size of the header
     for (var i = 0; i < this.column_count; i++)
         columns[i] = this.thead.lastChild.children[i].clientWidth;
-    console.log("Headers:");
-    console.log(columns);
     // Then for every cell, if it is wider than the current column, widen the column
     for (var j = 0; j < this.tbody.children.length; j++)
     {
@@ -120,7 +118,6 @@ Table.prototype.relayout = function()
         total += columns[i];
     }
     this.remove_colgroups();
-    console.log(columns);
     for (var i = 0; i < columns.length; i++)
     {
         this.set_column_width((100 * columns[i] / total));
@@ -163,38 +160,15 @@ Table.prototype.replaceChild = function(n, o)
     // This is quite complicated since there are 6 possible cases.
     if (n instanceof TableHeader && o instanceof TableHeader)
     {
-        // This is probably the simplest case.
-        // Delete the old thead and then add in the new one
-        while (this.thead.hasChildNodes())
-            this.thead.removeChild(this.thead.lastChild);
-        var row = n.getElements();
-        for (var i = 0; i < row.length; i++)
-            this.thead.appendChild(row[i]);
+        this.thead.replaceChild(n.getDOMNode(), o.getDOMNode());
     }
     else if (n instanceof TableFooter && o instanceof TableFooter)
     {
-        // This is more challenging. We need to know WHICH footer we are replacing
-        var footIndex = this.children.indexOf(o);
-        // Now delete the count elements from tfoot starting at footIndex
-        // Since the list will keep shrinking, we can just keep deleting the same index
-        for (var i = 0; i < this.column_count; i++)
-            this.tfoot.removeChild(this.tfoot.childNodes[footIndex]);
-        // Now we can add them back in
-        var sibling = this.tfoot.childNodes[footIndex];
-        var row = n.getElements();
-        for (var i = 0; i < row.length; i++)
-            this.tfoot.insertBefore(row[i], sibling);
+        this.tfoot.replaceChild(n.getDOMNode(), o.getDOMNode());
     }
     else if (n instanceof Row && o instanceof Row)
     {
-        // This is basically the same as TableFooter -> TableFooter
-        var bodyIndex = this.children.indexOf(o);
-        for (var i = 0; i < this.column_count; i++)
-            this.tbody.removeChild(this.tbody.childNodes[bodyIndex]);
-        var sibling = this.tbody.childNodes[bodyIndex];
-        var row = n.getElements();
-        for (var i = 0; i < row.length; i++)
-            this.tbody.insertBefore(row[i], sibling);
+        this.tbody.replaceChild(n.getDOMNode(), o.getDOMNode());
     }
     else if (n instanceof Row && o instanceof TableFooter)
     {
@@ -207,46 +181,34 @@ Table.prototype.replaceChild = function(n, o)
         //   <TableFooter/>
         // </Table>
 
-        var bodyIndex = 0;
-        var footIndex = 0;
-        for (var i = this.children.indexOf(o); i >= 0; i--)
+        // First, remove the old node. This is quite easy in a real table
+        this.tfoot.removeChild(o.getDOMNode());
+        // Now find the sibling to insert before. This is the next Row in the child list (or null if there is no such child)
+        var sibling = null
+        for (var i = this.children.indexOf(o); i < this.children.length; i++)
         {
             if (this.children[i] instanceof Row)
-                bodyIndex++;
-            else if (this.children[i] instanceof TableFooter)
-                footIndex++;
+            {
+                sibling = this.children[i].getDOMNode();
+                break;
+            }
         }
-        // We want to remove the (footIndex)th footer and insert a new row after the (bodyIndex)th row
-        // The actual position of the first item in the footer is (footIndex * count) since a footer
-        // describes (count) actual nodes
-        for (var i = 0; i < this.column_count; i++)
-            this.tfoot.removeChild(this.tfoot.childNodes[footIndex * this.column_count]);
-
-        // Similarly, (bodyIndex*count) describes the index of the tbody that we want to insert before
-        var row = n.getElements();
-        var beforeSibling = this.tbody.childNodes[bodyIndex * this.column_count];
-        for (var i = 0; i < row.length; i++)
-            this.tbody.insertBefore(row[i], beforeSibling);
+        this.tbody.insertBefore(n.getDOMNode(), sibling);
     }
     else if (n instanceof TableFooter && o instanceof Row)
     {
         // This is basically the same as the Row/TableFooter case above, just with the opposite operations at the end
-        // The only wrinkle is that bodyIndex will always be one too high since this.children[i] is always Row
-        var bodyIndex = -1;
-        var footIndex = 0;
-        for (var i = this.children.indexOf(o); i >= 0; i--)
+        this.tbody.removeChild(o.getDOMNode());
+        var sibling = null
+        for (var i = this.children.indexOf(o); i < this.children.length; i++)
         {
-            if (this.children[i] instanceof Row)
-                bodyIndex++;
-            else if (this.children[i] instanceof TableFooter)
-                footIndex++;
+            if (this.children[i] instanceof TableFooter)
+            {
+                sibling = this.children[i].getDOMNode();
+                break;
+            }
         }
-        for (var i = 0; i < this.column_count; i++)
-            this.tbody.removeChild(this.tbody.childNodes[bodyIndex * this.column_count]);
-        var row = n.getElements();
-        var beforeSibling = this.tfoot.childNodes[footIndex * this.column_count];
-        for (var i = 0; i < row.length; i++)
-            this.tfoot.insertBefore(row[i], beforeSibling);
+        this.tfoot.insertBefore(n.getDOMNode(), sibling);
 
     }
     else
@@ -263,36 +225,13 @@ Table.prototype.replaceChild = function(n, o)
 
 Table.prototype.removeChild = function(t)
 {
-    // Unfortunately we cannot just remove the nth child of tfoot (for example)
-    // by looking up which index in this.children t belongs at, because there is
-    // no (simple) relationship between this.children and the actual DOM
-    var bodyIndex = 0;
-    var footIndex = 0;
-    var headIndex = 0;
-    for (var i = this.children.indexOf(t)-1; i >= 0; i--)
-    {
-        if (this.children[i] instanceof Row)
-            bodyIndex++;
-        else if (this.children[i] instanceof TableFooter)
-            footIndex++;
-        else if (this.children[i] instanceof TableHeader)
-            headIndex++;
-    }
+    if (t instanceof TableHeader)
+        this.thead.removeChild(t.getDOMNode());
     if (t instanceof Row)
-    {
-        for (var i = 0; i < this.column_count; i++)
-            this.tbody.removeChild(this.tbody.childNodes[bodyIndex*this.column_count]);
-    }
-    else if (t instanceof TableFooter)
-    {
-        for (var i = 0; i < this.column_count; i++)
-            this.tfoot.removeChild(this.tfoot.childNodes[footIndex*this.column_count]);
-    }
-    else if (t instanceof TableHeader)
-    {
-        while (this.thead.hasChildNodes())
-            this.thead.removeChild(this.thead.lastChild);
-    }
+        this.tbody.removeChild(t.getDOMNode());
+    if (t instanceof TableFooter)
+        this.tfoot.removeChild(t.getDOMNode());
+
     t.setParent(null);
     this.markDirty()
 }
