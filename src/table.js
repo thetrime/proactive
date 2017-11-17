@@ -3,7 +3,15 @@ var TableHeader = require('./table_header');
 var TableFooter = require('./table_footer');
 var Row = require('./row');
 
-// FIXME: This is the third major attempt. Hopefully this time?
+// This is the third major attempt at tables with fixed headers and footers.
+// What a nightmare. For something so obvious, it is amazing how hard it is to implement in HTML.
+// After all, why have a tbody separate from the thead and tfoot if you cant scroll the tbody?
+
+// TODO:
+//   * weights
+//   * zebra striping
+//   * insertBefore
+
 
 function Table()
 {
@@ -35,20 +43,21 @@ function Table()
     this.dirty = false;
     this.dirtCount = 0;
     this.column_count = 0;
+    this.weights = null;
     this.markDirty();
 }
 Table.prototype = new ReactComponent;
 
-Table.prototype.set_column_width = function(p)
+Table.prototype.set_column_width = function(w)
 {
     var col = document.createElement("col");
-    col.style = 'width: ' + p + '%';
+    col.style = 'width: ' + w;
     this.header_colgroup.appendChild(col);
     col = document.createElement("col");
-    col.style = 'width: ' + p + '%';
+    col.style = 'width: ' + w;
     this.body_colgroup.appendChild(col);
     col = document.createElement("col");
-    col.style = 'width: ' + p + '%';
+    col.style = 'width: ' + w;
     this.footer_colgroup.appendChild(col);
 }
 
@@ -87,28 +96,35 @@ Table.prototype.relayout = function()
 {
     var padding = 3;
 
-    // First, unfortunately, we need to look at every single cell
     var columns = [];
 
-    // Start by setting the size of each column to the size of the header
-    for (var i = 0; i < this.column_count; i++)
-        columns[i] = this.thead.lastChild.children[i].clientWidth;
-    // Then for every cell, if it is wider than the current column, widen the column
-    for (var j = 0; j < this.tbody.children.length; j++)
+    if (this.weights != null)
     {
-        for (var i = 0; i < this.tbody.children[j].children.length; i++)
-        {
-            if (columns[i] < this.tbody.children[j].children[i].clientWidth)
-                columns[i] = this.tbody.children[j].children[i].clientWidth;
-        }
+        columns = this.weights;
     }
-    // Finally, do the footer
-    for (var j = 0; j < this.tfoot.children.length; j++)
+    else
     {
-        for (var i = 0; i < this.tfoot.children[j].children.length; i++)
+        // Otherwise, unfortunately, we need to look at every single cell
+        // Start by setting the size of each column to the size of the header
+        for (var i = 0; i < this.column_count; i++)
+            columns[i] = this.thead.lastChild.children[i].clientWidth;
+        // Then for every cell, if it is wider than the current column, widen the column
+        for (var j = 0; j < this.tbody.children.length; j++)
         {
-            if (columns[i] < this.tfoot.children[j].children[i].clientWidth)
-                columns[i] = this.tfoot.children[j].children[i].clientWidth;
+            for (var i = 0; i < this.tbody.children[j].children.length; i++)
+            {
+                if (columns[i] < this.tbody.children[j].children[i].clientWidth)
+                    columns[i] = this.tbody.children[j].children[i].clientWidth;
+            }
+        }
+        // Finally, do the footer
+        for (var j = 0; j < this.tfoot.children.length; j++)
+        {
+            for (var i = 0; i < this.tfoot.children[j].children.length; i++)
+            {
+                if (columns[i] < this.tfoot.children[j].children[i].clientWidth)
+                    columns[i] = this.tfoot.children[j].children[i].clientWidth;
+            }
         }
     }
 
@@ -120,7 +136,7 @@ Table.prototype.relayout = function()
     this.remove_colgroups();
     for (var i = 0; i < columns.length; i++)
     {
-        this.set_column_width((100 * columns[i] / total));
+        this.set_column_width((100 * columns[i] / total) + '%');
     }
     // Reset the width on the tables to take up the full width of the panel
     this.header_table.style.width = '';
@@ -149,6 +165,35 @@ Table.prototype.appendChild = function(t)
     this.markDirty()
 }
 
+Table.prototype.setProperties = function(t)
+{
+    ReactComponent.prototype.setProperties.call(this, t);
+    if (t.weights !== undefined)
+    {
+        if (ReactComponent.isNull(t.weights))
+        {
+            this.weights = null;
+            this.markDirty();
+        }
+        else
+        {
+            var list = t.weights;
+            var newWeights = [];
+            while (Prolog._is_compound(list) && Prolog._term_functor(list) == Constants.listFunctor)
+            {
+                newWeights.push(ReactComponent.numericValueOr(Prolog._term_arg(list, 0), 0));
+                list = Prolog._term_arg(list, 1);
+            }
+            if (list != Constants.emptyListAtom)
+                console.log("Bad weights list!");
+            // If the weights have changed, relayout
+            if (newWeights.length != this.weights.length || !newWeights.every(function(v,i) { return v === this.weights[i]}.bind(this)))
+                this.markDirty();
+            this.weights = newWeights;
+        }
+    }
+}
+
 Table.prototype.insertBefore = function(t, s)
 {
     console.log("Table.insertBefore is not implemented");
@@ -170,53 +215,56 @@ Table.prototype.replaceChild = function(n, o)
     {
         this.tbody.replaceChild(n.getDOMNode(), o.getDOMNode());
     }
-    else if (n instanceof Row && o instanceof TableFooter)
+    else
     {
-        // It may seem like the row has to be at the end here if we are making a TableFooter into a row,
-        // but internally we can have:
+        // This might seem relatively simple, but remember we can easily get cases like this:
         // <Table>
         //   <Row/>
         //   <TableFooter/>    <-- this is what must be converted from TableFooter -> Row
         //   <Row/>
         //   <TableFooter/>
         // </Table>
+        //
+        // This means we cannot assume, for example, that a TableFooter child always appears after all the Row children
 
-        // First, remove the old node. This is quite easy in a real table
-        this.tfoot.removeChild(o.getDOMNode());
-        // Now find the sibling to insert before. This is the next Row in the child list (or null if there is no such child)
-        var sibling = null
+        // Out with the old, ...
+        if (o instanceof TableHeader)
+            this.thead.removeChild(o.getDOMNode());
+        else if (o instanceof Row)
+            this.tbody.removeChild(o.getDOMNode());
+        else if (o instanceof TableFooter)
+            this.tfoot.removeChild(o.getDOMNode());
+
+        // In with the new
+        // We must find the sibling to insert before. This is the next object in the child list with the same class as n (or null if there is no such child)
+        // I did not know you could do this in Javascript until today!
+        var targetClass;
+        var target;
+        if (n instanceof TableHeader)
+        {
+            targetClass = TableHeader;
+            target = this.thead;
+        }
+        else if (n instanceof Row)
+        {
+            targetClass = Row;
+            target = this.tbody;
+        }
+        else if (n instanceof TableFooter)
+        {
+            targetClass = TableFooter;
+            target = this.tfoot;
+        }
+        var sibling = null;
         for (var i = this.children.indexOf(o); i < this.children.length; i++)
         {
-            if (this.children[i] instanceof Row)
+            if (this.children[i] instanceof targetClass)
             {
                 sibling = this.children[i].getDOMNode();
                 break;
             }
         }
-        this.tbody.insertBefore(n.getDOMNode(), sibling);
-    }
-    else if (n instanceof TableFooter && o instanceof Row)
-    {
-        // This is basically the same as the Row/TableFooter case above, just with the opposite operations at the end
-        this.tbody.removeChild(o.getDOMNode());
-        var sibling = null
-        for (var i = this.children.indexOf(o); i < this.children.length; i++)
-        {
-            if (this.children[i] instanceof TableFooter)
-            {
-                sibling = this.children[i].getDOMNode();
-                break;
-            }
-        }
-        this.tfoot.insertBefore(n.getDOMNode(), sibling);
-
-    }
-    else
-    {
-        console.log("Table transform not implemented");
-        console.log(o);
-        console.log("   ->   ");
-        console.log(n);
+        target.insertBefore(n.getDOMNode(), sibling);
     }
     n.setParent(this);
     o.setParent(null);
