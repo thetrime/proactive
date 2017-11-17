@@ -416,9 +416,21 @@ label
     align-self: stretch;
 }
 
+.react_table table
+{
+    width: 100%;
+}
+
+.react_table_body
+{
+    overflow: auto;
+    width: 100%;
+}
+
+
+
 .react_table tbody
 {
-    display: grid;
     background: #eeeeee;
     overflow-y: auto;
     overflow-x: hidden;
@@ -428,14 +440,12 @@ label
 
 .react_table tfoot
 {
-    display: grid;
     width: 100%;
     flex-shrink: 0;
 }
 
 .react_table thead
 {
-    display: grid;
     width: 100%;
 }
 

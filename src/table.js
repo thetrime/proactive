@@ -8,17 +8,30 @@ var Row = require('./row');
 function Table()
 {
     ReactComponent.call(this);
+    this.container = document.createElement("div");
+    this.header_table = document.createElement("table");
     this.table = document.createElement("table");
+    this.footer_table = document.createElement("table");
     this.baseClassName = "react_table scrollpane ";
-    this.setDOMNode(this.table);
-    this.colgroup = document.createElement("colgroup");
+    this.setDOMNode(this.container);
+    this.container.appendChild(this.header_table);
+    this.body_container = document.createElement("div");
+    this.body_container.appendChild(this.table);
+    this.body_container.className = "react_table_body";
+    this.container.appendChild(this.body_container);
+    this.container.appendChild(this.footer_table);
     this.thead = document.createElement("thead");
     this.tbody = document.createElement("tbody");
     this.tfoot = document.createElement("tfoot");
-    this.table.appendChild(this.colgroup);
-    this.table.appendChild(this.thead);
+    this.header_colgroup = document.createElement("colgroup");
+    this.body_colgroup = document.createElement("colgroup");
+    this.footer_colgroup = document.createElement("colgroup");
+    this.header_table.appendChild(this.header_colgroup);
+    this.table.appendChild(this.body_colgroup);
+    this.footer_table.appendChild(this.footer_colgroup);
+    this.header_table.appendChild(this.thead);
     this.table.appendChild(this.tbody);
-    this.table.appendChild(this.tfoot);
+    this.footer_table.appendChild(this.tfoot);
     this.dirty = false;
     this.dirtCount = 0;
     this.column_count = 0;
@@ -26,14 +39,40 @@ function Table()
 }
 Table.prototype = new ReactComponent;
 
+Table.prototype.set_column_width = function(p)
+{
+    var col = document.createElement("col");
+    col.style = 'width: ' + p + '%';
+    this.header_colgroup.appendChild(col);
+    col = document.createElement("col");
+    col.style = 'width: ' + p + '%';
+    this.body_colgroup.appendChild(col);
+    col = document.createElement("col");
+    col.style = 'width: ' + p + '%';
+    this.footer_colgroup.appendChild(col);
+}
+
+Table.prototype.remove_colgroups = function()
+{
+    while (this.header_colgroup.hasChildNodes())
+        this.header_colgroup.removeChild(this.header_colgroup.lastChild);
+    while (this.body_colgroup.hasChildNodes())
+        this.body_colgroup.removeChild(this.body_colgroup.lastChild);
+    while (this.footer_colgroup.hasChildNodes())
+        this.footer_colgroup.removeChild(this.footer_colgroup.lastChild);
+}
+
 Table.prototype.markDirty = function()
 {
     if (this.column_count == this.dirtCount && this.dirty)
         return;
     this.dirtCount = this.column_count;
-    var style = "";
-    while (this.colgroup.hasChildNodes())
-        this.colgroup.removeChild(this.colgroup.lastChild);
+    // We have to set the tables to all be 'auto' width here so that small columns arent stretched out
+    // after all, we want to compute the minimum width for each column!
+    this.header_table.style.width = 'auto';
+    this.table.style.width = 'auto';
+    this.footer_table.style.width = 'auto';
+    this.remove_colgroups();
     if (!this.dirty)
     {
         // Only put in one request to resize. If the number of columns changes that is fine - we will redo the auto style in the lines just
@@ -54,34 +93,43 @@ Table.prototype.relayout = function()
     // Start by setting the size of each column to the size of the header
     for (var i = 0; i < this.column_count; i++)
         columns[i] = this.thead.lastChild.children[i].clientWidth;
+    console.log("Headers:");
+    console.log(columns);
     // Then for every cell, if it is wider than the current column, widen the column
     for (var j = 0; j < this.tbody.children.length; j++)
     {
         for (var i = 0; i < this.tbody.children[j].children.length; i++)
         {
-            if (columns[j] < this.tbody.children[j].children[i].clientWidth)
-                columns[j] = this.tbody.children[j].children[i].clientWidth;
+            if (columns[i] < this.tbody.children[j].children[i].clientWidth)
+                columns[i] = this.tbody.children[j].children[i].clientWidth;
         }
     }
     // Finally, do the footer
     for (var j = 0; j < this.tfoot.children.length; j++)
-        if (columns[j % this.column_count] < this.tfoot.children[j].clientWidth)
-            columns[j % this.column_count] = this.tfoot.children[j].clientWidth;
+    {
+        for (var i = 0; i < this.tfoot.children[j].children.length; i++)
+        {
+            if (columns[i] < this.tfoot.children[j].children[i].clientWidth)
+                columns[i] = this.tfoot.children[j].children[i].clientWidth;
+        }
+    }
 
     var total = 0;
     for (var i = 0; i < columns.length; i++)
     {
         total += columns[i];
     }
-    while (this.colgroup.hasChildNodes())
-        this.colgroup.removeChild(this.colgroup.lastChild);
-
+    this.remove_colgroups();
+    console.log(columns);
     for (var i = 0; i < columns.length; i++)
     {
-        var col = document.createElement("col");
-        col.style = 'width: ' + (100 * columns[i] / total);
-        this.colgroup.appendChild(col);
+        this.set_column_width((100 * columns[i] / total));
     }
+    // Reset the width on the tables to take up the full width of the panel
+    this.header_table.style.width = '';
+    this.table.style.width = '';
+    this.footer_table.style.width = '';
+
     this.dirty = false;
 }
 
