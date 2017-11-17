@@ -61,6 +61,9 @@ Row.prototype.setProperties = function(t)
    ReactComponent.prototype.setProperties.call(this, t);
     if (t.onDblClick !== undefined)
         this.setDblClickHandler(t.onDblClick);
+    if (t.onClick !== undefined)
+        this.setClickHandler(t.onClick);
+
 }
 
 Row.prototype.setDblClickHandler = function(value)
@@ -77,6 +80,24 @@ Row.prototype.setDblClickHandler = function(value)
     this.domNode.ondblclick = dblClickHandler.bind(this);
 }
 
+Row.prototype.setClickHandler = function(value)
+{
+    if (this.setClickHandler != null)
+        Prolog._free_local(this.setClickHandler);
+    if (ReactComponent.isNull(value))
+    {
+        if (this.domNode.onClick !== undefined)
+            this.domNode.onClick = undefined;
+        return;
+    }
+    this.clickHandler = Prolog._make_local(value);
+    this.domNode.onclick = clickHandler.bind(this);
+}
+
+function clickHandler(event)
+{
+    this.getOwnerDocument().triggerEvent(this.clickHandler, Constants.emptyListAtom, function() {});
+}
 function dblClickHandler(event)
 {
     this.getOwnerDocument().triggerEvent(this.dblClickHandler, Constants.emptyListAtom, function() {});
