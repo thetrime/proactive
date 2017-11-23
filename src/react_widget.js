@@ -128,7 +128,7 @@ ReactWidget.prototype.freeComponent = function(vNode)
 
 ReactWidget.prototype.reRender = function(callback)
 {
-    /*
+    /* This is the slow-diff code
     this.engine.render(this, this.elementId, this.state, this.props, function(newVDom)
                        {
                            this.engine.diff(this.vDom, newVDom, function(patches)
@@ -145,10 +145,15 @@ ReactWidget.prototype.reRender = function(callback)
                                             }.bind(this));
                        }.bind(this));
     */
+    //var t0 = performance.now();
     this.engine.render(this, this.elementId, this.state, this.props, function(newVDom)
                        {
+                           //var t1 = performance.now();
                            this.engine.mutate(this.vDom, newVDom, this.internalComponent, function()
                                               {
+                                                  var t2 = performance.now();
+                                                  //console.log("Time to render " + this.elementId + ":" + (t1-t0));
+                                                  //console.log("Time to mutate " + this.elementId + ":" + (t2-t1));
                                                   this.internalComponent.setOwnerDocument(this);
                                                   if (this.vDom != null)
                                                       Prolog._free_local(this.vDom);
