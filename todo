@@ -14,3 +14,4 @@ Swing
 General
 -------
 How to do things like images on buttons? an Image child to a Button, or a image attribute on the Button? If the former we can control the attributes more directly. But it could also get out of hand. If the latter, it seems kind of hacky.
+Can I improve the diff algorithm? Currently it cannot detect insertions, and as a result adding an item to the start of a list of N items results in a series of N changes rather than a single insert.
