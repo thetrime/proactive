@@ -17,6 +17,7 @@ vdiff(A, B, [a-A|PatchSet]):-
         true.
 
 vmutate(A, B, DomNode, Options, NewNode):-
+        %writeln(vmutate(A,B)),
 %        ticks(T0),
         vmutate_1(A, B, DomNode, Options, NewNode),
 %        ticks(T1),
@@ -74,8 +75,9 @@ vmutate_1(A, B, DomNode, Options, {null}):-
             destroy_widgets_quickly(A, DomNode, Options)
         ; otherwise->
             % This is a widget changing to a different widget
-            patch_op(widget_patch(A, B), DomNode, Options, _)
-        ).
+            true
+        ),
+        patch_op(widget_patch(A, B), DomNode, Options, _).
 
 destroy_widgets_quickly(A, DomNode, Options):-
         is_widget(A),
