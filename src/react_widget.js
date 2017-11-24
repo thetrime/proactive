@@ -111,7 +111,7 @@ ReactWidget.prototype.updateWidget = function(newProps, callback)
 
 ReactWidget.prototype.destroyWidget = function(vNode)
 {
-    console.log("Destroy component: " + Prolog._portray(vNode));
+    //console.log("Destroy component: " + Prolog._portray(vNode));
     this.engine.deregisterWidget(this);
     this.freeComponent(vNode);
 }
