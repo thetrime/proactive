@@ -658,6 +658,9 @@ index_in_range_1(MinIndex, MaxIndex, Indices, Left, Right):-
             true
         ).
 
+%patch_op(Patch, _, _, _):-
+%        writeln(Patch), fail.
+
 patch_op(remove_patch(VNode, _), DomNode, _Options, NewNode):-
         !,
         parent_node(DomNode, ParentNode),
@@ -749,26 +752,39 @@ patch_op(props_patch(VNode, Patch), DomNode, _Options, DomNode):-
 
 %patch_op(thunk_patch(VNode, Patch), DomNode, Options, ?) % FIXME: Implement
 
+select_nth0(0, [Node|Tail], Node, Tail):- !.
+select_nth0(N, [Node|Tail], Child, [Node|Rest]):-
+        NN is N-1,
+        select_nth0(NN, Tail, Child, Rest).
+
+insert_nth0(0, Tail, Node, [Node|Tail]):- !.
+insert_nth0(N, [Node|Tail], Child, [Node|More]):-
+        NN is N-1,
+        insert_nth0(NN, Tail, Child, More).
+
 reorder_removes([], _DomNode, _ChildNodes, T, T):- !.
 reorder_removes([remove(From, Key)|Removes], DomNode, ChildNodes, KeyMap, FinalKeyMap):-
-        nth0(From, ChildNodes, Node),
+        select_nth0(From, ChildNodes, Node, RemainingChildren),
         ( Key \== {null}->
             NewKeyMap = [Key-Node|KeyMap]
         ; otherwise->
             NewKeyMap = KeyMap
         ),
         remove_child(DomNode, Node),
-        reorder_removes(Removes, DomNode, ChildNodes, NewKeyMap, FinalKeyMap).
+        reorder_removes(Removes, DomNode, RemainingChildren, NewKeyMap, FinalKeyMap).
 
 reorder_inserts([], _DomNode, _ChildNodes, _KeyMap):- !.
 reorder_inserts([insert(Key, Position)|Inserts], DomNode, ChildNodes, KeyMap):-
         memberchk(Key-Node, KeyMap),
         ( nth0(Position, ChildNodes, Sibling)->
+            insert_nth0(Position, ChildNodes, Sibling, NewChildNodes),
             insert_before(DomNode, Node, Sibling)
         ; otherwise->
+            length(ChildNodes, L),
+            insert_nth0(L, ChildNodes, Sibling, NewChildNodes),
             insert_before(DomNode, Node, {null})
         ),
-        reorder_inserts(Inserts, DomNode, ChildNodes, KeyMap).
+        reorder_inserts(Inserts, DomNode, NewChildNodes, KeyMap).
 
 render(Options, VNodeIn, DomNode):-
         handle_thunk(VNodeIn, {null}, VNode, _),
