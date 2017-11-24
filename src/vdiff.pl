@@ -126,11 +126,11 @@ vmutate_children_1(A, B, DomNodes, ParentDomNode, Options):-
             Right = {null}
         ),
         ( Left == {null}, Right \== {null}->
-            patch_op(insert_patch({null}, Right), ParentDomNode, Options, N)
+            patch_op(insert_patch({null}, Right), ParentDomNode, Options, _)
         ; Left \== {null}->
-            vmutate_1(Left, Right, LeftDom, Options, N)
+            vmutate_1(Left, Right, LeftDom, Options, _)
         ; otherwise->
-            N = DomNode
+            true
         ),
         vmutate_children_1(ASiblings, BSiblings, DomSiblings, ParentDomNode, Options).
 
