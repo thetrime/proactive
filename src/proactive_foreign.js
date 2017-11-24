@@ -352,23 +352,32 @@ module.exports["insert_before"] = function(parent, child, sibling)
 {
     var p = Prolog._get_blob("react_component", parent);
     var c = Prolog._get_blob("react_component", child);
-    var s = Prolog._get_blob("react_component", sibling);
-    var found = false;
-    var index = -1;
-    for (var i = 0; i < p.children.length; i++)
+    if (isNull(sibling))
     {
-        if (p.children[i] == s)
-        {
-            index = i;
-            found = true;
-            break;
-        }
+        p.insertBefore(c, null);
+        p.children.push(c);
+        return 1;
     }
-    if (!found)
-        throw new Error("Attempt to insert before non-existent sibling");
-    p.insertBefore(c, s);
-    p.children.splice(index, 0, c);
-    return 1;
+    else
+    {
+        var s = Prolog._get_blob("react_component", sibling);
+        var found = false;
+        var index = -1;
+        for (var i = 0; i < p.children.length; i++)
+        {
+            if (p.children[i] == s)
+            {
+                index = i;
+                found = true;
+                break;
+            }
+        }
+        if (!found)
+            throw new Error("Attempt to insert before non-existent sibling");
+        p.insertBefore(c, s);
+        p.children.splice(index, 0, c);
+        return 1;
+    }
 }
 
 module.exports["replace_child"] = function(parent, newChild, oldChild)
