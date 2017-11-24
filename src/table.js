@@ -211,15 +211,18 @@ Table.prototype.insertBefore = function(t, s)
         target = this.tfoot;
     }
     var sibling = null;
-    for (var i = this.children.indexOf(s); i < this.children.length; i++)
+    if (s != null)
     {
-        if (this.children[i] instanceof targetClass)
+        for (var i = this.children.indexOf(s); i < this.children.length; i++)
         {
-            sibling = this.children[i].getDOMNode();
-            break;
+            if (this.children[i] instanceof targetClass)
+            {
+                sibling = this.children[i].getDOMNode();
+                break;
+            }
         }
     }
-    target.insertBefore(n.getDOMNode(), sibling);
+    target.insertBefore(t.getDOMNode(), sibling);
     t.setParent(this);
 }
 
