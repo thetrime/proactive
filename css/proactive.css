@@ -354,6 +354,8 @@ td > *
 .grid
 {
     display: grid;
+    /* Really we dont mean flex-shrink: 0 so much as that the flex-basis should be the min-content-height. Otherwise if you have a grid and a huge table, the grid will get crushed to a sliver */
+    flex-shrink: 0;
 }
 
 
