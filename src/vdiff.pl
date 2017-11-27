@@ -17,7 +17,7 @@ vdiff(A, B, [a-A|PatchSet]):-
         true.
 
 vmutate(A, B, DomNode, Options, NewNode):-
-        %writeln(vmutate(A,B)),
+%        writeln(vmutate(A,B)),
 %        ticks(T0),
         vmutate_1(A, B, DomNode, Options, NewNode),
 %        ticks(T1),
@@ -364,10 +364,12 @@ reorder(AChildren, BChildren, Ordered, Moves):-
             Ordered = BChildren,
             Moves = {no_moves}
         ; otherwise->
-            % FIXME: I think reorder_1 is missing at least one level of indirection...
-            % FIXME: Return deletedItems from reorder_1 and check it against removes.length
+            % reorder_1 iterates through the items in AChildren and tries to find matching nodes in BChildren
             reorder_1(AChildren, BKeys, BFree, BStillFree, Ordered, Tail),
+
+            % reorder_2 then appends any new keys still missing from B
             reorder_2(BChildren, AKeys, BStillFree, Tail),
+
             simulate(BChildren, 0, BKeys, 0, Ordered, Removes, Inserts),
             ( Inserts == []->
                 Moves = {no_moves}
@@ -417,11 +419,13 @@ simulate([WantedItem|BChildren], K, BKeys, SimulateIndex, [SimulateItem|Simulati
                 ( memberchk(SimulateKey=key(_, Index), BKeys),
                   Index =\= K+1->
                     Removes = [remove(SimulateIndex, SimulateKey)|MoreRemoves],
-                    ( Simulations = [NextSimulateItem|MoreSimulations]->
+                    % We must now effectively delete the item from Simulations. This happens for free since we are also iterating through that list
+                    % However, we need to now consider NextSimulateItem for the rest of the clause
+                    MoreSimulations = Simulations,
+                    ( Simulations = [NextSimulateItem|_]->
                         true
                     ; otherwise->
-                        NextSimulateItem = {null},
-                        MoreSimulations = []
+                        NextSimulateItem = {null}
                     ),
                     ( ( NextSimulateItem == {null} ; \+get_key_or_null(NextSimulateItem, WantedKey))->
                         Inserts = [insert(WantedKey, K)|MoreInserts],
@@ -499,17 +503,24 @@ key_index([Child|Children], Objects, Index, Keys, Free):-
 
 reorder_1([], _BKeys, BFree, BFree, T, T):- !.
 reorder_1([AItem|Children], BKeys, BFree, BStillFree, NewChildren, Tail):-
+        % If the next item in A has a key,
         ( get_key_if_exists(AItem, Key)->
+            % If that key is also present in B
             ( memberchk(Key=key(BChild, _), BKeys)->
+                % Then match them up and emit that item in the list
                 NewChildren = [BChild|More]
             ; otherwise->
+                % Otherwise, if there is no such item in B, then insert a placeholder
                 NewChildren = [{null}|More]
             ),
             MoreBFree = BFree
         ; otherwise->
+            % However, if the item does not have a key at all,
             ( BFree = [free(BChild, _)|MoreBFree]->
+                % Consume a free spot in the children, if there is one
                 NewChildren = [BChild|More]
             ; otherwise->
+                % Otherwise we just put a placeholder
                 BFree = MoreBFree,
                 NewChildren = [{null}|More]
             )
@@ -779,11 +790,11 @@ reorder_inserts([], _DomNode, _ChildNodes, _KeyMap):- !.
 reorder_inserts([insert(Key, Position)|Inserts], DomNode, ChildNodes, KeyMap):-
         memberchk(Key-Node, KeyMap),
         ( nth0(Position, ChildNodes, Sibling)->
-            insert_nth0(Position, ChildNodes, Sibling, NewChildNodes),
+            insert_nth0(Position, ChildNodes, Node, NewChildNodes),
             insert_before(DomNode, Node, Sibling)
         ; otherwise->
             length(ChildNodes, L),
-            insert_nth0(L, ChildNodes, Sibling, NewChildNodes),
+            insert_nth0(L, ChildNodes, Node, NewChildNodes),
             insert_before(DomNode, Node, {null})
         ),
         reorder_inserts(Inserts, DomNode, NewChildNodes, KeyMap).

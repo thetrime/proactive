@@ -354,7 +354,9 @@ module.exports["insert_before"] = function(parent, child, sibling)
     var c = Prolog._get_blob("react_component", child);
     if (isNull(sibling))
     {
-        p.insertBefore(c, null);
+        // This makes the implementor's life much simpler. Otherwise they
+        // have to deal with the null case themselves
+        p.appendChild(c);
         p.children.push(c);
         return 1;
     }
