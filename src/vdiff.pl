@@ -1,3 +1,7 @@
+% http://docs.lib.purdue.edu/cgi/viewcontent.cgi?article=1377&context=cstech seems like a promising approach to the reordering problem
+% http://documents.scribd.com/docs/10ro9oowpo1h81pgh1as.pdf may also shed some helpful ideas
+
+
 :-module(vdiff, [create_element_from_vdom/3,
                  vdiff/3,
                  vmutate/5,
@@ -105,7 +109,7 @@ vmutate_children(A, B, DomNode, Options, NewNode):-
         vmutate_children_1(AChildren, Ordered, DomChildren, DomNode, Options),
         ( Moves == {no_moves} ->
             NewNode = DomNode
-        ; patch_op(order_patch(A, Moves), DomNode, Options, NewNode)
+        ; patch_op(order_patch(_Ignored, Moves), DomNode, Options, NewNode)
         ).
 
 children_of(widget(_,_,Children), Children):- !.
@@ -351,201 +355,126 @@ unhook_1([Child|Children], Index, Patch):-
         ).
 
 % reorder puts BChildren into a list that matches AChildren as closely as possible
-% inserting nulls or removing items to make them the same length
-reorder(AChildren, BChildren, Ordered, Moves):-
-        key_index(BChildren, AChildren, 0, BKeys, BFree),
-        key_index(AChildren, BChildren, 0, AKeys, AFree),
-        ( length(BChildren, Length),
-          length(BFree, Length)->
-            Ordered = BChildren,
-            Moves = {no_moves}
-        ; length(AChildren, Length),
-          length(AFree, Length)->
-            Ordered = BChildren,
+% Any remaining differences are left to the subtree-differencing process that is about to happen
+% Once the subtree diffs are done, we can optionally use the moves/2 term here to move the mutated
+% children into the right order
+reorder(As, Bs, NewBs, Moves):-
+        all_keys(Bs, 0, BKeys),
+        all_keys(As, 0, AKeys),
+        reorder_1(As, Bs, 0, AKeys, BKeys, NewBs, Removes, UnsortedInserts),
+        ( UnsortedInserts == []->
             Moves = {no_moves}
         ; otherwise->
-            % reorder_1 iterates through the items in AChildren and tries to find matching nodes in BChildren
-            reorder_1(AChildren, BKeys, BFree, BStillFree, Ordered, Tail),
-
-            % reorder_2 then appends any new keys still missing from B
-            reorder_2(BChildren, AKeys, BStillFree, Tail),
-
-            simulate(BChildren, 0, BKeys, 0, Ordered, Removes, Inserts),
-            ( Inserts == []->
-                Moves = {no_moves}
-            ; otherwise->
-                Moves = moves(inserts(Inserts),
-                              removes(Removes))
-            )
+            sort(UnsortedInserts, SortedInserts),
+            strip_sort_keys(SortedInserts, Inserts),
+            Moves = moves(inserts(Inserts),
+                          removes(Removes))
         ).
 
-simulate([], _, _, _, [], [], []):- !.
+strip_sort_keys([], []):- !.
+strip_sort_keys([_-X|Xs], [X|Ys]):-
+        strip_sort_keys(Xs, Ys).
 
-% remove all the remaining nodes from simulate
-simulate([], K, BKeys, SimulateIndex, [SimulateItem|SimulateItems], [remove(SimulateIndex, Key)|Removes], Inserts):-
-        !,
-        get_key_or_null(SimulateItem, Key),
-        simulate([], K, BKeys, SimulateIndex, SimulateItems, Removes, Inserts).
 
-% Remove items
-simulate([WantedItem|BChildren], K, BKeys, SimulateIndex, [{null}|Simulations], [remove(SimulateIndex, {null})|Removes], Inserts):-
-        !,
-        simulate([WantedItem|BChildren], K, BKeys, SimulateIndex, Simulations, Removes, Inserts).
-
-simulate([WantedItem|BChildren], K, BKeys, SimulateIndex, [], Removes, Inserts):-
-        !,
-        % This is the case where simulateItems are finished but WantedItems are not (ie when an item is added)
-        get_key_or_null(WantedItem, WantedKey),
-        ( WantedKey \== {null} ->
-            Inserts = [insert(WantedKey, K)|MoreInserts],
-            NextB = BChildren,
-            KK is K+1
+reorder_1([], [], _, _, _, [], [], []):- !.
+reorder_1([], [B|Bs], Position, AKeys, BKeys, Out, Removes, Inserts):-
+        % This is the case where the are more items in the new list
+        % If they appear in the original list as well then we have already added them by now
+        % and we can just skip them. Otherwise, we need to add them now
+        get_key_or_null(B, BKey),
+        ( memberchk(BKey-_-_, AKeys)->
+            Out = More
         ; otherwise->
-            NextB = [WantedItem|BChildren],
-            KK = K,
-            MoreInserts = Inserts
+            Out = [B|More]
         ),
-        simulate(NextB, KK, BKeys, SimulateIndex, [], Removes, MoreInserts).
+        reorder_1([], Bs, Position, AKeys, BKeys, More, Removes, Inserts).
 
-simulate([WantedItem|BChildren], K, BKeys, SimulateIndex, [SimulateItem|Simulations], Removes, Inserts):-
-        ( SimulateItem == {null}
-        ; get_key_or_null(SimulateItem, SimulateKey),
-          get_key_or_null(WantedItem, WantedKey),
-          WantedKey \== SimulateKey
-        ),
+reorder_1([_A|As], [], Position, AKeys, BKeys, [{null}|Children], Removes, Inserts):-
         !,
-        ( WantedKey \== {null}->
-            ( SimulateItem \== {null}, SimulateKey \== {null} ->
-                ( memberchk(SimulateKey=key(_, Index), BKeys),
-                  Index =\= K+1->
-                    Removes = [remove(SimulateIndex, SimulateKey)|MoreRemoves],
-                    % We must now effectively delete the item from Simulations. This happens for free since we are also iterating through that list
-                    % However, we need to now consider NextSimulateItem for the rest of the clause
-                    MoreSimulations = Simulations,
-                    ( Simulations = [NextSimulateItem|_]->
-                        true
-                    ; otherwise->
-                        NextSimulateItem = {null}
-                    ),
-                    ( ( NextSimulateItem == {null} ; \+get_key_or_null(NextSimulateItem, WantedKey))->
-                        Inserts = [insert(WantedKey, K)|MoreInserts],
-                        SS = SimulateIndex
-                    ; otherwise->
-                        Inserts = MoreInserts,
-                        SS is SimulateIndex + 1
-                    )
-                ; otherwise->
-                    MoreSimulations = [SimulateItem|Simulations],
-                    Removes = MoreRemoves,
-                    SS = SimulateIndex,
-                    Inserts = [insert(WantedKey, K)|MoreInserts]
-                )
-            ; otherwise->
-                MoreSimulations = [SimulateItem|Simulations],
-                Removes = MoreRemoves,
-                SS = SimulateIndex,
-                Inserts = [insert(WantedKey, K)|MoreInserts]
-            ),
-            KK is K+1,
-            NextB = BChildren
-        ; otherwise->
-            % A key in simulate has no matching wanted key, remove it
-            KK = K,
-            % K does not increment
-            % simulateIndex does not increment but we DO remove the item from simulations
-            MoreSimulations = Simulations,
-            SS = SimulateIndex,
-            NextB = [WantedItem|BChildren],
+        % This is the case when there are more items in the original list than the new one and we cannot make up the
+        % difference by inserting new items.
+        % In this case, just pad the output with {null}.
+        reorder_1(As, [], Position, AKeys, BKeys, Children, Removes, Inserts).
+
+
+reorder_1([A|As], [B|Bs], Position, AKeys, BKeys, [Child|Children], Removes, Inserts):-
+        get_key_or_null(A, AKey),
+        get_key_or_null(B, BKey),
+        ( AKey == BKey ->
+            % This is the happy case - the node is already in the right slot
+            Child = B,
+            MoreRemoves = Removes,
             MoreInserts = Inserts,
-            Removes = [remove(SimulateIndex, SimulateKey)|MoreRemoves]
+            NextAs = As,
+            NextBs = Bs,
+            PP is Position + 1
+        ; AKey \== {null},
+          memberchk(AKey-OriginalPosition-Child, BKeys)->
+            % This is the case where the node has been moved around
+            Removes = [remove(Position, AKey)|MoreRemoves],
+            Inserts = [OriginalPosition-insert(AKey, OriginalPosition)|MoreInserts],
+            NextAs = As,
+            NextBs = [B|Bs],
+            PP = Position
+        ; AKey \== {null}->
+            % This is the case where the node has been deleted. Just put a {null} in to pad
+            Child = {null},
+            MoreRemoves = Removes,
+            MoreInserts = Inserts,
+            NextAs = As,
+            NextBs = [B|Bs],
+            PP is Position + 1
+        ; otherwise->
+            % This is the case where we have a keyless node in A, and a keyed one in B. If that keyed entry in B
+            % appears later on in A, then we must wait for it, and put in a padding spot here. Otherwise,
+            % we can just accept both nodes since the {null} -> {no-longer-used-key} will get flagged in a moment
+            % by the subtree comparison
+            ( memberchk(BKey-_-_, AKeys)->
+                % Just pad then
+                Child = {null},
+                MoreRemoves = Removes,
+                MoreInserts = Inserts,
+                NextAs = As,
+                NextBs = [B|Bs],
+                PP is Position + 1
+            ; otherwise->
+                % Accept the discrepancy and leave subtree comparison to sort it out
+                Child = B,
+                MoreRemoves = Removes,
+                MoreInserts = Inserts,
+                NextAs = As,
+                NextBs = Bs,
+                PP is Position + 1
+            )
         ),
-        simulate(NextB, KK, BKeys, SS, MoreSimulations, MoreRemoves, MoreInserts).
+        reorder_1(NextAs, NextBs, PP, AKeys, BKeys, Children, MoreRemoves, MoreInserts).
 
 
-simulate([_|BChildren], K, BKeys, SimulateIndex, [_|Simulations], Removes, Inserts):-
-        SS is SimulateIndex + 1,
-        KK is K+1,
-        simulate(BChildren, KK, BKeys, SS, Simulations, Removes, Inserts).
+all_keys([], _, []):- !.
+all_keys([Node|Nodes], N, Keys):-
+        get_key_or_null(Node, Key),
+        ( Key == {null} ->
+            MoreKeys = Keys
+        ; Keys = [Key-N-Node|MoreKeys]
+        ),
+        NN is N+1,
+        all_keys(Nodes, NN, MoreKeys).
 
 
-%get_key_if_exists(A, A).
-get_key_if_exists(element(_, A, _), Key):- !, memberchk(key=Key, A).
-get_key_if_exists(widget(_, A, _), Key):- !, memberchk(key=Key, A).
-get_key_or_null(A, Key):-
-        ( get_key_if_exists(A, Key)->
+get_key_or_null(element(_, Attributes, _), Key):-
+        !,
+        ( memberchk(key=Key, Attributes)->
             true
         ; Key = {null}
         ).
 
-key_index([], _Objects, _, [], []):- !.
-key_index([Child|Children], Objects, Index, Keys, Free):-
-        ( Objects = [Object|MoreObjects]->
+get_key_or_null(widget(_, Attributes, _), Key):-
+        ( memberchk(key=Key, Attributes)->
             true
-        ; otherwise->
-            Object = {null},
-            MoreObjects = []
-        ),
-        ( get_key_if_exists(Child, Key)->
-            Keys = [Key=key(Child, Index)|MoreKeys],
-            MoreFree = Free
-        ; otherwise->
-            Keys = MoreKeys,
-            ( Object == {null}->
-                Free = MoreFree
-            ; otherwise->
-                Free = [free(Child, Index)|MoreFree]
-            )
-        ),
-        II is Index + 1,
-        key_index(Children, MoreObjects, II, MoreKeys, MoreFree).
+        ; Key = {null}
+        ).
 
 
-
-reorder_1([], _BKeys, BFree, BFree, T, T):- !.
-reorder_1([AItem|Children], BKeys, BFree, BStillFree, NewChildren, Tail):-
-        % If the next item in A has a key,
-        ( get_key_if_exists(AItem, Key)->
-            % If that key is also present in B
-            ( memberchk(Key=key(BChild, _), BKeys)->
-                % Then match them up and emit that item in the list
-                NewChildren = [BChild|More]
-            ; otherwise->
-                % Otherwise, if there is no such item in B, then insert a placeholder
-                NewChildren = [{null}|More]
-            ),
-            MoreBFree = BFree
-        ; otherwise->
-            % However, if the item does not have a key at all,
-            ( BFree = [free(BChild, _)|MoreBFree]->
-                % Consume a free spot in the children, if there is one
-                NewChildren = [BChild|More]
-            ; otherwise->
-                % Otherwise we just put a placeholder
-                BFree = MoreBFree,
-                NewChildren = [{null}|More]
-            )
-        ),
-        reorder_1(Children, BKeys, MoreBFree, BStillFree, More, Tail).
-
-% Iterate through b and append any new keys
-reorder_2([], _AKeys, _BStillFree, []):- !.
-reorder_2([NewItem|BChildren], AKeys, BStillFree, NewChildren):-
-        ( get_key_if_exists(NewItem, Key)->
-            ( \+memberchk(Key=_, AKeys)->
-                NewChildren = [NewItem|More]
-            ; otherwise->
-                NewChildren = More
-            ),
-            MoreBFree = BStillFree
-        ; otherwise->
-            ( BStillFree = [free(BItem, _)|MoreBFree]->
-                NewChildren = [BItem|More]
-            ; otherwise->
-                MoreBFree = BStillFree,
-                NewChildren = More
-            )
-        ),
-        reorder_2(BChildren, AKeys, MoreBFree, More).
 
 
 render_thunk(_, _, _):- fail. % FIXME: Stub
@@ -672,7 +601,7 @@ index_in_range_1(MinIndex, MaxIndex, Indices, Left, Right):-
         ).
 
 %patch_op(Patch, _, _, _):-
-%        writeln(Patch), fail.
+%        writeln(x(Patch)), fail.
 
 patch_op(remove_patch(VNode, _), DomNode, _Options, NewNode):-
         !,
