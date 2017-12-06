@@ -651,3 +651,11 @@ INPUT[type="checkbox"].tree_input+label
    * Should not display toggle icon for items with no children. This sounds very hard. We will have to change the
      className on the INPUT inside the li to something like 'leaf' from 'trunk' and then change the code above like in ZEN
 */
+
+
+/* CallOut */
+.callout
+{
+    position: absolute;
+    visibility: hidden;
+}

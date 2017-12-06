@@ -61,7 +61,7 @@ Panel.prototype.setProperties = function(t)
             else if (this.fill == "vertical")
                 f = "vertical_fill";
             var newContentElement = document.createElement("div");
-            newContentElement.className = "proactive_container vertical_layout " + f;
+            newContentElement.className = this.baseClassName + " vertical_layout " + f;
             while (this.getDOMNode().firstChild != null)
                 newContentElement.appendChild(this.contentElement.firstChild);
             this.getDOMNode().appendChild(this.legendElement);

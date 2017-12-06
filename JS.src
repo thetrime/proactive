@@ -1,4 +1,5 @@
 JS_SRC=src/button.js                                        \
+       src/call_out.js                                      \
        src/combo_box.js                                     \
        src/combo_item.js                                    \
        src/constants.js                                     \

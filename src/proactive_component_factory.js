@@ -22,6 +22,7 @@ var TextArea = require('./textarea');
 var Grid = require('./grid');
 var PopupMenu = require('./popup_menu');
 var MenuItem = require('./menu_item');
+var CallOut = require('./call_out');
 
 var overrides = {};
 
@@ -55,6 +56,7 @@ module.exports.createElement = function(name)
         case "MenuItem": return new MenuItem();
         case "Tree": return new Tree();
         case "TreeNode": return new TreeNode();
+        case "CallOut": return new CallOut();
         default: return new Broken(name);
     }
 }
