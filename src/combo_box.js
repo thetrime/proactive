@@ -8,6 +8,7 @@ var Prolog = require('proscript');
 function ComboBox()
 {
     ReactComponent.call(this);
+    this.layout = "";
     this.setDOMNode(document.createElement("select"));
     this.domNode.onblur = blurHandler.bind(this);
     this.domNode.onchange = changeHandler.bind(this);
