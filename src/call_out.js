@@ -24,12 +24,14 @@ CallOut.prototype.setProperties = function(t)
                           {
                               var f = document.getElementById(target_id);
                               if (f == null)
+                              {
+                                  console.log("Warning: CallOut for " + target_id + " but there is no element with that ID in the DOM");
                                   return;
+                              }
                               var rect = f.getBoundingClientRect();
-                              // This is the visible offset from the nearest positioned ancestor
-                              var ancestorRect = f.offsetParent.getBoundingClientRect();
+                              console.log(rect); // 520x1600
                               // This is still not exactly right - if the parent is itself positioned, we have a problem
-                              this.getDOMNode().style.top = (rect.top + f.clientHeight + 5 - ancestorRect.top + 10) + 'px';
+                              this.getDOMNode().style.top = (rect.top + f.clientHeight + 15) + 'px';
                               this.getDOMNode().style.left = rect.left + (rect.width/2) - (this.getDOMNode().clientWidth/2) + 'px';
                               this.getDOMNode().style.visibility = 'visible';
                               this.getDOMNode().style.opacity = '1';

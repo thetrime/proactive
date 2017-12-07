@@ -656,7 +656,7 @@ INPUT[type="checkbox"].tree_input+label
 /* CallOut */
 .callout
 {
-    position: absolute;
+    position: fixed;
     visibility: hidden;
     overflow: visible;
     opacity:0;
