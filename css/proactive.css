@@ -365,6 +365,7 @@ td > *
 {
     min-height: -webkit-min-content;
     min-height: min-content;
+    justify-content: center;
 }
 
 .scrollpane
