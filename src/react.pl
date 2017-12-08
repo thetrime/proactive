@@ -59,7 +59,15 @@ serve_react(Request):-
                     ),
                     Clauses),
             format(current_output, 'Access-Control-Allow-Origin: *~n', []),
-            ( memberchk(accept_encoding(AcceptEncoding), Request),
+
+            % There seems to be a bug in IE11 where sending the response deflated, *even if they explicitly say they support it* will
+            % get SCRIPT7002: No data is available for the requested resource
+            % MS doesnt put IE in the user agent string anymore (perhaps theyre suitably embarassed about IE6 and IE8) but we can still
+            % detect IE11 by checking for the substring 'Trident/'
+            ( memberchk(user_agent(UserAgent), Request),
+              sub_atom(UserAgent, _, _, _, 'Trident/') ->
+                TargetStream = current_output
+            ; memberchk(accept_encoding(AcceptEncoding), Request),
               sub_atom(AcceptEncoding, _, _, _, deflate)->
                 format(current_output, 'Content-Encoding: deflate~n', []),
                 % We shouldnt close the CGI-stream ourself. The wrapper will do that when the handler is finished
