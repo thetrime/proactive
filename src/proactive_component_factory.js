@@ -20,6 +20,7 @@ var Frame = require('./frame');
 var Image = require('./image');
 var TextArea = require('./textarea');
 var Grid = require('./grid');
+var ChimeraGrid = require('./table_grid');
 var PopupMenu = require('./popup_menu');
 var MenuItem = require('./menu_item');
 var CallOut = require('./call_out');
@@ -51,7 +52,11 @@ module.exports.createElement = function(name)
         case "Frame": return new Frame();
         case "Image": return new Image();
         case "TextArea": return new TextArea();
-        case "Grid": return new Grid();
+        case "Grid":
+        if (CSS != undefined && CSS.supports("display", "grid"))
+            return new Grid();
+        else
+            return new ChimeraGrid();
         case "PopupMenu": return new PopupMenu();
         case "MenuItem": return new MenuItem();
         case "Tree": return new Tree();

@@ -670,3 +670,17 @@ INPUT[type="checkbox"].tree_input+label
     opacity:0;
     transition:opacity 0.3s ease-in;
 }
+
+
+/* table-grid chimera */
+.table_grid tr
+{
+    border: none;
+    padding: none;
+}
+
+.table_grid td
+{
+    white-space: nowrap;
+    vertical-align: baseline;
+}
