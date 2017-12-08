@@ -366,14 +366,14 @@ reorder(As, Bs, NewBs, Moves):-
             Moves = {no_moves}
         ; otherwise->
             sort(UnsortedInserts, SortedInserts),
-            strip_sort_keys(SortedInserts, Inserts),
+            vstrip_sort_keys(SortedInserts, Inserts),
             Moves = moves(inserts(Inserts),
                           removes(Removes))
         ).
 
-strip_sort_keys([], []):- !.
-strip_sort_keys([_-X|Xs], [X|Ys]):-
-        strip_sort_keys(Xs, Ys).
+vstrip_sort_keys([], []):- !.
+vstrip_sort_keys([_-X|Xs], [X|Ys]):-
+        vstrip_sort_keys(Xs, Ys).
 
 
 reorder_1([], [], _, _, _, [], [], []):- !.
