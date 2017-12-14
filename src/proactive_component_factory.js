@@ -53,7 +53,7 @@ module.exports.createElement = function(name)
         case "Image": return new Image();
         case "TextArea": return new TextArea();
         case "Grid":
-        if (CSS != undefined && CSS.supports("display", "grid"))
+        if (window.CSS != undefined && window.CSS.supports("display", "grid"))
             return new Grid();
         else
             return new ChimeraGrid();

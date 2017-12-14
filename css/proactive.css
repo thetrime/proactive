@@ -378,13 +378,14 @@ td > *
 {
     min-height: -webkit-min-content;
     min-height: min-content;
-    flex-shrink: 0;
+    flex-shrink: 0 !important;
 }
 
 label
 {
     min-height: -webkit-min-content;
     min-height: min-content;
+    flex-shrink: 0;
 }
 
 .maycrush
@@ -682,5 +683,24 @@ INPUT[type="checkbox"].tree_input+label
 .table_grid td
 {
     white-space: nowrap;
-    vertical-align: baseline;
+    vertical-align: top;
+}
+
+/* This bears some explaining. If we have a chimera-table which is not the only child in a div, then
+   we cannot just set the width to 100%. Suppose the parent div has width 500px and we have a label
+   (width 100px) and the chimera-table. Setting that to be width: 100% would give it width 500px as
+   well, and the parent would overflow. However, in general, if the horixontal-fill is requested then
+   we want to at least *try*. In the case where the table is the ONLY child we can easily fulfil this
+*/
+
+.table_grid.horizontal_fill:only-child
+{
+    width: 100%;
+}
+
+/* We can also do it if there are many children but the parent is laid out vertically */
+
+.vertical_layout .table_grid.horizontal_fill
+{
+    width: 100%;
 }
