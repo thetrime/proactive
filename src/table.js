@@ -48,13 +48,13 @@ Table.prototype = new ReactComponent;
 Table.prototype.set_column_width = function(w)
 {
     var col = document.createElement("col");
-    col.style = 'width: ' + w;
+    col.style.width = w;
     this.header_colgroup.appendChild(col);
     col = document.createElement("col");
-    col.style = 'width: ' + w;
+    col.style.width = w;
     this.body_colgroup.appendChild(col);
     col = document.createElement("col");
-    col.style = 'width: ' + w;
+    col.style.width = w;
     this.footer_colgroup.appendChild(col);
 }
 
