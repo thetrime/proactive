@@ -700,7 +700,7 @@ INPUT[type="checkbox"].tree_input+label
 
 /* We can also do it if there are many children but the parent is laid out vertically */
 
-.vertical_layout .table_grid.horizontal_fill
+.vertical_layout > .table_grid.horizontal_fill
 {
     width: 100%;
 }
