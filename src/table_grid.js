@@ -64,6 +64,13 @@ Grid.prototype.relayout = function(t)
         // This is not HTML5. But then, we are trying to cater to browsers that dont have css-grid, so...
         if (this.weights[i] != 0)
             col.width = this.weights[i] + '*';
+        else
+        {
+            // I have no idea why this works, but what I am trying to emulate is width="0*". Chrome seems to ignore 0*
+            // (after all, it is not part of HTML5) but 10px generates something that does the same thing - a column that
+            // is just wide enough for the contents. Note that this is always wider than 10px...
+            col.width = '10px';
+        }
     }
 }
 
