@@ -109,7 +109,7 @@ function getServerConnection(URI, rootElementId, callback, onConnectionLoss)
         {
             pinger = setInterval(function()
                                       {
-                                          console.log("Sending ping");
+                                          //console.log("Sending ping");
                                           server_connection.send("ping");
                                       }, 60000);
         }
@@ -762,7 +762,7 @@ PrologEngine.prototype.onMessage = function(event)
     }
     else if (t == pongAtom)
     {
-        console.log("Received pong");
+        //console.log("Received pong");
     }
     else
     {
