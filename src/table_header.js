@@ -30,7 +30,6 @@ TableHeader.prototype.appendChild = function(t)
 TableHeader.prototype.removeChild = function(t)
 {
     var index = this.children.indexOf(t);
-    this.children.splice(index, 1);
     t.setParent(null);
     this.tr.removeChild(this.tr.childNodes[index]);
     if (this.parent != null)
