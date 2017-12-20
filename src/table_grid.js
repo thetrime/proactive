@@ -74,6 +74,14 @@ Grid.prototype.relayout = function(t)
     }
 }
 
+Grid.prototype.debug = function()
+{
+    console.log("Current cells:");
+    for (var i = 0; i < this.cells.length; i++)
+        console.log("Cell " + i + ": " + this.cells[i].outerHTML);
+    console.log("-----");
+}
+
 Grid.prototype.rearrangeChildren = function()
 {
     var new_tbody = document.createElement('tbody');
@@ -126,7 +134,9 @@ Grid.prototype.replaceChild = function(n, o)
     cell.appendChild(n.getDOMNode());
     var index = this.children.indexOf(o);
     this.cells[index] = cell;
-    o.getDOMNode().parentNode.replaceChild(n.getDOMNode(), o.getDOMNode());
+    // o.getDOMNode().parentNode is the TD holding the parent
+    // o.getDOMNode().parentNode.parentNode is the TR holding the cell
+    o.getDOMNode().parentNode.parentNode.replaceChild(cell, o.getDOMNode().parentNode);
     n.setParent(this);
     o.setParent(null);
 }
