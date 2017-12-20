@@ -126,7 +126,7 @@ Grid.prototype.replaceChild = function(n, o)
     cell.appendChild(n.getDOMNode());
     var index = this.children.indexOf(o);
     this.cells[index] = cell;
-    this.o.getDOMNode().parent.replaceChild(n.getDOMNode(), o.getDOMNode());
+    o.getDOMNode().parentNode.replaceChild(n.getDOMNode(), o.getDOMNode());
     n.setParent(this);
     o.setParent(null);
 }
