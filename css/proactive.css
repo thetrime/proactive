@@ -338,7 +338,6 @@ td > *
 .proactive_frame_contentpane
 {
     position: absolute;
-    background-color: #000000;
     /* Center */
     top: 50%;
     left: 50%;
@@ -346,7 +345,6 @@ td > *
     overflow: scroll;
     max-height: 90%;
     max-width: 90%;
-    border: 2px solid white;
     padding: 10px;
     resize: both;
 }
@@ -418,6 +416,7 @@ label
     display: flex;
     overflow: hidden;
     align-self: stretch;
+    align-items: stretch;
 }
 
 .react_table table
@@ -435,7 +434,6 @@ label
 
 .react_table tbody
 {
-    background: #eeeeee;
     overflow-y: auto;
     overflow-x: hidden;
     width: 100%;
@@ -454,23 +452,10 @@ label
 
 .react_table tbody td
 {
-    background: #000;
     padding: 5px;
     position: relative;
     z-index: 1;
 }
-
-.react_table tbody tr:nth-child(2n) td
-{
-    background: #111;
-}
-
-/*
-.react_table thead th
-{
-    padding: 5px;
-}
-*/
 
 .react_table tfoot td
 {

@@ -12,6 +12,10 @@ function Table()
 {
     ReactComponent.call(this);
     this.container = document.createElement("div");
+    this.header_container = document.createElement("div");
+    this.header_container.className = "react_header_container";
+    this.footer_container = document.createElement("div");
+    this.footer_container.className = "react_footer_container";
     this.header_table = document.createElement("table");
     this.header_table.className = "react_header_table";
     this.table = document.createElement("table");
@@ -19,12 +23,14 @@ function Table()
     this.footer_table.className = "react_footer_table";
     this.baseClassName = "react_table scrollpane ";
     this.setDOMNode(this.container);
-    this.container.appendChild(this.header_table);
+    this.container.appendChild(this.header_container);
+    this.header_container.appendChild(this.header_table);
     this.body_container = document.createElement("div");
     this.body_container.appendChild(this.table);
     this.body_container.className = "react_table_body";
     this.container.appendChild(this.body_container);
-    this.container.appendChild(this.footer_table);
+    this.footer_container.appendChild(this.footer_table);
+    this.container.appendChild(this.footer_container);
     this.thead = document.createElement("thead");
     this.tbody = document.createElement("tbody");
     this.tfoot = document.createElement("tfoot");
@@ -143,9 +149,9 @@ Table.prototype.relayout = function()
     this.header_table.style.width = '';
     this.table.style.width = '';
     this.footer_table.style.width = '';
-    this.header_table.style['table-layout'] = 'fixed';
-    this.table.style['table-layout'] = 'fixed';
-    this.footer_table.style['table-layout'] = 'fixed';
+//    this.header_table.style['table-layout'] = 'fixed';
+//    this.table.style['table-layout'] = 'fixed';
+//    this.footer_table.style['table-layout'] = 'fixed';
 
     this.dirty = false;
 }
