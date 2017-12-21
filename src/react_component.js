@@ -261,6 +261,8 @@ ReactComponent.prototype.getStyle = function()
 
     if (this.align_children == "start")
         newClassName += " align_start";
+    if (this.align_children == "center")
+        newClassName += " align_center";
     if (this.align_children == "end")
         newClassName += " align_end";
 
