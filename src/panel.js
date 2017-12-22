@@ -43,7 +43,7 @@ Panel.prototype.setProperties = function(t)
         if (this.legendElement == null)
         {
             this.legendElement = document.createElement("div");
-            this.legendElement.className = "proactive_container horizontal_layout fieldset_legend";
+            this.legendElement.className = "proactive_container horizontal_layout horizontal_fill fieldset_legend";
             var pre = document.createElement("div"); // this is the --- at the top-left
             pre.className = "pre_fieldset";
             this.legendElement.appendChild(pre);
