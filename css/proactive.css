@@ -205,7 +205,7 @@ button
 {
     -webkit-justify-content: space-between;
     -ms-flex-pack: justify;
-    justify-content: space-between;
+    justify-content: space-between !important;
 }
 
 .justify_center
@@ -221,7 +221,7 @@ button
 .justify_space_around
 {
     -webkit-justify-content: space-around;
-    justify-content: space-around;
+    justify-content: space-around  !important;
 }
 
 
