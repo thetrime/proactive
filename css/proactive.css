@@ -421,9 +421,44 @@ label
 
 .react_table table
 {
-    width: 100%;
+    min-width: 100%;
     border-spacing: 0;
 }
+
+.react_table.horizontal_fill table
+{
+    width: 100%;
+}
+
+.react_footer_container
+{
+    padding-right: 8px;
+}
+
+.react_header_container
+{
+    padding-right: 8px;
+}
+
+
+/* testing only!
+.react_table_header_cell
+{
+    border: 2px solid red;
+}
+
+.react_table_body td
+{
+    border: 2px solid white;
+}
+
+.react_footer_container td
+{
+    border: 2px solid blue;
+}
+
+end testing */
+
 
 .react_table_body
 {

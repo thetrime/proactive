@@ -149,9 +149,9 @@ Table.prototype.relayout = function()
     this.header_table.style.width = '';
     this.table.style.width = '';
     this.footer_table.style.width = '';
-//    this.header_table.style['table-layout'] = 'fixed';
-//    this.table.style['table-layout'] = 'fixed';
-//    this.footer_table.style['table-layout'] = 'fixed';
+    this.header_table.style['table-layout'] = 'fixed';
+    this.table.style['table-layout'] = 'fixed';
+    this.footer_table.style['table-layout'] = 'fixed';
 
     this.dirty = false;
 }

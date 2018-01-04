@@ -192,6 +192,12 @@ Panel.prototype.removeChild = function(t)
     }
 }
 
+Panel.prototype.setParent = function(t)
+{
+    ReactComponent.prototype.setParent.call(this, t);
+    this.configureHeight();
+}
+
 Panel.prototype.configureHeight = function ()
 {
     // If the panel contains a scrollpane then it can be crushed to effectively zero size
@@ -199,7 +205,14 @@ Panel.prototype.configureHeight = function ()
     // had no overflow - ie the scrollpane will never appear
     // Similarly, if we always set it to 0 then things like buttons can get squashed into oblivion by a large table
     this.hasScrollpaneChildren = (this.contentElement.getElementsByClassName("scrollpane").length > 0);
-    if (this.layout == "horizontal")
+
+    // Furthermore, if the we are in a horizontal panel ourselves (that is, the parent is horizontal) and we do not contain a scrollpane
+    // then we should always be nocrush. This stops any 100%-width tables in sibling subtrees from crushing us
+    if (this.parent != null && this.parent.layout == "horizontal" && !this.hasScrollpaneChildren)
+    {
+        this.crush = "nocrush";
+    }
+    else if (this.layout == "horizontal")
     {
         if (!this.hasScrollpaneChildren)
             this.crush = "nocrush";
