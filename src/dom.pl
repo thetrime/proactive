@@ -17,6 +17,7 @@
 
           vpath/3,
           proactive_event/3,
+          set_dom_media_size/2,
 
           proactive/3,
           bubble_event/3,
@@ -238,7 +239,19 @@ widget_id(Id):-
         ; existence_error(widget, This)
         ).
 
-media_size(800, 600).
+:-thread_local
+        media_size_override/2.
+
+media_size(Width, Height):-
+        ( media_size_override(Width, Height)->
+            true
+        ; Width = 800,
+          Height = 600
+        ).
+
+set_dom_media_size(Width, Height):-
+        retractall(media_size_override(_,_)),
+        assert(media_size_override(Width, Height)).
 
 % DOM node is represented as dom_node(Attributes)
 %  Attributes must contain:
