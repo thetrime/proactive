@@ -196,7 +196,7 @@ init_widget(_, VNode, DomNode):-
                              create_element_from_vdom([], Expanded, DomNode)
                            ),
                            pop_context),
-        put_attr(This, react_dom, react_widget(Tag, State, Props, id_goes_here, VDom, DomNode)).
+        put_attr(This, react_dom, react_widget(Tag, State, Props, id_goes_here, Expanded, DomNode)).
 
 update_widget(NewWidget, VNode, DomNode, NewNode):-
         NewWidget = widget(Tag, PropList, Children),
@@ -206,10 +206,17 @@ update_widget(NewWidget, VNode, DomNode, NewNode):-
         props_from_list([children=Children|PropList], Props),
         Widget = react_widget(_OldTag, State, _OldProps, Id, _OldVDOM, _OldDOM),
         setup_call_cleanup(push_context(This),
-                           ( Tag:render(State, Props, VDom) ->
-                             expand_children(VDom, ExpandedVDom),
-                             vdiff(VNode, ExpandedVDom, Patches),
-                             vpatch(DomNode, Patches, [document(_Document)], NewNode)
+                           ( ( current_predicate(Tag:componentWillReceiveProps/3),
+                               Tag:componentWillReceiveProps(State, Props, NewState)->
+                                 true
+                             ; otherwise->
+                                 NewState = State
+                             ),
+                             Tag:render(NewState, Props, VDom) ->
+                               expand_children(VDom, ExpandedVDom),
+                               vmutate(VNode, ExpandedVDom, DomNode, [document(_Document)], NewNode)
+%                             vdiff(VNode, ExpandedVDom, Patches),
+%                             vpatch(DomNode, Patches, [document(_Document)], NewNode)
                            ),
                            pop_context),
         put_attr(This, react_dom, react_widget(Tag, State, Props, Id, VDom, NewNode)).
@@ -291,12 +298,15 @@ proactive(Module, Props, [Document]):-
             I = proactive{}
         ),
         put_attr(This, react_dom, react_widget(Module, I, Props, id_goes_here, [], [])),
-        setup_call_cleanup(push_context(This),
-                           ( Module:render(I, Props, VDOM) ->
-                               expand_children(VDOM, Expanded),
-                             create_element_from_vdom([], Expanded, DOM)
-                           ),
-                           pop_context),
+        ( setup_call_cleanup(push_context(This),
+                             ( Module:render(I, Props, VDOM) ->
+                                 expand_children(VDOM, Expanded),
+                                 create_element_from_vdom([], Expanded, DOM)
+                             ),
+                               pop_context)->
+            true
+        ; throw(error(proactive_error('render/3 failed'), _))
+        ),
 
         put_attr(This, react_dom, react_widget(Module, I, Props, id_goes_here, VDOM, DOM)),
         Document = dom_element([tag-{document},
@@ -424,6 +434,7 @@ fire_event(Handler, Event, ThisPtr):-
                            pop_context),
         expand_children(CompressedNewVDOM, NewVDOM),
         !,
+        /* This is only necessary if we want to use vdiff/3 and vpatch/4 rather than vmutate/5, which doesnt use setof/3 or bagof/3
         % vdiff/3 will not work if the term contains attributed variables. This is because, for example:
         %   ?- put_attr(X, react_dom, qqq), bagof(A, member(A, [X,Y]), As).
         %   X = qqq,
@@ -441,6 +452,8 @@ fire_event(Handler, Event, ThisPtr):-
         maplist(call, AttributeGoals),
         % Then continue on our way
         vpatch(OldDOM, Patch, [document(This)], NewDOM),
+        */
+        vmutate(OldVDOM, NewVDOM, OldDOM, [document(This)], NewDOM),
         put_attr(This, react_dom, react_widget(Module, UpdatedState, Props, Id, NewVDOM, NewDOM)).
 
 
@@ -597,7 +610,7 @@ vpath(DOM, Path+Child, Node):-
         vpath([Candidate], /Child, Node).
 
 % General sibling selector is ~
-vpath(DOM, Path+Child, Node):-
+vpath(DOM, Path~Child, Node):-
         !,
         vpath(DOM, Path, OlderSibling),
         parent_node(OlderSibling, Parent),
