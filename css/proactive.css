@@ -432,13 +432,11 @@ label
 
 .react_footer_container
 {
-    background: #ccc;
     padding-right: 6px;
 }
 
 .react_header_container
 {
-    background: #ccc;
     padding-right: 6px;
 }
 
@@ -448,12 +446,12 @@ label
 }
 
 .react_table_body::-webkit-scrollbar-button
- {
-    background: #ccc
+{
+     background: #1a1a1c;
 }
 .react_table_body::-webkit-scrollbar-track-piece
 {
-    background: #ccc
+    background: #1a1a1c;
 }
 .react_table_body::-webkit-scrollbar-button
 {
