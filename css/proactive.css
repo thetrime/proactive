@@ -432,12 +432,37 @@ label
 
 .react_footer_container
 {
-    padding-right: 8px;
+    background: #ccc;
+    padding-right: 6px;
 }
 
 .react_header_container
 {
-    padding-right: 8px;
+    background: #ccc;
+    padding-right: 6px;
+}
+
+.react_table_body::-webkit-scrollbar
+{
+    width: 6px;
+}
+
+.react_table_body::-webkit-scrollbar-button
+ {
+    background: #ccc
+}
+.react_table_body::-webkit-scrollbar-track-piece
+{
+    background: #ccc
+}
+.react_table_body::-webkit-scrollbar-button
+{
+    display:none;
+}
+
+.react_table_body::-webkit-scrollbar-thumb
+{
+    background: #888;
 }
 
 
@@ -462,7 +487,7 @@ end testing */
 
 .react_table_body
 {
-    overflow: auto;
+    overflow: scroll;
     width: 100%;
     border-spacing: 0;
 }
