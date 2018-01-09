@@ -378,6 +378,7 @@ vstrip_sort_keys([_-X|Xs], [X|Ys]):-
 
 reorder_1([], [], _, _, _, [], [], []):- !.
 reorder_1([], [B|Bs], Position, AKeys, BKeys, Out, Removes, Inserts):-
+        !,
         % This is the case where the are more items in the new list
         % If they appear in the original list as well then we have already added them by now
         % and we can just skip them. Otherwise, we need to add them now
@@ -724,13 +725,13 @@ reorder_inserts([], _DomNode, _ChildNodes, _KeyMap):- !.
 reorder_inserts([insert(Key, Position)|Inserts], DomNode, ChildNodes, KeyMap):-
         memberchk(Key-Node, KeyMap),
         ( nth0(Position, ChildNodes, Sibling)->
-            insert_nth0(Position, ChildNodes, Node, NewChildNodes),
+%            insert_nth0(Position, ChildNodes, Node, NewChildNodes),
             insert_before(DomNode, Node, Sibling)
         ; otherwise->
-            insert_end(ChildNodes, Node, NewChildNodes),
+%            insert_end(ChildNodes, Node, NewChildNodes),
             insert_before(DomNode, Node, {null})
         ),
-        reorder_inserts(Inserts, DomNode, NewChildNodes, KeyMap).
+        reorder_inserts(Inserts, DomNode, ChildNodes, KeyMap).
 
 render(Options, VNodeIn, DomNode):-
         handle_thunk(VNodeIn, {null}, VNode, _),
