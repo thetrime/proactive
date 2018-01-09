@@ -704,6 +704,11 @@ insert_nth0(N, [Node|Tail], Child, [Node|More]):-
         NN is N-1,
         insert_nth0(NN, Tail, Child, More).
 
+insert_end([], Node, [Node]):- !.
+insert_end([Node|Tail], Child, [Node|More]):-
+        insert_end(Tail, Child, More).
+
+
 reorder_removes([], _DomNode, _ChildNodes, T, T):- !.
 reorder_removes([remove(From, Key)|Removes], DomNode, ChildNodes, KeyMap, FinalKeyMap):-
         select_nth0(From, ChildNodes, Node, RemainingChildren),
@@ -722,8 +727,7 @@ reorder_inserts([insert(Key, Position)|Inserts], DomNode, ChildNodes, KeyMap):-
             insert_nth0(Position, ChildNodes, Node, NewChildNodes),
             insert_before(DomNode, Node, Sibling)
         ; otherwise->
-            length(ChildNodes, L),
-            insert_nth0(L, ChildNodes, Node, NewChildNodes),
+            insert_end(ChildNodes, Node, NewChildNodes),
             insert_before(DomNode, Node, {null})
         ),
         reorder_inserts(Inserts, DomNode, NewChildNodes, KeyMap).
