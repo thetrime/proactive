@@ -447,11 +447,11 @@ label
 
 .react_table_body::-webkit-scrollbar-button
 {
-     background: #1a1a1c;
+     background: #444;
 }
 .react_table_body::-webkit-scrollbar-track-piece
 {
-    background: #1a1a1c;
+    background: #444;
 }
 .react_table_body::-webkit-scrollbar-button
 {
