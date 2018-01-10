@@ -24,6 +24,7 @@ JS_SRC=src/button.js                                        \
        src/react_component.js                               \
        src/react_widget.js                                  \
        src/row.js                                           \
+       src/runtime_options.js                               \
        src/tab.js                                           \
        src/tabbed_pane.js                                   \
        src/table.js                                         \

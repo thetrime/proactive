@@ -8,6 +8,7 @@ window.onPrologReady = function(Prolog)
     var PrologEngine = require('./prolog_engine')
     var ReactWidget = require('./react_widget');
     var PrologState = require('./prolog_state');
+    var RuntimeOptions = require('./runtime_options');
     var ReactComponent = require('./react_component.js');
     console.log("Proactive v" + Version + " is ready");
     var engine;
@@ -54,6 +55,10 @@ window.onPrologReady = function(Prolog)
                                                                 else if (settings.callback != undefined)
                                                                     settings.callback(false, error);
                                                             });
+                          },
+                          setOptions: function(o)
+                          {
+                              RuntimeOptions.options = o;
                           },
                           registerPredicate: PrologEngine.registerPredicate,
 			  registerComponent: ProactiveComponentFactory.registerComponent,

@@ -24,6 +24,7 @@ var ChimeraGrid = require('./table_grid');
 var PopupMenu = require('./popup_menu');
 var MenuItem = require('./menu_item');
 var CallOut = require('./call_out');
+var RuntimeOptions = require('./runtime_options');
 
 var overrides = {};
 
@@ -53,7 +54,7 @@ module.exports.createElement = function(name)
         case "Image": return new Image();
         case "TextArea": return new TextArea();
         case "Grid":
-        if (window.CSS != undefined && window.CSS.supports("display", "grid"))
+        if (window.CSS != undefined && window.CSS.supports("display", "grid") && !RuntimeOptions.options.force_chimera)
             return new Grid();
         else
             return new ChimeraGrid();
