@@ -32,4 +32,4 @@ module.exports = {emptyListAtom: Prolog._make_atom("[]"),
                   openAtom: Prolog._make_atom("open"),
                   serverConnectionAtom: Prolog._make_atom("server_connection"),
                   duringRenderAtom: Prolog._make_atom("during_render"),
-                  ellipsisAtom: Prolog._make_atom("ellipsis"),};
+                  ellipsisAtom: Prolog._make_atom("ellipsis")};
