@@ -50,6 +50,14 @@ Grid.prototype.setProperties = function(t)
         this.relayout();
 }
 
+Grid.prototype.restyle = function()
+{
+    ReactComponent.prototype.restyle.call(this);
+    // Horizontal grids can only be stretched if a maxWidth is provided.
+    if (this.maxWidth != null && this.fill == "horizontal")
+        this.getDOMNode().style.width = '100%';
+}
+
 Grid.prototype.relayout = function(t)
 {
     var template = "";
