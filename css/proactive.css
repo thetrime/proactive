@@ -726,7 +726,7 @@ INPUT[type="checkbox"].tree_input+label
 .table_grid td
 {
     white-space: nowrap;
-    vertical-align: top;
+    vertical-align: middle;
 }
 
 /* This bears some explaining. If we have a chimera-table which is not the only child in a div, then
