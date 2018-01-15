@@ -252,6 +252,7 @@ PrologEngine.prototype.render = function(widget, component, state, props, callba
     var goal = crossModuleCall(component, Prolog._make_compound(renderFunctor, [state.blob, props.blob, vDom]));
     this.env.pushProactiveContext(widget.blob);
     this.rendering = true;
+    var t0 = performance.now();
     Prolog._execute(this.env,
                     goal,
                     function(success)
@@ -269,6 +270,7 @@ PrologEngine.prototype.render = function(widget, component, state, props, callba
                                             {
                                                 vDom = Prolog._make_local(expandedDom);
                                                 Prolog._restore_state(savePoint);
+                                                console.log("Render time: " + (performance.now() - t0) + "ms");
                                                 if (s2)
                                                 {
                                                     callback(vDom);
@@ -625,7 +627,7 @@ PrologEngine.prototype.mutate = function(a, b, root, callback)
                     goal,
                     function(result)
                     {
-                        //console.log("Time to run vmutate/5: " + (performance.now() - t0) + "ms");
+                        console.log("Time to run vmutate/5: " + (performance.now() - t0) + "ms (" + result + ")");
                         var element = null;
                         if (result == 1)
                             element = Prolog._get_blob("react_component", newRoot);
