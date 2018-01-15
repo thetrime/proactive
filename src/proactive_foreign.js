@@ -594,3 +594,9 @@ module.exports["ticks"] = function(t)
 {
     return Prolog._unify(Prolog._make_float(performance.now()), t);
 }
+
+module.exports["dump_node"] = function(t)
+{
+    console.log(Prolog._get_blob("react_component", t).getDOMNode().outerHTML);
+    return 1;
+}
