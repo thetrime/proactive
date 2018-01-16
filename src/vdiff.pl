@@ -392,8 +392,9 @@ reorder(As, Bs, NewAs, NewBs, Moves):-
         all_keys(Bs, 0, BKeys),
         all_keys(As, 0, AKeys),
         ticks(T0),
-        length(BKeys, L),
-        reorder_1(As, Bs, 0, L, AKeys, BKeys, NewAs, NewBs, Removes, UnsortedInserts),
+        length(As, ACount),
+        EndPosition is ACount,
+        reorder_1(As, Bs, 0, EndPosition, AKeys, BKeys, NewAs, NewBs, Removes, UnsortedInserts),
         ticks(T1),
         ( UnsortedInserts == []->
             Moves = {no_moves}
@@ -427,7 +428,7 @@ reorder_1([], [B|Bs], Position, L, AKeys, BKeys, NewAs, Out, Removes, Inserts):-
         ),
         reorder_1([], Bs, Position, L, AKeys, BKeys, NewAs, More, Removes, Inserts).
 
-reorder_1([_A|As], [], Position, L, AKeys, BKeys, NewAs, [{null}|Children], Removes, Inserts):-
+reorder_1([A|As], [], Position, L, AKeys, BKeys, [A|NewAs], [{null}|Children], Removes, Inserts):-
         !,
         % This is the case when there are more items in the original list than the new one and we cannot make up the
         % difference by inserting new items.
@@ -438,7 +439,7 @@ reorder_1([_A|As], [], Position, L, AKeys, BKeys, NewAs, [{null}|Children], Remo
 reorder_1([A|As], [B|Bs], Position, L, AKeys, BKeys, NewA, NewB, Removes, Inserts):-
         get_key_or_null(A, AKey),
         get_key_or_null(B, BKey),
-        %format(user_error, 'Considering left child ~w, at position ~w. The correct key is ~w~n', [AKey, Position, BKey]),
+%        format(user_error, 'Considering left child ~w, at position ~w. The correct key is ~w~n', [AKey, Position, BKey]),
         ( AKey == BKey ->
             % This is the happy case - the node is already in the right slot
             NewA = [A|MoreA],
@@ -457,8 +458,9 @@ reorder_1([A|As], [B|Bs], Position, L, AKeys, BKeys, NewA, NewB, Removes, Insert
             ; otherwise->
                 % In this case, the node is being inserted. For example, A = [a,b,c] and B = [x,a,b,c]
                 % Since we always insert at the end, this is essentially a move from the end of the list
+                %format(user_error, 'This refers to a node that will be inserted. The end-of-list position is ~w. The OriginalPosition is ~w~n', [L, OriginalPosition]),
                 CurrentPosition = L,
-                LL is L+1,
+                LL = L,
                 NewA = [{null}|MoreA]
             ),
             NewB = [B|MoreB],
@@ -469,7 +471,6 @@ reorder_1([A|As], [B|Bs], Position, L, AKeys, BKeys, NewA, NewB, Removes, Insert
             %   2: Remove BKey from OriginalPosition and insert it at Position
             % I propose that we will get better results if we choose the option which moves the object the furthest distance
             ( abs(OriginalPosition - Position) > abs(CurrentPosition - Position) ->
-                writeln(here),
                 Removes = [remove(Position, AKey)|MoreRemoves],
                 Inserts = [OriginalPosition-insert(AKey, OriginalPosition)|MoreInserts],
                 NextAs = As,
@@ -756,6 +757,7 @@ patch_op(order_patch(_VNode, Moves), DomNode, _Options, DomNode):-
         Moves = moves(inserts(Inserts),
                       removes(Removes)),
         reorder_removes(Removes, DomNode, ChildNodes, [], KeyMap),
+
         child_nodes(DomNode, ChildNodesAfterRemoves),
         reorder_inserts(Inserts, DomNode, ChildNodesAfterRemoves, KeyMap).
 
@@ -800,13 +802,13 @@ reorder_inserts([], _DomNode, _ChildNodes, _KeyMap):- !.
 reorder_inserts([insert(Key, Position)|Inserts], DomNode, ChildNodes, KeyMap):-
         memberchk(Key-Node, KeyMap),
         ( nth0(Position, ChildNodes, Sibling)->
-%            insert_nth0(Position, ChildNodes, Node, NewChildNodes),
+            insert_nth0(Position, ChildNodes, Node, NewChildNodes),
             insert_before(DomNode, Node, Sibling)
         ; otherwise->
-%            insert_end(ChildNodes, Node, NewChildNodes),
+            insert_end(ChildNodes, Node, NewChildNodes),
             insert_before(DomNode, Node, {null})
         ),
-        reorder_inserts(Inserts, DomNode, ChildNodes, KeyMap).
+        reorder_inserts(Inserts, DomNode, NewChildNodes, KeyMap).
 
 render(Options, VNodeIn, DomNode):-
         handle_thunk(VNodeIn, {null}, VNode, _),
