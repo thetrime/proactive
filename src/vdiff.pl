@@ -106,11 +106,13 @@ vmutate_children(A, B, DomNode, Options, NewNode):-
         reorder(AChildren, BChildren, OrderedA, OrderedB, Moves),
         child_nodes(DomNode, DomChildren),
         !,
-        %dump(OrderedA, OrderedB),
+%        dump(AChildren, BChildren),
+%        writeln(becomes),
+%        dump(OrderedA, OrderedB),
         %writeln(Moves),
         % The problem is that vmutate_children_1 expects DomChildren and OrderedA to be the same length.
         % But we pad OrderedA to make space for converting {null} -> {inserted node} operations. Hmm.
-        vmutate_children_1(OrderedA, OrderedB, DomChildren, DomNode, Options),
+        \+(\+(vmutate_children_1(OrderedA, OrderedB, DomChildren, DomNode, Options))),
         ( Moves == {no_moves} ->
             NewNode = DomNode
         ; patch_op(order_patch(_Ignored, Moves), DomNode, Options, NewNode)
@@ -139,7 +141,7 @@ keysof([widget(_, _, _)|A], [{widget}|Keys]):-
 children_of(widget(_,_,Children), Children):- !.
 children_of(element(_,_,Children), Children):- !.
 
-vmutate_children_1([], [], [], _, _):- !.
+vmutate_children_1([], [], _, _, _):- !.
 vmutate_children_1(A, B, DomNodes, ParentDomNode, Options):-
         ( A = [Left|ASiblings] ->
             ( Left == {null} ->
@@ -436,7 +438,7 @@ reorder_1([A|As], [], Position, L, AKeys, BKeys, [A|NewAs], [{null}|Children], R
         reorder_1(As, [], Position, L, AKeys, BKeys, NewAs, Children, Removes, Inserts).
 
 
-reorder_1([A|As], [B|Bs], Position, L, AKeys, BKeys, NewA, NewB, Removes, Inserts):-
+reorder_1([A|As], [B|Bs], Position, NextFreePosition, AKeys, BKeys, NewA, NewB, Removes, Inserts):-
         get_key_or_null(A, AKey),
         get_key_or_null(B, BKey),
 %        format(user_error, 'Considering left child ~w, at position ~w. The correct key is ~w~n', [AKey, Position, BKey]),
@@ -448,19 +450,16 @@ reorder_1([A|As], [B|Bs], Position, L, AKeys, BKeys, NewA, NewB, Removes, Insert
             MoreInserts = Inserts,
             NextAs = As,
             NextBs = Bs,
-            PP is Position + 1,
-            LL = L
+            PP is Position + 1
         ; AKey \== {null},
           memberchk(AKey-OriginalPosition-_, BKeys)->
             ( memberchk(BKey-CurrentPosition-_, AKeys)->
-                LL  = L,
                 NewA = [A|MoreA]
             ; otherwise->
                 % In this case, the node is being inserted. For example, A = [a,b,c] and B = [x,a,b,c]
                 % Since we always insert at the end, this is essentially a move from the end of the list
                 %format(user_error, 'This refers to a node that will be inserted. The end-of-list position is ~w. The OriginalPosition is ~w~n', [L, OriginalPosition]),
-                CurrentPosition = L,
-                LL = L,
+                CurrentPosition = NextFreePosition,
                 NewA = [{null}|MoreA]
             ),
             NewB = [B|MoreB],
@@ -470,7 +469,8 @@ reorder_1([A|As], [B|Bs], Position, L, AKeys, BKeys, NewA, NewB, Removes, Insert
             %   1: Remove AKey from Position and insert it at OriginalPosition
             %   2: Remove BKey from OriginalPosition and insert it at Position
             % I propose that we will get better results if we choose the option which moves the object the furthest distance
-            ( abs(OriginalPosition - Position) > abs(CurrentPosition - Position) ->
+            % For now though this is all disabled via the fail just below
+            ( fail, abs(OriginalPosition - Position) > abs(CurrentPosition - Position) ->
                 Removes = [remove(Position, AKey)|MoreRemoves],
                 Inserts = [OriginalPosition-insert(AKey, OriginalPosition)|MoreInserts],
                 NextAs = As,
@@ -491,14 +491,12 @@ reorder_1([A|As], [B|Bs], Position, L, AKeys, BKeys, NewA, NewB, Removes, Insert
             MoreInserts = Inserts,
             NextAs = As,
             NextBs = [B|Bs],
-            PP is Position + 1,
-            LL = L
+            PP is Position + 1
         ; otherwise->
             % This is the case where we have a keyless node in A, and a keyed one in B. If that keyed entry in B
             % appears later on in A, then we must wait for it, and put in a padding spot here. Otherwise,
             % we can just accept both nodes since the {null} -> {no-longer-used-key} will get flagged in a moment
             % by the subtree comparison
-            LL = L,
             ( memberchk(BKey-_-_, AKeys)->
                 % Just pad then
                 NewA = MoreA,
@@ -519,7 +517,7 @@ reorder_1([A|As], [B|Bs], Position, L, AKeys, BKeys, NewA, NewB, Removes, Insert
                 PP is Position + 1
             )
         ),
-        reorder_1(NextAs, NextBs, PP, LL, AKeys, BKeys, MoreA, MoreB, MoreRemoves, MoreInserts).
+        reorder_1(NextAs, NextBs, PP, NextFreePosition, AKeys, BKeys, MoreA, MoreB, MoreRemoves, MoreInserts).
 
 
 all_keys([], _, []):- !.
