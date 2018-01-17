@@ -1,6 +1,9 @@
 % http://docs.lib.purdue.edu/cgi/viewcontent.cgi?article=1377&context=cstech seems like a promising approach to the reordering problem
 % http://documents.scribd.com/docs/10ro9oowpo1h81pgh1as.pdf may also shed some helpful ideas
 
+% Next plan:
+%   All of this mess could be avoided if we just inserted the new nodes *at the right place*. Surely that isnt such a stupid idea?
+
 
 :-module(vdiff, [create_element_from_vdom/3,
                  vdiff/3,
@@ -103,22 +106,54 @@ destroy_widget_children([Element|Elements], [DomNode|DomNodes], Options):-
 vmutate_children(A, B, DomNode, Options, NewNode):-
         children_of(A, AChildren),
         children_of(B, BChildren),
-        reorder(AChildren, BChildren, Ordered, Moves),
+        reorder(AChildren, BChildren, OrderedA, OrderedB, Moves),
         child_nodes(DomNode, DomChildren),
         !,
-        vmutate_children_1(AChildren, Ordered, DomChildren, DomNode, Options),
+%        dump(AChildren, BChildren),
+%        writeln(becomes),
+%        dump(OrderedA, OrderedB),
+        %writeln(Moves),
+        % The problem is that vmutate_children_1 expects DomChildren and OrderedA to be the same length.
+        % But we pad OrderedA to make space for converting {null} -> {inserted node} operations. Hmm.
+        \+(\+(vmutate_children_1(OrderedA, OrderedB, DomChildren, DomNode, Options))),
         ( Moves == {no_moves} ->
             NewNode = DomNode
         ; patch_op(order_patch(_Ignored, Moves), DomNode, Options, NewNode)
         ).
 
+dump(A, B):-
+        keysof(A, AK),
+        keysof(B, BK),
+        writeln(AK -> BK).
+
+keysof([], []):- !.
+keysof([{null}|A], [{null}|Keys]):- !,
+        keysof(A, Keys).
+keysof([element(_, Attributes, _)|A], [Key|Keys]):-
+        !,
+        ( memberchk(key=Key, Attributes)->
+            true
+        ; Key = {element_with_no_key}
+        ),
+        keysof(A, Keys).
+keysof([widget(_, _, _)|A], [{widget}|Keys]):-
+        !,
+        keysof(A, Keys).
+
+
 children_of(widget(_,_,Children), Children):- !.
 children_of(element(_,_,Children), Children):- !.
 
-vmutate_children_1([], [], [], _, _):- !.
+vmutate_children_1([], [], _, _, _):- !.
 vmutate_children_1(A, B, DomNodes, ParentDomNode, Options):-
         ( A = [Left|ASiblings] ->
-            DomNodes = [LeftDom|DomSiblings]
+            ( Left == {null} ->
+                % This is a tombstone
+                DomSiblings = DomNodes,
+                LeftDom = {null}
+            ; otherwise->
+                DomNodes = [LeftDom|DomSiblings]
+            )
         ; otherwise->
             DomSiblings = DomNodes,
             LeftDom = {null},
@@ -132,7 +167,11 @@ vmutate_children_1(A, B, DomNodes, ParentDomNode, Options):-
             Right = {null}
         ),
         ( Left == {null}, Right \== {null}->
-            patch_op(insert_patch({null}, Right), ParentDomNode, Options, _)
+            ( DomSiblings = [Sibling|_]->
+                patch_op(insert_at_patch(Sibling, Right), ParentDomNode, Options, _)
+            ; otherwise->
+                patch_op(insert_patch({null}, Right), ParentDomNode, Options, _)
+            )
         ; Left \== {null}->
             vmutate_1(Left, Right, LeftDom, Options, _)
         ; otherwise->
@@ -243,8 +282,8 @@ child_element(Children, Child):-
 diff_children(A, B, Index, Patch):-
         expand_children(A, AChildren),
         expand_children(B, BChildren),
-        reorder(AChildren, BChildren, Ordered, Moves),
-        ( diff_children_1(AChildren, Ordered, Index, Index, Patch)
+        reorder(AChildren, BChildren, OrderedA, OrderedB, Moves),
+        ( diff_children_1(OrderedA, OrderedB, Index, Index, Patch)
         ; Moves \== {no_moves},
           Patch = Index-order_patch(A, Moves)
         ).
@@ -358,13 +397,20 @@ unhook_1([Child|Children], Index, Patch):-
 % Any remaining differences are left to the subtree-differencing process that is about to happen
 % Once the subtree diffs are done, we can optionally use the moves/2 term here to move the mutated
 % children into the right order
-reorder(As, Bs, NewBs, Moves):-
+reorder(As, Bs, NewAs, NewBs, Moves):-
         all_keys(Bs, 0, BKeys),
         all_keys(As, 0, AKeys),
-        reorder_1(As, Bs, 0, AKeys, BKeys, NewBs, Removes, UnsortedInserts),
+        ticks(T0),
+        length(As, ACount),
+        EndPosition is ACount,
+        reorder_1(As, Bs, 0, EndPosition, AKeys, BKeys, NewAs, NewBs, Removes, UnsortedInserts),
+        ticks(T1),
         ( UnsortedInserts == []->
             Moves = {no_moves}
         ; otherwise->
+            D is T1-T0,
+            %writeq(reorder_1(As, Bs)), nl,
+            %writeln(reorder_1(D)),
             sort(UnsortedInserts, SortedInserts),
             vstrip_sort_keys(SortedInserts, Inserts),
             Moves = moves(inserts(Inserts),
@@ -375,51 +421,84 @@ vstrip_sort_keys([], []):- !.
 vstrip_sort_keys([_-X|Xs], [X|Ys]):-
         vstrip_sort_keys(Xs, Ys).
 
-
-reorder_1([], [], _, _, _, [], [], []):- !.
-reorder_1([], [B|Bs], Position, AKeys, BKeys, Out, Removes, Inserts):-
+reorder_1([], [], _, _, _, _, [], [], [], []):- !.
+reorder_1([], [B|Bs], Position, L, AKeys, BKeys, NewAs, Out, Removes, Inserts):-
         !,
         % This is the case where the are more items in the new list
         % If they appear in the original list as well then we have already added them by now
         % and we can just skip them. Otherwise, we need to add them now
+        % FIXME: Not necessarily. It depends now on whether that move was selected by the heuristic below!
         get_key_or_null(B, BKey),
-        ( memberchk(BKey-_-_, AKeys)->
+        ( fail,
+          memberchk(BKey-_-_, AKeys)->
             Out = More
         ; otherwise->
             Out = [B|More]
         ),
-        reorder_1([], Bs, Position, AKeys, BKeys, More, Removes, Inserts).
+        reorder_1([], Bs, Position, L, AKeys, BKeys, NewAs, More, Removes, Inserts).
 
-reorder_1([_A|As], [], Position, AKeys, BKeys, [{null}|Children], Removes, Inserts):-
+reorder_1([A|As], [], Position, L, AKeys, BKeys, [A|NewAs], [{null}|Children], Removes, Inserts):-
         !,
         % This is the case when there are more items in the original list than the new one and we cannot make up the
         % difference by inserting new items.
         % In this case, just pad the output with {null}.
-        reorder_1(As, [], Position, AKeys, BKeys, Children, Removes, Inserts).
+        reorder_1(As, [], Position, L, AKeys, BKeys, NewAs, Children, Removes, Inserts).
 
 
-reorder_1([A|As], [B|Bs], Position, AKeys, BKeys, [Child|Children], Removes, Inserts):-
+reorder_1([A|As], [B|Bs], Position, NextFreePosition, AKeys, BKeys, NewA, NewB, Removes, Inserts):-
         get_key_or_null(A, AKey),
         get_key_or_null(B, BKey),
+%        format(user_error, 'Considering left child ~w, at position ~w. The correct key is ~w~n', [AKey, Position, BKey]),
         ( AKey == BKey ->
             % This is the happy case - the node is already in the right slot
-            Child = B,
+            NewA = [A|MoreA],
+            NewB = [B|MoreB],
             MoreRemoves = Removes,
             MoreInserts = Inserts,
             NextAs = As,
             NextBs = Bs,
             PP is Position + 1
         ; AKey \== {null},
-          memberchk(AKey-OriginalPosition-Child, BKeys)->
-            % This is the case where the node has been moved around
-            Removes = [remove(Position, AKey)|MoreRemoves],
-            Inserts = [OriginalPosition-insert(AKey, OriginalPosition)|MoreInserts],
-            NextAs = As,
-            NextBs = [B|Bs],
-            PP = Position
+          memberchk(AKey-OriginalPosition-_, BKeys)->
+            ( memberchk(BKey-CurrentPosition-_, AKeys)->
+                NewA = [A|MoreA],
+                NewB = [B|MoreB],
+                % format(user_error, 'Processing entry ~w in left list: ~w. The current position of this in right list is: ~w and the original position was ~w~n', [Position, AKey, OriginalPosition, CurrentPosition]),
+                % This is the case where the node is in both lists but has been moved around
+                % Our two choices are:
+                %   1: Remove AKey from Position and insert it at OriginalPosition
+                %   2: Remove BKey from OriginalPosition and insert it at Position
+                % I propose that we will get better results if we choose the option which moves the object the furthest distance
+                % For now though this is all disabled via the fail just below
+                ( fail, abs(OriginalPosition - Position) > abs(CurrentPosition - Position) ->
+                    Removes = [remove(Position, AKey)|MoreRemoves],
+                    Inserts = [OriginalPosition-insert(AKey, OriginalPosition)|MoreInserts],
+                    NextAs = As,
+                    NextBs = [B|Bs],
+                    PP = Position
+                ; otherwise->
+                    Removes = [remove(CurrentPosition, BKey)|MoreRemoves],
+                    Inserts = [Position-insert(BKey, Position)|MoreInserts],
+                    NextAs = [A|As],
+                    NextBs = Bs,
+                    PP is Position + 1
+                )
+            ; otherwise->
+                % In this case, the node is being inserted. For example, A = [a,b,c] and B = [x,a,b,c]
+                % We can now insert at the correct place using the insert_at_patch. This means no reordering is needed
+                %format(user_error, 'This refers to a node that will be inserted. The end-of-list position is ~w. The OriginalPosition is ~w~n', [L, OriginalPosition]),
+                NewA = [{null}|MoreA],
+                NewB = [B|MoreB],
+                MoreRemoves = Removes,
+                MoreInserts = Inserts,
+                NextAs = [A|As],
+                NextBs = Bs,
+                PP is Position + 1
+            )
         ; AKey \== {null}->
             % This is the case where the node has been deleted. Just put a {null} in to pad
-            Child = {null},
+            NewA = [A|MoreA],
+            NewB = [{null}|MoreB],
             MoreRemoves = Removes,
             MoreInserts = Inserts,
             NextAs = As,
@@ -432,7 +511,8 @@ reorder_1([A|As], [B|Bs], Position, AKeys, BKeys, [Child|Children], Removes, Ins
             % by the subtree comparison
             ( memberchk(BKey-_-_, AKeys)->
                 % Just pad then
-                Child = {null},
+                NewA = MoreA,
+                NewB = [{null}|MoreB],
                 MoreRemoves = Removes,
                 MoreInserts = Inserts,
                 NextAs = As,
@@ -440,7 +520,8 @@ reorder_1([A|As], [B|Bs], Position, AKeys, BKeys, [Child|Children], Removes, Ins
                 PP is Position + 1
             ; otherwise->
                 % Accept the discrepancy and leave subtree comparison to sort it out
-                Child = B,
+                NewA = MoreA,
+                NewB = [B|MoreB],
                 MoreRemoves = Removes,
                 MoreInserts = Inserts,
                 NextAs = As,
@@ -448,7 +529,7 @@ reorder_1([A|As], [B|Bs], Position, AKeys, BKeys, [Child|Children], Removes, Ins
                 PP is Position + 1
             )
         ),
-        reorder_1(NextAs, NextBs, PP, AKeys, BKeys, Children, MoreRemoves, MoreInserts).
+        reorder_1(NextAs, NextBs, PP, NextFreePosition, AKeys, BKeys, MoreA, MoreB, MoreRemoves, MoreInserts).
 
 
 all_keys([], _, []):- !.
@@ -615,6 +696,7 @@ patch_op(remove_patch(VNode, _), DomNode, _Options, NewNode):-
         destroy_component(DomNode, VNode),
         NewNode = {null}.
 
+
 patch_op(insert_patch(_ActualVNode, VNode), ParentNode, Options, ParentNode):-
         render(Options, VNode, NewNode),
         !,
@@ -623,6 +705,16 @@ patch_op(insert_patch(_ActualVNode, VNode), ParentNode, Options, ParentNode):-
         ; otherwise->
             true
         ).
+
+patch_op(insert_at_patch(Sibling, VNode), ParentNode, Options, ParentNode):-
+        render(Options, VNode, NewNode),
+        !,
+        ( ParentNode \== {null}->
+            insert_before(ParentNode, NewNode, Sibling)
+        ; otherwise->
+            true
+        ).
+
 
 patch_op(text_patch(_LeftVNode, VText), DomNode, Options, NewNode):-
         ( node_type(DomNode, text)->
@@ -709,9 +801,14 @@ insert_end([], Node, [Node]):- !.
 insert_end([Node|Tail], Child, [Node|More]):-
         insert_end(Tail, Child, More).
 
+dump_nodes([]).
+dump_nodes([Node|Nodes]):-
+        dump_node(Node),
+        dump_nodes(Nodes).
 
 reorder_removes([], _DomNode, _ChildNodes, T, T):- !.
 reorder_removes([remove(From, Key)|Removes], DomNode, ChildNodes, KeyMap, FinalKeyMap):-
+        %dump_nodes(ChildNodes),
         select_nth0(From, ChildNodes, Node, RemainingChildren),
         ( Key \== {null}->
             NewKeyMap = [Key-Node|KeyMap]
@@ -725,13 +822,13 @@ reorder_inserts([], _DomNode, _ChildNodes, _KeyMap):- !.
 reorder_inserts([insert(Key, Position)|Inserts], DomNode, ChildNodes, KeyMap):-
         memberchk(Key-Node, KeyMap),
         ( nth0(Position, ChildNodes, Sibling)->
-%            insert_nth0(Position, ChildNodes, Node, NewChildNodes),
+            insert_nth0(Position, ChildNodes, Node, NewChildNodes),
             insert_before(DomNode, Node, Sibling)
         ; otherwise->
-%            insert_end(ChildNodes, Node, NewChildNodes),
+            insert_end(ChildNodes, Node, NewChildNodes),
             insert_before(DomNode, Node, {null})
         ),
-        reorder_inserts(Inserts, DomNode, ChildNodes, KeyMap).
+        reorder_inserts(Inserts, DomNode, NewChildNodes, KeyMap).
 
 render(Options, VNodeIn, DomNode):-
         handle_thunk(VNodeIn, {null}, VNode, _),
