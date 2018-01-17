@@ -1,6 +1,9 @@
 % http://docs.lib.purdue.edu/cgi/viewcontent.cgi?article=1377&context=cstech seems like a promising approach to the reordering problem
 % http://documents.scribd.com/docs/10ro9oowpo1h81pgh1as.pdf may also shed some helpful ideas
 
+% Next plan:
+%   All of this mess could be avoided if we just inserted the new nodes *at the right place*. Surely that isnt such a stupid idea?
+
 
 :-module(vdiff, [create_element_from_vdom/3,
                  vdiff/3,
@@ -164,7 +167,11 @@ vmutate_children_1(A, B, DomNodes, ParentDomNode, Options):-
             Right = {null}
         ),
         ( Left == {null}, Right \== {null}->
-            patch_op(insert_patch({null}, Right), ParentDomNode, Options, _)
+            ( DomSiblings = [Sibling|_]->
+                patch_op(insert_at_patch(Sibling, Right), ParentDomNode, Options, _)
+            ; otherwise->
+                patch_op(insert_patch({null}, Right), ParentDomNode, Options, _)
+            )
         ; Left \== {null}->
             vmutate_1(Left, Right, LeftDom, Options, _)
         ; otherwise->
@@ -454,31 +461,36 @@ reorder_1([A|As], [B|Bs], Position, NextFreePosition, AKeys, BKeys, NewA, NewB, 
         ; AKey \== {null},
           memberchk(AKey-OriginalPosition-_, BKeys)->
             ( memberchk(BKey-CurrentPosition-_, AKeys)->
-                NewA = [A|MoreA]
+                NewA = [A|MoreA],
+                NewB = [B|MoreB],
+                % format(user_error, 'Processing entry ~w in left list: ~w. The current position of this in right list is: ~w and the original position was ~w~n', [Position, AKey, OriginalPosition, CurrentPosition]),
+                % This is the case where the node is in both lists but has been moved around
+                % Our two choices are:
+                %   1: Remove AKey from Position and insert it at OriginalPosition
+                %   2: Remove BKey from OriginalPosition and insert it at Position
+                % I propose that we will get better results if we choose the option which moves the object the furthest distance
+                % For now though this is all disabled via the fail just below
+                ( fail, abs(OriginalPosition - Position) > abs(CurrentPosition - Position) ->
+                    Removes = [remove(Position, AKey)|MoreRemoves],
+                    Inserts = [OriginalPosition-insert(AKey, OriginalPosition)|MoreInserts],
+                    NextAs = As,
+                    NextBs = [B|Bs],
+                    PP = Position
+                ; otherwise->
+                    Removes = [remove(CurrentPosition, BKey)|MoreRemoves],
+                    Inserts = [Position-insert(BKey, Position)|MoreInserts],
+                    NextAs = [A|As],
+                    NextBs = Bs,
+                    PP is Position + 1
+                )
             ; otherwise->
                 % In this case, the node is being inserted. For example, A = [a,b,c] and B = [x,a,b,c]
-                % Since we always insert at the end, this is essentially a move from the end of the list
+                % We can now insert at the correct place using the insert_at_patch. This means no reordering is needed
                 %format(user_error, 'This refers to a node that will be inserted. The end-of-list position is ~w. The OriginalPosition is ~w~n', [L, OriginalPosition]),
-                CurrentPosition = NextFreePosition,
-                NewA = [{null}|MoreA]
-            ),
-            NewB = [B|MoreB],
-            % format(user_error, 'Processing entry ~w in left list: ~w. The current position of this in right list is: ~w and the original position was ~w~n', [Position, AKey, OriginalPosition, CurrentPosition]),
-            % This is the case where the node is in both lists but has been moved around
-            % Our two choices are:
-            %   1: Remove AKey from Position and insert it at OriginalPosition
-            %   2: Remove BKey from OriginalPosition and insert it at Position
-            % I propose that we will get better results if we choose the option which moves the object the furthest distance
-            % For now though this is all disabled via the fail just below
-            ( fail, abs(OriginalPosition - Position) > abs(CurrentPosition - Position) ->
-                Removes = [remove(Position, AKey)|MoreRemoves],
-                Inserts = [OriginalPosition-insert(AKey, OriginalPosition)|MoreInserts],
-                NextAs = As,
-                NextBs = [B|Bs],
-                PP = Position
-            ; otherwise->
-                Removes = [remove(CurrentPosition, BKey)|MoreRemoves],
-                Inserts = [Position-insert(BKey, Position)|MoreInserts],
+                NewA = [{null}|MoreA],
+                NewB = [B|MoreB],
+                MoreRemoves = Removes,
+                MoreInserts = Inserts,
                 NextAs = [A|As],
                 NextBs = Bs,
                 PP is Position + 1
@@ -684,6 +696,7 @@ patch_op(remove_patch(VNode, _), DomNode, _Options, NewNode):-
         destroy_component(DomNode, VNode),
         NewNode = {null}.
 
+
 patch_op(insert_patch(_ActualVNode, VNode), ParentNode, Options, ParentNode):-
         render(Options, VNode, NewNode),
         !,
@@ -692,6 +705,16 @@ patch_op(insert_patch(_ActualVNode, VNode), ParentNode, Options, ParentNode):-
         ; otherwise->
             true
         ).
+
+patch_op(insert_at_patch(Sibling, VNode), ParentNode, Options, ParentNode):-
+        render(Options, VNode, NewNode),
+        !,
+        ( ParentNode \== {null}->
+            insert_before(ParentNode, NewNode, Sibling)
+        ; otherwise->
+            true
+        ).
+
 
 patch_op(text_patch(_LeftVNode, VText), DomNode, Options, NewNode):-
         ( node_type(DomNode, text)->
@@ -755,7 +778,6 @@ patch_op(order_patch(_VNode, Moves), DomNode, _Options, DomNode):-
         Moves = moves(inserts(Inserts),
                       removes(Removes)),
         reorder_removes(Removes, DomNode, ChildNodes, [], KeyMap),
-
         child_nodes(DomNode, ChildNodesAfterRemoves),
         reorder_inserts(Inserts, DomNode, ChildNodesAfterRemoves, KeyMap).
 
