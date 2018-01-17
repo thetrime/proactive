@@ -401,9 +401,7 @@ reorder(As, Bs, NewAs, NewBs, Moves):-
         all_keys(Bs, 0, BKeys),
         all_keys(As, 0, AKeys),
         ticks(T0),
-        length(As, ACount),
-        EndPosition is ACount,
-        reorder_1(As, Bs, 0, EndPosition, AKeys, BKeys, NewAs, NewBs, Removes, UnsortedInserts),
+        reorder_1(As, Bs, 0, AKeys, BKeys, [], NewAs, NewBs, Removes, UnsortedInserts),
         ticks(T1),
         ( UnsortedInserts == []->
             Moves = {no_moves}
@@ -422,33 +420,129 @@ vstrip_sort_keys([_-X|Xs], [X|Ys]):-
         vstrip_sort_keys(Xs, Ys).
 
 reorder_1([], [], _, _, _, _, [], [], [], []):- !.
-reorder_1([], [B|Bs], Position, L, AKeys, BKeys, NewAs, Out, Removes, Inserts):-
+reorder_1([], [B|Bs], Position, AKeys, BKeys, Consumed, NewAs, Out, Removes, Inserts):-
         !,
         % This is the case where the are more items in the new list
         % If they appear in the original list as well then we have already added them by now
         % and we can just skip them. Otherwise, we need to add them now
         % FIXME: Not necessarily. It depends now on whether that move was selected by the heuristic below!
         get_key_or_null(B, BKey),
-        ( fail,
-          memberchk(BKey-_-_, AKeys)->
-            Out = More
+        ( memberchk(BKey-_-_, AKeys)->
+            Out = [{null}|More]
         ; otherwise->
             Out = [B|More]
         ),
-        reorder_1([], Bs, Position, L, AKeys, BKeys, NewAs, More, Removes, Inserts).
+        reorder_1([], Bs, Position, AKeys, BKeys, Consumed, NewAs, More, Removes, Inserts).
 
-reorder_1([A|As], [], Position, L, AKeys, BKeys, [A|NewAs], [{null}|Children], Removes, Inserts):-
+reorder_1([A|As], [], Position, AKeys, BKeys, Consumed, [A|NewAs], Out, Removes, Inserts):-
         !,
+        get_key_or_null(A, AKey),
+        ( memberchk(AKey-_-_, BKeys)->
+            Out = [A|More]
+        ; otherwise->
+            Out = [{null}|More]
+        ),
         % This is the case when there are more items in the original list than the new one and we cannot make up the
         % difference by inserting new items.
         % In this case, just pad the output with {null}.
-        reorder_1(As, [], Position, L, AKeys, BKeys, NewAs, Children, Removes, Inserts).
+        reorder_1(As, [], Position, AKeys, BKeys, Consumed, NewAs, More, Removes, Inserts).
 
-
-reorder_1([A|As], [B|Bs], Position, NextFreePosition, AKeys, BKeys, NewA, NewB, Removes, Inserts):-
+reorder_1([A|As], [B|Bs], Position, AKeys, BKeys, ConsumedSoFar, NewA, NewB, Removes, Inserts):-
         get_key_or_null(A, AKey),
         get_key_or_null(B, BKey),
-%        format(user_error, 'Considering left child ~w, at position ~w. The correct key is ~w~n', [AKey, Position, BKey]),
+        format(user_error, 'Considering left child ~w, at position ~w. The next right key is ~w~n', [AKey, Position, BKey]),
+        ( AKey == BKey ->
+            % This is the happy case - the node is already in the right slot
+            NewA = [A|MoreA],
+            NewB = [B|MoreB],
+            MoreRemoves = Removes,
+            MoreInserts = Inserts,
+            NextAs = As,
+            NextBs = Bs,
+            PP is Position + 1,
+            ConsumedKeys = ConsumedSoFar
+        ; AKey \== {null},
+          memberchk(AKey-OriginalPosition-_, BKeys)->
+            % In this case, the left item has a key and the key IS present in the right list. There could be two possibilities:
+            % 1) The item needs to be shuffled in the right list (For example, [a,b,c,d] -> [a,d,b,c]), or
+            % 2) An item has been inserted in the right list. (For example: [a,b,c] -> [d,a,b,c])
+            ( BKey \== {null},
+              memberchk(BKey-CurrentPosition-_, AKeys)->
+                % The item at the head of the right list is present in the AKeys. Consider this to be case 1
+                ( memberchk(BKey, ConsumedSoFar)->
+                    % If we have already moved the key, then just ignore it.
+                    NewA = [A|MoreA],
+                    NewB = [A|MoreB],
+                    PP is Position + 1,
+                    MoreRemoves = Removes,
+                    MoreInserts = Inserts,
+                    NextAs = As,
+                    NextBs = Bs,
+                    ConsumedKeys = ConsumedSoFar
+                ; otherwise->
+                    Removes = [remove(CurrentPosition, BKey)|MoreRemoves],
+                    Inserts = [Position-insert(BKey, Position)|MoreInserts],
+                    PP is Position + 1,
+                    NextAs = As,
+                    NextBs = Bs,
+                    ConsumedKeys = [AKey|ConsumedSoFar],
+                    NewA = [A|MoreA],
+                    NewB = [A|MoreB]
+                )
+            ; otherwise->
+                % Otherwise, case 2
+                NewA = [{null}|MoreA],
+                NewB = MoreB,
+                PP is Position + 1,
+                MoreRemoves = Removes,
+                MoreInserts = Inserts,
+                NextAs = [A|As],
+                NextBs = Bs,
+                ConsumedKeys = ConsumedSoFar
+            )
+        ; AKey \== {null}->
+            % This is the case where the node has been deleted. Just put a {null} in to pad
+            NewA = [A|MoreA],
+            NewB = [{null}|MoreB],
+            MoreRemoves = Removes,
+            MoreInserts = Inserts,
+            NextAs = As,
+            NextBs = [B|Bs],
+            PP is Position + 1,
+            ConsumedKeys = ConsumedSoFar
+        ; otherwise->
+            % This is the case where we have a keyless node in A, and a keyed one in B. If that keyed entry in B
+            % appears later on in A, then we must wait for it, and put in a padding spot here. Otherwise,
+            % we can just accept both nodes since the {null} -> {no-longer-used-key} will get flagged in a moment
+            % by the subtree comparison
+            ( memberchk(BKey-_-_, AKeys)->
+                % Just pad then
+                NewA = MoreA,
+                NewB = [{null}|MoreB],
+                MoreRemoves = Removes,
+                MoreInserts = Inserts,
+                NextAs = As,
+                NextBs = [B|Bs],
+                PP is Position + 1,
+                ConsumedKeys = ConsumedSoFar
+            ; otherwise->
+                % Accept the discrepancy and leave subtree comparison to sort it out
+                NewA = MoreA,
+                NewB = [B|MoreB],
+                MoreRemoves = Removes,
+                MoreInserts = Inserts,
+                NextAs = As,
+                NextBs = Bs,
+                PP is Position + 1,
+                ConsumedKeys = ConsumedSoFar
+            )
+        ),
+        reorder_1(NextAs, NextBs, PP, AKeys, BKeys, ConsumedKeys, MoreA, MoreB, MoreRemoves, MoreInserts).
+
+xreorder_1([A|As], [B|Bs], Position, NextFreePosition, AKeys, BKeys, NewA, NewB, Removes, Inserts):-
+        get_key_or_null(A, AKey),
+        get_key_or_null(B, BKey),
+        format(user_error, 'Considering left child ~w, at position ~w. The next right key is ~w~n', [AKey, Position, BKey]),
         ( AKey == BKey ->
             % This is the happy case - the node is already in the right slot
             NewA = [A|MoreA],
@@ -461,26 +555,27 @@ reorder_1([A|As], [B|Bs], Position, NextFreePosition, AKeys, BKeys, NewA, NewB, 
         ; AKey \== {null},
           memberchk(AKey-OriginalPosition-_, BKeys)->
             ( memberchk(BKey-CurrentPosition-_, AKeys)->
-                NewA = [A|MoreA],
-                NewB = [B|MoreB],
-                % format(user_error, 'Processing entry ~w in left list: ~w. The current position of this in right list is: ~w and the original position was ~w~n', [Position, AKey, OriginalPosition, CurrentPosition]),
+                %format(user_error, 'Processing entry ~w in left list: ~w. The next entry in the right list at the moment is ~w, which should be at position ~w not the current position of ~w~n', [Position, AKey, BKey, CurrentPosition, Position]),
                 % This is the case where the node is in both lists but has been moved around
-                % Our two choices are:
-                %   1: Remove AKey from Position and insert it at OriginalPosition
-                %   2: Remove BKey from OriginalPosition and insert it at Position
-                % I propose that we will get better results if we choose the option which moves the object the furthest distance
-                % For now though this is all disabled via the fail just below
-                ( fail, abs(OriginalPosition - Position) > abs(CurrentPosition - Position) ->
+                ( abs(CurrentPosition-Position) < abs(OriginalPosition-Position) ->
+                    % We will move AKey to the right place
+                    format(user_error, '--> Ok. Lets move ~w to the right place (~f vs ~f)~n', [AKey, abs(CurrentPosition-Position), abs(OriginalPosition-Position)]),
                     Removes = [remove(Position, AKey)|MoreRemoves],
                     Inserts = [OriginalPosition-insert(AKey, OriginalPosition)|MoreInserts],
                     NextAs = As,
                     NextBs = [B|Bs],
-                    PP = Position
+                    NewA = MoreA,
+                    NewB = MoreB,
+                    PP is Position
                 ; otherwise->
+                    format(user_error, '--> Lets leave ~w where it is, and move ~w to the right place (~f vs ~f)~n', [AKey, BKey, abs(CurrentPosition-Position), abs(OriginalPosition-Position)]),
+                    % We will move BKey to the right place
                     Removes = [remove(CurrentPosition, BKey)|MoreRemoves],
                     Inserts = [Position-insert(BKey, Position)|MoreInserts],
                     NextAs = [A|As],
                     NextBs = Bs,
+                    NewB = MoreB,
+                    NewA = MoreA,
                     PP is Position + 1
                 )
             ; otherwise->
