@@ -400,14 +400,10 @@ unhook_1([Child|Children], Index, Patch):-
 reorder(As, Bs, NewAs, NewBs, Moves):-
         all_keys(Bs, 0, BKeys),
         all_keys(As, 0, AKeys),
-        ticks(T0),
         reorder_1(As, Bs, 0, AKeys, BKeys, [], NewAs, NewBs, Removes, UnsortedInserts),
-        ticks(T1),
         ( UnsortedInserts == []->
             Moves = {no_moves}
         ; otherwise->
-            D is T1-T0,
-            %writeq(reorder_1(As, Bs)), nl,
             %writeln(reorder_1(D)),
             sort(UnsortedInserts, SortedInserts),
             vstrip_sort_keys(SortedInserts, Inserts),
@@ -450,7 +446,7 @@ reorder_1([A|As], [], Position, AKeys, BKeys, Consumed, [A|NewAs], Out, Removes,
 reorder_1([A|As], [B|Bs], Position, AKeys, BKeys, ConsumedSoFar, NewA, NewB, Removes, Inserts):-
         get_key_or_null(A, AKey),
         get_key_or_null(B, BKey),
-        format(user_error, 'Considering left child ~w, at position ~w. The next right key is ~w~n', [AKey, Position, BKey]),
+        %format(user_error, 'Considering left child ~w, at position ~w. The next right key is ~w~n', [AKey, Position, BKey]),
         ( AKey == BKey ->
             % This is the happy case - the node is already in the right slot
             NewA = [A|MoreA],
@@ -470,6 +466,7 @@ reorder_1([A|As], [B|Bs], Position, AKeys, BKeys, ConsumedSoFar, NewA, NewB, Rem
               memberchk(BKey-CurrentPosition-_, AKeys)->
                 % The item at the head of the right list is present in the AKeys. Consider this to be case 1
                 ( memberchk(BKey, ConsumedSoFar)->
+                    %format(user_error, 'We have already dealt with this discrepancy~n', []),
                     % If we have already moved the key, then just ignore it.
                     NewA = [A|MoreA],
                     NewB = [A|MoreB],
@@ -480,19 +477,21 @@ reorder_1([A|As], [B|Bs], Position, AKeys, BKeys, ConsumedSoFar, NewA, NewB, Rem
                     NextBs = Bs,
                     ConsumedKeys = ConsumedSoFar
                 ; otherwise->
+                    % NB: This is not necessarily optimal. We have two choices here: Move A, or move B.
+                    %format(user_error, 'Moving ~w to ~w~n', [BKey, Position]),
                     Removes = [remove(CurrentPosition, BKey)|MoreRemoves],
                     Inserts = [Position-insert(BKey, Position)|MoreInserts],
                     PP is Position + 1,
-                    NextAs = As,
+                    NextAs = [A|As],
                     NextBs = Bs,
                     ConsumedKeys = [AKey|ConsumedSoFar],
-                    NewA = [A|MoreA],
-                    NewB = [A|MoreB]
+                    NewA = MoreA,
+                    NewB = MoreB
                 )
             ; otherwise->
                 % Otherwise, case 2
                 NewA = [{null}|MoreA],
-                NewB = MoreB,
+                NewB = [B|MoreB],
                 PP is Position + 1,
                 MoreRemoves = Removes,
                 MoreInserts = Inserts,
@@ -538,93 +537,6 @@ reorder_1([A|As], [B|Bs], Position, AKeys, BKeys, ConsumedSoFar, NewA, NewB, Rem
             )
         ),
         reorder_1(NextAs, NextBs, PP, AKeys, BKeys, ConsumedKeys, MoreA, MoreB, MoreRemoves, MoreInserts).
-
-xreorder_1([A|As], [B|Bs], Position, NextFreePosition, AKeys, BKeys, NewA, NewB, Removes, Inserts):-
-        get_key_or_null(A, AKey),
-        get_key_or_null(B, BKey),
-        format(user_error, 'Considering left child ~w, at position ~w. The next right key is ~w~n', [AKey, Position, BKey]),
-        ( AKey == BKey ->
-            % This is the happy case - the node is already in the right slot
-            NewA = [A|MoreA],
-            NewB = [B|MoreB],
-            MoreRemoves = Removes,
-            MoreInserts = Inserts,
-            NextAs = As,
-            NextBs = Bs,
-            PP is Position + 1
-        ; AKey \== {null},
-          memberchk(AKey-OriginalPosition-_, BKeys)->
-            ( memberchk(BKey-CurrentPosition-_, AKeys)->
-                %format(user_error, 'Processing entry ~w in left list: ~w. The next entry in the right list at the moment is ~w, which should be at position ~w not the current position of ~w~n', [Position, AKey, BKey, CurrentPosition, Position]),
-                % This is the case where the node is in both lists but has been moved around
-                ( abs(CurrentPosition-Position) < abs(OriginalPosition-Position) ->
-                    % We will move AKey to the right place
-                    format(user_error, '--> Ok. Lets move ~w to the right place (~f vs ~f)~n', [AKey, abs(CurrentPosition-Position), abs(OriginalPosition-Position)]),
-                    Removes = [remove(Position, AKey)|MoreRemoves],
-                    Inserts = [OriginalPosition-insert(AKey, OriginalPosition)|MoreInserts],
-                    NextAs = As,
-                    NextBs = [B|Bs],
-                    NewA = MoreA,
-                    NewB = MoreB,
-                    PP is Position
-                ; otherwise->
-                    format(user_error, '--> Lets leave ~w where it is, and move ~w to the right place (~f vs ~f)~n', [AKey, BKey, abs(CurrentPosition-Position), abs(OriginalPosition-Position)]),
-                    % We will move BKey to the right place
-                    Removes = [remove(CurrentPosition, BKey)|MoreRemoves],
-                    Inserts = [Position-insert(BKey, Position)|MoreInserts],
-                    NextAs = [A|As],
-                    NextBs = Bs,
-                    NewB = MoreB,
-                    NewA = MoreA,
-                    PP is Position + 1
-                )
-            ; otherwise->
-                % In this case, the node is being inserted. For example, A = [a,b,c] and B = [x,a,b,c]
-                % We can now insert at the correct place using the insert_at_patch. This means no reordering is needed
-                %format(user_error, 'This refers to a node that will be inserted. The end-of-list position is ~w. The OriginalPosition is ~w~n', [L, OriginalPosition]),
-                NewA = [{null}|MoreA],
-                NewB = [B|MoreB],
-                MoreRemoves = Removes,
-                MoreInserts = Inserts,
-                NextAs = [A|As],
-                NextBs = Bs,
-                PP is Position + 1
-            )
-        ; AKey \== {null}->
-            % This is the case where the node has been deleted. Just put a {null} in to pad
-            NewA = [A|MoreA],
-            NewB = [{null}|MoreB],
-            MoreRemoves = Removes,
-            MoreInserts = Inserts,
-            NextAs = As,
-            NextBs = [B|Bs],
-            PP is Position + 1
-        ; otherwise->
-            % This is the case where we have a keyless node in A, and a keyed one in B. If that keyed entry in B
-            % appears later on in A, then we must wait for it, and put in a padding spot here. Otherwise,
-            % we can just accept both nodes since the {null} -> {no-longer-used-key} will get flagged in a moment
-            % by the subtree comparison
-            ( memberchk(BKey-_-_, AKeys)->
-                % Just pad then
-                NewA = MoreA,
-                NewB = [{null}|MoreB],
-                MoreRemoves = Removes,
-                MoreInserts = Inserts,
-                NextAs = As,
-                NextBs = [B|Bs],
-                PP is Position + 1
-            ; otherwise->
-                % Accept the discrepancy and leave subtree comparison to sort it out
-                NewA = MoreA,
-                NewB = [B|MoreB],
-                MoreRemoves = Removes,
-                MoreInserts = Inserts,
-                NextAs = As,
-                NextBs = Bs,
-                PP is Position + 1
-            )
-        ),
-        reorder_1(NextAs, NextBs, PP, NextFreePosition, AKeys, BKeys, MoreA, MoreB, MoreRemoves, MoreInserts).
 
 
 all_keys([], _, []):- !.
@@ -904,14 +816,14 @@ dump_nodes([Node|Nodes]):-
 reorder_removes([], _DomNode, _ChildNodes, T, T):- !.
 reorder_removes([remove(From, Key)|Removes], DomNode, ChildNodes, KeyMap, FinalKeyMap):-
         %dump_nodes(ChildNodes),
-        select_nth0(From, ChildNodes, Node, RemainingChildren),
+        nth0(From, ChildNodes, Node),
         ( Key \== {null}->
             NewKeyMap = [Key-Node|KeyMap]
         ; otherwise->
             NewKeyMap = KeyMap
         ),
         remove_child(DomNode, Node),
-        reorder_removes(Removes, DomNode, RemainingChildren, NewKeyMap, FinalKeyMap).
+        reorder_removes(Removes, DomNode, ChildNodes, NewKeyMap, FinalKeyMap).
 
 reorder_inserts([], _DomNode, _ChildNodes, _KeyMap):- !.
 reorder_inserts([insert(Key, Position)|Inserts], DomNode, ChildNodes, KeyMap):-
