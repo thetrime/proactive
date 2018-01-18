@@ -282,8 +282,8 @@ child_element(Children, Child):-
 diff_children(A, B, Index, Patch):-
         expand_children(A, AChildren),
         expand_children(B, BChildren),
-        reorder(AChildren, BChildren, OrderedA, OrderedB, Moves),
-        ( diff_children_1(OrderedA, OrderedB, Index, Index, Patch)
+        reorder(AChildren, BChildren, OrderedB, Moves),
+        ( diff_children_1(AChildren, OrderedB, Index, Index, Patch)
         ; Moves \== {no_moves},
           Patch = Index-order_patch(A, Moves)
         ).
@@ -393,14 +393,156 @@ unhook_1([Child|Children], Index, Patch):-
           unhook_1(Children, III, Patch)
         ).
 
+reorder(As, Bs, NewBs, Moves):-
+        all_keys(Bs, 0, BKeys),
+        all_keys(As, 0, AKeys),
+        reorder_1(As, Bs, 0, AKeys, BKeys, NewBs, Removes, UnsortedInserts),
+        ( UnsortedInserts == []->
+            Moves = {no_moves}
+        ; otherwise->
+            sort(UnsortedInserts, SortedInserts),
+            vstrip_sort_keys(SortedInserts, Inserts),
+            Moves = moves(inserts(Inserts),
+                          removes(Removes))
+        ).
+reorder_1([], [], _, _, _, [], [], []):- !.
+reorder_1([], [B|Bs], Position, AKeys, BKeys, Out, Removes, Inserts):-
+        !,
+        % This is the case where the are more items in the new list
+        % If they appear in the original list as well then we have already added them by now
+        % and we can just skip them. Otherwise, we need to add them now
+        get_key_or_null(B, BKey),
+        ( memberchk(BKey-_-_, AKeys)->
+            Out = More
+        ; otherwise->
+            Out = [B|More]
+        ),
+        reorder_1([], Bs, Position, AKeys, BKeys, More, Removes, Inserts).
+
+reorder_1([_A|As], [], Position, AKeys, BKeys, [{null}|Children], Removes, Inserts):-
+        !,
+        % This is the case when there are more items in the original list than the new one and we cannot make up the
+        % difference by inserting new items.
+        % In this case, just pad the output with {null}.
+        reorder_1(As, [], Position, AKeys, BKeys, Children, Removes, Inserts).
+
+
+reorder_1([A|As], [B|Bs], Position, AKeys, BKeys, [Child|Children], Removes, Inserts):-
+        get_key_or_null(A, AKey),
+        get_key_or_null(B, BKey),
+        ( AKey == BKey ->
+            % This is the happy case - the node is already in the right slot
+            Child = B,
+            MoreRemoves = Removes,
+            MoreInserts = Inserts,
+            NextAs = As,
+            NextBs = Bs,
+            PP is Position + 1
+        ; AKey \== {null},
+          memberchk(AKey-OriginalPosition-Child, BKeys)->
+            % This is the case where the node has been moved around
+            Removes = [remove(Position, AKey)|MoreRemoves],
+            Inserts = [OriginalPosition-insert(AKey, OriginalPosition)|MoreInserts],
+            NextAs = As,
+            NextBs = [B|Bs],
+            PP = Position
+        ; AKey \== {null}->
+            % This is the case where the node has been deleted. Just put a {null} in to pad
+            Child = {null},
+            MoreRemoves = Removes,
+            MoreInserts = Inserts,
+            NextAs = As,
+            NextBs = [B|Bs],
+            PP is Position + 1
+        ; otherwise->
+            % This is the case where we have a keyless node in A, and a keyed one in B. If that keyed entry in B
+            % appears later on in A, then we must wait for it, and put in a padding spot here. Otherwise,
+            % we can just accept both nodes since the {null} -> {no-longer-used-key} will get flagged in a moment
+            % by the subtree comparison
+            ( memberchk(BKey-_-_, AKeys)->
+                % Just pad then
+                Child = {null},
+                MoreRemoves = Removes,
+                MoreInserts = Inserts,
+                NextAs = As,
+                NextBs = [B|Bs],
+                PP is Position + 1
+            ; otherwise->
+                % Accept the discrepancy and leave subtree comparison to sort it out
+                Child = B,
+                MoreRemoves = Removes,
+                MoreInserts = Inserts,
+        ),
+        reorder_1([], Bs, Position, AKeys, BKeys, More, Removes, Inserts).
+
+reorder_1([_A|As], [], Position, AKeys, BKeys, [{null}|Children], Removes, Inserts):-
+        !,
+        % This is the case when there are more items in the original list than the new one and we cannot make up the
+        % difference by inserting new items.
+        % In this case, just pad the output with {null}.
+        reorder_1(As, [], Position, AKeys, BKeys, Children, Removes, Inserts).
+
+
+reorder_1([A|As], [B|Bs], Position, AKeys, BKeys, [Child|Children], Removes, Inserts):-
+        get_key_or_null(A, AKey),
+        get_key_or_null(B, BKey),
+        ( AKey == BKey ->
+            % This is the happy case - the node is already in the right slot
+            Child = B,
+            MoreRemoves = Removes,
+            MoreInserts = Inserts,
+            NextAs = As,
+            NextBs = Bs,
+            PP is Position + 1
+        ; AKey \== {null},
+          memberchk(AKey-OriginalPosition-Child, BKeys)->
+            % This is the case where the node has been moved around
+            Removes = [remove(Position, AKey)|MoreRemoves],
+            Inserts = [OriginalPosition-insert(AKey, OriginalPosition)|MoreInserts],
+            NextAs = As,
+            NextBs = [B|Bs],
+            PP = Position
+        ; AKey \== {null}->
+            % This is the case where the node has been deleted. Just put a {null} in to pad
+            Child = {null},
+            MoreRemoves = Removes,
+            MoreInserts = Inserts,
+            NextAs = As,
+            NextBs = [B|Bs],
+            PP is Position + 1
+        ; otherwise->
+            % This is the case where we have a keyless node in A, and a keyed one in B. If that keyed entry in B
+            % appears later on in A, then we must wait for it, and put in a padding spot here. Otherwise,
+            % we can just accept both nodes since the {null} -> {no-longer-used-key} will get flagged in a moment
+            % by the subtree comparison
+            ( memberchk(BKey-_-_, AKeys)->
+                % Just pad then
+                Child = {null},
+                MoreRemoves = Removes,
+                MoreInserts = Inserts,
+                NextAs = As,
+                NextBs = [B|Bs],
+                PP is Position + 1
+            ; otherwise->
+                % Accept the discrepancy and leave subtree comparison to sort it out
+                Child = B,
+                MoreRemoves = Removes,
+                MoreInserts = Inserts,
+                NextAs = As,
+                NextBs = Bs,
+                PP is Position + 1
+            )
+        ),
+        reorder_1(NextAs, NextBs, PP, AKeys, BKeys, Children, MoreRemoves, MoreInserts).
+
 % reorder puts BChildren into a list that matches AChildren as closely as possible
 % Any remaining differences are left to the subtree-differencing process that is about to happen
 % Once the subtree diffs are done, we can optionally use the moves/2 term here to move the mutated
 % children into the right order
-reorder(As, Bs, NewAs, NewBs, Moves):-
+mutate_reorder(As, Bs, NewAs, NewBs, Moves):-
         all_keys(Bs, 0, BKeys),
         all_keys(As, 0, AKeys),
-        reorder_1(As, Bs, 0, AKeys, BKeys, [], NewAs, NewBs, Removes, UnsortedInserts),
+        mutate_reorder_1(As, Bs, 0, AKeys, BKeys, [], NewAs, NewBs, Removes, UnsortedInserts),
         ( UnsortedInserts == []->
             Moves = {no_moves}
         ; otherwise->
@@ -415,22 +557,21 @@ vstrip_sort_keys([], []):- !.
 vstrip_sort_keys([_-X|Xs], [X|Ys]):-
         vstrip_sort_keys(Xs, Ys).
 
-reorder_1([], [], _, _, _, _, [], [], [], []):- !.
-reorder_1([], [B|Bs], Position, AKeys, BKeys, Consumed, NewAs, Out, Removes, Inserts):-
+mutate_reorder_1([], [], _, _, _, _, [], [], [], []):- !.
+mutate_reorder_1([], [B|Bs], Position, AKeys, BKeys, Consumed, NewAs, Out, Removes, Inserts):-
         !,
         % This is the case where the are more items in the new list
         % If they appear in the original list as well then we have already added them by now
         % and we can just skip them. Otherwise, we need to add them now
-        % FIXME: Not necessarily. It depends now on whether that move was selected by the heuristic below!
         get_key_or_null(B, BKey),
         ( memberchk(BKey-_-_, AKeys)->
             Out = [{null}|More]
         ; otherwise->
             Out = [B|More]
         ),
-        reorder_1([], Bs, Position, AKeys, BKeys, Consumed, NewAs, More, Removes, Inserts).
+        mutate_reorder_1([], Bs, Position, AKeys, BKeys, Consumed, NewAs, More, Removes, Inserts).
 
-reorder_1([A|As], [], Position, AKeys, BKeys, Consumed, [A|NewAs], Out, Removes, Inserts):-
+mutate_reorder_1([A|As], [], Position, AKeys, BKeys, Consumed, [A|NewAs], Out, Removes, Inserts):-
         !,
         get_key_or_null(A, AKey),
         ( memberchk(AKey-_-_, BKeys)->
@@ -441,9 +582,9 @@ reorder_1([A|As], [], Position, AKeys, BKeys, Consumed, [A|NewAs], Out, Removes,
         % This is the case when there are more items in the original list than the new one and we cannot make up the
         % difference by inserting new items.
         % In this case, just pad the output with {null}.
-        reorder_1(As, [], Position, AKeys, BKeys, Consumed, NewAs, More, Removes, Inserts).
+        mutate_reorder_1(As, [], Position, AKeys, BKeys, Consumed, NewAs, More, Removes, Inserts).
 
-reorder_1([A|As], [B|Bs], Position, AKeys, BKeys, ConsumedSoFar, NewA, NewB, Removes, Inserts):-
+mutate_reorder_1([A|As], [B|Bs], Position, AKeys, BKeys, ConsumedSoFar, NewA, NewB, Removes, Inserts):-
         get_key_or_null(A, AKey),
         get_key_or_null(B, BKey),
         %format(user_error, 'Considering left child ~w, at position ~w. The next right key is ~w~n', [AKey, Position, BKey]),
@@ -536,7 +677,7 @@ reorder_1([A|As], [B|Bs], Position, AKeys, BKeys, ConsumedSoFar, NewA, NewB, Rem
                 ConsumedKeys = ConsumedSoFar
             )
         ),
-        reorder_1(NextAs, NextBs, PP, AKeys, BKeys, ConsumedKeys, MoreA, MoreB, MoreRemoves, MoreInserts).
+        mutate_reorder_1(NextAs, NextBs, PP, AKeys, BKeys, ConsumedKeys, MoreA, MoreB, MoreRemoves, MoreInserts).
 
 
 all_keys([], _, []):- !.
