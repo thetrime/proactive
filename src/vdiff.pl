@@ -106,7 +106,7 @@ destroy_widget_children([Element|Elements], [DomNode|DomNodes], Options):-
 vmutate_children(A, B, DomNode, Options, NewNode):-
         children_of(A, AChildren),
         children_of(B, BChildren),
-        reorder(AChildren, BChildren, OrderedA, OrderedB, Moves),
+        mutate_reorder(AChildren, BChildren, OrderedA, OrderedB, Moves),
         child_nodes(DomNode, DomChildren),
         !,
 %        dump(AChildren, BChildren),
