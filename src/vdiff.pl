@@ -121,10 +121,10 @@ vmutate_children(A, B, DomNode, Options, NewNode):-
         ; patch_op(order_patch(_Ignored, Moves), DomNode, Options, NewNode)
         ).
 
-dump(A, B):-
-        keysof(A, AK),
-        keysof(B, BK),
-        writeln(AK -> BK).
+%dump(A, B):-
+%        keysof(A, AK),
+%        keysof(B, BK),
+%        writeln(AK -> BK).
 
 keysof([], []):- !.
 keysof([{null}|A], [{null}|Keys]):- !,
@@ -472,8 +472,12 @@ reorder_1([A|As], [B|Bs], Position, AKeys, BKeys, [Child|Children], Removes, Ins
                 Child = B,
                 MoreRemoves = Removes,
                 MoreInserts = Inserts,
+                NextAs = As,
+                NextBs = Bs,
+                PP is Position + 1
+            )
         ),
-        reorder_1([], Bs, Position, AKeys, BKeys, More, Removes, Inserts).
+        reorder_1(NextAs, NextBs, PP, AKeys, BKeys, Children, MoreRemoves, MoreInserts).
 
 reorder_1([_A|As], [], Position, AKeys, BKeys, [{null}|Children], Removes, Inserts):-
         !,
@@ -599,7 +603,7 @@ mutate_reorder_1([A|As], [B|Bs], Position, AKeys, BKeys, ConsumedSoFar, NewA, Ne
             PP is Position + 1,
             ConsumedKeys = ConsumedSoFar
         ; AKey \== {null},
-          memberchk(AKey-OriginalPosition-_, BKeys)->
+          memberchk(AKey-_-_, BKeys)->
             % In this case, the left item has a key and the key IS present in the right list. There could be two possibilities:
             % 1) The item needs to be shuffled in the right list (For example, [a,b,c,d] -> [a,d,b,c]), or
             % 2) An item has been inserted in the right list. (For example: [a,b,c] -> [d,a,b,c])

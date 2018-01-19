@@ -29,6 +29,7 @@
           get_this/1,
           widget_id/1,
           media_size/2,
+          dump_node/1,
 
           op(400, fx, //),
           op(400, fx, /),
@@ -264,7 +265,7 @@ set_dom_media_size(Width, Height):-
 %     * tag-Atom if type is node
 %     * properties-AttributedVar if type is node
 
-
+dump_node(_).
 
 render_dom(Stream, Object):-
         crystalize(Object, XML),
