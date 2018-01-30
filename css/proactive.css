@@ -298,6 +298,23 @@ body
     overflow: hidden;
 }
 
+.tab_bar
+{
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+/* Not sure if this is what people would want or not. It makes the tab bar at the top always stretch all the
+   way along the top of the tabpane. Without it, if there arent enough tabs, they will just sit on the left
+    align-self: stretch;
+*/
+}
+
+.tab_bar > button
+{
+    flex-grow: 1;
+}
+
+
 label
 {
     padding-left: 5px;

@@ -11,6 +11,7 @@ function TabbedPane()
     this.setDOMNode(document.createElement("div"));
     this.layout = "vertical";
     this.tabBar = document.createElement("div");
+    this.tabBar.className = "tab_bar";
     this.contentPane = document.createElement("div");
     this.domNode.appendChild(this.tabBar);
     this.domNode.appendChild(this.contentPane);
