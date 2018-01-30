@@ -228,12 +228,14 @@ button
 .not_selected_tab
 {
     display: none;
+    flex-basis: 0px;
 }
 
 .selected_tab
 {
+    flex-basis: 0px !important; /* We do not need any space at all. We can scroll */
     display: flex;
-    overflow: hidden;
+    overflow: scroll;
     border: 2px groove threedface;
 }
 
