@@ -24,7 +24,13 @@ Button.prototype.setProperties = function(t)
 {
    ReactComponent.prototype.setProperties.call(this, t);
     if (t.label !== undefined)
-        this.domNode.textContent = Prolog._portray(t.label);
+    {
+        var v = Prolog._portray(t.label);
+        if (v.lastIndexOf("<html>", 0) == 0)
+            this.domNode.innerHTML = v;
+        else
+            this.domNode.textContent = v;
+    }
     if (t.image !== undefined)
     {
         if (ReactComponent.isNull(t.image) && this.imageNode != null)
