@@ -32,7 +32,7 @@ build:
 
 swing-client: proactive-${VERSION}/lib/proactive.jar
 
-js-client: force-proscript-build proactive-${VERSION}/lib/proactive.js proactive-${VERSION}/lib/proscript.js.mem proactive-${VERSION}/css/proactive.css
+js-client: force-proscript-build proactive-${VERSION}/lib/proactive.js proactive-${VERSION}/css/proactive.css
 
 ifeq ($(OS), Windows_NT)
 CLASSPATH_SEPARATOR=\;
@@ -64,7 +64,7 @@ src/Version.java: VERSION
 	echo 'package org.proactive; public class Version { public static String version="$(VERSION)";}' > $@
 
 
-proactive-${VERSION}/lib/proactive.js:	$(JS_SRC) $(REACT_SRC) node_modules/brfs node_modules/xmlhttprequest node_modules/uglifyjs node_modules/browserify node_modules/proscript/proscript.js.mem
+proactive-${VERSION}/lib/proactive.js:	$(JS_SRC) $(REACT_SRC) node_modules/brfs node_modules/xmlhttprequest node_modules/uglifyjs node_modules/browserify
 # We have to disable warnings here because emscripten generates output containing a HUGE amount of unused vars and functions
 # and uglify produces pages and pages of warnings about them if we dont stop it
 	mkdir -p proactive-${VERSION}/lib
@@ -78,14 +78,9 @@ proactive-${VERSION}/css/proactive.css:	css/proactive.css
 	@mkdir -p proactive-${VERSION}/css
 	cp $< $@
 
-node_modules/proscript/proscript.js.mem:	force-proscript-build
-
 force-proscript-build:
 	@make -C node_modules/proscript
 
-proactive-${VERSION}/lib/proscript.js.mem:	node_modules/proscript/proscript.js.mem
-	@mkdir -p proactive-${VERSION}/lib
-	cp $< $@
 
 run-swing-client:	swing-client
 	java -cp dist/gpj.jar${CLASSPATH_SEPARATOR}dist/java_websocket.jar${CLASSPATH_SEPARATOR}proactive-${VERSION}/lib/proactive.jar org.proactive.React ${SWING_ARGS} "http://localhost:${PORT}/react" ${TEST_APP}
