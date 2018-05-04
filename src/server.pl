@@ -31,7 +31,7 @@ serve_form(Request):-
         memberchk(path_info(FormId), Request),
         subtract(Request, [path(_)], R1),
         parse_url(URL, [path('/react')|R1]),
-        format(atom(RenderCommand),'                   Proactive.render("~w", null, "~w", document.getElementById("container"), function(status, error) {if (!status && error == 403) location.reload();}, function(ex) {console.log(ex);});', [URL, FormId]),
+        format(atom(RenderCommand),'                   Proactive.render("~w", "~w", document.getElementById("container"), {errorHandler: function(status, error) {if (!status && error == 403) location.reload();}, function(ex) {console.log(ex);}, callback: function() { console.log("Initial rendering complete");}});', [URL, FormId]),
         atomic_list_concat(['window.proactivePrefixURL="/assets/lib/";',
                             'onProactiveReady = function(Proactive)',
                             '{',
