@@ -26,11 +26,14 @@ public class Tab extends ReactComponent
    }
    public Component getAWTComponent()
    {
-      return child.getAWTComponent();
+      System.out.println("Getting component of tab: " + child);
+      return new javax.swing.JPanel();
+//      return child.getAWTComponent();
    }
 
    public void insertChildBefore(ReactComponent child, ReactComponent sibling)
    {
+      System.out.println("Inserted child into tab: " + child);
       // First rehome the child in the document
       this.child = child;
       if (child.getParentNode() != null)

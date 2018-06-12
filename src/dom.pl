@@ -216,7 +216,7 @@ update_widget(NewWidget, VNode, DomNode, NewNode):-
                              ),
                              Tag:render(NewState, Props, VDom) ->
                                expand_children(VDom, ExpandedVDom),
-                               vmutate(VNode, ExpandedVDom, DomNode, [document(_Document)], NewNode)
+                               vmutate(VNode, ExpandedVDom, DomNode, [document(_Document), logical(true)], NewNode)
 %                             vdiff(VNode, ExpandedVDom, Patches),
 %                             vpatch(DomNode, Patches, [document(_Document)], NewNode)
                            ),
@@ -467,7 +467,7 @@ fire_event(Handler, Event, ThisPtr):-
         % Then continue on our way
         vpatch(OldDOM, Patch, [document(This)], NewDOM),
         */
-        vmutate(OldVDOM, NewVDOM, OldDOM, [document(This)], NewDOM),
+        vmutate(OldVDOM, NewVDOM, OldDOM, [document(This), logical(true)], NewDOM),
         put_attr(This, react_dom, react_widget(Module, UpdatedState, Props, Id, NewVDOM, NewDOM)).
 
 

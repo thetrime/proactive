@@ -10,10 +10,16 @@ import java.util.HashMap;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import java.awt.Component;
+import javax.swing.SwingConstants;
 
 public class Button extends ReactLeafComponent 
 {
    private JButton button = new JButton();
+
+   public Button()
+   {
+      button.setHorizontalAlignment(SwingConstants.CENTER);
+   }
 
    private PrologObject serializeObject()
    {

@@ -115,7 +115,13 @@ vmutate_children(A, B, DomNode, Options, NewNode):-
         %writeln(Moves),
         % The problem is that vmutate_children_1 expects DomChildren and OrderedA to be the same length.
         % But we pad OrderedA to make space for converting {null} -> {inserted node} operations. Hmm.
-        \+(\+(vmutate_children_1(OrderedA, OrderedB, DomChildren, DomNode, Options))),
+
+        % The logical(true) option is used to ensure we do not backtrack over bindings to save on stack
+        % This is needed for the in-Prolog DOM which uses attributed variables
+        ( memberchk(logical(true), Options)->
+            vmutate_children_1(OrderedA, OrderedB, DomChildren, DomNode, Options)
+        ; \+ (\+ (vmutate_children_1(OrderedA, OrderedB, DomChildren, DomNode, Options)))
+        ),
         ( Moves == {no_moves} ->
             NewNode = DomNode
         ; patch_op(order_patch(_Ignored, Moves), DomNode, Options, NewNode)
