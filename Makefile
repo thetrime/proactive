@@ -64,7 +64,7 @@ src/Version.java: VERSION
 	echo 'package org.proactive; public class Version { public static String version="$(VERSION)";}' > $@
 
 
-proactive-${VERSION}/lib/proactive.js:	$(JS_SRC) $(REACT_SRC) node_modules/brfs node_modules/xmlhttprequest node_modules/uglifyjs node_modules/browserify node_modules/proscript/proscript.js.mem
+proactive-${VERSION}/lib/proactive.js:	$(JS_SRC) $(REACT_SRC) src/boilerplate.pl node_modules/brfs node_modules/xmlhttprequest node_modules/uglifyjs node_modules/browserify node_modules/proscript/proscript.js.mem
 # We have to disable warnings here because emscripten generates output containing a HUGE amount of unused vars and functions
 # and uglify produces pages and pages of warnings about them if we dont stop it
 	mkdir -p proactive-${VERSION}/lib
