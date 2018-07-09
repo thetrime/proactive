@@ -59,10 +59,9 @@ module.exports["."] = function(state, key, value)
     if (Prolog._is_compound(key))
     {
         // For example foo={this.bar(x)} to mean
-        // A = this.bar
-        // B = A.x
-        // foo = {B}
-        // FIXME: Why not just put foo={this.bar.x} ?
+        // First, get this.bar (which may itself be a term like my_term(a, b, c)
+        // Then add x to the start of the arguments, to give my_term(x, a, b, c)
+        //   (a bit like call(my_term(a,b,c), x) would have called my_term(a, b, c, x)), except backwards (x, a, b, c))
         var term = key;
         var functor = Prolog._term_functor(key);
         var glueArgs = [];
@@ -87,12 +86,13 @@ module.exports["."] = function(state, key, value)
                 else
                 {
                     // No module
-                    var newGoal = addArgs(term, glueArgs);
-                    return Prolog._unify(value, Prolog._make_compound(Prolog._term_functor(result), [Prolog._term_arg(term, 0), newGoal]));
+                    var newGoal = addArgs(Prolog._term_arg(result, 1), glueArgs);
+                    return Prolog._unify(value, Prolog._make_compound(Prolog._term_functor(result), [Prolog._term_arg(result, 0), newGoal]));
                 }
             }
             return Errors.typeError(Constants.gluableAtom, term);
         }
+        // FIXME: If result is an atom we can still proceed here by using it as the functor of a term
     }
     return Errors.typeError(Constants.prologStateKeyAtom, state);
 }
