@@ -20,7 +20,7 @@ vdiff(A, B, [a-A|PatchSet]):-
         ; otherwise->
             PatchSet = []
         ),
-        %writeq(diff(A, B, [a-A|PatchSet])), nl,
+%        writeq(diff(A, B, [a-A|PatchSet])), nl,
         true.
 
 vmutate(A, B, DomNode, Options, NewNode):-
@@ -485,65 +485,6 @@ reorder_1([A|As], [B|Bs], Position, AKeys, BKeys, [Child|Children], Removes, Ins
         ),
         reorder_1(NextAs, NextBs, PP, AKeys, BKeys, Children, MoreRemoves, MoreInserts).
 
-reorder_1([_A|As], [], Position, AKeys, BKeys, [{null}|Children], Removes, Inserts):-
-        !,
-        % This is the case when there are more items in the original list than the new one and we cannot make up the
-        % difference by inserting new items.
-        % In this case, just pad the output with {null}.
-        reorder_1(As, [], Position, AKeys, BKeys, Children, Removes, Inserts).
-
-
-reorder_1([A|As], [B|Bs], Position, AKeys, BKeys, [Child|Children], Removes, Inserts):-
-        get_key_or_null(A, AKey),
-        get_key_or_null(B, BKey),
-        ( AKey == BKey ->
-            % This is the happy case - the node is already in the right slot
-            Child = B,
-            MoreRemoves = Removes,
-            MoreInserts = Inserts,
-            NextAs = As,
-            NextBs = Bs,
-            PP is Position + 1
-        ; AKey \== {null},
-          memberchk(AKey-OriginalPosition-Child, BKeys)->
-            % This is the case where the node has been moved around
-            Removes = [remove(Position, AKey)|MoreRemoves],
-            Inserts = [OriginalPosition-insert(AKey, OriginalPosition)|MoreInserts],
-            NextAs = As,
-            NextBs = [B|Bs],
-            PP = Position
-        ; AKey \== {null}->
-            % This is the case where the node has been deleted. Just put a {null} in to pad
-            Child = {null},
-            MoreRemoves = Removes,
-            MoreInserts = Inserts,
-            NextAs = As,
-            NextBs = [B|Bs],
-            PP is Position + 1
-        ; otherwise->
-            % This is the case where we have a keyless node in A, and a keyed one in B. If that keyed entry in B
-            % appears later on in A, then we must wait for it, and put in a padding spot here. Otherwise,
-            % we can just accept both nodes since the {null} -> {no-longer-used-key} will get flagged in a moment
-            % by the subtree comparison
-            ( memberchk(BKey-_-_, AKeys)->
-                % Just pad then
-                Child = {null},
-                MoreRemoves = Removes,
-                MoreInserts = Inserts,
-                NextAs = As,
-                NextBs = [B|Bs],
-                PP is Position + 1
-            ; otherwise->
-                % Accept the discrepancy and leave subtree comparison to sort it out
-                Child = B,
-                MoreRemoves = Removes,
-                MoreInserts = Inserts,
-                NextAs = As,
-                NextBs = Bs,
-                PP is Position + 1
-            )
-        ),
-        reorder_1(NextAs, NextBs, PP, AKeys, BKeys, Children, MoreRemoves, MoreInserts).
 
 % reorder puts BChildren into a list that matches AChildren as closely as possible
 % Any remaining differences are left to the subtree-differencing process that is about to happen
