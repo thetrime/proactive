@@ -482,6 +482,10 @@ label
     background: #888;
 }
 
+.react_table_header_cell
+{
+    display: table-cell;
+}
 
 /* testing only!
 .react_table_header_cell
