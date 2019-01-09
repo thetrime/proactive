@@ -205,6 +205,7 @@ module.exports["_on_server"] = function(goal)
                 ws.cleanup();
                 var rc = Prolog._unify(goal, Prolog._copy_term(Prolog._term_arg(term, 0)));
                 //console.log("Resuming with " + Prolog._format_term(null, 1200, Prolog._term_arg(term, 0)) + ": " + rc);
+                if (!rc) console.log("Warning: Could not unify " + Prolog._format_term(null, 1200, Prolog._term_arg(term, 0)) + " with goal " + Prolog._format_term(null, 1200, goal));
                 resume(rc);
                 Prolog._free_local(term);
             }
@@ -215,7 +216,9 @@ module.exports["_on_server"] = function(goal)
                     Prolog._make_choicepoint_with_cleanup(this.foreign, ws.cleanup);
                 else
                     Prolog._make_choicepoint_with_cleanup(Prolog._make_blob("websocket", ws), ws.cleanup);
-                resume(Prolog._unify(goal, Prolog._copy_term(Prolog._term_arg(term, 0))));
+                var rc = Prolog._unify(goal, Prolog._copy_term(Prolog._term_arg(term, 0)));
+                if (!rc) console.log("Warning: Could not unify " + Prolog._format_term(null, 1200, Prolog._term_arg(term, 0)) + " with goal " + Prolog._format_term(null, 1200, goal));
+                resume(rc);
                 Prolog._free_local(term);
             }
         }
