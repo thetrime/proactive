@@ -8,5 +8,5 @@
 	path = SocketRocket
 	url = https://github.com/facebook/SocketRocket.git
 [submodule "node_modules/proscript"]
-	path = node_modules/proscript
+	path = proscript
 	url = https://github.com/thetrime/proscript2.git

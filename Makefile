@@ -64,7 +64,7 @@ src/Version.java: VERSION
 	echo 'package org.proactive; public class Version { public static String version="$(VERSION)";}' > $@
 
 
-proactive-${VERSION}/lib/proactive.js:	$(JS_SRC) $(REACT_SRC) src/boilerplate.pl node_modules/brfs node_modules/xmlhttprequest node_modules/uglifyjs node_modules/browserify node_modules/proscript/proscript.js.mem
+proactive-${VERSION}/lib/proactive.js:	$(JS_SRC) $(REACT_SRC) src/boilerplate.pl node_modules/brfs node_modules/xmlhttprequest node_modules/uglifyjs node_modules/browserify proscript/proscript.js.mem
 # We have to disable warnings here because emscripten generates output containing a HUGE amount of unused vars and functions
 # and uglify produces pages and pages of warnings about them if we dont stop it
 	mkdir -p proactive-${VERSION}/lib
@@ -78,12 +78,12 @@ proactive-${VERSION}/css/proactive.css:	css/proactive.css
 	@mkdir -p proactive-${VERSION}/css
 	cp $< $@
 
-node_modules/proscript/proscript.js.mem:	force-proscript-build
+proscript/proscript.js.mem:	force-proscript-build
 
 force-proscript-build:
-	@make -C node_modules/proscript
+	@make -C proscript
 
-proactive-${VERSION}/lib/proscript.js.mem:	node_modules/proscript/proscript.js.mem
+proactive-${VERSION}/lib/proscript.js.mem:	proscript/proscript.js.mem
 	@mkdir -p proactive-${VERSION}/lib
 	cp $< $@
 
@@ -115,7 +115,7 @@ package: force-proscript-build $(CLIENTS) $(REACT_SRC)
 #	rm -rf proactive-${VERSION}
 
 clean:
-	make -C node_modules/proscript clean
+	make -C proscript clean
 	rm -rf build
 	rm -rf proactive-*
 	rm -f .src
