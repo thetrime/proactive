@@ -67,9 +67,9 @@ proactive-${VERSION}/lib/proactive.js:	$(JS_SRC) $(REACT_SRC) src/boilerplate.pl
 # and uglify produces pages and pages of warnings about them if we dont stop it
 	mkdir -p proactive-${VERSION}/lib
 ifeq ($(MINIFY),true)
-	node_modules/browserify/bin/cmd.js --standalone Proactive -t brfs src/core.js | node_modules/uglify-js/bin/uglifyjs  -m -c warnings=false > proactive-${VERSION}/lib/proactive.js
+	NODE_PATH=proscript node_modules/browserify/bin/cmd.js --standalone Proactive -t brfs src/core.js | node_modules/uglify-js/bin/uglifyjs  -m  > proactive-${VERSION}/lib/proactive.js
 else
-	node_modules/browserify/bin/cmd.js --standalone Proactive -t brfs src/core.js  > proactive-${VERSION}/lib/proactive.js
+	NODE_PATH=proscript node_modules/browserify/bin/cmd.js --standalone Proactive -t brfs src/core.js  > proactive-${VERSION}/lib/proactive.js
 endif
 
 proactive-${VERSION}/css/proactive.css:	css/proactive.css

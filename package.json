@@ -4,12 +4,12 @@
     "description": "React in Prolog",
     "main": "proscript.js",
     "dependencies": {
-        "xmlhttprequest": "^1.8.0",
+        "brfs": "^1.4.3",
         "browserify": "^13.0.0",
-        "brfs": "^1.4.3"
+        "uglify-js": "^3.6.2",
+        "xmlhttprequest": "^1.8.0"
     },
-    "devDependencies": {
-    },
+    "devDependencies": {},
     "scripts": {
         "start": "STATIC_ROOT=./static watchify src/core.js --standalone Proactive -t brfs -v -o build/proactive.js",
         "install": "make CLIENTS=js-client package",
