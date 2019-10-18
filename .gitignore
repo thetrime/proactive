@@ -7,9 +7,7 @@ build
 *.zip
 proactivejs-*
 proactive-*
-node_modules/browserify
-node_modules/brfs
-node_modules/uglifyjs
+node_modules/*
 src/#*
 src/.#*
 build
