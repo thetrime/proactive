@@ -1,8 +1,6 @@
 # Note that to compile the js client you must have the following in your path:
 #  Empscripten
 #  npm
-#  browserify
-#  uglifyjs
 # Note also that this makefile does NOT build proscript, gmpjs (yet) or the ios version (Probably ever)
 
 PORT?=10080
@@ -51,8 +49,8 @@ node_modules/brfs:
 node_modules/xmlhttprequest:
 	npm install xmlhttprequest
 
-node_modules/uglifyjs:
-	npm install uglifyjs
+node_modules/uglify-js:
+	npm install uglify-js
 
 node_modules/browserify:
 	npm install browserify
@@ -64,12 +62,12 @@ src/Version.java: VERSION
 	echo 'package org.proactive; public class Version { public static String version="$(VERSION)";}' > $@
 
 
-proactive-${VERSION}/lib/proactive.js:	$(JS_SRC) $(REACT_SRC) src/boilerplate.pl node_modules/brfs node_modules/xmlhttprequest node_modules/uglifyjs node_modules/browserify proscript/proscript.js.mem
+proactive-${VERSION}/lib/proactive.js:	$(JS_SRC) $(REACT_SRC) src/boilerplate.pl node_modules/brfs node_modules/xmlhttprequest node_modules/uglify-js node_modules/browserify proscript/proscript.js.mem
 # We have to disable warnings here because emscripten generates output containing a HUGE amount of unused vars and functions
 # and uglify produces pages and pages of warnings about them if we dont stop it
 	mkdir -p proactive-${VERSION}/lib
 ifeq ($(MINIFY),true)
-	node_modules/browserify/bin/cmd.js --standalone Proactive -t brfs src/core.js | node_modules/uglifyjs/bin/uglifyjs  -m -c warnings=false > proactive-${VERSION}/lib/proactive.js
+	node_modules/browserify/bin/cmd.js --standalone Proactive -t brfs src/core.js | node_modules/uglify-js/bin/uglifyjs  -m -c warnings=false > proactive-${VERSION}/lib/proactive.js
 else
 	node_modules/browserify/bin/cmd.js --standalone Proactive -t brfs src/core.js  > proactive-${VERSION}/lib/proactive.js
 endif
