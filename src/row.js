@@ -39,7 +39,7 @@ Row.prototype.replaceChild = function(n, o)
     var cell = document.createElement("td");
     cell.appendChild(n.getDOMNode());
     var index = this.children.indexOf(o);
-    this.domNode.replaceChild(cell, o.getDOMNode().parentNode.parentNode);
+    this.domNode.replaceChild(cell, o.getDOMNode().parentNode);
     n.setParent(this);
     o.setParent(null);
     if (this.parent != null)
