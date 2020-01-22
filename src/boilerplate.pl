@@ -3,34 +3,6 @@ otherwise.
 jsx(Form, jsx(Form)):- !.
 jsx(Form, jsx(Form, Goals)):- Goals.
 
-:-meta_predicate(call(0,?)).
-
-call(A,B):-
-	( A = Module:InGoal->
-            InGoal =.. [Name|Args],
-            append(Args, [B], NewArgs),
-            Goal =.. [Name|NewArgs],
-            call(Module:Goal)
-        ; A =.. [Name|Args],
-          append(Args, [B], NewArgs),
-          Goal =.. [Name|NewArgs],
-          call(Goal)
-        ).
-
-:-meta_predicate(call(0,?,?)).
-
-call(A,B,C):-
-	( A = Module:InGoal->
-            InGoal =.. [Name|Args],
-            append(Args, [B,C], NewArgs),
-            Goal =.. [Name|NewArgs],
-            call(Module:Goal)
-        ; A =.. [Name|Args],
-          append(Args, [B,C], NewArgs),
-          Goal =.. [Name|NewArgs],
-          call(Goal)
-        ).
-
 
 bubble_event(List, Key, Event):-
 	'.'(List, Key, Handler),
