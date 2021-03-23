@@ -514,6 +514,8 @@ curly_term_to_pairs((Name:Value, In), [Pair|Out]):-
 curly_item_to_pair(Name, Value, Pair):-
         ( Value == {} ->
             Pair = Name-proactive{}
+        ; Value == {null}->
+            Pair = Name-{null}
         ; functor(Value, {}, 1)->
             curly_term_to_state(Value, N),
             Pair = Name-N

@@ -41,7 +41,7 @@ serve_form(Request):-
 
         Body = element(body, [], [element(div, [id=container, style='width: 100%;'], []),
                                   element(script, [type='text/javascript'], [Bootstrap]),
-                                  element(script, [type='text/javascript', src='/assets/lib/proactive.js'], [])
+                                  element(script, [type='text/babel', src='/assets/lib/proactive.js'], [])
                                  ]),
         HTML = element(html, [], [element(head, [], [element(link, [rel=stylesheet, type='text/css', href='/assets/css/proactive.css'], []),
                                                      element(meta, [name='apple-mobile-web-app-capable', content=yes], []),
