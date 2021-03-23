@@ -393,7 +393,7 @@ get_store_state(_, []). % FIXME: Implement Flux!
 state_to_term(X, X). % FIXME: This should copy X and instantiate all the vars
 
 
-:-redefine_system_predicate('.'(_,_,_)).
+:-redefine_system_predicate(user:'.'(_,_,_)).
 user:'.'(State,Key,Value):-
 	( is_list(State)->
 	    get_state(State, Key, Value)
